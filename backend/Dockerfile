@@ -1,42 +1,46 @@
-# syntax = docker/dockerfile:1
+# syntax=docker/dockerfile:1
 
-# Adjust NODE_VERSION as desired
+# ---------- Base Stage ----------
 ARG NODE_VERSION=24.3.0
 FROM node:${NODE_VERSION}-slim AS base
 
 LABEL fly_launch_runtime="NestJS"
 
-# NestJS app lives here
+# Set working directory
 WORKDIR /app
 
-# Set production environment
-ENV NODE_ENV="production"
+# Set environment
+ENV NODE_ENV=production
 
-
-# Throw-away build stage to reduce size of final image
+# ---------- Build Stage ----------
 FROM base AS build
 
-# Install packages needed to build node modules
+# Install OS-level build tools
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
+    apt-get install --no-install-recommends -y \
+    build-essential \
+    node-gyp \
+    pkg-config \
+    python-is-python3
 
-# Install node modules
-COPY package-lock.json package.json ./
+# Install dependencies
+COPY package*.json ./
 RUN npm ci --include=dev
 
-# Copy application code
+# Copy source code
 COPY . .
 
-# Build application
+# Build the app
 RUN npm run build
 
-
-# Final stage for app image
+# ---------- Final Stage ----------
 FROM base
 
-# Copy built application
+# Copy build artifacts
 COPY --from=build /app /app
 
-# Start the server by default, this can be overwritten at runtime
+# Expose NestJS port
 EXPOSE 3000
-CMD [ "npm", "run", "start" ]
+
+# Start the app in production mode
+CMD ["npm", "run", "start:prod"]

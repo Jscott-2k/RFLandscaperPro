@@ -1,0 +1,21 @@
+# syntax=docker/dockerfile:1
+
+# ---- Base image ----
+ARG NODE_VERSION=24.3.0
+FROM node:${NODE_VERSION}-slim AS base
+
+# ---- Set working directory ----
+WORKDIR /app
+
+# ---- Install dependencies ----
+COPY package*.json ./
+RUN npm install
+
+# ---- Copy application code ----
+COPY . .
+
+# ---- Expose application port ----
+EXPOSE 3000
+
+# ---- Start development server with live reload ----
+CMD ["npm", "run", "start:dev"]
