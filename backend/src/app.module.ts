@@ -20,6 +20,12 @@ import { JobsModule } from './jobs/jobs.module';
         database: config.get<string>('DB_NAME'),
         autoLoadEntities: true,
         synchronize: config.get<string>('NODE_ENV') !== 'production',
+            ssl: true,
+            extra: {
+              ssl: {
+                rejectUnauthorized: false,
+              },
+            },
       }),
     }),
 
