@@ -1,4 +1,4 @@
-import { Job } from 'src/jobs/entities/job.entity';
+import { Job } from '../../jobs/entities/job.entity';
 import { Address } from './address.entity';
 
 import {

@@ -1,4 +1,4 @@
-import { Job } from 'src/jobs/entities/job.entity';
+import { Job } from '../../jobs/entities/job.entity';
 
 export class AddressResponseDto {
   id: number;
@@ -13,7 +13,7 @@ export class CustomerResponseDto {
   name: string;
   email: string;
   addresses: AddressResponseDto[];
-  jobs?: { id: number; title: string }[];
+  jobs?: Partial<Job>[];
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,10 +1,10 @@
 {
-  "name": "backend",
+  "name": "rflandscaperpro-backend",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Backend API for RF Landscaper Pro",
+  "author": "Justin Scott justinscott2k@gmail.com",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -18,10 +18,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "ts-node --transpile-only ./node_modules/typeorm/cli.js",
-    "migration:generate": "npm run typeorm migration:generate -- -d data-source.ts src/migrations/Init",
-    "migration:run": "npm run typeorm migration:run -- -d data-source.ts",
-    "migration:revert": "npm run typeorm migration:revert -- -d data-source.ts"
+    "migration:create": "dotenv -e .env.production -- ts-node --transpile-only ./node_modules/typeorm/cli.js migration:create",
+    "migration:generate": "dotenv -e .env.production -- ts-node --transpile-only ./node_modules/typeorm/cli.js migration:generate -d data-source.ts",
+    "migration:run": "dotenv -e .env.production -- ts-node --transpile-only ./node_modules/typeorm/cli.js migration:run -d data-source.ts",
+    "migration:revert": "dotenv -e .env.production -- ts-node --transpile-only ./node_modules/typeorm/cli.js migration:revert -d data-source.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -51,6 +51,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.16.5",
     "@types/supertest": "^6.0.2",
+    "dotenv-cli": "^10.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
