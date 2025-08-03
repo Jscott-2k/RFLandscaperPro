@@ -74,6 +74,13 @@ export class CustomersService {
         id: job.id,
         title: job.title,
       })),
+      addresses: customer.addresses?.map((addr) => ({
+        id: addr.id,
+        street: addr.street,
+        city: addr.city,
+        state: addr.state,
+        zip: addr.zip,
+      })),
     };
   }
 }

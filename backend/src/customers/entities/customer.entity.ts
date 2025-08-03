@@ -1,4 +1,6 @@
 import { Job } from 'src/jobs/entities/job.entity';
+import { Address } from './address.entity';
+
 import {
   Entity,
   Column,
@@ -30,4 +32,11 @@ export class Customer {
 
   @OneToMany(() => Job, (job) => job.customer)
   jobs: Job[];
+
+  @OneToMany(() => Address, (address) => address.customer, {
+  cascade: true,
+  eager: true,
+  })
+  addresses: Address[];
+
 }
