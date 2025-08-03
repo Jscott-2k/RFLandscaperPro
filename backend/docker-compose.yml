@@ -1,5 +1,6 @@
 services:
   backend:
+    container_name: rflandscaperpro_backend_dev
     build:
       context: .
       dockerfile: Dockerfile.dev

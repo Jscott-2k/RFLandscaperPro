@@ -13,15 +13,6 @@ export default new DataSource({
   entities: [__dirname + '/**/*.entity.ts'],
   migrations: ['src/migrations/*.ts'],
   ssl: isProduction
-    ? {
-        rejectUnauthorized: false,
-      }
-    : false,
-  extra: isProduction
-    ? {
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      }
-    : undefined,
+    ? { rejectUnauthorized: false }
+    : false
 });
