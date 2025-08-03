@@ -1,5 +1,6 @@
 services:
   backend:
+    image: rflandscaperpro/backend:dev
     container_name: rflandscaperpro_backend_dev
     build:
       context: .
