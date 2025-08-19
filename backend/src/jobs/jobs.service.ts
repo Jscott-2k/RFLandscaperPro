@@ -14,10 +14,9 @@ export class JobsService {
   ) {}
 
   async create(createJobDto: CreateJobDto): Promise<JobResponseDto> {
-    const { customerId, ...jobData } = createJobDto;
     const job = this.jobRepository.create({
-      ...jobData,
-      customer: { id: customerId },
+      ...createJobDto,
+      customer: { id: createJobDto.customerId },
     });
     const savedJob = await this.jobRepository.save(job);
     return this.toJobResponseDto(savedJob);
