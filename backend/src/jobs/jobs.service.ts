@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Job } from './entities/job.entity';
@@ -52,20 +48,16 @@ export class JobsService {
   }
 
   async findOne(id: number): Promise<JobResponseDto> {
-    try {
-      const job = await this.jobRepository.findOne({
-        where: { id },
-        relations: ['customer'],
-      });
+    const job = await this.jobRepository.findOne({
+      where: { id },
+      relations: ['customer'],
+    });
 
-      if (!job) {
-        throw new NotFoundException(`Job with ID ${id} not found.`);
-      }
-
-      return this.toJobResponseDto(job);
-    } catch {
-      throw new InternalServerErrorException('Failed to retrieve job');
+    if (!job) {
+      throw new NotFoundException(`Job with ID ${id} not found.`);
     }
+
+    return this.toJobResponseDto(job);
   }
 
   async remove(id: number): Promise<void> {
