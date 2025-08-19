@@ -6,11 +6,17 @@ import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  logger.log(`Starting backend in ${process.env.NODE_ENV || 'development'} mode`);
+  logger.log(
+    `Starting backend in ${process.env.NODE_ENV || 'development'} mode`,
+  );
   const app = await NestFactory.create(AppModule);
   app.enableCors();
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
   );
   app.useGlobalFilters(new HttpExceptionFilter() satisfies ExceptionFilter);
   await app.listen(process.env.PORT || 3000, '0.0.0.0');
