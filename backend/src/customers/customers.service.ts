@@ -2,8 +2,9 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
+  ConflictException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, QueryFailedError } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Customer } from './entities/customer.entity';
 import { CreateCustomerDto } from './dto/create-customer.dto';
@@ -24,7 +25,13 @@ export class CustomersService {
       const customer = this.customerRepository.create(createCustomerDto);
       const savedCustomer = await this.customerRepository.save(customer);
       return this.toCustomerResponseDto(savedCustomer);
-    } catch {
+    } catch (error) {
+      if (
+        error instanceof QueryFailedError &&
+        (error as any).driverError?.code === '23505'
+      ) {
+        throw new ConflictException('Email already exists');
+      }
       throw new InternalServerErrorException('Failed to create customer');
     }
   }
