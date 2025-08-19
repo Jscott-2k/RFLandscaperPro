@@ -1,4 +1,5 @@
 import { IsString, IsOptional, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateEquipmentDto {
   @IsString()
@@ -15,6 +16,7 @@ export class CreateEquipmentDto {
   location?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   assignedTruckId?: number;
 }
