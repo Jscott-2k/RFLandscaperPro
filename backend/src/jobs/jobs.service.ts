@@ -14,13 +14,13 @@ export class JobsService {
   ) {}
 
   async create(createJobDto: CreateJobDto): Promise<JobResponseDto> {
-    const job = this.jobRepository.create(createJobDto);
-    const savedJob = await this.jobRepository.save(job);
-    const jobWithCustomer = await this.jobRepository.findOneOrFail({
-      where: { id: savedJob.id },
-      relations: ['customer'],
+    const { customerId, ...jobData } = createJobDto;
+    const job = this.jobRepository.create({
+      ...jobData,
+      customer: { id: customerId },
     });
-    return this.toJobResponseDto(jobWithCustomer);
+    const savedJob = await this.jobRepository.save(job);
+    return this.toJobResponseDto(savedJob);
   }
 
   async findAll(): Promise<JobResponseDto[]> {
@@ -42,7 +42,11 @@ export class JobsService {
     if (!job) {
       throw new NotFoundException(`Job with ID ${id} not found.`);
     }
-    Object.assign(job, updateJobDto);
+    const { customerId, ...updateData } = updateJobDto;
+    if (customerId !== undefined) {
+      job.customer = { id: customerId } as Job['customer'];
+    }
+    Object.assign(job, updateData);
     const updatedJob = await this.jobRepository.save(job);
     return this.toJobResponseDto(updatedJob);
   }
