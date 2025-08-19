@@ -14,9 +14,10 @@ export class JobsService {
   ) {}
 
   async create(createJobDto: CreateJobDto): Promise<JobResponseDto> {
+    const { customerId, ...jobData } = createJobDto;
     const job = this.jobRepository.create({
-      ...createJobDto,
-      customer: { id: createJobDto.customerId },
+      ...jobData,
+      customer: { id: customerId },
     });
     const savedJob = await this.jobRepository.save(job);
     return this.toJobResponseDto(savedJob);
@@ -41,7 +42,11 @@ export class JobsService {
     if (!job) {
       throw new NotFoundException(`Job with ID ${id} not found.`);
     }
-    Object.assign(job, updateJobDto);
+    const { customerId, ...updateData } = updateJobDto;
+    if (customerId !== undefined) {
+      job.customer = { id: customerId } as Job['customer'];
+    }
+    Object.assign(job, updateData);
     const updatedJob = await this.jobRepository.save(job);
     return this.toJobResponseDto(updatedJob);
   }
