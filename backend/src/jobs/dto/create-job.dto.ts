@@ -24,6 +24,7 @@ export class CreateJobDto {
   @IsBoolean()
   completed?: boolean;
 
+  @Type(() => Number)
   @IsNumber()
   customerId: number;
 }
