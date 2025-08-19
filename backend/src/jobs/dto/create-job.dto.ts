@@ -26,4 +26,9 @@ export class CreateJobDto {
 
   @IsNumber()
   customerId: number;
+
+  toEntity() {
+    const { customerId, ...jobData } = this;
+    return { ...jobData, customer: { id: customerId } };
+  }
 }
