@@ -28,7 +28,11 @@ export class CustomersService {
     } catch (error) {
       if (
         error instanceof QueryFailedError &&
-        (error as any).driverError?.code === '23505'
+        (
+          error as QueryFailedError & {
+            driverError?: { code?: string };
+          }
+        ).driverError?.code === '23505'
       ) {
         throw new ConflictException('Email already exists');
       }

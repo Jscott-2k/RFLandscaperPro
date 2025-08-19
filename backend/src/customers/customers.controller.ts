@@ -15,12 +15,15 @@ import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
+import { Roles } from '../common/decorators/roles.decorator';
+import { UserRole } from '../users/user.entity';
 
 @Controller('customers')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
   @Post()
+  @Roles(UserRole.Admin)
   async create(
     @Body() createCustomerDto: CreateCustomerDto,
   ): Promise<CustomerResponseDto> {
@@ -28,11 +31,13 @@ export class CustomersController {
   }
 
   @Get()
+  @Roles(UserRole.Admin, UserRole.Worker)
   async findAll(): Promise<CustomerResponseDto[]> {
     return this.customersService.findAll();
   }
 
   @Get(':id')
+  @Roles(UserRole.Admin, UserRole.Worker)
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CustomerResponseDto> {
@@ -40,6 +45,7 @@ export class CustomersController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.Admin)
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
@@ -49,6 +55,7 @@ export class CustomersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles(UserRole.Admin)
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.customersService.remove(id);
   }
