@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CustomersModule } from './customers/customers.module';
 import { JobsModule } from './jobs/jobs.module';
+import { VehicleModule } from './vehicle/vehicle.module';
 
 const logger = new Logger('TypeORM');
 
@@ -36,6 +37,7 @@ TypeOrmModule.forRootAsync({
 
     CustomersModule,
     JobsModule,
+    VehicleModule,
   ],
   controllers: [],
   providers: [],
