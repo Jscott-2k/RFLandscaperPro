@@ -91,6 +91,7 @@ DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=password
 DB_NAME=rflandscaperpro
+JWT_SECRET=your_jwt_secret
 LOG_LEVEL=debug
 ```
 
@@ -103,6 +104,7 @@ DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=your-supabase-db-password
 DB_NAME=postgres
+JWT_SECRET=your_jwt_secret
 LOG_LEVEL=info
 ```
 
@@ -115,8 +117,11 @@ DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=password
 DB_NAME=rflandscaperpro_test
+JWT_SECRET=your_jwt_secret
 LOG_LEVEL=error
 ```
+
+The `JWT_SECRET` variable is required for token signing in all environments. The application will throw an error if it is not set.
 
 4. **Start Development Server**
 ```bash
