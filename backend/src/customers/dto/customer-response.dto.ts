@@ -23,6 +23,8 @@ export class CustomerResponseDto {
   email: string;
   @ApiProperty({ type: [AddressResponseDto] })
   addresses: AddressResponseDto[];
+  @ApiProperty()
+  notificationPreference: 'email' | 'sms' | 'none';
   @ApiPropertyOptional({ type: [JobResponseDto] })
   jobs?: Partial<JobResponseDto>[];
   @ApiProperty()

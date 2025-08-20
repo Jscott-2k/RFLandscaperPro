@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { SchedulerRegistry } from '@nestjs/schedule';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Job } from './entities/job.entity';
@@ -6,6 +7,7 @@ import { Customer } from '../customers/entities/customer.entity';
 import { JobResponseDto } from './dto/job-response.dto';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { NotificationService } from '../common/notification.service';
 
 @Injectable()
 export class JobsService {
@@ -14,6 +16,8 @@ export class JobsService {
     private readonly jobRepository: Repository<Job>,
     @InjectRepository(Customer)
     private readonly customerRepository: Repository<Customer>,
+    private readonly schedulerRegistry: SchedulerRegistry,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async create(createJobDto: CreateJobDto): Promise<JobResponseDto> {
@@ -30,6 +34,7 @@ export class JobsService {
       customer,
     });
     const savedJob = await this.jobRepository.save(job);
+    this.scheduleReminder(savedJob);
     return this.toJobResponseDto(savedJob);
   }
 
@@ -74,6 +79,7 @@ export class JobsService {
     }
     Object.assign(job, updateData);
     const updatedJob = await this.jobRepository.save(job);
+    this.scheduleReminder(updatedJob);
     return this.toJobResponseDto(updatedJob);
   }
 
@@ -113,5 +119,25 @@ export class JobsService {
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
     };
+  }
+
+  private scheduleReminder(job: Job): void {
+    if (!job.scheduledDate) {
+      return;
+    }
+    const timeoutName = `job-reminder-${job.id}`;
+    if (this.schedulerRegistry.doesExist('timeout', timeoutName)) {
+      this.schedulerRegistry.deleteTimeout(timeoutName);
+    }
+    const delay = new Date(job.scheduledDate).getTime() - Date.now();
+    if (delay <= 0) {
+      this.notificationService.sendJobReminder(job);
+      return;
+    }
+    const timeout = setTimeout(async () => {
+      await this.notificationService.sendJobReminder(job);
+      this.schedulerRegistry.deleteTimeout(timeoutName);
+    }, delay);
+    this.schedulerRegistry.addTimeout(timeoutName, timeout);
   }
 }

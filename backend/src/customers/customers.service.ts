@@ -88,6 +88,7 @@ export class CustomersService {
       id: customer.id,
       name: customer.name,
       email: customer.email,
+      notificationPreference: customer.notificationPreference,
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt,
       jobs: customer.jobs?.map((job) => ({

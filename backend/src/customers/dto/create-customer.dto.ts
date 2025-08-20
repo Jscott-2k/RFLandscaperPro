@@ -1,4 +1,10 @@
-import { IsString, IsEmail, ValidateNested, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  ValidateNested,
+  IsArray,
+  IsEnum,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -34,4 +40,8 @@ export class CreateCustomerDto {
   @ValidateNested({ each: true })
   @Type(() => CreateAddressDto)
   addresses: CreateAddressDto[];
+
+  @ApiProperty({ enum: ['email', 'sms', 'none'], default: 'email' })
+  @IsEnum(['email', 'sms', 'none'])
+  notificationPreference?: 'email' | 'sms' | 'none';
 }

@@ -1,4 +1,5 @@
 import { Module, LoggerService } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import {
   PrometheusModule,
   makeHistogramProvider,
@@ -22,6 +23,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
   imports: [
     PrometheusModule.register(),
     LoggerModule,
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: `.env.${process.env.NODE_ENV}`,
       isGlobal: true,

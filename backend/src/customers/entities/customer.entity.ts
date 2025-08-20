@@ -24,6 +24,9 @@ export class Customer {
   @Column({ nullable: true })
   phone?: string;
 
+  @Column({ default: 'email' })
+  notificationPreference: 'email' | 'sms' | 'none';
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -34,9 +37,8 @@ export class Customer {
   jobs: Job[];
 
   @OneToMany(() => Address, (address) => address.customer, {
-  cascade: true,
-  eager: true,
+    cascade: true,
+    eager: true,
   })
   addresses: Address[];
-
 }
