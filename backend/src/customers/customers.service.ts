@@ -40,9 +40,18 @@ export class CustomersService {
     }
   }
 
-  async findAll(): Promise<CustomerResponseDto[]> {
-    const customers = await this.customerRepository.find();
-    return customers.map((customer) => this.toCustomerResponseDto(customer));
+  async findAll(
+    page = 1,
+    limit = 10,
+  ): Promise<{ items: CustomerResponseDto[]; total: number }> {
+    const [customers, total] = await this.customerRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return {
+      items: customers.map((customer) => this.toCustomerResponseDto(customer)),
+      total,
+    };
   }
 
   async findOne(id: number): Promise<CustomerResponseDto> {

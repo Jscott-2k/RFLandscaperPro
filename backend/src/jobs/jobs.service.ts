@@ -33,12 +33,20 @@ export class JobsService {
     return this.toJobResponseDto(savedJob);
   }
 
-  async findAll(): Promise<JobResponseDto[]> {
-    const jobs = await this.jobRepository.find({
+  async findAll(
+    page = 1,
+    limit = 10,
+  ): Promise<{ items: JobResponseDto[]; total: number }> {
+    const [jobs, total] = await this.jobRepository.findAndCount({
       relations: ['customer'],
+      skip: (page - 1) * limit,
+      take: limit,
     });
 
-    return jobs.map((job) => this.toJobResponseDto(job));
+    return {
+      items: jobs.map((job) => this.toJobResponseDto(job)),
+      total,
+    };
   }
 
   async update(

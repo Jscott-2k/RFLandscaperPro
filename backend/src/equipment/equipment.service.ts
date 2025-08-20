@@ -21,9 +21,18 @@ export class EquipmentService {
     return this.toEquipmentResponseDto(savedEquipment);
   }
 
-  async findAll(): Promise<EquipmentResponseDto[]> {
-    const equipments = await this.equipmentRepository.find();
-    return equipments.map((eq) => this.toEquipmentResponseDto(eq));
+  async findAll(
+    page = 1,
+    limit = 10,
+  ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
+    const [equipments, total] = await this.equipmentRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return {
+      items: equipments.map((eq) => this.toEquipmentResponseDto(eq)),
+      total,
+    };
   }
 
   async findOne(id: number): Promise<EquipmentResponseDto> {
@@ -55,9 +64,7 @@ export class EquipmentService {
     await this.equipmentRepository.remove(equipment);
   }
 
-  private toEquipmentResponseDto(
-    equipment: Equipment,
-  ): EquipmentResponseDto {
+  private toEquipmentResponseDto(equipment: Equipment): EquipmentResponseDto {
     return {
       id: equipment.id,
       name: equipment.name,
