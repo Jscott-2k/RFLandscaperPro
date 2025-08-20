@@ -1,12 +1,15 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+
+import {
+  isUniqueViolation,
+  UNIQUE_VIOLATION,
+} from '../common/constants/postgres-error-codes';
 
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
-
-const UNIQUE_VIOLATION = '23505';
 
 @Injectable()
 export class UsersService {
@@ -22,16 +25,16 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { password, ...rest } = createUserDto;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = this.usersRepository.create({ ...rest, password: hashedPassword });
+    const user = this.usersRepository.create({
+      ...rest,
+      password: hashedPassword,
+    });
 
     try {
       return await this.usersRepository.save(user);
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        const { code } = error.driverError as { code?: string };
-        if (code === UNIQUE_VIOLATION) {
-          throw new ConflictException('Username already exists');
-        }
+      if (isUniqueViolation(error, UNIQUE_VIOLATION)) {
+        throw new ConflictException('Username already exists');
       }
       throw error;
     }

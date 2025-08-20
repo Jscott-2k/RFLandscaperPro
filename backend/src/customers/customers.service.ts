@@ -4,12 +4,17 @@ import {
   InternalServerErrorException,
   ConflictException,
 } from '@nestjs/common';
-import { Repository, QueryFailedError } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Customer } from './entities/customer.entity';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
+
+import {
+  isUniqueViolation,
+  UNIQUE_VIOLATION,
+} from '../common/constants/postgres-error-codes';
 
 @Injectable()
 export class CustomersService {
@@ -26,14 +31,7 @@ export class CustomersService {
       const savedCustomer = await this.customerRepository.save(customer);
       return this.toCustomerResponseDto(savedCustomer);
     } catch (error) {
-      if (
-        error instanceof QueryFailedError &&
-        (
-          error as QueryFailedError & {
-            driverError?: { code?: string };
-          }
-        ).driverError?.code === '23505'
-      ) {
+      if (isUniqueViolation(error, UNIQUE_VIOLATION)) {
         throw new ConflictException('Email already exists');
       }
       throw new InternalServerErrorException('Failed to create customer');
