@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module, LoggerService } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,11 +10,12 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
-
-const logger = new Logger('TypeORM');
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
+    LoggerModule,
     ConfigModule.forRoot({
       envFilePath: `.env.${process.env.NODE_ENV}`,
       isGlobal: true,
@@ -34,8 +35,8 @@ const logger = new Logger('TypeORM');
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
+      inject: [ConfigService, WINSTON_MODULE_NEST_PROVIDER],
+      useFactory: (config: ConfigService, logger: LoggerService) => {
         const isProduction = config.get<string>('NODE_ENV') === 'production';
         logger.log(
           `Connecting to DB in ${isProduction ? 'production' : 'development'} mode`,
