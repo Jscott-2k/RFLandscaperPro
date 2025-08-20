@@ -10,8 +10,9 @@ export default new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  // Discover entity files in both TS source and compiled JS output
   entities: [__dirname + '/**/*.entity{.ts,.js}'],
-  migrations: ['src/migrations/*.ts'],
+  migrations: [__dirname + '/**/migrations/*{.ts,.js}'],
   ssl: isProduction
     ? { rejectUnauthorized: false }
     : false
