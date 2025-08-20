@@ -4,6 +4,8 @@ import { QueryFailedError } from 'typeorm';
 import { UsersService } from '../users.service';
 import { UserRole } from '../user.entity';
 
+const UNIQUE_VIOLATION = '23505';
+
 describe('UsersService', () => {
   let service: UsersService;
   let usersRepository: {
@@ -35,7 +37,11 @@ describe('UsersService', () => {
   });
 
   it('throws conflict when username exists', async () => {
-    const error = new QueryFailedError('', [], { code: '23505' } as any);
+    const error = new QueryFailedError(
+      '',
+      [],
+      Object.assign(new Error(), { code: UNIQUE_VIOLATION }),
+    );
     usersRepository.save.mockRejectedValueOnce(error);
 
     await expect(
