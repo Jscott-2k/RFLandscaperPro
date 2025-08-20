@@ -57,9 +57,13 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        ttl: Number(config.get('THROTTLE_TTL')) || 60,
-        limit: Number(config.get('THROTTLE_LIMIT')) || 20,
+      useFactory: async (config: ConfigService) => ({
+        throttlers: [
+          {
+            ttl: Number(config.get('THROTTLE_TTL')) || 60,
+            limit: Number(config.get('THROTTLE_LIMIT')) || 20,
+          },
+        ],
       }),
     }),
     TypeOrmModule.forRootAsync({
