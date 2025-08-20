@@ -1,4 +1,5 @@
 import { Module, LoggerService } from '@nestjs/common';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -15,6 +16,7 @@ import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
+    PrometheusModule.register(),
     LoggerModule,
     ConfigModule.forRoot({
       envFilePath: `.env.${process.env.NODE_ENV}`,
