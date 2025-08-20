@@ -412,6 +412,10 @@ npm run start:prod
 - **Caching**: Ready for Redis integration (planned)
 - **Compression**: Response compression (planned)
 
+## 📊 Monitoring
+
+- The backend exposes Prometheus-formatted metrics at `/metrics` via the `@willsoto/nestjs-prometheus` package. A Prometheus server can scrape this endpoint for application monitoring and alerting.
+
 ## 🤝 Contributing
 
 1. Fork the repository
