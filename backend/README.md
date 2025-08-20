@@ -1,109 +1,109 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# RFLandscaperPro Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This directory contains the NestJS API server for RFLandscaperPro.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Setup
 
-## Description
+### Prerequisites
+- Node.js 18+
+- PostgreSQL 9.6+
+- Docker & Docker Compose (optional)
+- Git
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### Local Development
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Create a PostgreSQL database:
+   ```bash
+   createdb rflandscaperpro
+   ```
+3. Run migrations (when available):
+   ```bash
+   npm run migration:run
+   ```
+4. Configure environment variables:
+   ```bash
+   cp env.example .env.development
+   ```
+   Update values as needed.
+5. Start the server:
+   ```bash
+   npm run start:dev
+   ```
 
-## Project setup
+## Environment Variables
 
-```bash
-$ npm install
+Create environment files in this directory to configure different environments.
+
+`.env.development`:
+```env
+NODE_ENV=development
+PORT=3000
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=password
+DB_NAME=rflandscaperpro
+JWT_SECRET=your_jwt_secret
+LOG_LEVEL=debug
 ```
 
-## Compile and run the project
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+`.env.production`:
+```env
+NODE_ENV=production
+PORT=3000
+DB_HOST=your-project.supabase.co
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=your-supabase-db-password
+DB_NAME=postgres
+JWT_SECRET=your_jwt_secret
+LOG_LEVEL=info
 ```
 
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+`.env.test`:
+```env
+NODE_ENV=test
+PORT=3001
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=password
+DB_NAME=rflandscaperpro_test
+JWT_SECRET=your_jwt_secret
+LOG_LEVEL=error
 ```
 
-## API Documentation
-
-When the server is running, interactive API docs are available at `http://localhost:3000/docs`.
-This endpoint is protected with basic authentication. Use the default credentials `admin`/`admin`
-or set the `SWAGGER_USER` and `SWAGGER_PASSWORD` environment variables to customize them.
-The generated OpenAPI specification can be retrieved from `http://localhost:3000/docs-json`.
-
-## Monitoring
-
-The application exposes a Prometheus metrics endpoint at `/metrics` using the `@willsoto/nestjs-prometheus` package. Configure a Prometheus server to scrape this endpoint for runtime metrics. A built-in `http_request_duration_seconds` histogram records request latency by method, path, and status code.
+See `env.example` for additional optional settings.
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+The backend is containerized with Docker and configured for Fly.io deployment.
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run build
+fly deploy
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Ensure all required environment variables are set on the target platform.
 
-## Resources
+## API Documentation
 
-Check out a few resources that may come in handy when working with NestJS:
+When running locally, Swagger docs are available at `http://localhost:3000/docs` (basic auth `admin`/`admin` by default).
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Monitoring
 
-## Support
+Prometheus metrics are exposed at `/metrics` via `@willsoto/nestjs-prometheus`.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Testing
 
-## Stay in touch
+```bash
+npm run test
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+For end-to-end tests:
+```bash
+npm run test:e2e
+```
