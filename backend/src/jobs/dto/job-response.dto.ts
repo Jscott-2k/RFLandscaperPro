@@ -9,6 +9,29 @@ class JobCustomerDto {
   email: string;
 }
 
+class JobAssignmentUserDto {
+  @ApiProperty()
+  id: number;
+  @ApiProperty()
+  username: string;
+}
+
+class JobAssignmentEquipmentDto {
+  @ApiProperty()
+  id: number;
+  @ApiProperty()
+  name: string;
+}
+
+class JobAssignmentDto {
+  @ApiProperty()
+  id: number;
+  @ApiProperty({ type: JobAssignmentUserDto })
+  user: JobAssignmentUserDto;
+  @ApiProperty({ type: JobAssignmentEquipmentDto })
+  equipment: JobAssignmentEquipmentDto;
+}
+
 export class JobResponseDto {
   @ApiProperty()
   id: number;
@@ -22,6 +45,8 @@ export class JobResponseDto {
   completed: boolean;
   @ApiProperty({ type: JobCustomerDto })
   customer: JobCustomerDto;
+  @ApiProperty({ type: [JobAssignmentDto] })
+  assignments?: JobAssignmentDto[];
   @ApiProperty()
   createdAt: Date;
   @ApiProperty()
