@@ -2,18 +2,25 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExceptionFilter, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
-import {
-  WINSTON_MODULE_NEST_PROVIDER,
-  WinstonModule,
-} from 'nest-winston';
+import { WINSTON_MODULE_NEST_PROVIDER, WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
+import { MetricsModule } from './metrics/metrics.module';
+import { PrometheusInterceptor } from '@willsoto/nestjs-prometheus';
+import { requestIdMiddleware } from './common/middleware/request-id.middleware';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 async function bootstrap() {
   let app;
   try {
     app = await NestFactory.create(AppModule, { bufferLogs: true });
+    app.use(requestIdMiddleware);
     app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
     const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
+    app.get(MetricsModule);
+    app.useGlobalInterceptors(
+      new PrometheusInterceptor(),
+      new LoggingInterceptor(logger),
+    );
     logger.log(
       `Starting backend in ${process.env.NODE_ENV || 'development'} mode`,
     );
