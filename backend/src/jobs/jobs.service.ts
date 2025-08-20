@@ -28,16 +28,17 @@ export class JobsService {
   ) {}
 
   async create(createJobDto: CreateJobDto): Promise<JobResponseDto> {
+    const { customerId, ...jobData } = createJobDto;
     const customer = await this.customerRepository.findOne({
-      where: { id: createJobDto.customerId },
+      where: { id: customerId },
     });
     if (!customer) {
       throw new NotFoundException(
-        `Customer with ID ${createJobDto.customerId} not found.`,
+        `Customer with ID ${customerId} not found.`,
       );
     }
     const job = this.jobRepository.create({
-      ...createJobDto,
+      ...jobData,
       customer,
     });
     const savedJob = await this.jobRepository.save(job);
