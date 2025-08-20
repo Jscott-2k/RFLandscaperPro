@@ -10,6 +10,7 @@ import { User } from '../users/user.entity';
 import { Equipment } from '../equipment/entities/equipment.entity';
 import { Assignment } from './entities/assignment.entity';
 import { AssignJobDto } from './dto/assign-job.dto';
+import { BulkAssignJobDto } from './dto/bulk-assign-job.dto';
 import { ScheduleJobDto } from './dto/schedule-job.dto';
 
 @Injectable()
@@ -231,6 +232,85 @@ export class JobsService {
 
     const updatedJob = await this.jobRepository.findOne({
       where: { id },
+      relations: ['customer', 'assignments', 'assignments.user', 'assignments.equipment'],
+    });
+    return this.toJobResponseDto(updatedJob!);
+  }
+
+  async bulkAssign(id: number, dto: BulkAssignJobDto): Promise<JobResponseDto> {
+    const job = await this.jobRepository.findOne({
+      where: { id },
+      relations: ['customer'],
+    });
+    if (!job) {
+      throw new NotFoundException(`Job with ID ${id} not found.`);
+    }
+
+    // Validate all users and equipment exist
+    for (const assignment of dto.assignments) {
+      const user = await this.userRepository.findOne({ where: { id: assignment.userId } });
+      if (!user) {
+        throw new NotFoundException(`User with ID ${assignment.userId} not found.`);
+      }
+
+      const equipment = await this.equipmentRepository.findOne({
+        where: { id: assignment.equipmentId },
+      });
+      if (!equipment) {
+        throw new NotFoundException(
+          `Equipment with ID ${assignment.equipmentId} not found.`,
+        );
+      }
+    }
+
+    // Check for conflicts if job is scheduled
+    if (job.scheduledDate) {
+      for (const assignment of dto.assignments) {
+        const conflict = await this.checkResourceConflicts(
+          job.scheduledDate,
+          assignment.userId,
+          assignment.equipmentId,
+        );
+        if (conflict) {
+          throw new ConflictException(
+            `Resource conflict: user ${assignment.userId} or equipment ${assignment.equipmentId} is already assigned on this date.`,
+          );
+        }
+      }
+    }
+
+    // Create all assignments
+    const assignments = dto.assignments.map(assignmentData =>
+      this.assignmentRepository.create({
+        job,
+        user: { id: assignmentData.userId } as User,
+        equipment: { id: assignmentData.equipmentId } as Equipment,
+      })
+    );
+
+    await this.assignmentRepository.save(assignments);
+
+    const updatedJob = await this.jobRepository.findOne({
+      where: { id },
+      relations: ['customer', 'assignments', 'assignments.user', 'assignments.equipment'],
+    });
+    return this.toJobResponseDto(updatedJob!);
+  }
+
+  async removeAssignment(jobId: number, assignmentId: number): Promise<JobResponseDto> {
+    const assignment = await this.assignmentRepository.findOne({
+      where: { id: assignmentId, job: { id: jobId } },
+      relations: ['job'],
+    });
+
+    if (!assignment) {
+      throw new NotFoundException(`Assignment with ID ${assignmentId} not found for job ${jobId}.`);
+    }
+
+    await this.assignmentRepository.remove(assignment);
+
+    const updatedJob = await this.jobRepository.findOne({
+      where: { id: jobId },
       relations: ['customer', 'assignments', 'assignments.user', 'assignments.equipment'],
     });
     return this.toJobResponseDto(updatedJob!);

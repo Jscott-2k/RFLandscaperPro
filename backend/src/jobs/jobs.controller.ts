@@ -21,6 +21,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
 import { ScheduleJobDto } from './dto/schedule-job.dto';
 import { AssignJobDto } from './dto/assign-job.dto';
+import { BulkAssignJobDto } from './dto/bulk-assign-job.dto';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -115,6 +116,36 @@ export class JobsController {
     @Body() assignJobDto: AssignJobDto,
   ): Promise<JobResponseDto> {
     return this.jobsService.assign(id, assignJobDto);
+  }
+
+  @Post(':id/bulk-assign')
+  @Roles(UserRole.Admin, UserRole.Worker)
+  @ApiOperation({ summary: 'Assign multiple resources to job' })
+  @ApiResponse({
+    status: 200,
+    description: 'Multiple job assignments added',
+    type: JobResponseDto,
+  })
+  bulkAssign(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() bulkAssignJobDto: BulkAssignJobDto,
+  ): Promise<JobResponseDto> {
+    return this.jobsService.bulkAssign(id, bulkAssignJobDto);
+  }
+
+  @Delete(':id/assignments/:assignmentId')
+  @Roles(UserRole.Admin, UserRole.Worker)
+  @ApiOperation({ summary: 'Remove assignment from job' })
+  @ApiResponse({
+    status: 200,
+    description: 'Assignment removed',
+    type: JobResponseDto,
+  })
+  removeAssignment(
+    @Param('id', ParseIntPipe) jobId: number,
+    @Param('assignmentId', ParseIntPipe) assignmentId: number,
+  ): Promise<JobResponseDto> {
+    return this.jobsService.removeAssignment(jobId, assignmentId);
   }
 
   @Delete(':id')

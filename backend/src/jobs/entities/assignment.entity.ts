@@ -8,7 +8,7 @@ export class Assignment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Job, (job) => job.assignments, { onDelete: 'CASCADE', eager: true })
+  @ManyToOne(() => Job, (job) => job.assignments, { onDelete: 'CASCADE' })
   job: Job;
 
   @ManyToOne(() => User, { eager: true })

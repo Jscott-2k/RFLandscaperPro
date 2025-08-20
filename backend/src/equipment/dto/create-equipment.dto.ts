@@ -1,5 +1,4 @@
-import { IsString, IsOptional, IsNumber } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsOptional } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateEquipmentDto {
@@ -19,10 +18,4 @@ export class CreateEquipmentDto {
   @IsOptional()
   @IsString()
   location?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  assignedTruckId?: number;
 }

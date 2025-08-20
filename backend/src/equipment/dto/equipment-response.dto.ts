@@ -11,8 +11,6 @@ export class EquipmentResponseDto {
   status: string;
   @ApiPropertyOptional()
   location?: string;
-  @ApiPropertyOptional()
-  assignedTruckId?: number;
   @ApiProperty()
   createdAt: Date;
   @ApiProperty()

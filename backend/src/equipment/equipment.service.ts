@@ -25,12 +25,12 @@ export class EquipmentService {
     page = 1,
     limit = 10,
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
-    const [equipmentList, total] = await this.equipmentRepository.findAndCount({
+    const [equipments, total] = await this.equipmentRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
     });
     return {
-      items: equipmentList.map((eq) => this.toEquipmentResponseDto(eq)),
+      items: equipments.map((eq) => this.toEquipmentResponseDto(eq)),
       total,
     };
   }
@@ -71,7 +71,6 @@ export class EquipmentService {
       type: equipment.type,
       status: equipment.status,
       location: equipment.location,
-      assignedTruckId: equipment.assignedTruckId,
       createdAt: equipment.createdAt,
       updatedAt: equipment.updatedAt,
     };

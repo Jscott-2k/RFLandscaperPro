@@ -17,9 +17,6 @@ export class Equipment {
   @Column({ nullable: true })
   location?: string;
 
-  @Column({ nullable: true })
-  assignedTruckId?: number;
-
   @CreateDateColumn()
   createdAt: Date;
 
