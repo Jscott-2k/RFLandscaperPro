@@ -4,10 +4,10 @@ import { ExceptionFilter, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
-import { MetricsModule } from './metrics/metrics.module';
-import { PrometheusInterceptor } from '@willsoto/nestjs-prometheus';
 import { requestIdMiddleware } from './common/middleware/request-id.middleware';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { MetricsModule } from './metrics/metrics.module';
+import { PrometheusInterceptor } from '@willsoto/nestjs-prometheus';
 
 async function bootstrap() {
   let app;
