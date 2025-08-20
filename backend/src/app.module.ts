@@ -1,5 +1,8 @@
 import { Module, LoggerService } from '@nestjs/common';
-import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import {
+  PrometheusModule,
+  makeHistogramProvider,
+} from '@willsoto/nestjs-prometheus';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -13,6 +16,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { LoggerModule } from './logger/logger.module';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 @Module({
   imports: [
@@ -69,6 +73,12 @@ import { LoggerModule } from './logger/logger.module';
   ],
   controllers: [],
   providers: [
+    makeHistogramProvider({
+      name: 'http_request_duration_seconds',
+      help: 'HTTP request duration in seconds',
+      labelNames: ['method', 'path', 'status_code'],
+    }),
+    LoggingInterceptor,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

@@ -414,7 +414,7 @@ npm run start:prod
 
 ## 📊 Monitoring
 
-- The backend exposes Prometheus-formatted metrics at `/metrics` via the `@willsoto/nestjs-prometheus` package. A Prometheus server can scrape this endpoint for application monitoring and alerting.
+- The backend exposes Prometheus-formatted metrics at `/metrics` via the `@willsoto/nestjs-prometheus` package. A Prometheus server can scrape this endpoint for application monitoring and alerting. A built-in `http_request_duration_seconds` histogram provides latency metrics by HTTP method, path, and status code.
 
 ## 🤝 Contributing
 
