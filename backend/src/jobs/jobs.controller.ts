@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
+  DefaultValuePipe,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -30,8 +32,11 @@ export class JobsController {
 
   @Get()
   @Roles(UserRole.Admin, UserRole.Worker, UserRole.Customer)
-  findAll(): Promise<JobResponseDto[]> {
-    return this.jobsService.findAll();
+  findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+  ): Promise<{ items: JobResponseDto[]; total: number }> {
+    return this.jobsService.findAll(page, limit);
   }
 
   @Get(':id')

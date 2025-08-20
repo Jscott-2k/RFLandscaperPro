@@ -7,6 +7,8 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  Query,
+  DefaultValuePipe,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -32,8 +34,11 @@ export class CustomersController {
 
   @Get()
   @Roles(UserRole.Admin, UserRole.Worker)
-  async findAll(): Promise<CustomerResponseDto[]> {
-    return this.customersService.findAll();
+  async findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+  ): Promise<{ items: CustomerResponseDto[]; total: number }> {
+    return this.customersService.findAll(page, limit);
   }
 
   @Get(':id')

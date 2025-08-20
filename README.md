@@ -337,6 +337,15 @@ DB_NAME=postgres
 - `PATCH /equipment/:id` - Update equipment
 - `DELETE /equipment/:id` - Delete equipment
 
+### Pagination
+
+All list endpoints support optional pagination parameters:
+
+- `page` (number, default `1`) – page number to retrieve
+- `limit` (number, default `10`) – number of items per page
+
+Responses are wrapped in an object containing the retrieved `items` array and the `total` number of available records.
+
 ### Request/Response Examples
 
 #### Create Customer

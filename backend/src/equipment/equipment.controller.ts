@@ -7,6 +7,8 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  Query,
+  DefaultValuePipe,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -31,8 +33,11 @@ export class EquipmentController {
 
   @Get()
   @Roles(UserRole.Admin, UserRole.Worker, UserRole.Customer)
-  async findAll(): Promise<EquipmentResponseDto[]> {
-    return this.equipmentService.findAll();
+  async findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+  ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
+    return this.equipmentService.findAll(page, limit);
   }
 
   @Get(':id')
