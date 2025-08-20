@@ -1,7 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,9 +19,7 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const { password, ...rest } = createUserDto;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = this.usersRepository.create({ ...rest, password: hashedPassword });
+    const user = this.usersRepository.create(createUserDto);
 
     try {
       return await this.usersRepository.save(user);
