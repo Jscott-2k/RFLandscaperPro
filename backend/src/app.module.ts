@@ -11,6 +11,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { EquipmentModule } from './equipment/equipment.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { InvoicesModule } from './invoices/invoices.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -68,6 +69,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     CustomersModule,
     JobsModule,
     EquipmentModule,
+    InvoicesModule,
     UsersModule,
     AuthModule,
   ],

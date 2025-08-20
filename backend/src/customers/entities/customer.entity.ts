@@ -1,4 +1,6 @@
 import { Job } from '../../jobs/entities/job.entity';
+import { Invoice } from '../../invoices/entities/invoice.entity';
+import { Payment } from '../../payments/entities/payment.entity';
 import { Address } from './address.entity';
 
 import {
@@ -32,6 +34,12 @@ export class Customer {
 
   @OneToMany(() => Job, (job) => job.customer)
   jobs: Job[];
+
+  @OneToMany(() => Invoice, (invoice) => invoice.customer)
+  invoices: Invoice[];
+
+  @OneToMany(() => Payment, (payment) => payment.customer)
+  payments: Payment[];
 
   @OneToMany(() => Address, (address) => address.customer, {
   cascade: true,

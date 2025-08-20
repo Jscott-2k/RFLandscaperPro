@@ -5,8 +5,11 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { Customer } from '../../customers/entities/customer.entity';
+import { Invoice } from '../../invoices/entities/invoice.entity';
+import { Payment } from '../../payments/entities/payment.entity';
 
 @Entity()
 export class Job {
@@ -27,6 +30,12 @@ export class Job {
 
   @ManyToOne(() => Customer, (customer) => customer.jobs, { eager: true })
   customer: Customer;
+
+  @OneToMany(() => Invoice, (invoice) => invoice.job)
+  invoices: Invoice[];
+
+  @OneToMany(() => Payment, (payment) => payment.job)
+  payments: Payment[];
 
   @CreateDateColumn()
   createdAt: Date;
