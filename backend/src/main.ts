@@ -7,13 +7,17 @@ import {
   WinstonModule,
 } from 'nest-winston';
 import * as winston from 'winston';
+import { requestIdMiddleware } from './common/middleware/request-id.middleware';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 async function bootstrap() {
   let app;
   try {
     app = await NestFactory.create(AppModule, { bufferLogs: true });
+    app.use(requestIdMiddleware);
     app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
     const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
+    app.useGlobalInterceptors(new LoggingInterceptor(logger));
     logger.log(
       `Starting backend in ${process.env.NODE_ENV || 'development'} mode`,
     );
