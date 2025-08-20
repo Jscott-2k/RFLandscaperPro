@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+
+const UNIQUE_VIOLATION = '23505';
 
 @Injectable()
 export class UsersService {
@@ -21,6 +23,17 @@ export class UsersService {
     const { password, ...rest } = createUserDto;
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = this.usersRepository.create({ ...rest, password: hashedPassword });
-    return this.usersRepository.save(user);
+
+    try {
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        const { code } = error.driverError as { code?: string };
+        if (code === UNIQUE_VIOLATION) {
+          throw new ConflictException('Username already exists');
+        }
+      }
+      throw error;
+    }
   }
 }
