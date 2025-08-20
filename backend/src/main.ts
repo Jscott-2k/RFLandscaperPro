@@ -17,7 +17,7 @@ async function bootstrap() {
     app.use(requestIdMiddleware);
     app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
     const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
-    app.useGlobalInterceptors(new LoggingInterceptor(logger));
+    app.useGlobalInterceptors(app.get(LoggingInterceptor));
     logger.log(
       `Starting backend in ${process.env.NODE_ENV || 'development'} mode`,
     );

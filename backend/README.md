@@ -59,7 +59,7 @@ $ npm run test:cov
 
 ## Monitoring
 
-The application exposes a Prometheus metrics endpoint at `/metrics` using the `@willsoto/nestjs-prometheus` package. Configure a Prometheus server to scrape this endpoint for runtime metrics.
+The application exposes a Prometheus metrics endpoint at `/metrics` using the `@willsoto/nestjs-prometheus` package. Configure a Prometheus server to scrape this endpoint for runtime metrics. A built-in `http_request_duration_seconds` histogram records request latency by method, path, and status code.
 
 ## Deployment
 
