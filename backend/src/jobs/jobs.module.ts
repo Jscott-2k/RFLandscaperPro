@@ -5,9 +5,14 @@ import { JobsService } from './jobs.service';
 import { JobsController } from './jobs.controller';
 import { Job } from './entities/job.entity';
 import { Customer } from '../customers/entities/customer.entity';
+import { Assignment } from './entities/assignment.entity';
+import { User } from '../users/user.entity';
+import { Equipment } from '../equipment/entities/equipment.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Job, Customer])],
+  imports: [
+    TypeOrmModule.forFeature([Job, Customer, Assignment, User, Equipment]),
+  ],
   controllers: [JobsController],
   providers: [JobsService],
   exports: [JobsService],

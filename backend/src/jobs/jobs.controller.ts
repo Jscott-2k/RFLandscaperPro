@@ -19,6 +19,8 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { JobResponseDto } from './dto/job-response.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
+import { ScheduleJobDto } from './dto/schedule-job.dto';
+import { AssignJobDto } from './dto/assign-job.dto';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -83,6 +85,36 @@ export class JobsController {
     @Body() updateJobDto: UpdateJobDto,
   ): Promise<JobResponseDto> {
     return this.jobsService.update(id, updateJobDto);
+  }
+
+  @Post(':id/schedule')
+  @Roles(UserRole.Admin, UserRole.Worker)
+  @ApiOperation({ summary: 'Schedule job' })
+  @ApiResponse({
+    status: 200,
+    description: 'Job scheduled',
+    type: JobResponseDto,
+  })
+  schedule(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() scheduleJobDto: ScheduleJobDto,
+  ): Promise<JobResponseDto> {
+    return this.jobsService.schedule(id, scheduleJobDto);
+  }
+
+  @Post(':id/assign')
+  @Roles(UserRole.Admin, UserRole.Worker)
+  @ApiOperation({ summary: 'Assign resources to job' })
+  @ApiResponse({
+    status: 200,
+    description: 'Job assignment added',
+    type: JobResponseDto,
+  })
+  assign(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() assignJobDto: AssignJobDto,
+  ): Promise<JobResponseDto> {
+    return this.jobsService.assign(id, assignJobDto);
   }
 
   @Delete(':id')
