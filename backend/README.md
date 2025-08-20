@@ -57,6 +57,13 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## API Documentation
+
+When the server is running, interactive API docs are available at `http://localhost:3000/docs`.
+This endpoint is protected with basic authentication. Use the default credentials `admin`/`admin`
+or set the `SWAGGER_USER` and `SWAGGER_PASSWORD` environment variables to customize them.
+The generated OpenAPI specification can be retrieved from `http://localhost:3000/docs-json`.
+
 ## Monitoring
 
 The application exposes a Prometheus metrics endpoint at `/metrics` using the `@willsoto/nestjs-prometheus` package. Configure a Prometheus server to scrape this endpoint for runtime metrics. A built-in `http_request_duration_seconds` histogram records request latency by method, path, and status code.

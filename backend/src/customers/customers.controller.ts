@@ -19,13 +19,28 @@ import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('customers')
+@ApiBearerAuth()
 @Controller('customers')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
   @Post()
   @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Create customer' })
+  @ApiResponse({
+    status: 201,
+    description: 'Customer created',
+    type: CustomerResponseDto,
+  })
   async create(
     @Body() createCustomerDto: CreateCustomerDto,
   ): Promise<CustomerResponseDto> {
@@ -34,6 +49,10 @@ export class CustomersController {
 
   @Get()
   @Roles(UserRole.Admin, UserRole.Worker)
+  @ApiOperation({ summary: 'List customers' })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiResponse({ status: 200, description: 'List of customers' })
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
@@ -43,6 +62,12 @@ export class CustomersController {
 
   @Get(':id')
   @Roles(UserRole.Admin, UserRole.Worker)
+  @ApiOperation({ summary: 'Get customer by id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Customer retrieved',
+    type: CustomerResponseDto,
+  })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CustomerResponseDto> {
@@ -51,6 +76,12 @@ export class CustomersController {
 
   @Patch(':id')
   @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Update customer' })
+  @ApiResponse({
+    status: 200,
+    description: 'Customer updated',
+    type: CustomerResponseDto,
+  })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
@@ -61,6 +92,8 @@ export class CustomersController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Delete customer' })
+  @ApiResponse({ status: 204, description: 'Customer deleted' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.customersService.remove(id);
   }
