@@ -1,8 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
+
+type UploadedFile = {
+  filename: string;
+  originalname: string;
+  mimetype: string;
+  size: number;
+  path: string;
+};
 import { InjectRepository } from '@nestjs/typeorm';
 import { Job } from './entities/job.entity';
 import { Customer } from '../customers/entities/customer.entity';
+import { JobImage } from './entities/job-image.entity';
 import { JobResponseDto } from './dto/job-response.dto';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
@@ -14,6 +23,8 @@ export class JobsService {
     private readonly jobRepository: Repository<Job>,
     @InjectRepository(Customer)
     private readonly customerRepository: Repository<Customer>,
+    @InjectRepository(JobImage)
+    private readonly imageRepository: Repository<JobImage>,
   ) {}
 
   async create(createJobDto: CreateJobDto): Promise<JobResponseDto> {
@@ -96,6 +107,33 @@ export class JobsService {
       throw new NotFoundException(`Job with ID ${id} not found.`);
     }
     await this.jobRepository.remove(job);
+  }
+
+  async addImage(jobId: number, file: UploadedFile): Promise<JobImage> {
+    const job = await this.jobRepository.findOne({ where: { id: jobId } });
+    if (!job) {
+      throw new NotFoundException(`Job with ID ${jobId} not found.`);
+    }
+    const image = this.imageRepository.create({
+      job,
+      filename: file.filename,
+      originalName: file.originalname,
+      mimeType: file.mimetype,
+      size: file.size,
+      path: file.path,
+    });
+    return this.imageRepository.save(image);
+  }
+
+  async getImage(jobId: number, imageId: number): Promise<JobImage> {
+    const image = await this.imageRepository.findOne({
+      where: { id: imageId },
+      relations: ['job'],
+    });
+    if (!image || image.job.id !== jobId) {
+      throw new NotFoundException('Image not found for this job.');
+    }
+    return image;
   }
 
   private toJobResponseDto(job: Job): JobResponseDto {

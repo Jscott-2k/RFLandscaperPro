@@ -3,10 +3,12 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Customer } from '../../customers/entities/customer.entity';
+import { JobImage } from './job-image.entity';
 
 @Entity()
 export class Job {
@@ -27,6 +29,9 @@ export class Job {
 
   @ManyToOne(() => Customer, (customer) => customer.jobs, { eager: true })
   customer: Customer;
+
+  @OneToMany(() => JobImage, (image) => image.job, { cascade: true })
+  images: JobImage[];
 
   @CreateDateColumn()
   createdAt: Date;

@@ -4,6 +4,7 @@ import { NotFoundException } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { Job } from './entities/job.entity';
 import { Customer } from '../customers/entities/customer.entity';
+import { JobImage } from './entities/job-image.entity';
 
 describe('JobsService', () => {
   let service: JobsService;
@@ -13,10 +14,20 @@ describe('JobsService', () => {
     save: jest.Mock;
   };
   let customerRepository: { findOne: jest.Mock };
+  let imageRepository: {
+    findOne: jest.Mock;
+    create: jest.Mock;
+    save: jest.Mock;
+  };
 
   beforeEach(async () => {
     jobRepository = { findOne: jest.fn(), create: jest.fn(), save: jest.fn() };
     customerRepository = { findOne: jest.fn() };
+    imageRepository = {
+      findOne: jest.fn(),
+      create: jest.fn(),
+      save: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -28,6 +39,10 @@ describe('JobsService', () => {
         {
           provide: getRepositoryToken(Customer),
           useValue: customerRepository,
+        },
+        {
+          provide: getRepositoryToken(JobImage),
+          useValue: imageRepository,
         },
       ],
     }).compile();

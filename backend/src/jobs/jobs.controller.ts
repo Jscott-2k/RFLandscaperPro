@@ -11,7 +11,21 @@ import {
   DefaultValuePipe,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  Res,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
+import * as path from 'path';
+
+type UploadedFile = {
+  filename: string;
+  originalname: string;
+  mimetype: string;
+  size: number;
+  path: string;
+};
 
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
@@ -92,5 +106,28 @@ export class JobsController {
   @ApiResponse({ status: 204, description: 'Job deleted' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.jobsService.remove(id);
+  }
+
+  @Post(':id/images')
+  @Roles(UserRole.Admin, UserRole.Worker)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Upload job image' })
+  uploadImage(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: UploadedFile,
+  ) {
+    return this.jobsService.addImage(id, file);
+  }
+
+  @Get(':jobId/images/:imageId')
+  @Roles(UserRole.Admin, UserRole.Worker, UserRole.Customer)
+  @ApiOperation({ summary: 'Get job image' })
+  async getImage(
+    @Param('jobId', ParseIntPipe) jobId: number,
+    @Param('imageId', ParseIntPipe) imageId: number,
+    @Res() res: Response,
+  ) {
+    const image = await this.jobsService.getImage(jobId, imageId);
+    return res.sendFile(path.resolve(image.path));
   }
 }
