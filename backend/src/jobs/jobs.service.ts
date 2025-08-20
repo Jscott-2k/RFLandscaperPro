@@ -131,6 +131,29 @@ export class JobsService {
     };
   }
 
+  private async checkResourceConflicts(
+    date: Date,
+    userId: number,
+    equipmentId: number,
+    jobId?: number,
+  ): Promise<boolean> {
+    const query = this.assignmentRepository
+      .createQueryBuilder('assignment')
+      .leftJoin('assignment.job', 'job')
+      .where('job.scheduledDate = :date', { date })
+      .andWhere(
+        '(assignment.userId = :userId OR assignment.equipmentId = :equipmentId)',
+        { userId, equipmentId },
+      );
+
+    if (jobId !== undefined) {
+      query.andWhere('job.id != :jobId', { jobId });
+    }
+
+    const conflict = await query.getOne();
+    return !!conflict;
+  }
+
   async schedule(
     id: number,
     scheduleJobDto: ScheduleJobDto,
@@ -144,21 +167,12 @@ export class JobsService {
     }
 
     for (const assignment of job.assignments || []) {
-      const conflict = await this.assignmentRepository
-        .createQueryBuilder('assignment')
-        .leftJoin('assignment.job', 'job')
-        .where('job.scheduledDate = :date', {
-          date: scheduleJobDto.scheduledDate,
-        })
-        .andWhere('job.id != :jobId', { jobId: id })
-        .andWhere(
-          '(assignment.userId = :userId OR assignment.equipmentId = :equipmentId)',
-          {
-            userId: assignment.user.id,
-            equipmentId: assignment.equipment.id,
-          },
-        )
-        .getOne();
+      const conflict = await this.checkResourceConflicts(
+        scheduleJobDto.scheduledDate,
+        assignment.user.id,
+        assignment.equipment.id,
+        id,
+      );
       if (conflict) {
         throw new ConflictException(
           'Resource conflict: assigned user or equipment is already booked on this date.',
@@ -195,15 +209,11 @@ export class JobsService {
     }
 
     if (job.scheduledDate) {
-      const conflict = await this.assignmentRepository
-        .createQueryBuilder('assignment')
-        .leftJoin('assignment.job', 'job')
-        .where('job.scheduledDate = :date', { date: job.scheduledDate })
-        .andWhere(
-          '(assignment.userId = :userId OR assignment.equipmentId = :equipmentId)',
-          { userId: dto.userId, equipmentId: dto.equipmentId },
-        )
-        .getOne();
+      const conflict = await this.checkResourceConflicts(
+        job.scheduledDate,
+        dto.userId,
+        dto.equipmentId,
+      );
       if (conflict) {
         throw new ConflictException(
           'Resource conflict: user or equipment is already assigned on this date.',
