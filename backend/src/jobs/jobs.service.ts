@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Job } from './entities/job.entity';
+import { Customer } from '../customers/entities/customer.entity';
 import { JobResponseDto } from './dto/job-response.dto';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
@@ -11,12 +12,22 @@ export class JobsService {
   constructor(
     @InjectRepository(Job)
     private readonly jobRepository: Repository<Job>,
+    @InjectRepository(Customer)
+    private readonly customerRepository: Repository<Customer>,
   ) {}
 
   async create(createJobDto: CreateJobDto): Promise<JobResponseDto> {
+    const customer = await this.customerRepository.findOne({
+      where: { id: createJobDto.customerId },
+    });
+    if (!customer) {
+      throw new NotFoundException(
+        `Customer with ID ${createJobDto.customerId} not found.`,
+      );
+    }
     const job = this.jobRepository.create({
       ...createJobDto,
-      customer: { id: createJobDto.customerId },
+      customer,
     });
     const savedJob = await this.jobRepository.save(job);
     return this.toJobResponseDto(savedJob);
@@ -43,7 +54,15 @@ export class JobsService {
     }
     const { customerId, ...updateData } = updateJobDto;
     if (customerId !== undefined) {
-      job.customer = { id: customerId } as Job['customer'];
+      const customer = await this.customerRepository.findOne({
+        where: { id: customerId },
+      });
+      if (!customer) {
+        throw new NotFoundException(
+          `Customer with ID ${customerId} not found.`,
+        );
+      }
+      job.customer = customer;
     }
     Object.assign(job, updateData);
     const updatedJob = await this.jobRepository.save(job);
