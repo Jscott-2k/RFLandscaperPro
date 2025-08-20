@@ -1,4 +1,6 @@
 import { Module, LoggerService } from '@nestjs/common';
+import { CacheModule, CacheInterceptor } from '@nestjs/cache-manager';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import {
   PrometheusModule,
   makeHistogramProvider,
@@ -11,7 +13,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { EquipmentModule } from './equipment/equipment.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
@@ -37,6 +39,27 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
         DB_NAME: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
         LOG_LEVEL: Joi.string().default('debug'),
+        CACHE_TTL: Joi.number().default(60_000),
+        CACHE_MAX: Joi.number().default(100),
+        THROTTLE_TTL: Joi.number().default(60),
+        THROTTLE_LIMIT: Joi.number().default(20),
+      }),
+    }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        ttl: Number(config.get('CACHE_TTL')) || 60_000,
+        max: Number(config.get('CACHE_MAX')) || 100,
+      }),
+    }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        ttl: Number(config.get('THROTTLE_TTL')) || 60,
+        limit: Number(config.get('THROTTLE_LIMIT')) || 20,
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -79,6 +102,14 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
       labelNames: ['method', 'path', 'status_code'],
     }),
     LoggingInterceptor,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
