@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { Job } from './entities/job.entity';
 import { Customer } from '../customers/entities/customer.entity';
@@ -34,13 +34,7 @@ describe('JobsService', () => {
       create: jest.fn(),
       save: jest.fn(),
       findOne: jest.fn(),
-      createQueryBuilder: jest.fn().mockReturnValue({
-        leftJoin: () => ({
-          where: () => ({
-            andWhere: () => ({ getOne: jest.fn() }),
-          }),
-        }),
-      }),
+      createQueryBuilder: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -80,5 +74,50 @@ describe('JobsService', () => {
         customerId: 1,
       } as any),
     ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('should throw ConflictException when scheduling with existing assignment conflict', async () => {
+    const date = new Date();
+    jobRepository.findOne.mockResolvedValue({
+      id: 1,
+      assignments: [
+        {
+          user: { id: 1 },
+          equipment: { id: 2 },
+        },
+      ],
+      customer: {},
+    });
+
+    const qb = {
+      leftJoin: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getOne: jest.fn().mockResolvedValue({ id: 99 }),
+    };
+    assignmentRepository.createQueryBuilder.mockReturnValue(qb);
+
+    await expect(
+      service.schedule(1, { scheduledDate: date } as any),
+    ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('should throw ConflictException when assigning user or equipment already booked', async () => {
+    const date = new Date();
+    jobRepository.findOne.mockResolvedValue({ id: 1, scheduledDate: date, customer: {} });
+    userRepository.findOne.mockResolvedValue({ id: 1 });
+    equipmentRepository.findOne.mockResolvedValue({ id: 2 });
+
+    const qb = {
+      leftJoin: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getOne: jest.fn().mockResolvedValue({ id: 99 }),
+    };
+    assignmentRepository.createQueryBuilder.mockReturnValue(qb);
+
+    await expect(
+      service.assign(1, { userId: 1, equipmentId: 2 } as any),
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 });
