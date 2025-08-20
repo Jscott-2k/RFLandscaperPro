@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
+import { join } from 'path';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -10,10 +11,11 @@ export default new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  // Discover entity files in both TS source and compiled JS output
-  entities: [__dirname + '/**/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/**/migrations/*{.ts,.js}'],
+  entities: [join(__dirname, '**/*.entity{.ts,.js}')],
+  migrations: [join(__dirname, 'src/migrations/*{.ts,.js}')],
+  migrationsRun: true,
+  synchronize: false,
   ssl: isProduction
     ? { rejectUnauthorized: false }
-    : false
+    : false,
 });
