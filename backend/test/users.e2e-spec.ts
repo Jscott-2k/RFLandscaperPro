@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
+import { Request, Response, NextFunction } from 'express';
 import { AppModule } from './../src/app.module';
 import { UserRole } from '../src/users/user.entity';
 
@@ -14,10 +15,16 @@ describe('UsersController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.use((req, _res, next) => {
-      (req as any).user = { role: UserRole.Customer };
-      next();
-    });
+    app.use(
+      (
+        req: Request & { user?: unknown },
+        _res: Response,
+        next: NextFunction,
+      ) => {
+        req.user = { role: UserRole.Customer };
+        next();
+      },
+    );
     await app.init();
   });
 
