@@ -4,6 +4,7 @@ import { NotFoundException } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { Job } from './entities/job.entity';
 import { Customer } from '../customers/entities/customer.entity';
+import { getToken } from '@willsoto/nestjs-prometheus';
 
 describe('JobsService', () => {
   let service: JobsService;
@@ -28,6 +29,14 @@ describe('JobsService', () => {
         {
           provide: getRepositoryToken(Customer),
           useValue: customerRepository,
+        },
+        {
+          provide: getToken('jobs_created_total'),
+          useValue: { inc: jest.fn() },
+        },
+        {
+          provide: getToken('jobs_creation_duration_seconds'),
+          useValue: { startTimer: jest.fn(() => jest.fn()) },
         },
       ],
     }).compile();

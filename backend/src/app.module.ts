@@ -12,6 +12,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { LoggerModule } from './logger/logger.module';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { LoggerModule } from './logger/logger.module';
     EquipmentModule,
     UsersModule,
     AuthModule,
+    MetricsModule,
   ],
   controllers: [],
   providers: [

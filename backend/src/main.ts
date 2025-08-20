@@ -2,16 +2,16 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExceptionFilter, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
-import {
-  WINSTON_MODULE_NEST_PROVIDER,
-  WinstonModule,
-} from 'nest-winston';
+import { WINSTON_MODULE_NEST_PROVIDER, WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
+import { MetricsModule } from './metrics/metrics.module';
+import { PrometheusInterceptor } from '@willsoto/nestjs-prometheus';
 
 async function bootstrap() {
   let app;
   try {
     app = await NestFactory.create(AppModule, { bufferLogs: true });
+    app.useGlobalInterceptors(new PrometheusInterceptor());
     app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
     const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
     logger.log(

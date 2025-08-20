@@ -6,6 +6,8 @@ import { Customer } from '../customers/entities/customer.entity';
 import { JobResponseDto } from './dto/job-response.dto';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
+import { InjectMetric } from '@willsoto/nestjs-prometheus';
+import { Counter, Histogram } from 'prom-client';
 
 @Injectable()
 export class JobsService {
@@ -14,9 +16,14 @@ export class JobsService {
     private readonly jobRepository: Repository<Job>,
     @InjectRepository(Customer)
     private readonly customerRepository: Repository<Customer>,
+    @InjectMetric('jobs_created_total')
+    private readonly jobsCreatedCounter: Counter<string>,
+    @InjectMetric('jobs_creation_duration_seconds')
+    private readonly jobsCreationHistogram: Histogram<string>,
   ) {}
 
   async create(createJobDto: CreateJobDto): Promise<JobResponseDto> {
+    const end = this.jobsCreationHistogram.startTimer();
     const customer = await this.customerRepository.findOne({
       where: { id: createJobDto.customerId },
     });
@@ -30,6 +37,8 @@ export class JobsService {
       customer,
     });
     const savedJob = await this.jobRepository.save(job);
+    this.jobsCreatedCounter.inc();
+    end();
     return this.toJobResponseDto(savedJob);
   }
 
