@@ -38,10 +38,10 @@ describe('CustomersService', () => {
       new QueryFailedError('', [], { code: '23505' } as any),
     );
 
-    await expect(service.create({} as any)).rejects.toBeInstanceOf(
+    await expect(service.create(1, {} as any)).rejects.toBeInstanceOf(
       ConflictException,
     );
-    await expect(service.create({} as any)).rejects.toHaveProperty(
+    await expect(service.create(1, {} as any)).rejects.toHaveProperty(
       'message',
       'Email already exists',
     );

@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,7 +19,10 @@ export class UsersController {
   @Post()
   @ApiOperation({ summary: 'Create user' })
   @ApiResponse({ status: 201, description: 'User created', type: User })
-  create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.create(createUserDto);
+  create(
+    @Req() req: { companyId: number },
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<User> {
+    return this.usersService.create(createUserDto, req.companyId);
   }
 }

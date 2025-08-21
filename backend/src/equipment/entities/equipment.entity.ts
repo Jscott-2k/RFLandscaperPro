@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { Company } from '../../companies/company.entity';
 
 @Entity()
 export class Equipment {
@@ -16,6 +25,10 @@ export class Equipment {
 
   @Column({ nullable: true })
   location?: string;
+
+  @ManyToOne(() => Company, (company) => company.equipment, { nullable: false })
+  @JoinColumn({ name: 'companyId' })
+  company: Company;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -11,6 +11,7 @@ import {
   DefaultValuePipe,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 
 import { CustomersService } from './customers.service';
@@ -42,9 +43,10 @@ export class CustomersController {
     type: CustomerResponseDto,
   })
   async create(
+    @Req() req: { companyId: number },
     @Body() createCustomerDto: CreateCustomerDto,
   ): Promise<CustomerResponseDto> {
-    return this.customersService.create(createCustomerDto);
+    return this.customersService.create(req.companyId, createCustomerDto);
   }
 
   @Get()
@@ -55,9 +57,10 @@ export class CustomersController {
   @ApiResponse({ status: 200, description: 'List of customers' })
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Req() req: { companyId: number },
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
-    return this.customersService.findAll(page, limit);
+    return this.customersService.findAll(req.companyId, page, limit);
   }
 
   @Get(':id')
@@ -69,9 +72,10 @@ export class CustomersController {
     type: CustomerResponseDto,
   })
   async findOne(
+    @Req() req: { companyId: number },
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CustomerResponseDto> {
-    return this.customersService.findOne(id);
+    return this.customersService.findOne(req.companyId, id);
   }
 
   @Patch(':id')
@@ -83,10 +87,11 @@ export class CustomersController {
     type: CustomerResponseDto,
   })
   async update(
+    @Req() req: { companyId: number },
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ): Promise<CustomerResponseDto> {
-    return this.customersService.update(id, updateCustomerDto);
+    return this.customersService.update(req.companyId, id, updateCustomerDto);
   }
 
   @Delete(':id')
@@ -94,7 +99,10 @@ export class CustomersController {
   @Roles(UserRole.Admin)
   @ApiOperation({ summary: 'Delete customer' })
   @ApiResponse({ status: 204, description: 'Customer deleted' })
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.customersService.remove(id);
+  async remove(
+    @Req() req: { companyId: number },
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    await this.customersService.remove(req.companyId, id);
   }
 }

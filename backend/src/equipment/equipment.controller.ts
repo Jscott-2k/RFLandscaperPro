@@ -11,6 +11,7 @@ import {
   DefaultValuePipe,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { EquipmentService } from './equipment.service';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
@@ -41,9 +42,10 @@ export class EquipmentController {
     type: EquipmentResponseDto,
   })
   async create(
+    @Req() req: { companyId: number },
     @Body() createEquipmentDto: CreateEquipmentDto,
   ): Promise<EquipmentResponseDto> {
-    return this.equipmentService.create(createEquipmentDto);
+    return this.equipmentService.create(req.companyId, createEquipmentDto);
   }
 
   @Get()
@@ -53,10 +55,11 @@ export class EquipmentController {
   @ApiQuery({ name: 'limit', required: false })
   @ApiResponse({ status: 200, description: 'List of equipment' })
   async findAll(
+    @Req() req: { companyId: number },
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
-    return this.equipmentService.findAll(page, limit);
+    return this.equipmentService.findAll(req.companyId, page, limit);
   }
 
   @Get(':id')
@@ -68,9 +71,10 @@ export class EquipmentController {
     type: EquipmentResponseDto,
   })
   async findOne(
+    @Req() req: { companyId: number },
     @Param('id', ParseIntPipe) id: number,
   ): Promise<EquipmentResponseDto> {
-    return this.equipmentService.findOne(id);
+    return this.equipmentService.findOne(req.companyId, id);
   }
 
   @Patch(':id')
@@ -82,10 +86,11 @@ export class EquipmentController {
     type: EquipmentResponseDto,
   })
   async update(
+    @Req() req: { companyId: number },
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEquipmentDto: UpdateEquipmentDto,
   ): Promise<EquipmentResponseDto> {
-    return this.equipmentService.update(id, updateEquipmentDto);
+    return this.equipmentService.update(req.companyId, id, updateEquipmentDto);
   }
 
   @Delete(':id')
@@ -93,7 +98,10 @@ export class EquipmentController {
   @Roles(UserRole.Admin, UserRole.Worker)
   @ApiOperation({ summary: 'Delete equipment' })
   @ApiResponse({ status: 204, description: 'Equipment deleted' })
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.equipmentService.remove(id);
+  async remove(
+    @Req() req: { companyId: number },
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    await this.equipmentService.remove(req.companyId, id);
   }
 }

@@ -21,7 +21,7 @@ describe('UsersController (e2e)', () => {
         _res: Response,
         next: NextFunction,
       ) => {
-        req.user = { role: UserRole.Customer };
+        req.user = { role: UserRole.Customer, companyId: 1 };
         next();
       },
     );

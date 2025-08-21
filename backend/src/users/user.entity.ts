@@ -1,5 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BeforeInsert,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Company } from '../companies/company.entity';
 
 export enum UserRole {
   Admin = 'admin',
@@ -26,6 +34,10 @@ export class User {
 
   @Column({ type: 'timestamptz', nullable: true })
   passwordResetExpires: Date | null;
+
+  @ManyToOne(() => Company, (company) => company.users, { nullable: false })
+  @JoinColumn({ name: 'companyId' })
+  company: Company;
 
   @BeforeInsert()
   async hashPassword(): Promise<void> {

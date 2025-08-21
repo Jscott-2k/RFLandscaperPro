@@ -19,10 +19,14 @@ export class CustomersService {
   ) {}
 
   async create(
+    companyId: number,
     createCustomerDto: CreateCustomerDto,
   ): Promise<CustomerResponseDto> {
     try {
-      const customer = this.customerRepository.create(createCustomerDto);
+      const customer = this.customerRepository.create({
+        ...createCustomerDto,
+        company: { id: companyId } as any,
+      });
       const savedCustomer = await this.customerRepository.save(customer);
       return this.toCustomerResponseDto(savedCustomer);
     } catch (error) {
@@ -41,10 +45,12 @@ export class CustomersService {
   }
 
   async findAll(
+    companyId: number,
     page = 1,
     limit = 10,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
     const [customers, total] = await this.customerRepository.findAndCount({
+      where: { company: { id: companyId } },
       skip: (page - 1) * limit,
       take: limit,
     });
@@ -54,8 +60,10 @@ export class CustomersService {
     };
   }
 
-  async findOne(id: number): Promise<CustomerResponseDto> {
-    const customer = await this.customerRepository.findOne({ where: { id } });
+  async findOne(companyId: number, id: number): Promise<CustomerResponseDto> {
+    const customer = await this.customerRepository.findOne({
+      where: { id, company: { id: companyId } },
+    });
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${id} not found.`);
     }
@@ -63,10 +71,13 @@ export class CustomersService {
   }
 
   async update(
+    companyId: number,
     id: number,
     updateCustomerDto: UpdateCustomerDto,
   ): Promise<CustomerResponseDto> {
-    const customer = await this.customerRepository.findOne({ where: { id } });
+    const customer = await this.customerRepository.findOne({
+      where: { id, company: { id: companyId } },
+    });
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${id} not found.`);
     }
@@ -75,8 +86,10 @@ export class CustomersService {
     return this.toCustomerResponseDto(updatedCustomer);
   }
 
-  async remove(id: number): Promise<void> {
-    const customer = await this.customerRepository.findOne({ where: { id } });
+  async remove(companyId: number, id: number): Promise<void> {
+    const customer = await this.customerRepository.findOne({
+      where: { id, company: { id: companyId } },
+    });
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${id} not found.`);
     }

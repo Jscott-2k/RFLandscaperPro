@@ -8,7 +8,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { Company } from '../../companies/company.entity';
 
 @Entity()
 export class Customer {
@@ -38,5 +41,9 @@ export class Customer {
   eager: true,
   })
   addresses: Address[];
+
+  @ManyToOne(() => Company, (company) => company.customers, { nullable: false })
+  @JoinColumn({ name: 'companyId' })
+  company: Company;
 
 }

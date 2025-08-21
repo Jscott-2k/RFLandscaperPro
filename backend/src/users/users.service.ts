@@ -26,8 +26,14 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { username } });
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.usersRepository.create(createUserDto);
+  async create(
+    createUserDto: CreateUserDto,
+    companyId?: number,
+  ): Promise<User> {
+    const user = this.usersRepository.create({
+      ...createUserDto,
+      ...(companyId ? { company: { id: companyId } as any } : {}),
+    });
 
     try {
       return await this.usersRepository.save(user);

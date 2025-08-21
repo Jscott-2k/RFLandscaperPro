@@ -11,6 +11,7 @@ import {
   DefaultValuePipe,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 
 import { JobsService } from './jobs.service';
@@ -44,8 +45,11 @@ export class JobsController {
     description: 'Job created',
     type: JobResponseDto,
   })
-  create(@Body() createJobDto: CreateJobDto): Promise<JobResponseDto> {
-    return this.jobsService.create(createJobDto);
+  create(
+    @Req() req: { companyId: number },
+    @Body() createJobDto: CreateJobDto,
+  ): Promise<JobResponseDto> {
+    return this.jobsService.create(req.companyId, createJobDto);
   }
 
   @Get()
@@ -55,10 +59,11 @@ export class JobsController {
   @ApiQuery({ name: 'limit', required: false })
   @ApiResponse({ status: 200, description: 'List of jobs' })
   findAll(
+    @Req() req: { companyId: number },
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
   ): Promise<{ items: JobResponseDto[]; total: number }> {
-    return this.jobsService.findAll(page, limit);
+    return this.jobsService.findAll(req.companyId, page, limit);
   }
 
   @Get(':id')
@@ -69,8 +74,11 @@ export class JobsController {
     description: 'Job retrieved',
     type: JobResponseDto,
   })
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<JobResponseDto> {
-    return this.jobsService.findOne(id);
+  findOne(
+    @Req() req: { companyId: number },
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<JobResponseDto> {
+    return this.jobsService.findOne(req.companyId, id);
   }
 
   @Patch(':id')
@@ -82,10 +90,11 @@ export class JobsController {
     type: JobResponseDto,
   })
   update(
+    @Req() req: { companyId: number },
     @Param('id', ParseIntPipe) id: number,
     @Body() updateJobDto: UpdateJobDto,
   ): Promise<JobResponseDto> {
-    return this.jobsService.update(id, updateJobDto);
+    return this.jobsService.update(req.companyId, id, updateJobDto);
   }
 
   @Post(':id/schedule')
@@ -97,10 +106,11 @@ export class JobsController {
     type: JobResponseDto,
   })
   schedule(
+    @Req() req: { companyId: number },
     @Param('id', ParseIntPipe) id: number,
     @Body() scheduleJobDto: ScheduleJobDto,
   ): Promise<JobResponseDto> {
-    return this.jobsService.schedule(id, scheduleJobDto);
+    return this.jobsService.schedule(req.companyId, id, scheduleJobDto);
   }
 
   @Post(':id/assign')
@@ -112,10 +122,11 @@ export class JobsController {
     type: JobResponseDto,
   })
   assign(
+    @Req() req: { companyId: number },
     @Param('id', ParseIntPipe) id: number,
     @Body() assignJobDto: AssignJobDto,
   ): Promise<JobResponseDto> {
-    return this.jobsService.assign(id, assignJobDto);
+    return this.jobsService.assign(req.companyId, id, assignJobDto);
   }
 
   @Post(':id/bulk-assign')
@@ -127,10 +138,11 @@ export class JobsController {
     type: JobResponseDto,
   })
   bulkAssign(
+    @Req() req: { companyId: number },
     @Param('id', ParseIntPipe) id: number,
     @Body() bulkAssignJobDto: BulkAssignJobDto,
   ): Promise<JobResponseDto> {
-    return this.jobsService.bulkAssign(id, bulkAssignJobDto);
+    return this.jobsService.bulkAssign(req.companyId, id, bulkAssignJobDto);
   }
 
   @Delete(':id/assignments/:assignmentId')
@@ -142,10 +154,15 @@ export class JobsController {
     type: JobResponseDto,
   })
   removeAssignment(
+    @Req() req: { companyId: number },
     @Param('id', ParseIntPipe) jobId: number,
     @Param('assignmentId', ParseIntPipe) assignmentId: number,
   ): Promise<JobResponseDto> {
-    return this.jobsService.removeAssignment(jobId, assignmentId);
+    return this.jobsService.removeAssignment(
+      req.companyId,
+      jobId,
+      assignmentId,
+    );
   }
 
   @Delete(':id')
@@ -153,7 +170,10 @@ export class JobsController {
   @Roles(UserRole.Admin, UserRole.Worker)
   @ApiOperation({ summary: 'Delete job' })
   @ApiResponse({ status: 204, description: 'Job deleted' })
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.jobsService.remove(id);
+  async remove(
+    @Req() req: { companyId: number },
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    await this.jobsService.remove(req.companyId, id);
   }
 }

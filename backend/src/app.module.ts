@@ -16,6 +16,7 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
+import { CompanyGuard } from './common/guards/company.guard';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { LoggerModule } from './logger/logger.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -118,9 +119,13 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    {
+    {  
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: CompanyGuard,
     },
   ],
 })

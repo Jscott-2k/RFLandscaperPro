@@ -14,18 +14,24 @@ export class EquipmentService {
   ) {}
 
   async create(
+    companyId: number,
     createEquipmentDto: CreateEquipmentDto,
   ): Promise<EquipmentResponseDto> {
-    const equipment = this.equipmentRepository.create(createEquipmentDto);
+    const equipment = this.equipmentRepository.create({
+      ...createEquipmentDto,
+      company: { id: companyId } as any,
+    });
     const savedEquipment = await this.equipmentRepository.save(equipment);
     return this.toEquipmentResponseDto(savedEquipment);
   }
 
   async findAll(
+    companyId: number,
     page = 1,
     limit = 10,
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
     const [equipments, total] = await this.equipmentRepository.findAndCount({
+      where: { company: { id: companyId } },
       skip: (page - 1) * limit,
       take: limit,
     });
@@ -35,8 +41,10 @@ export class EquipmentService {
     };
   }
 
-  async findOne(id: number): Promise<EquipmentResponseDto> {
-    const equipment = await this.equipmentRepository.findOne({ where: { id } });
+  async findOne(companyId: number, id: number): Promise<EquipmentResponseDto> {
+    const equipment = await this.equipmentRepository.findOne({
+      where: { id, company: { id: companyId } },
+    });
     if (!equipment) {
       throw new NotFoundException(`Equipment with ID ${id} not found.`);
     }
@@ -44,10 +52,13 @@ export class EquipmentService {
   }
 
   async update(
+    companyId: number,
     id: number,
     updateEquipmentDto: UpdateEquipmentDto,
   ): Promise<EquipmentResponseDto> {
-    const equipment = await this.equipmentRepository.findOne({ where: { id } });
+    const equipment = await this.equipmentRepository.findOne({
+      where: { id, company: { id: companyId } },
+    });
     if (!equipment) {
       throw new NotFoundException(`Equipment with ID ${id} not found.`);
     }
@@ -56,8 +67,10 @@ export class EquipmentService {
     return this.toEquipmentResponseDto(updatedEquipment);
   }
 
-  async remove(id: number): Promise<void> {
-    const equipment = await this.equipmentRepository.findOne({ where: { id } });
+  async remove(companyId: number, id: number): Promise<void> {
+    const equipment = await this.equipmentRepository.findOne({
+      where: { id, company: { id: companyId } },
+    });
     if (!equipment) {
       throw new NotFoundException(`Equipment with ID ${id} not found.`);
     }

@@ -63,13 +63,15 @@ describe('JobsService', () => {
 
   it('should throw NotFoundException when job does not exist', async () => {
     jobRepository.findOne.mockResolvedValue(null);
-    await expect(service.findOne(1)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.findOne(1, 1)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('should throw NotFoundException when customer does not exist on create', async () => {
     customerRepository.findOne.mockResolvedValue(null);
     await expect(
-      service.create({
+      service.create(1, {
         title: 'Test',
         customerId: 1,
       } as any),
@@ -98,7 +100,7 @@ describe('JobsService', () => {
     assignmentRepository.createQueryBuilder.mockReturnValue(qb);
 
     await expect(
-      service.schedule(1, { scheduledDate: date } as any),
+      service.schedule(1, 1, { scheduledDate: date } as any),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
@@ -117,7 +119,7 @@ describe('JobsService', () => {
     assignmentRepository.createQueryBuilder.mockReturnValue(qb);
 
     await expect(
-      service.assign(1, { userId: 1, equipmentId: 2 } as any),
+      service.assign(1, 1, { userId: 1, equipmentId: 2 } as any),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 });
