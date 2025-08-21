@@ -1,6 +1,13 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
+import { MoreThan, QueryFailedError, Repository } from 'typeorm';
+import * as crypto from 'crypto';
+
+import { EmailService } from '../common/email.service';
 
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -12,6 +19,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly emailService: EmailService,
   ) {}
 
   findByUsername(username: string): Promise<User | null> {
@@ -32,5 +40,34 @@ export class UsersService {
       }
       throw error;
     }
+  }
+
+  async requestPasswordReset(username: string): Promise<void> {
+    const user = await this.findByUsername(username);
+    if (!user) {
+      return;
+    }
+    const token = crypto.randomBytes(32).toString('hex');
+    user.passwordResetToken = token;
+    user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
+    await this.usersRepository.save(user);
+    await this.emailService.sendPasswordResetEmail(user.username, token);
+  }
+
+  async resetPassword(token: string, password: string): Promise<void> {
+    const user = await this.usersRepository.findOne({
+      where: {
+        passwordResetToken: token,
+        passwordResetExpires: MoreThan(new Date()),
+      },
+    });
+    if (!user) {
+      throw new BadRequestException('Invalid or expired token');
+    }
+    user.password = password;
+    await user.hashPassword();
+    user.passwordResetToken = null;
+    user.passwordResetExpires = null;
+    await this.usersRepository.save(user);
   }
 }

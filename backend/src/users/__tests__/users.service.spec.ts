@@ -11,6 +11,7 @@ describe('UsersService', () => {
   let usersRepository: jest.Mocked<
     Pick<Repository<User>, 'create' | 'save' | 'findOne'>
   >;
+  let emailService: { sendPasswordResetEmail: jest.Mock };
 
   beforeEach(() => {
     usersRepository = {
@@ -22,14 +23,20 @@ describe('UsersService', () => {
           }) as User,
       ),
       save: jest.fn(async (user: User) => {
-        await user.hashPassword();
+        if (user.password) {
+          await user.hashPassword();
+        }
         return user;
       }),
       findOne: jest.fn(),
     } as unknown as jest.Mocked<
       Pick<Repository<User>, 'create' | 'save' | 'findOne'>
     >;
-    service = new UsersService(usersRepository as unknown as Repository<User>);
+    emailService = { sendPasswordResetEmail: jest.fn() };
+    service = new UsersService(
+      usersRepository as unknown as Repository<User>,
+      emailService as any,
+    );
   });
 
   it('hashes passwords before saving', async () => {
@@ -66,5 +73,37 @@ describe('UsersService', () => {
       message: 'Username already exists',
       status: 409,
     });
+  });
+
+  it('generates reset token and emails user', async () => {
+    const user = Object.assign(new User(), { username: 'user3' });
+    usersRepository.findOne.mockResolvedValueOnce(user);
+
+    await service.requestPasswordReset('user3');
+
+    expect(user.passwordResetToken).toBeDefined();
+    expect(user.passwordResetExpires).toBeInstanceOf(Date);
+    expect(usersRepository.save).toHaveBeenCalledWith(user);
+    expect(emailService.sendPasswordResetEmail).toHaveBeenCalledWith(
+      'user3',
+      user.passwordResetToken,
+    );
+  });
+
+  it('resets password with valid token', async () => {
+    const user = Object.assign(new User(), {
+      username: 'user4',
+      passwordResetToken: 'token123',
+      passwordResetExpires: new Date(Date.now() + 1000 * 60),
+    });
+    usersRepository.findOne.mockResolvedValueOnce(user);
+
+    await service.resetPassword('token123', 'newpass');
+
+    expect(user.passwordResetToken).toBeNull();
+    expect(user.passwordResetExpires).toBeNull();
+    expect(usersRepository.save).toHaveBeenCalledWith(user);
+    const isMatch = await bcrypt.compare('newpass', user.password);
+    expect(isMatch).toBe(true);
   });
 });
