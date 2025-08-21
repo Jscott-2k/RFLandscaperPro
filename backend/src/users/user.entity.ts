@@ -21,6 +21,12 @@ export class User {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.Customer })
   role: UserRole;
 
+  @Column({ nullable: true })
+  passwordResetToken: string | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  passwordResetExpires: Date | null;
+
   @BeforeInsert()
   async hashPassword(): Promise<void> {
     if (!this.password.startsWith('$2')) {
