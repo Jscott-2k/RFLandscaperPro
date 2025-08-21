@@ -6,11 +6,14 @@ import {
   OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { Customer } from '../../customers/entities/customer.entity';
 import { Assignment } from './assignment.entity';
 
 @Entity()
+@Index(['scheduledDate', 'completed']) // Add index for common queries
+@Index(['customer']) // Add index for customer-based queries
 export class Job {
   @PrimaryGeneratedColumn()
   id: number;
@@ -27,10 +30,25 @@ export class Job {
   @Column({ default: false })
   completed: boolean;
 
-  @ManyToOne(() => Customer, (customer) => customer.jobs, { eager: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  estimatedHours?: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  actualHours?: number;
+
+  @Column({ type: 'text', nullable: true })
+  notes?: string;
+
+  @ManyToOne(() => Customer, (customer) => customer.jobs, { 
+    onDelete: 'CASCADE',
+    nullable: false 
+  })
   customer: Customer;
 
-  @OneToMany(() => Assignment, (assignment) => assignment.job, { eager: true })
+  @OneToMany(() => Assignment, (assignment) => assignment.job, { 
+    cascade: true,
+    onDelete: 'CASCADE'
+  })
   assignments: Assignment[];
 
   @CreateDateColumn()

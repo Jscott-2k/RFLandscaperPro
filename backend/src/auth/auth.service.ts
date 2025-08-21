@@ -1,6 +1,5 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/user.entity';
 import { RegisterDto } from './dto/register.dto';
@@ -14,18 +13,34 @@ export class AuthService {
 
   async validateUser(username: string, pass: string): Promise<User> {
     const user = await this.usersService.findByUsername(username);
-    if (!user || !(await bcrypt.compare(pass, user.password))) {
-      throw new UnauthorizedException();
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
     }
+    
+    const isValidPassword = await user.validatePassword(pass);
+    if (!isValidPassword) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    
     return user;
   }
 
   async login(user: User) {
     const payload = { username: user.username, sub: user.id, role: user.role };
-    return { access_token: await this.jwtService.signAsync(payload) };
+    return { 
+      access_token: await this.jwtService.signAsync(payload),
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+      }
+    };
   }
 
   async register(registerDto: RegisterDto): Promise<User> {
+    // Validate password strength
+    this.validatePasswordStrength(registerDto.password);
+    
     return this.usersService.create(registerDto);
   }
 
@@ -34,6 +49,31 @@ export class AuthService {
   }
 
   async resetPassword(token: string, password: string): Promise<void> {
+    // Validate new password strength
+    this.validatePasswordStrength(password);
+    
     await this.usersService.resetPassword(token, password);
+  }
+
+  private validatePasswordStrength(password: string): void {
+    if (password.length < 8) {
+      throw new BadRequestException('Password must be at least 8 characters long');
+    }
+    
+    if (!/(?=.*[a-z])/.test(password)) {
+      throw new BadRequestException('Password must contain at least one lowercase letter');
+    }
+    
+    if (!/(?=.*[A-Z])/.test(password)) {
+      throw new BadRequestException('Password must contain at least one uppercase letter');
+    }
+    
+    if (!/(?=.*\d)/.test(password)) {
+      throw new BadRequestException('Password must contain at least one number');
+    }
+    
+    if (!/(?=.*[@$!%*?&])/.test(password)) {
+      throw new BadRequestException('Password must contain at least one special character (@$!%*?&)');
+    }
   }
 }

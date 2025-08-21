@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 export enum UserRole {
@@ -28,9 +28,15 @@ export class User {
   passwordResetExpires: Date | null;
 
   @BeforeInsert()
+  @BeforeUpdate()
   async hashPassword(): Promise<void> {
-    if (!this.password.startsWith('$2')) {
-      this.password = await bcrypt.hash(this.password, 10);
+    // Only hash if password is not already hashed and has changed
+    if (this.password && !this.password.startsWith('$2')) {
+      this.password = await bcrypt.hash(this.password, 12); // Increased salt rounds
     }
+  }
+
+  async validatePassword(password: string): Promise<boolean> {
+    return bcrypt.compare(password, this.password);
   }
 }

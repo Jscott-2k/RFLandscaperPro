@@ -30,6 +30,12 @@ class JobAssignmentDto {
   user: JobAssignmentUserDto;
   @ApiProperty({ type: JobAssignmentEquipmentDto })
   equipment: JobAssignmentEquipmentDto;
+  @ApiPropertyOptional()
+  startTime?: Date;
+  @ApiPropertyOptional()
+  endTime?: Date;
+  @ApiPropertyOptional()
+  notes?: string;
 }
 
 export class JobResponseDto {
@@ -43,6 +49,12 @@ export class JobResponseDto {
   scheduledDate?: Date;
   @ApiProperty()
   completed: boolean;
+  @ApiPropertyOptional()
+  estimatedHours?: number;
+  @ApiPropertyOptional()
+  actualHours?: number;
+  @ApiPropertyOptional()
+  notes?: string;
   @ApiProperty({ type: JobCustomerDto })
   customer: JobCustomerDto;
   @ApiProperty({ type: [JobAssignmentDto] })

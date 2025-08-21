@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Equipment } from './entities/equipment.entity';
+import { Equipment, EquipmentStatus } from './entities/equipment.entity';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentResponseDto } from './dto/equipment-response.dto';
@@ -24,11 +24,24 @@ export class EquipmentService {
   async findAll(
     page = 1,
     limit = 10,
+    status?: EquipmentStatus,
+    type?: string,
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
-    const [equipments, total] = await this.equipmentRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+    const queryBuilder = this.equipmentRepository.createQueryBuilder('equipment');
+    
+    if (status) {
+      queryBuilder.andWhere('equipment.status = :status', { status });
+    }
+    
+    if (type) {
+      queryBuilder.andWhere('equipment.type = :type', { type });
+    }
+
+    const [equipments, total] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
     return {
       items: equipments.map((eq) => this.toEquipmentResponseDto(eq)),
       total,
@@ -51,6 +64,12 @@ export class EquipmentService {
     if (!equipment) {
       throw new NotFoundException(`Equipment with ID ${id} not found.`);
     }
+    
+    // Validate status transitions
+    if (updateEquipmentDto.status && equipment.status !== updateEquipmentDto.status) {
+      this.validateStatusTransition(equipment.status, updateEquipmentDto.status);
+    }
+    
     Object.assign(equipment, updateEquipmentDto);
     const updatedEquipment = await this.equipmentRepository.save(equipment);
     return this.toEquipmentResponseDto(updatedEquipment);
@@ -61,7 +80,33 @@ export class EquipmentService {
     if (!equipment) {
       throw new NotFoundException(`Equipment with ID ${id} not found.`);
     }
+    
+    // Check if equipment is currently in use
+    if (equipment.status === EquipmentStatus.IN_USE) {
+      throw new BadRequestException('Cannot remove equipment that is currently in use');
+    }
+    
     await this.equipmentRepository.remove(equipment);
+  }
+
+  async updateStatus(id: number, status: EquipmentStatus): Promise<EquipmentResponseDto> {
+    const equipment = await this.findOne(id);
+    return this.update(id, { status });
+  }
+
+  private validateStatusTransition(currentStatus: EquipmentStatus, newStatus: EquipmentStatus): void {
+    const validTransitions: Record<EquipmentStatus, EquipmentStatus[]> = {
+      [EquipmentStatus.AVAILABLE]: [EquipmentStatus.IN_USE, EquipmentStatus.MAINTENANCE, EquipmentStatus.OUT_OF_SERVICE],
+      [EquipmentStatus.IN_USE]: [EquipmentStatus.AVAILABLE, EquipmentStatus.MAINTENANCE],
+      [EquipmentStatus.MAINTENANCE]: [EquipmentStatus.AVAILABLE, EquipmentStatus.OUT_OF_SERVICE],
+      [EquipmentStatus.OUT_OF_SERVICE]: [EquipmentStatus.AVAILABLE, EquipmentStatus.MAINTENANCE],
+    };
+
+    if (!validTransitions[currentStatus]?.includes(newStatus)) {
+      throw new BadRequestException(
+        `Invalid status transition from ${currentStatus} to ${newStatus}`
+      );
+    }
   }
 
   private toEquipmentResponseDto(equipment: Equipment): EquipmentResponseDto {
@@ -71,6 +116,8 @@ export class EquipmentService {
       type: equipment.type,
       status: equipment.status,
       location: equipment.location,
+      description: equipment.description,
+      lastMaintenanceDate: equipment.lastMaintenanceDate,
       createdAt: equipment.createdAt,
       updatedAt: equipment.updatedAt,
     };

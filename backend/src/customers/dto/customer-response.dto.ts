@@ -1,7 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { JobResponseDto } from '../../jobs/dto/job-response.dto';
 
-export class AddressResponseDto {
+class CustomerJobDto {
+  @ApiProperty()
+  id: number;
+  @ApiProperty()
+  title: string;
+}
+
+class CustomerAddressDto {
   @ApiProperty()
   id: number;
   @ApiProperty()
@@ -12,6 +18,12 @@ export class AddressResponseDto {
   state: string;
   @ApiProperty()
   zip: string;
+  @ApiPropertyOptional()
+  unit?: string;
+  @ApiPropertyOptional()
+  notes?: string;
+  @ApiProperty()
+  primary: boolean;
 }
 
 export class CustomerResponseDto {
@@ -21,12 +33,18 @@ export class CustomerResponseDto {
   name: string;
   @ApiProperty()
   email: string;
-  @ApiProperty({ type: [AddressResponseDto] })
-  addresses: AddressResponseDto[];
-  @ApiPropertyOptional({ type: [JobResponseDto] })
-  jobs?: Partial<JobResponseDto>[];
+  @ApiPropertyOptional()
+  phone?: string;
+  @ApiPropertyOptional()
+  notes?: string;
+  @ApiProperty()
+  active: boolean;
   @ApiProperty()
   createdAt: Date;
   @ApiProperty()
   updatedAt: Date;
+  @ApiProperty({ type: [CustomerJobDto] })
+  jobs?: CustomerJobDto[];
+  @ApiProperty({ type: [CustomerAddressDto] })
+  addresses?: CustomerAddressDto[];
 }

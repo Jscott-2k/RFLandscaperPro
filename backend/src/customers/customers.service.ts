@@ -43,11 +43,20 @@ export class CustomersService {
   async findAll(
     page = 1,
     limit = 10,
+    active?: boolean,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
-    const [customers, total] = await this.customerRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+    const queryBuilder = this.customerRepository.createQueryBuilder('customer');
+    
+    if (active !== undefined) {
+      queryBuilder.andWhere('customer.active = :active', { active });
+    }
+
+    const [customers, total] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .orderBy('customer.name', 'ASC')
+      .getManyAndCount();
+      
     return {
       items: customers.map((customer) => this.toCustomerResponseDto(customer)),
       total,
@@ -83,11 +92,24 @@ export class CustomersService {
     await this.customerRepository.remove(customer);
   }
 
+  async deactivate(id: number): Promise<CustomerResponseDto> {
+    const customer = await this.findOne(id);
+    return this.update(id, { active: false });
+  }
+
+  async activate(id: number): Promise<CustomerResponseDto> {
+    const customer = await this.findOne(id);
+    return this.update(id, { active: true });
+  }
+
   private toCustomerResponseDto(customer: Customer): CustomerResponseDto {
     return {
       id: customer.id,
       name: customer.name,
       email: customer.email,
+      phone: customer.phone,
+      notes: customer.notes,
+      active: customer.active,
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt,
       jobs: customer.jobs?.map((job) => ({
@@ -100,6 +122,9 @@ export class CustomersService {
         city: addr.city,
         state: addr.state,
         zip: addr.zip,
+        unit: addr.unit,
+        notes: addr.notes,
+        primary: addr.primary,
       })),
     };
   }

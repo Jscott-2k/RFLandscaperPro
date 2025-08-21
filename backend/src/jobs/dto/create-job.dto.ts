@@ -4,6 +4,8 @@ import {
   IsOptional,
   IsBoolean,
   IsDate,
+  Min,
+  Max,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -28,6 +30,19 @@ export class CreateJobDto {
   @IsOptional()
   @IsBoolean()
   completed?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(1000)
+  estimatedHours?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  notes?: string;
 
   @ApiProperty()
   @Type(() => Number)

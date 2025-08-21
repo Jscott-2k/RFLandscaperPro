@@ -49,12 +49,30 @@ export class JobsService {
   async findAll(
     page = 1,
     limit = 10,
+    completed?: boolean,
+    customerId?: number,
   ): Promise<{ items: JobResponseDto[]; total: number }> {
-    const [jobs, total] = await this.jobRepository.findAndCount({
-      relations: ['customer', 'assignments', 'assignments.user', 'assignments.equipment'],
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+    const queryBuilder = this.jobRepository
+      .createQueryBuilder('job')
+      .leftJoinAndSelect('job.customer', 'customer')
+      .leftJoinAndSelect('job.assignments', 'assignments')
+      .leftJoinAndSelect('assignments.user', 'user')
+      .leftJoinAndSelect('assignments.equipment', 'equipment');
+
+    if (completed !== undefined) {
+      queryBuilder.andWhere('job.completed = :completed', { completed });
+    }
+
+    if (customerId) {
+      queryBuilder.andWhere('job.customer.id = :customerId', { customerId });
+    }
+
+    const [jobs, total] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .orderBy('job.scheduledDate', 'ASC')
+      .addOrderBy('job.createdAt', 'DESC')
+      .getManyAndCount();
 
     return {
       items: jobs.map((job) => this.toJobResponseDto(job)),
@@ -68,7 +86,7 @@ export class JobsService {
   ): Promise<JobResponseDto> {
     const job = await this.jobRepository.findOne({
       where: { id },
-      relations: ['customer', 'assignments', 'assignments.user', 'assignments.equipment'],
+      relations: ['customer'],
     });
     if (!job) {
       throw new NotFoundException(`Job with ID ${id} not found.`);
@@ -91,10 +109,14 @@ export class JobsService {
   }
 
   async findOne(id: number): Promise<JobResponseDto> {
-    const job = await this.jobRepository.findOne({
-      where: { id },
-      relations: ['customer', 'assignments', 'assignments.user', 'assignments.equipment'],
-    });
+    const job = await this.jobRepository
+      .createQueryBuilder('job')
+      .leftJoinAndSelect('job.customer', 'customer')
+      .leftJoinAndSelect('job.assignments', 'assignments')
+      .leftJoinAndSelect('assignments.user', 'user')
+      .leftJoinAndSelect('assignments.equipment', 'equipment')
+      .where('job.id = :id', { id })
+      .getOne();
 
     if (!job) {
       throw new NotFoundException(`Job with ID ${id} not found.`);
@@ -118,6 +140,9 @@ export class JobsService {
       description: job.description,
       scheduledDate: job.scheduledDate,
       completed: job.completed,
+      estimatedHours: job.estimatedHours,
+      actualHours: job.actualHours,
+      notes: job.notes,
       customer: {
         id: job.customer.id,
         name: job.customer.name,
@@ -127,6 +152,9 @@ export class JobsService {
         id: assignment.id,
         user: { id: assignment.user.id, username: assignment.user.username },
         equipment: { id: assignment.equipment.id, name: assignment.equipment.name },
+        startTime: assignment.startTime,
+        endTime: assignment.endTime,
+        notes: assignment.notes,
       })),
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
@@ -162,7 +190,7 @@ export class JobsService {
   ): Promise<JobResponseDto> {
     const job = await this.jobRepository.findOne({
       where: { id },
-      relations: ['customer', 'assignments', 'assignments.user', 'assignments.equipment'],
+      relations: ['assignments'],
     });
     if (!job) {
       throw new NotFoundException(`Job with ID ${id} not found.`);
@@ -230,11 +258,8 @@ export class JobsService {
     });
     await this.assignmentRepository.save(assignment);
 
-    const updatedJob = await this.jobRepository.findOne({
-      where: { id },
-      relations: ['customer', 'assignments', 'assignments.user', 'assignments.equipment'],
-    });
-    return this.toJobResponseDto(updatedJob!);
+    const updatedJob = await this.findOne(id);
+    return updatedJob;
   }
 
   async bulkAssign(id: number, dto: BulkAssignJobDto): Promise<JobResponseDto> {
@@ -290,11 +315,8 @@ export class JobsService {
 
     await this.assignmentRepository.save(assignments);
 
-    const updatedJob = await this.jobRepository.findOne({
-      where: { id },
-      relations: ['customer', 'assignments', 'assignments.user', 'assignments.equipment'],
-    });
-    return this.toJobResponseDto(updatedJob!);
+    const updatedJob = await this.findOne(id);
+    return updatedJob;
   }
 
   async removeAssignment(jobId: number, assignmentId: number): Promise<JobResponseDto> {
@@ -309,10 +331,7 @@ export class JobsService {
 
     await this.assignmentRepository.remove(assignment);
 
-    const updatedJob = await this.jobRepository.findOne({
-      where: { id: jobId },
-      relations: ['customer', 'assignments', 'assignments.user', 'assignments.equipment'],
-    });
-    return this.toJobResponseDto(updatedJob!);
+    const updatedJob = await this.findOne(jobId);
+    return updatedJob;
   }
 }
