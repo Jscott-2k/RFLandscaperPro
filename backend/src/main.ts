@@ -1,6 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ExceptionFilter, ValidationPipe, Logger } from '@nestjs/common';
+import {
+  ExceptionFilter,
+  ValidationPipe,
+  Logger,
+  INestApplication,
+} from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
@@ -10,7 +15,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as basicAuth from 'express-basic-auth';
 
 async function bootstrap() {
-  let app;
+  let app: INestApplication;
   const logger = new Logger('Bootstrap');
 
   try {
@@ -20,11 +25,11 @@ async function bootstrap() {
     app.use(requestIdMiddleware);
 
     // Setup logging
-    app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
-    const winstonLogger = app.get(WINSTON_MODULE_NEST_PROVIDER);
+    app.useLogger(app.get<Logger>(WINSTON_MODULE_NEST_PROVIDER));
+    const winstonLogger = app.get<Logger>(WINSTON_MODULE_NEST_PROVIDER);
 
     // Apply interceptors
-    app.useGlobalInterceptors(app.get(LoggingInterceptor));
+    app.useGlobalInterceptors(app.get<LoggingInterceptor>(LoggingInterceptor));
 
     logger.log(
       `Starting backend in ${process.env.NODE_ENV || 'development'} mode`,
@@ -96,7 +101,7 @@ async function bootstrap() {
     logger.log(`Application is running on: http://${host}:${port}`);
   } catch (error) {
     const errorLogger =
-      app?.get(WINSTON_MODULE_NEST_PROVIDER) ||
+      app?.get<Logger>(WINSTON_MODULE_NEST_PROVIDER) ||
       WinstonModule.createLogger({
         transports: [new winston.transports.Console()],
       });
