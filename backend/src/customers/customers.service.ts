@@ -95,12 +95,12 @@ export class CustomersService {
   }
 
   async deactivate(id: number): Promise<CustomerResponseDto> {
-    const customer = await this.findOne(id);
+    await this.findOne(id);
     return this.update(id, { active: false });
   }
 
   async activate(id: number): Promise<CustomerResponseDto> {
-    const customer = await this.findOne(id);
+    await this.findOne(id);
     return this.update(id, { active: true });
   }
 
