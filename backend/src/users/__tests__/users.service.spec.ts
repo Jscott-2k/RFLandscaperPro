@@ -4,6 +4,7 @@ import { QueryFailedError, Repository } from 'typeorm';
 
 import { UsersService } from '../users.service';
 import { User, UserRole } from '../user.entity';
+import { EmailService } from '../../common/email.service';
 
 const UNIQUE_VIOLATION = '23505';
 
@@ -12,7 +13,11 @@ describe('UsersService', () => {
   let usersRepository: jest.Mocked<
     Pick<Repository<User>, 'create' | 'save' | 'findOne'>
   >;
-  let emailService: { sendPasswordResetEmail: jest.Mock };
+  let emailService: EmailService;
+  let sendPasswordResetEmailMock: jest.SpyInstance<
+    Promise<void>,
+    [string, string]
+  >;
 
   beforeEach(() => {
     usersRepository = {
@@ -33,10 +38,17 @@ describe('UsersService', () => {
     } as unknown as jest.Mocked<
       Pick<Repository<User>, 'create' | 'save' | 'findOne'>
     >;
-    emailService = { sendPasswordResetEmail: jest.fn() };
+    emailService = new EmailService();
+    sendPasswordResetEmailMock = jest
+      .spyOn(emailService, 'sendPasswordResetEmail')
+      .mockResolvedValue();
+    jest.spyOn(emailService, 'sendWelcomeEmail').mockResolvedValue();
+    jest
+      .spyOn(emailService, 'sendJobAssignmentNotification')
+      .mockResolvedValue();
     service = new UsersService(
       usersRepository as unknown as Repository<User>,
-      emailService as any,
+      emailService,
     );
   });
 
@@ -82,7 +94,7 @@ describe('UsersService', () => {
 
     await service.requestPasswordReset('user3');
     const [[emailUsername, rawToken]] =
-      emailService.sendPasswordResetEmail.mock.calls;
+      sendPasswordResetEmailMock.mock.calls as [string, string][];
     const hashedToken = crypto
       .createHash('sha256')
       .update(rawToken)

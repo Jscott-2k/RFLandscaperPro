@@ -4,6 +4,7 @@ import { CustomersService } from './customers.service';
 import { Customer } from './entities/customer.entity';
 import { Repository, QueryFailedError } from 'typeorm';
 import { ConflictException } from '@nestjs/common';
+import { CreateCustomerDto } from './dto/create-customer.dto';
 
 describe('CustomersService', () => {
   let service: CustomersService;
@@ -35,13 +36,22 @@ describe('CustomersService', () => {
   it('throws ConflictException when email already exists', async () => {
     repo.create.mockReturnValue({} as Customer);
     repo.save.mockRejectedValue(
-      new QueryFailedError('', [], { code: '23505' } as any),
+      new QueryFailedError(
+        '',
+        [],
+        Object.assign(new Error(), { code: '23505' }),
+      ),
     );
+    const createCustomerDto: CreateCustomerDto = {
+      name: 'Test',
+      email: 'test@example.com',
+      addresses: [],
+    };
 
-    await expect(service.create({} as any)).rejects.toBeInstanceOf(
+    await expect(service.create(createCustomerDto)).rejects.toBeInstanceOf(
       ConflictException,
     );
-    await expect(service.create({} as any)).rejects.toHaveProperty(
+    await expect(service.create(createCustomerDto)).rejects.toHaveProperty(
       'message',
       'Email already exists',
     );

@@ -9,13 +9,13 @@ interface RequestStore {
 export const requestIdStorage = new AsyncLocalStorage<RequestStore>();
 
 export function requestIdMiddleware(
-  req: Request,
+  req: Request & { requestId?: string },
   res: Response,
   next: NextFunction,
 ): void {
   const requestId = randomUUID();
   requestIdStorage.run({ requestId }, () => {
-    (req as any).requestId = requestId;
+    req.requestId = requestId;
     res.setHeader('X-Request-Id', requestId);
     next();
   });

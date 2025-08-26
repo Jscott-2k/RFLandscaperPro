@@ -7,6 +7,9 @@ import { Customer } from '../customers/entities/customer.entity';
 import { User } from '../users/user.entity';
 import { Equipment } from '../equipment/entities/equipment.entity';
 import { Assignment } from './entities/assignment.entity';
+import { CreateJobDto } from './dto/create-job.dto';
+import { ScheduleJobDto } from './dto/schedule-job.dto';
+import { AssignJobDto } from './dto/assign-job.dto';
 
 describe('JobsService', () => {
   let service: JobsService;
@@ -85,12 +88,13 @@ describe('JobsService', () => {
 
   it('should throw NotFoundException when customer does not exist on create', async () => {
     customerRepository.findOne.mockResolvedValue(null);
-    await expect(
-      service.create({
-        title: 'Test',
-        customerId: 1,
-      } as any),
-    ).rejects.toBeInstanceOf(NotFoundException);
+    const createJobDto: CreateJobDto = {
+      title: 'Test',
+      customerId: 1,
+    };
+    await expect(service.create(createJobDto)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('should throw ConflictException when scheduling with existing assignment conflict', async () => {
@@ -114,9 +118,10 @@ describe('JobsService', () => {
     };
     assignmentRepository.createQueryBuilder.mockReturnValue(qb);
 
-    await expect(
-      service.schedule(1, { scheduledDate: date } as any),
-    ).rejects.toBeInstanceOf(ConflictException);
+    const scheduleJobDto: ScheduleJobDto = { scheduledDate: date };
+    await expect(service.schedule(1, scheduleJobDto)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
   });
 
   it('should throw ConflictException when assigning user or equipment already booked', async () => {
@@ -137,8 +142,9 @@ describe('JobsService', () => {
     };
     assignmentRepository.createQueryBuilder.mockReturnValue(qb);
 
-    await expect(
-      service.assign(1, { userId: 1, equipmentId: 2 } as any),
-    ).rejects.toBeInstanceOf(ConflictException);
+    const assignJobDto: AssignJobDto = { userId: 1, equipmentId: 2 };
+    await expect(service.assign(1, assignJobDto)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
   });
 });

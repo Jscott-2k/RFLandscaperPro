@@ -39,7 +39,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     this.logger.error(
       `HTTP ${status} ${request.method} ${request.url} - ${message}`,
-      (exception as any)?.stack,
+      exception instanceof Error ? exception.stack : undefined,
     );
 
     response.status(status).json({
