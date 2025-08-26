@@ -8,7 +8,6 @@ import {
   Delete,
   ParseIntPipe,
   Query,
-  DefaultValuePipe,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -22,6 +21,7 @@ import { UserRole } from '../users/user.entity';
 import { ScheduleJobDto } from './dto/schedule-job.dto';
 import { AssignJobDto } from './dto/assign-job.dto';
 import { BulkAssignJobDto } from './dto/bulk-assign-job.dto';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -55,10 +55,9 @@ export class JobsController {
   @ApiQuery({ name: 'limit', required: false })
   @ApiResponse({ status: 200, description: 'List of jobs' })
   findAll(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+    @Query() pagination: PaginationQueryDto,
   ): Promise<{ items: JobResponseDto[]; total: number }> {
-    return this.jobsService.findAll(page, limit);
+    return this.jobsService.findAll(pagination);
   }
 
   @Get(':id')
