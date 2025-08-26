@@ -6,6 +6,10 @@ interface RequestStore {
   requestId: string;
 }
 
+interface RequestWithId extends Request {
+  requestId?: string;
+}
+
 export const requestIdStorage = new AsyncLocalStorage<RequestStore>();
 
 export function requestIdMiddleware(
@@ -15,7 +19,7 @@ export function requestIdMiddleware(
 ): void {
   const requestId = randomUUID();
   requestIdStorage.run({ requestId }, () => {
-    (req as any).requestId = requestId;
+    (req as RequestWithId).requestId = requestId;
     res.setHeader('X-Request-Id', requestId);
     next();
   });
