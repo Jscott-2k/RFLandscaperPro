@@ -48,10 +48,7 @@ export class UsersService {
       return;
     }
     const token = crypto.randomBytes(32).toString('hex');
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
     user.passwordResetToken = hashedToken;
     user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
     await this.usersRepository.save(user);
@@ -59,10 +56,7 @@ export class UsersService {
   }
 
   async resetPassword(token: string, password: string): Promise<void> {
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
     const user = await this.usersRepository.findOne({
       where: {
         passwordResetToken: hashedToken,
