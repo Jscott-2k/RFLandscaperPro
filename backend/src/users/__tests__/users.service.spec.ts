@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { QueryFailedError, Repository } from 'typeorm';
 
 import { UsersService } from '../users.service';
@@ -80,25 +81,33 @@ describe('UsersService', () => {
     usersRepository.findOne.mockResolvedValueOnce(user);
 
     await service.requestPasswordReset('user3');
+    const [[emailUsername, rawToken]] =
+      emailService.sendPasswordResetEmail.mock.calls;
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
 
-    expect(user.passwordResetToken).toBeDefined();
+    expect(emailUsername).toBe('user3');
+    expect(user.passwordResetToken).toBe(hashedToken);
     expect(user.passwordResetExpires).toBeInstanceOf(Date);
     expect(usersRepository.save).toHaveBeenCalledWith(user);
-    expect(emailService.sendPasswordResetEmail).toHaveBeenCalledWith(
-      'user3',
-      user.passwordResetToken,
-    );
   });
 
   it('resets password with valid token', async () => {
+    const rawToken = 'token123';
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
     const user = Object.assign(new User(), {
       username: 'user4',
-      passwordResetToken: 'token123',
+      passwordResetToken: hashedToken,
       passwordResetExpires: new Date(Date.now() + 1000 * 60),
     });
     usersRepository.findOne.mockResolvedValueOnce(user);
 
-    await service.resetPassword('token123', 'newpass');
+    await service.resetPassword(rawToken, 'newpass');
 
     expect(user.passwordResetToken).toBeNull();
     expect(user.passwordResetExpires).toBeNull();

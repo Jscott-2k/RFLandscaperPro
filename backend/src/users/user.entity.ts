@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BeforeInsert,
+  BeforeUpdate,
+  Index,
+} from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 export enum UserRole {
@@ -21,7 +28,8 @@ export class User {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.Customer })
   role: UserRole;
 
-  @Column({ nullable: true })
+  @Index('IDX_user_password_reset_token')
+  @Column({ length: 64, nullable: true })
   passwordResetToken: string | null;
 
   @Column({ type: 'timestamptz', nullable: true })
