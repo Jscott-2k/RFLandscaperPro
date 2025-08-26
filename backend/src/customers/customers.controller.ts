@@ -8,7 +8,6 @@ import {
   Param,
   ParseIntPipe,
   Query,
-  DefaultValuePipe,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -19,6 +18,7 @@ import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -54,10 +54,9 @@ export class CustomersController {
   @ApiQuery({ name: 'limit', required: false })
   @ApiResponse({ status: 200, description: 'List of customers' })
   async findAll(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+    @Query() pagination: PaginationQueryDto,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
-    return this.customersService.findAll(page, limit);
+    return this.customersService.findAll(pagination);
   }
 
   @Get(':id')

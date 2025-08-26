@@ -12,6 +12,7 @@ import { Assignment } from './entities/assignment.entity';
 import { AssignJobDto } from './dto/assign-job.dto';
 import { BulkAssignJobDto } from './dto/bulk-assign-job.dto';
 import { ScheduleJobDto } from './dto/schedule-job.dto';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @Injectable()
 export class JobsService {
@@ -47,11 +48,12 @@ export class JobsService {
   }
 
   async findAll(
-    page = 1,
-    limit = 10,
+    pagination: PaginationQueryDto,
     completed?: boolean,
     customerId?: number,
   ): Promise<{ items: JobResponseDto[]; total: number }> {
+    const { page = 1, limit = 10 } = pagination;
+    const cappedLimit = Math.min(limit, 100);
     const queryBuilder = this.jobRepository
       .createQueryBuilder('job')
       .leftJoinAndSelect('job.customer', 'customer')
@@ -68,8 +70,8 @@ export class JobsService {
     }
 
     const [jobs, total] = await queryBuilder
-      .skip((page - 1) * limit)
-      .take(limit)
+      .skip((page - 1) * cappedLimit)
+      .take(cappedLimit)
       .orderBy('job.scheduledDate', 'ASC')
       .addOrderBy('job.createdAt', 'DESC')
       .getManyAndCount();
@@ -109,14 +111,15 @@ export class JobsService {
   }
 
   async findOne(id: number): Promise<JobResponseDto> {
-    const job = await this.jobRepository
-      .createQueryBuilder('job')
-      .leftJoinAndSelect('job.customer', 'customer')
-      .leftJoinAndSelect('job.assignments', 'assignments')
-      .leftJoinAndSelect('assignments.user', 'user')
-      .leftJoinAndSelect('assignments.equipment', 'equipment')
-      .where('job.id = :id', { id })
-      .getOne();
+    const job = await this.jobRepository.findOne({
+      where: { id },
+      relations: [
+        'customer',
+        'assignments',
+        'assignments.user',
+        'assignments.equipment',
+      ],
+    });
 
     if (!job) {
       throw new NotFoundException(`Job with ID ${id} not found.`);
