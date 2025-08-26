@@ -27,6 +27,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest<Request>();
     const { method, url } = request;
+    const routePath = (request.route?.path as string | undefined) ?? url;
     const start = Date.now();
 
     return next.handle().pipe(
@@ -39,7 +40,7 @@ export class LoggingInterceptor implements NestInterceptor {
           `HTTP ${method} ${url} ${statusCode} ${duration}ms - ${requestId}`,
         );
         this.histogram
-          .labels(method, request.route?.path ?? url, statusCode.toString())
+          .labels(method, routePath, statusCode.toString())
           .observe(duration / 1000);
       }),
     );
