@@ -14,6 +14,7 @@ describe('JobsService', () => {
     findOne: jest.Mock;
     create: jest.Mock;
     save: jest.Mock;
+    createQueryBuilder: jest.Mock;
   };
   let customerRepository: { findOne: jest.Mock };
   let userRepository: { findOne: jest.Mock };
@@ -26,7 +27,12 @@ describe('JobsService', () => {
   };
 
   beforeEach(async () => {
-    jobRepository = { findOne: jest.fn(), create: jest.fn(), save: jest.fn() };
+    jobRepository = {
+      findOne: jest.fn(),
+      create: jest.fn(),
+      save: jest.fn(),
+      createQueryBuilder: jest.fn(),
+    };
     customerRepository = { findOne: jest.fn() };
     userRepository = { findOne: jest.fn() };
     equipmentRepository = { findOne: jest.fn() };
@@ -49,8 +55,14 @@ describe('JobsService', () => {
           useValue: customerRepository,
         },
         { provide: getRepositoryToken(User), useValue: userRepository },
-        { provide: getRepositoryToken(Equipment), useValue: equipmentRepository },
-        { provide: getRepositoryToken(Assignment), useValue: assignmentRepository },
+        {
+          provide: getRepositoryToken(Equipment),
+          useValue: equipmentRepository,
+        },
+        {
+          provide: getRepositoryToken(Assignment),
+          useValue: assignmentRepository,
+        },
       ],
     }).compile();
 
@@ -62,7 +74,12 @@ describe('JobsService', () => {
   });
 
   it('should throw NotFoundException when job does not exist', async () => {
-    jobRepository.findOne.mockResolvedValue(null);
+    const qb = {
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      getOne: jest.fn().mockResolvedValue(null),
+    };
+    jobRepository.createQueryBuilder.mockReturnValue(qb);
     await expect(service.findOne(1)).rejects.toBeInstanceOf(NotFoundException);
   });
 
@@ -104,7 +121,11 @@ describe('JobsService', () => {
 
   it('should throw ConflictException when assigning user or equipment already booked', async () => {
     const date = new Date();
-    jobRepository.findOne.mockResolvedValue({ id: 1, scheduledDate: date, customer: {} });
+    jobRepository.findOne.mockResolvedValue({
+      id: 1,
+      scheduledDate: date,
+      customer: {},
+    });
     userRepository.findOne.mockResolvedValue({ id: 1 });
     equipmentRepository.findOne.mockResolvedValue({ id: 2 });
 
