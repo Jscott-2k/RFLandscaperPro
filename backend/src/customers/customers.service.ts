@@ -46,7 +46,7 @@ export class CustomersService {
     active?: boolean,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
     const queryBuilder = this.customerRepository.createQueryBuilder('customer');
-    
+
     if (active !== undefined) {
       queryBuilder.andWhere('customer.active = :active', { active });
     }
@@ -56,7 +56,7 @@ export class CustomersService {
       .take(limit)
       .orderBy('customer.name', 'ASC')
       .getManyAndCount();
-      
+
     return {
       items: customers.map((customer) => this.toCustomerResponseDto(customer)),
       total,

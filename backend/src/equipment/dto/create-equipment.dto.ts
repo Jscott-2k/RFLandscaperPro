@@ -11,7 +11,10 @@ export class CreateEquipmentDto {
   @IsEnum(EquipmentType)
   type: EquipmentType;
 
-  @ApiPropertyOptional({ enum: EquipmentStatus, default: EquipmentStatus.AVAILABLE })
+  @ApiPropertyOptional({
+    enum: EquipmentStatus,
+    default: EquipmentStatus.AVAILABLE,
+  })
   @IsOptional()
   @IsEnum(EquipmentStatus)
   status?: EquipmentStatus = EquipmentStatus.AVAILABLE;

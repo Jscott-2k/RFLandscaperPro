@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, Index } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  Index,
+} from 'typeorm';
 import { Customer } from './customer.entity';
 
 @Entity()
@@ -28,6 +34,8 @@ export class Address {
   @Column({ type: 'boolean', default: true })
   primary: boolean;
 
-  @ManyToOne(() => Customer, (customer) => customer.addresses, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Customer, (customer) => customer.addresses, {
+    onDelete: 'CASCADE',
+  })
   customer: Customer;
 }

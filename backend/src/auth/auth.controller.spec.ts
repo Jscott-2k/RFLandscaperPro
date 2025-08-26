@@ -48,7 +48,11 @@ describe('AuthController', () => {
     const result = await controller.register(dto);
 
     expect(authService.register).toHaveBeenCalledWith(dto);
-    expect(result).toEqual({ id: 1, username: 'user', role: UserRole.Customer });
+    expect(result).toEqual({
+      id: 1,
+      username: 'user',
+      role: UserRole.Customer,
+    });
   });
 
   it('requests password reset', async () => {

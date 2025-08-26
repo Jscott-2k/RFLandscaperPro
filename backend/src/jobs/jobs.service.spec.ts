@@ -49,8 +49,14 @@ describe('JobsService', () => {
           useValue: customerRepository,
         },
         { provide: getRepositoryToken(User), useValue: userRepository },
-        { provide: getRepositoryToken(Equipment), useValue: equipmentRepository },
-        { provide: getRepositoryToken(Assignment), useValue: assignmentRepository },
+        {
+          provide: getRepositoryToken(Equipment),
+          useValue: equipmentRepository,
+        },
+        {
+          provide: getRepositoryToken(Assignment),
+          useValue: assignmentRepository,
+        },
       ],
     }).compile();
 
@@ -104,7 +110,11 @@ describe('JobsService', () => {
 
   it('should throw ConflictException when assigning user or equipment already booked', async () => {
     const date = new Date();
-    jobRepository.findOne.mockResolvedValue({ id: 1, scheduledDate: date, customer: {} });
+    jobRepository.findOne.mockResolvedValue({
+      id: 1,
+      scheduledDate: date,
+      customer: {},
+    });
     userRepository.findOne.mockResolvedValue({ id: 1 });
     equipmentRepository.findOne.mockResolvedValue({ id: 2 });
 

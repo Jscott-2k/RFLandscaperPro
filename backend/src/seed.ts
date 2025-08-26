@@ -4,7 +4,7 @@ import { Customer } from './customers/entities/customer.entity';
 
 async function seed() {
   let dataSourceInstance: any;
-  
+
   try {
     dataSourceInstance = await dataSource.initialize();
     console.log('Database connection established');
@@ -13,7 +13,9 @@ async function seed() {
     const customerRepo = dataSourceInstance.getRepository(Customer);
 
     // Create admin user with secure password
-    const adminExists = await userRepo.findOne({ where: { username: 'admin' } });
+    const adminExists = await userRepo.findOne({
+      where: { username: 'admin' },
+    });
     if (!adminExists) {
       const admin = userRepo.create({
         username: 'admin',

@@ -39,15 +39,15 @@ export class Job {
   @Column({ type: 'text', nullable: true })
   notes?: string;
 
-  @ManyToOne(() => Customer, (customer) => customer.jobs, { 
+  @ManyToOne(() => Customer, (customer) => customer.jobs, {
     onDelete: 'CASCADE',
-    nullable: false 
+    nullable: false,
   })
   customer: Customer;
 
-  @OneToMany(() => Assignment, (assignment) => assignment.job, { 
+  @OneToMany(() => Assignment, (assignment) => assignment.job, {
     cascade: true,
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
   })
   assignments: Assignment[];
 

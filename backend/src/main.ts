@@ -12,30 +12,33 @@ import * as basicAuth from 'express-basic-auth';
 async function bootstrap() {
   let app;
   const logger = new Logger('Bootstrap');
-  
+
   try {
     app = await NestFactory.create(AppModule, { bufferLogs: true });
-    
+
     // Apply middleware
     app.use(requestIdMiddleware);
-    
+
     // Setup logging
     app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
     const winstonLogger = app.get(WINSTON_MODULE_NEST_PROVIDER);
-    
+
     // Apply interceptors
     app.useGlobalInterceptors(app.get(LoggingInterceptor));
-    
-    logger.log(`Starting backend in ${process.env.NODE_ENV || 'development'} mode`);
-    
+
+    logger.log(
+      `Starting backend in ${process.env.NODE_ENV || 'development'} mode`,
+    );
+
     // Enable CORS
     app.enableCors({
-      origin: process.env.NODE_ENV === 'production' 
-        ? process.env.ALLOWED_ORIGINS?.split(',') || []
-        : true,
+      origin:
+        process.env.NODE_ENV === 'production'
+          ? process.env.ALLOWED_ORIGINS?.split(',') || []
+          : true,
       credentials: true,
     });
-    
+
     // Global validation pipe
     app.useGlobalPipes(
       new ValidationPipe({
@@ -48,12 +51,12 @@ async function bootstrap() {
         errorHttpStatusCode: 422,
       }),
     );
-    
+
     // Global exception filter
     app.useGlobalFilters(
       new HttpExceptionFilter(winstonLogger) satisfies ExceptionFilter,
     );
-    
+
     // Swagger documentation with basic auth
     if (process.env.NODE_ENV !== 'production') {
       app.use(
@@ -66,7 +69,7 @@ async function bootstrap() {
           },
         }),
       );
-      
+
       const config = new DocumentBuilder()
         .setTitle('RF Landscaper Pro API')
         .setDescription('Professional landscaping business management API')
@@ -78,26 +81,26 @@ async function bootstrap() {
         .addTag('equipment', 'Equipment management')
         .addBearerAuth()
         .build();
-      
+
       const document = SwaggerModule.createDocument(app, config);
       SwaggerModule.setup('docs', app, document);
-      
+
       logger.log('Swagger documentation available at /docs');
     }
-    
+
     // Start the application
     const port = process.env.PORT || 3000;
     const host = process.env.HOST || '0.0.0.0';
-    
+
     await app.listen(port, host);
     logger.log(`Application is running on: http://${host}:${port}`);
-    
   } catch (error) {
-    const errorLogger = app?.get(WINSTON_MODULE_NEST_PROVIDER) ||
+    const errorLogger =
+      app?.get(WINSTON_MODULE_NEST_PROVIDER) ||
       WinstonModule.createLogger({
         transports: [new winston.transports.Console()],
       });
-    
+
     errorLogger.error('Bootstrap error:', error);
     logger.error('Failed to start application:', error);
     process.exit(1);

@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Job } from './entities/job.entity';
@@ -34,9 +38,7 @@ export class JobsService {
       where: { id: customerId },
     });
     if (!customer) {
-      throw new NotFoundException(
-        `Customer with ID ${customerId} not found.`,
-      );
+      throw new NotFoundException(`Customer with ID ${customerId} not found.`);
     }
     const job = this.jobRepository.create({
       ...jobData,
@@ -151,7 +153,10 @@ export class JobsService {
       assignments: job.assignments?.map((assignment) => ({
         id: assignment.id,
         user: { id: assignment.user.id, username: assignment.user.username },
-        equipment: { id: assignment.equipment.id, name: assignment.equipment.name },
+        equipment: {
+          id: assignment.equipment.id,
+          name: assignment.equipment.name,
+        },
         startTime: assignment.startTime,
         endTime: assignment.endTime,
         notes: assignment.notes,
@@ -224,7 +229,9 @@ export class JobsService {
       throw new NotFoundException(`Job with ID ${id} not found.`);
     }
 
-    const user = await this.userRepository.findOne({ where: { id: dto.userId } });
+    const user = await this.userRepository.findOne({
+      where: { id: dto.userId },
+    });
     if (!user) {
       throw new NotFoundException(`User with ID ${dto.userId} not found.`);
     }
@@ -273,9 +280,13 @@ export class JobsService {
 
     // Validate all users and equipment exist
     for (const assignment of dto.assignments) {
-      const user = await this.userRepository.findOne({ where: { id: assignment.userId } });
+      const user = await this.userRepository.findOne({
+        where: { id: assignment.userId },
+      });
       if (!user) {
-        throw new NotFoundException(`User with ID ${assignment.userId} not found.`);
+        throw new NotFoundException(
+          `User with ID ${assignment.userId} not found.`,
+        );
       }
 
       const equipment = await this.equipmentRepository.findOne({
@@ -305,12 +316,12 @@ export class JobsService {
     }
 
     // Create all assignments
-    const assignments = dto.assignments.map(assignmentData =>
+    const assignments = dto.assignments.map((assignmentData) =>
       this.assignmentRepository.create({
         job,
         user: { id: assignmentData.userId } as User,
         equipment: { id: assignmentData.equipmentId } as Equipment,
-      })
+      }),
     );
 
     await this.assignmentRepository.save(assignments);
@@ -319,14 +330,19 @@ export class JobsService {
     return updatedJob;
   }
 
-  async removeAssignment(jobId: number, assignmentId: number): Promise<JobResponseDto> {
+  async removeAssignment(
+    jobId: number,
+    assignmentId: number,
+  ): Promise<JobResponseDto> {
     const assignment = await this.assignmentRepository.findOne({
       where: { id: assignmentId, job: { id: jobId } },
       relations: ['job'],
     });
 
     if (!assignment) {
-      throw new NotFoundException(`Assignment with ID ${assignmentId} not found for job ${jobId}.`);
+      throw new NotFoundException(
+        `Assignment with ID ${assignmentId} not found for job ${jobId}.`,
+      );
     }
 
     await this.assignmentRepository.remove(assignment);

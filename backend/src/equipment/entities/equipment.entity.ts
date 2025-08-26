@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+} from 'typeorm';
 
 export enum EquipmentType {
   MOWER = 'mower',
@@ -30,7 +37,11 @@ export class Equipment {
   @Column({ type: 'enum', enum: EquipmentType })
   type: EquipmentType;
 
-  @Column({ type: 'enum', enum: EquipmentStatus, default: EquipmentStatus.AVAILABLE })
+  @Column({
+    type: 'enum',
+    enum: EquipmentStatus,
+    default: EquipmentStatus.AVAILABLE,
+  })
   status: EquipmentStatus;
 
   @Column({ nullable: true })
