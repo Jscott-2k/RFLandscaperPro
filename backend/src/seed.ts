@@ -1,9 +1,10 @@
 import dataSource from '../data-source';
+import { DataSource } from 'typeorm';
 import { User, UserRole } from './users/user.entity';
 import { Customer } from './customers/entities/customer.entity';
 
 async function seed() {
-  let dataSourceInstance: any;
+  let dataSourceInstance: DataSource;
 
   try {
     dataSourceInstance = await dataSource.initialize();
