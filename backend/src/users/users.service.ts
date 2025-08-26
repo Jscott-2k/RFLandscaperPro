@@ -48,16 +48,24 @@ export class UsersService {
       return;
     }
     const token = crypto.randomBytes(32).toString('hex');
-    user.passwordResetToken = token;
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+    user.passwordResetToken = hashedToken;
     user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
     await this.usersRepository.save(user);
     await this.emailService.sendPasswordResetEmail(user.username, token);
   }
 
   async resetPassword(token: string, password: string): Promise<void> {
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
     const user = await this.usersRepository.findOne({
       where: {
-        passwordResetToken: token,
+        passwordResetToken: hashedToken,
         passwordResetExpires: MoreThan(new Date()),
       },
     });

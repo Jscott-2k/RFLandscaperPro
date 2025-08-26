@@ -6,11 +6,10 @@ export class EmailService {
 
   async sendPasswordResetEmail(username: string, token: string): Promise<void> {
     try {
-      // In a real application, integrate with an email provider here
-      // For now, we simply log the token for development purposes
+      // Integrate with an email provider to deliver the token in production.
+      // Currently logs the token for development purposes.
       this.logger.log(`Password reset token for ${username}: ${token}`);
 
-      // TODO: Implement actual email sending
       // Example with a hypothetical email service:
       // await this.emailProvider.send({
       //   to: username,
@@ -34,7 +33,7 @@ export class EmailService {
     try {
       this.logger.log(`Welcome email sent to ${username} at ${email}`);
 
-      // TODO: Implement actual welcome email
+      // Replace log with a real welcome email implementation.
     } catch (error) {
       this.logger.error(`Failed to send welcome email to ${username}:`, error);
     }
@@ -49,7 +48,7 @@ export class EmailService {
         `Job assignment notification sent to ${username} for job: ${jobTitle}`,
       );
 
-      // TODO: Implement actual job assignment notification
+      // Replace log with a real job assignment notification implementation.
     } catch (error) {
       this.logger.error(
         `Failed to send job assignment notification to ${username}:`,

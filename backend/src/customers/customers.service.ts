@@ -10,6 +10,7 @@ import { Customer } from './entities/customer.entity';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @Injectable()
 export class CustomersService {
@@ -41,10 +42,11 @@ export class CustomersService {
   }
 
   async findAll(
-    page = 1,
-    limit = 10,
+    pagination: PaginationQueryDto,
     active?: boolean,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
+    const { page = 1, limit = 10 } = pagination;
+    const cappedLimit = Math.min(limit, 100);
     const queryBuilder = this.customerRepository.createQueryBuilder('customer');
 
     if (active !== undefined) {
@@ -52,8 +54,8 @@ export class CustomersService {
     }
 
     const [customers, total] = await queryBuilder
-      .skip((page - 1) * limit)
-      .take(limit)
+      .skip((page - 1) * cappedLimit)
+      .take(cappedLimit)
       .orderBy('customer.name', 'ASC')
       .getManyAndCount();
 

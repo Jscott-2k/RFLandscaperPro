@@ -9,6 +9,7 @@ import { Equipment, EquipmentStatus } from './entities/equipment.entity';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentResponseDto } from './dto/equipment-response.dto';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @Injectable()
 export class EquipmentService {
@@ -26,13 +27,13 @@ export class EquipmentService {
   }
 
   async findAll(
-    page = 1,
-    limit = 10,
+    pagination: PaginationQueryDto,
     status?: EquipmentStatus,
     type?: string,
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
-    const queryBuilder =
-      this.equipmentRepository.createQueryBuilder('equipment');
+    const { page = 1, limit = 10 } = pagination;
+    const cappedLimit = Math.min(limit, 100);
+    const queryBuilder = this.equipmentRepository.createQueryBuilder('equipment');
 
     if (status) {
       queryBuilder.andWhere('equipment.status = :status', { status });
@@ -43,8 +44,8 @@ export class EquipmentService {
     }
 
     const [equipments, total] = await queryBuilder
-      .skip((page - 1) * limit)
-      .take(limit)
+      .skip((page - 1) * cappedLimit)
+      .take(cappedLimit)
       .getManyAndCount();
 
     return {
