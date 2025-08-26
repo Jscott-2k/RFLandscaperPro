@@ -4,7 +4,7 @@ import { Injectable, Logger } from '@nestjs/common';
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
 
-  async sendPasswordResetEmail(username: string, token: string): Promise<void> {
+  sendPasswordResetEmail(username: string, token: string): void {
     try {
       // Integrate with an email provider to deliver the token in production.
       // Currently logs the token for development purposes.
@@ -29,7 +29,7 @@ export class EmailService {
     }
   }
 
-  async sendWelcomeEmail(username: string, email: string): Promise<void> {
+  sendWelcomeEmail(username: string, email: string): void {
     try {
       this.logger.log(`Welcome email sent to ${username} at ${email}`);
 
@@ -39,10 +39,7 @@ export class EmailService {
     }
   }
 
-  async sendJobAssignmentNotification(
-    username: string,
-    jobTitle: string,
-  ): Promise<void> {
+  sendJobAssignmentNotification(username: string, jobTitle: string): void {
     try {
       this.logger.log(
         `Job assignment notification sent to ${username} for job: ${jobTitle}`,
