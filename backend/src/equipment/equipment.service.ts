@@ -33,7 +33,8 @@ export class EquipmentService {
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
     const { page = 1, limit = 10 } = pagination;
     const cappedLimit = Math.min(limit, 100);
-    const queryBuilder = this.equipmentRepository.createQueryBuilder('equipment');
+    const queryBuilder =
+      this.equipmentRepository.createQueryBuilder('equipment');
 
     if (status) {
       queryBuilder.andWhere('equipment.status = :status', { status });
@@ -107,7 +108,7 @@ export class EquipmentService {
     id: number,
     status: EquipmentStatus,
   ): Promise<EquipmentResponseDto> {
-    const equipment = await this.findOne(id);
+    await this.findOne(id);
     return this.update(id, { status });
   }
 
