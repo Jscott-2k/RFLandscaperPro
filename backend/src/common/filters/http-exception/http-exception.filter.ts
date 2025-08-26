@@ -36,15 +36,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
       typeof errorResponse === 'string'
         ? errorResponse
         : (errorResponse as { message?: string | string[] }).message;
+    const msg = Array.isArray(message) ? message.join(', ') : (message ?? '');
 
     this.logger.error(
-      `HTTP ${status} ${request.method} ${request.url} - ${message}`,
-      (exception as any)?.stack,
+      `HTTP ${status} ${request.method} ${request.url} - ${msg}`,
+      exception instanceof Error ? exception.stack : undefined,
     );
 
     response.status(status).json({
       statusCode: status,
-      message,
+      message: msg,
       timestamp: new Date().toISOString(),
       path: request.url,
     });
