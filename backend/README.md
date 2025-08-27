@@ -76,7 +76,10 @@ docker compose -f docker-compose.yml -f docker-compose.override.yml up
 `npm run start:dev` and the other commands below are executed **inside the Docker container**. Run them directly only if all dependent services (e.g., PostgreSQL) are available locally.
 
 ```bash
-# Start with hot reload
+# Preferred: start the full environment with Docker
+npm run dev:compose
+
+# Alternatively, run the NestJS server with hot reload
 npm run start:dev
 
 # Start with debugger
