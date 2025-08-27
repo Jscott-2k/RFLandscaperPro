@@ -29,7 +29,7 @@ export class User {
   role: UserRole;
 
   @Index('IDX_user_password_reset_token')
-  @Column({ length: 64, nullable: true })
+  @Column({ type: 'varchar', length: 64, nullable: true })
   passwordResetToken: string | null;
 
   @Column({ type: 'timestamptz', nullable: true })
