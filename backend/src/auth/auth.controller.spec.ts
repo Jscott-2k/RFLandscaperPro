@@ -15,6 +15,7 @@ describe('AuthController', () => {
     requestPasswordReset: jest.Mock;
     resetPassword: jest.Mock;
     refresh: jest.Mock;
+    logout: jest.Mock;
   };
 
   beforeEach(async () => {
@@ -25,6 +26,7 @@ describe('AuthController', () => {
       requestPasswordReset: jest.fn(),
       resetPassword: jest.fn(),
       refresh: jest.fn(),
+      logout: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -78,9 +80,20 @@ describe('AuthController', () => {
   });
 
   it('refreshes token', async () => {
-    authService.refresh.mockResolvedValue({ access_token: 'new' });
+    authService.refresh.mockResolvedValue({
+      access_token: 'newAccess',
+      refresh_token: 'newRefresh',
+    });
     const result = await controller.refresh({ refreshToken: 'token' });
     expect(authService.refresh).toHaveBeenCalledWith('token');
-    expect(result).toEqual({ access_token: 'new' });
+    expect(result).toEqual({
+      access_token: 'newAccess',
+      refresh_token: 'newRefresh',
+    });
+  });
+
+  it('logs out', async () => {
+    await controller.logout({ refreshToken: 'token' });
+    expect(authService.logout).toHaveBeenCalledWith('token');
   });
 });
