@@ -15,6 +15,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { validatePasswordStrength } from '../auth/password.util';
 import { Customer } from '../customers/entities/customer.entity';
+import { Company } from '../companies/entities/company.entity';
 
 const UNIQUE_VIOLATION = '23505';
 
@@ -25,6 +26,8 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(Customer)
     private readonly customerRepository: Repository<Customer>,
+    @InjectRepository(Company)
+    private readonly companyRepository: Repository<Company>,
     private readonly emailService: EmailService,
   ) {}
 
@@ -53,6 +56,27 @@ export class UsersService {
           userId: savedUser.id,
         });
         await this.customerRepository.save(customer);
+      } else if (savedUser.role === UserRole.Owner) {
+        if (!createUserDto.companyName) {
+          throw new BadRequestException(
+            'Company name is required for owner accounts',
+          );
+        }
+        const company = this.companyRepository.create({
+          name: createUserDto.companyName,
+          ownerId: savedUser.id,
+        });
+        const savedCompany = await this.companyRepository.save(company);
+        savedUser.companyId = savedCompany.id;
+        await this.usersRepository.save(savedUser);
+      } else if (savedUser.role === UserRole.Worker) {
+        if (!createUserDto.companyId) {
+          throw new BadRequestException(
+            'companyId is required for worker accounts',
+          );
+        }
+        savedUser.companyId = createUserDto.companyId;
+        await this.usersRepository.save(savedUser);
       }
 
       return savedUser;
