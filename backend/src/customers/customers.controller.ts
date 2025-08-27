@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  ParseBoolPipe,
   Query,
   HttpCode,
   HttpStatus,
@@ -57,15 +58,14 @@ export class CustomersController {
   @ApiOperation({ summary: 'List customers' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'active', required: false, type: Boolean })
   @ApiResponse({ status: 200, description: 'List of customers' })
   async findAll(
     @Query() pagination: PaginationQueryDto,
-    @Req() req: { user: { companyId: number } },
+    @Query('active', new ParseBoolPipe({ optional: true }))
+    active?: boolean,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
-    return this.customersService.findAll(
-      pagination,
-      req.user.companyId,
-    );
+    return this.customersService.findAll(pagination, active);
   }
 
   @Get('profile')

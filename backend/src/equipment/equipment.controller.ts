@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  ParseEnumPipe,
   Query,
   HttpCode,
   HttpStatus,
@@ -16,6 +17,7 @@ import { EquipmentService } from './equipment.service';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentResponseDto } from './dto/equipment-response.dto';
+import { EquipmentStatus, EquipmentType } from './entities/equipment.entity';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
@@ -56,12 +58,17 @@ export class EquipmentController {
   @ApiOperation({ summary: 'List equipment' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'status', required: false, enum: EquipmentStatus })
+  @ApiQuery({ name: 'type', required: false, enum: EquipmentType })
   @ApiResponse({ status: 200, description: 'List of equipment' })
   async findAll(
     @Query() pagination: PaginationQueryDto,
-    @Req() req: { user: { companyId: number } },
+    @Query('status', new ParseEnumPipe(EquipmentStatus, { optional: true }))
+    status?: EquipmentStatus,
+    @Query('type', new ParseEnumPipe(EquipmentType, { optional: true }))
+    type?: EquipmentType,
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
-    return this.equipmentService.findAll(pagination, req.user.companyId);
+    return this.equipmentService.findAll(pagination, status, type);
   }
 
   @Get(':id')
