@@ -17,6 +17,7 @@ import { EquipmentService } from './equipment.service';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentResponseDto } from './dto/equipment-response.dto';
+import { UpdateEquipmentStatusDto } from './dto/update-equipment-status.dto';
 import { EquipmentStatus, EquipmentType } from './entities/equipment.entity';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
@@ -103,6 +104,24 @@ export class EquipmentController {
       id,
       updateEquipmentDto,
       req.user.companyId,
+    );
+  }
+
+  @Patch(':id/status')
+  @Roles(UserRole.Admin, UserRole.Worker)
+  @ApiOperation({ summary: 'Update equipment status' })
+  @ApiResponse({
+    status: 200,
+    description: 'Equipment status updated',
+    type: EquipmentResponseDto,
+  })
+  async updateStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateEquipmentStatusDto: UpdateEquipmentStatusDto,
+  ): Promise<EquipmentResponseDto> {
+    return this.equipmentService.updateStatus(
+      id,
+      updateEquipmentStatusDto.status,
     );
   }
 
