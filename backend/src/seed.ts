@@ -18,7 +18,6 @@ async function seed() {
     const userRepo = dataSourceInstance.getRepository(User);
     const customerRepo = dataSourceInstance.getRepository(Customer);
 
-    // Create admin user with secure password
     const adminExists = await userRepo.findOne({
       where: { username: 'admin' },
     });
@@ -26,7 +25,7 @@ async function seed() {
       const admin = userRepo.create({
         username: 'admin',
         email: 'admin@example.com',
-        password: 'AdminSecure123!', // More secure password
+        password: 'AdminSecure123!',
         role: UserRole.Admin,
       });
       await userRepo.save(admin);
@@ -35,7 +34,6 @@ async function seed() {
       console.log('Admin user already exists');
     }
 
-    // Create sample customer
     const customerExists = await customerRepo.findOne({
       where: { email: 'customer@example.com' },
     });
