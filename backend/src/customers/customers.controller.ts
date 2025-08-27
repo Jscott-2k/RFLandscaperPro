@@ -103,6 +103,34 @@ export class CustomersController {
     return this.customersService.update(id, updateCustomerDto);
   }
 
+  @Patch(':id/activate')
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Activate customer' })
+  @ApiResponse({
+    status: 200,
+    description: 'Customer activated',
+    type: CustomerResponseDto,
+  })
+  async activate(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<CustomerResponseDto> {
+    return this.customersService.activate(id);
+  }
+
+  @Patch(':id/deactivate')
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Deactivate customer' })
+  @ApiResponse({
+    status: 200,
+    description: 'Customer deactivated',
+    type: CustomerResponseDto,
+  })
+  async deactivate(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<CustomerResponseDto> {
+    return this.customersService.deactivate(id);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @Roles(UserRole.Admin)
