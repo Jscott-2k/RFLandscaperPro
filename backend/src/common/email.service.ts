@@ -1,21 +1,43 @@
 import { Injectable, Logger } from '@nestjs/common';
-import nodemailer, { Transporter } from 'nodemailer';
+import * as nodemailer from 'nodemailer';
+
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private readonly transporter: Transporter;
+  private transporter!: nodemailer.Transporter;
+  private testAccount?: nodemailer.TestAccount;
+  private readonly ready: Promise<void>;
 
   constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: Number(process.env.SMTP_PORT) === 465,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    if (process.env.NODE_ENV === 'production') {
+      this.transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT) || 587,
+        secure: Number(process.env.SMTP_PORT) === 465,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+      this.ready = Promise.resolve();
+    } else {
+      this.ready = nodemailer
+        .createTestAccount()
+        .then((account: nodemailer.TestAccount) => {
+          this.testAccount = account;
+          this.transporter = nodemailer.createTransport({
+            host: 'smtp.ethereal.email',
+            port: 587,
+            secure: false,
+            auth: {
+              user: account.user,
+              pass: account.pass,
+            },
+          });
+        });
+    }
   }
 
   private formatRecipients(to: nodemailer.SendMailOptions['to']): string {
@@ -26,14 +48,19 @@ export class EmailService {
   }
 
   private async sendMail(options: nodemailer.SendMailOptions): Promise<void> {
+    await this.ready;
     try {
-      await this.transporter.sendMail({
-        from: process.env.SMTP_FROM,
+      const info = await this.transporter.sendMail({
+        from: process.env.SMTP_FROM || this.testAccount?.user,
         ...options,
       });
       const recipients = this.formatRecipients(options.to);
       this.logger.log(`Email sent to ${recipients}`);
-    } catch (error) {
+      if (process.env.NODE_ENV !== 'production') {
+        const url = nodemailer.getTestMessageUrl(info);
+        if (url) this.logger.log(`Preview URL: ${url}`);
+      }
+    } catch (error: unknown) {
       const recipients = this.formatRecipients(options.to);
       this.logger.error(`Failed to send email to ${recipients}:`, error);
     }
