@@ -203,7 +203,6 @@ npx cross-env NODE_ENV=development npm run migration:revert
 
 # Seed database with sample data
 npx cross-env NODE_ENV=development npm run seed
-
 ```
 
 ## 🗄️ **Database Schema**
