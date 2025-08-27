@@ -108,7 +108,7 @@ export class UsersService {
     await this.emailService.sendPasswordResetEmail(user.email, token);
   }
 
-  async resetPassword(token: string, password: string): Promise<void> {
+  async resetPassword(token: string, password: string): Promise<User> {
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
     const user = await this.usersRepository.findOne({
       where: {
@@ -123,6 +123,7 @@ export class UsersService {
     user.passwordResetToken = null;
     user.passwordResetExpires = null;
     await this.usersRepository.save(user);
+    return user;
   }
 
   async updateProfile(id: number, dto: UpdateUserDto): Promise<User> {
