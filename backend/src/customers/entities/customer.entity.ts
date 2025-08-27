@@ -1,5 +1,6 @@
 import { Job } from '../../jobs/entities/job.entity';
 import { Address } from './address.entity';
+import { User } from '../../users/user.entity';
 
 import {
   Entity,
@@ -8,6 +9,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  OneToOne,
+  JoinColumn,
   Index,
 } from 'typeorm';
 
@@ -32,6 +35,16 @@ export class Customer {
 
   @Column({ type: 'boolean', default: true })
   active: boolean;
+
+  @Column({ nullable: true })
+  userId?: number;
+
+  @OneToOne(() => User, (user) => user.customer, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'userId' })
+  user?: User;
 
   @CreateDateColumn()
   createdAt: Date;

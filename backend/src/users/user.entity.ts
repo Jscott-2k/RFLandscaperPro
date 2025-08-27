@@ -5,8 +5,10 @@ import {
   BeforeInsert,
   BeforeUpdate,
   Index,
+  OneToOne,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Customer } from '../customers/entities/customer.entity';
 
 export enum UserRole {
   Admin = 'admin',
@@ -37,6 +39,9 @@ export class User {
 
   @Column({ type: 'timestamptz', nullable: true })
   passwordResetExpires: Date | null;
+
+  @OneToOne(() => Customer, (customer) => customer.user)
+  customer?: Customer;
 
   @BeforeInsert()
   @BeforeUpdate()

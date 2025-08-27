@@ -79,6 +79,17 @@ export class CustomersService {
     return this.toCustomerResponseDto(customer);
   }
 
+  async findByUserId(userId: number): Promise<CustomerResponseDto> {
+    const customer = await this.customerRepository.findOne({
+      where: { userId },
+      relations: ['jobs', 'addresses'],
+    });
+    if (!customer) {
+      throw new NotFoundException(`Customer with userId ${userId} not found.`);
+    }
+    return this.toCustomerResponseDto(customer);
+  }
+
   async update(
     id: number,
     updateCustomerDto: UpdateCustomerDto,
@@ -120,6 +131,7 @@ export class CustomersService {
       active: customer.active,
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt,
+      userId: customer.userId,
       jobs: customer.jobs?.map((job) => ({
         id: job.id,
         title: job.title,

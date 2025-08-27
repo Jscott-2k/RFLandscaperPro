@@ -10,10 +10,11 @@ import * as crypto from 'crypto';
 
 import { EmailService } from '../common/email.service';
 
-import { User } from './user.entity';
+import { User, UserRole } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { validatePasswordStrength } from '../auth/password.util';
+import { Customer } from '../customers/entities/customer.entity';
 
 const UNIQUE_VIOLATION = '23505';
 
@@ -22,6 +23,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Customer)
+    private readonly customerRepository: Repository<Customer>,
     private readonly emailService: EmailService,
   ) {}
 
@@ -41,7 +44,18 @@ export class UsersService {
     const user = this.usersRepository.create(createUserDto);
 
     try {
-      return await this.usersRepository.save(user);
+      const savedUser = await this.usersRepository.save(user);
+
+      if (savedUser.role === UserRole.Customer) {
+        const customer = this.customerRepository.create({
+          name: savedUser.username,
+          email: savedUser.email,
+          userId: savedUser.id,
+        });
+        await this.customerRepository.save(customer);
+      }
+
+      return savedUser;
     } catch (error) {
       if (error instanceof QueryFailedError) {
         const { code } = error.driverError as { code?: string };

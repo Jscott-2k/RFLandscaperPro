@@ -4,6 +4,7 @@ import { QueryFailedError, Repository } from 'typeorm';
 
 import { UsersService } from '../users.service';
 import { User, UserRole } from '../user.entity';
+import { Customer } from '../../customers/entities/customer.entity';
 import { EmailService } from '../../common/email.service';
 
 const UNIQUE_VIOLATION = '23505';
@@ -12,6 +13,9 @@ describe('UsersService', () => {
   let service: UsersService;
   let usersRepository: jest.Mocked<
     Pick<Repository<User>, 'create' | 'save' | 'findOne'>
+  >;
+  let customerRepository: jest.Mocked<
+    Pick<Repository<Customer>, 'create' | 'save'>
   >;
   let emailService: {
     sendPasswordResetEmail: jest.Mock<void, [string, string]>;
@@ -30,17 +34,27 @@ describe('UsersService', () => {
         if (user.password) {
           await user.hashPassword();
         }
+        if (!user.id) {
+          user.id = 1;
+        }
         return user;
       }),
       findOne: jest.fn(),
     } as unknown as jest.Mocked<
       Pick<Repository<User>, 'create' | 'save' | 'findOne'>
     >;
+    customerRepository = {
+      create: jest.fn((dto) => Object.assign(new Customer(), dto) as Customer),
+      save: jest.fn(async (customer: Customer) => customer),
+    } as unknown as jest.Mocked<
+      Pick<Repository<Customer>, 'create' | 'save'>
+    >;
     emailService = {
       sendPasswordResetEmail: jest.fn<void, [string, string]>(),
     };
     service = new UsersService(
       usersRepository as unknown as Repository<User>,
+      customerRepository as unknown as Repository<Customer>,
       emailService as unknown as EmailService,
     );
   });
@@ -69,6 +83,12 @@ describe('UsersService', () => {
       password: 'secret',
     });
     expect(user.role).toBe(UserRole.Customer);
+    expect(customerRepository.create).toHaveBeenCalledWith({
+      name: 'user2',
+      email: 'user2@example.com',
+      userId: 1,
+    });
+    expect(customerRepository.save).toHaveBeenCalled();
   });
 
   it('throws conflict when username exists', async () => {
