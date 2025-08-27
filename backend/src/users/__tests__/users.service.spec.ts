@@ -51,11 +51,11 @@ describe('UsersService', () => {
     >;
     customerRepository = {
       create: jest.fn((dto) => Object.assign(new Customer(), dto) as Customer),
-      save: jest.fn(async (customer: Customer) => customer),
+      save: jest.fn((customer: Customer) => customer),
     } as unknown as jest.Mocked<Pick<Repository<Customer>, 'create' | 'save'>>;
     companyRepository = {
       create: jest.fn((dto) => Object.assign(new Company(), dto) as Company),
-      save: jest.fn(async (company: Company) => {
+      save: jest.fn((company: Company) => {
         if (!company.id) {
           company.id = 1;
         }
