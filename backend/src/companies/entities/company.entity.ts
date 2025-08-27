@@ -7,6 +7,9 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from '../../users/user.entity';
+import { Customer } from '../../customers/entities/customer.entity';
+import { Equipment } from '../../equipment/entities/equipment.entity';
+import { Job } from '../../jobs/entities/job.entity';
 
 @Entity()
 export class Company {
@@ -25,4 +28,13 @@ export class Company {
 
   @OneToMany(() => User, (user) => user.company)
   users: User[];
+
+  @OneToMany(() => Customer, (customer) => customer.company)
+  customers: Customer[];
+
+  @OneToMany(() => Equipment, (equipment) => equipment.company)
+  equipment: Equipment[];
+
+  @OneToMany(() => Job, (job) => job.company)
+  jobs: Job[];
 }

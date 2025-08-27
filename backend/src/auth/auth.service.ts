@@ -33,11 +33,20 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload = { username: user.username, sub: user.id, role: user.role };
+
+    const payload = {
+      username: user.username,
+      sub: user.id,
+      role: user.role,
+      companyId: user.companyId,
+    };
+
+
     const refreshToken = await this.jwtService.signAsync(payload, {
       expiresIn: '7d',
     });
     await this.saveRefreshToken(user.id, refreshToken);
+
     return {
       access_token: await this.jwtService.signAsync(payload),
       refresh_token: refreshToken,
@@ -80,6 +89,7 @@ export class AuthService {
         username: string;
         sub: number;
         role: UserRole;
+        companyId: number;
       }>(token);
       const hashed = this.hashToken(token);
       const tokenEntity = await this.refreshTokenRepository.findOne({
@@ -104,6 +114,7 @@ export class AuthService {
           username: payload.username,
           sub: payload.sub,
           role: payload.role,
+          companyId: payload.companyId,
         }),
         refresh_token: newRefresh,
       };

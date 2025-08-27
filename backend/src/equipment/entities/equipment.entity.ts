@@ -5,7 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { Company } from '../../companies/entities/company.entity';
 
 export enum EquipmentType {
   MOWER = 'mower',
@@ -52,6 +55,15 @@ export class Equipment {
 
   @Column({ type: 'date', nullable: true })
   lastMaintenanceDate?: Date;
+
+  @Column()
+  companyId: number;
+
+  @ManyToOne(() => Company, (company) => company.equipment, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'companyId' })
+  company: Company;
 
   @CreateDateColumn()
   createdAt: Date;
