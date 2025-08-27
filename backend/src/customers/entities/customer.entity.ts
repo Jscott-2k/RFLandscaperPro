@@ -1,6 +1,7 @@
 import { Job } from '../../jobs/entities/job.entity';
 import { Address } from './address.entity';
 import { User } from '../../users/user.entity';
+import { Company } from '../../companies/entities/company.entity';
 
 import {
   Entity,
@@ -12,6 +13,7 @@ import {
   OneToOne,
   JoinColumn,
   Index,
+  ManyToOne,
 } from 'typeorm';
 
 @Entity()
@@ -35,6 +37,15 @@ export class Customer {
 
   @Column({ type: 'boolean', default: true })
   active: boolean;
+
+  @Column()
+  companyId: number;
+
+  @ManyToOne(() => Company, (company) => company.customers, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'companyId' })
+  company: Company;
 
   @Column({ nullable: true })
   userId?: number;

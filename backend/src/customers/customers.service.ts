@@ -21,9 +21,13 @@ export class CustomersService {
 
   async create(
     createCustomerDto: CreateCustomerDto,
+    companyId: number,
   ): Promise<CustomerResponseDto> {
     try {
-      const customer = this.customerRepository.create(createCustomerDto);
+      const customer = this.customerRepository.create({
+        ...createCustomerDto,
+        companyId,
+      });
       const savedCustomer = await this.customerRepository.save(customer);
       return this.toCustomerResponseDto(savedCustomer);
     } catch (error) {
@@ -43,6 +47,7 @@ export class CustomersService {
 
   async findAll(
     pagination: PaginationQueryDto,
+    companyId: number,
     active?: boolean,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
     const { page = 1, limit = 10 } = pagination;
@@ -50,7 +55,8 @@ export class CustomersService {
     const queryBuilder = this.customerRepository
       .createQueryBuilder('customer')
       .leftJoinAndSelect('customer.jobs', 'jobs')
-      .leftJoinAndSelect('customer.addresses', 'addresses');
+      .leftJoinAndSelect('customer.addresses', 'addresses')
+      .where('customer.companyId = :companyId', { companyId });
 
     if (active !== undefined) {
       queryBuilder.andWhere('customer.active = :active', { active });
@@ -68,9 +74,9 @@ export class CustomersService {
     };
   }
 
-  async findOne(id: number): Promise<CustomerResponseDto> {
+  async findOne(id: number, companyId: number): Promise<CustomerResponseDto> {
     const customer = await this.customerRepository.findOne({
-      where: { id },
+      where: { id, companyId },
       relations: ['jobs', 'addresses'],
     });
     if (!customer) {
@@ -79,9 +85,12 @@ export class CustomersService {
     return this.toCustomerResponseDto(customer);
   }
 
-  async findByUserId(userId: number): Promise<CustomerResponseDto> {
+  async findByUserId(
+    userId: number,
+    companyId: number,
+  ): Promise<CustomerResponseDto> {
     const customer = await this.customerRepository.findOne({
-      where: { userId },
+      where: { userId, companyId },
       relations: ['jobs', 'addresses'],
     });
     if (!customer) {
@@ -93,8 +102,11 @@ export class CustomersService {
   async update(
     id: number,
     updateCustomerDto: UpdateCustomerDto,
+    companyId: number,
   ): Promise<CustomerResponseDto> {
-    const customer = await this.customerRepository.findOne({ where: { id } });
+    const customer = await this.customerRepository.findOne({
+      where: { id, companyId },
+    });
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${id} not found.`);
     }
@@ -103,22 +115,30 @@ export class CustomersService {
     return this.toCustomerResponseDto(updatedCustomer);
   }
 
-  async remove(id: number): Promise<void> {
-    const customer = await this.customerRepository.findOne({ where: { id } });
+  async remove(id: number, companyId: number): Promise<void> {
+    const customer = await this.customerRepository.findOne({
+      where: { id, companyId },
+    });
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${id} not found.`);
     }
     await this.customerRepository.remove(customer);
   }
 
-  async deactivate(id: number): Promise<CustomerResponseDto> {
-    await this.findOne(id);
-    return this.update(id, { active: false });
+  async deactivate(
+    id: number,
+    companyId: number,
+  ): Promise<CustomerResponseDto> {
+    await this.findOne(id, companyId);
+    return this.update(id, { active: false }, companyId);
   }
 
-  async activate(id: number): Promise<CustomerResponseDto> {
-    await this.findOne(id);
-    return this.update(id, { active: true });
+  async activate(
+    id: number,
+    companyId: number,
+  ): Promise<CustomerResponseDto> {
+    await this.findOne(id, companyId);
+    return this.update(id, { active: true }, companyId);
   }
 
   private toCustomerResponseDto(customer: Customer): CustomerResponseDto {
