@@ -119,9 +119,9 @@ describe('JobsService', () => {
     assignmentRepository.createQueryBuilder.mockReturnValue(qb);
 
     const scheduleJobDto: ScheduleJobDto = { scheduledDate: date };
-    await expect(
-      service.schedule(1, scheduleJobDto),
-    ).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.schedule(1, scheduleJobDto)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
   });
 
   it('should throw ConflictException when assigning user or equipment already booked', async () => {
@@ -143,8 +143,8 @@ describe('JobsService', () => {
     assignmentRepository.createQueryBuilder.mockReturnValue(qb);
 
     const assignJobDto: AssignJobDto = { userId: 1, equipmentId: 2 };
-    await expect(
-      service.assign(1, assignJobDto),
-    ).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.assign(1, assignJobDto)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
   });
 });
