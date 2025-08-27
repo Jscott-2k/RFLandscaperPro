@@ -13,10 +13,7 @@ const UNIQUE_VIOLATION = '23505';
 describe('UsersService', () => {
   let service: UsersService;
   let usersRepository: jest.Mocked<
-    Pick<
-      Repository<User>,
-      'create' | 'save' | 'findOne' | 'find' | 'remove'
-    >
+    Pick<Repository<User>, 'create' | 'save' | 'findOne' | 'find' | 'remove'>
   >;
   let customerRepository: jest.Mocked<
     Pick<Repository<Customer>, 'create' | 'save'>
@@ -50,17 +47,12 @@ describe('UsersService', () => {
       find: jest.fn(),
       remove: jest.fn(),
     } as unknown as jest.Mocked<
-      Pick<
-        Repository<User>,
-        'create' | 'save' | 'findOne' | 'find' | 'remove'
-      >
+      Pick<Repository<User>, 'create' | 'save' | 'findOne' | 'find' | 'remove'>
     >;
     customerRepository = {
       create: jest.fn((dto) => Object.assign(new Customer(), dto) as Customer),
       save: jest.fn(async (customer: Customer) => customer),
-    } as unknown as jest.Mocked<
-      Pick<Repository<Customer>, 'create' | 'save'>
-    >;
+    } as unknown as jest.Mocked<Pick<Repository<Customer>, 'create' | 'save'>>;
     companyRepository = {
       create: jest.fn((dto) => Object.assign(new Company(), dto) as Company),
       save: jest.fn(async (company: Company) => {
@@ -69,9 +61,7 @@ describe('UsersService', () => {
         }
         return company;
       }),
-    } as unknown as jest.Mocked<
-      Pick<Repository<Company>, 'create' | 'save'>
-    >;
+    } as unknown as jest.Mocked<Pick<Repository<Company>, 'create' | 'save'>>;
     emailService = {
       sendPasswordResetEmail: jest.fn<void, [string, string]>(),
     };

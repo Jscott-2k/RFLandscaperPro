@@ -13,7 +13,6 @@ import {
   BadRequestException,
   HttpCode,
   HttpStatus,
-
 } from '@nestjs/common';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UsersService } from './users.service';

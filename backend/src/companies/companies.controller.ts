@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Get,
-  NotFoundException,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, NotFoundException, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CompaniesService } from './companies.service';
 import { CompanyResponseDto } from './dto/company-response.dto';
@@ -26,9 +21,7 @@ export class CompaniesController {
   async getProfile(
     @Req() req: { user: { userId: number } },
   ): Promise<CompanyResponseDto> {
-    const company = await this.companiesService.findByUserId(
-      req.user.userId,
-    );
+    const company = await this.companiesService.findByUserId(req.user.userId);
     if (!company) throw new NotFoundException('Company not found');
     return { id: company.id, name: company.name };
   }

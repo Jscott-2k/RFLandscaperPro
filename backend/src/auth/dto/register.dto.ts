@@ -1,5 +1,11 @@
-
-import { IsEmail, IsString, MinLength, Matches, IsEnum, IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  Matches,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PASSWORD_REGEX } from '../password.util';
@@ -52,5 +58,4 @@ export class RegisterDto {
   @IsString()
   @IsOptional()
   phone?: string;
-
 }
