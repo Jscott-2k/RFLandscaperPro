@@ -1,6 +1,6 @@
 import { Module, LoggerService } from '@nestjs/common';
 import { CacheModule, CacheInterceptor } from '@nestjs/cache-manager';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import {
   PrometheusModule,
   makeHistogramProvider,
@@ -17,13 +17,14 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
+import { MetricsThrottlerGuard } from './common/guards/metrics-throttler.guard';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { LoggerModule } from './logger/logger.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 @Module({
   imports: [
-    PrometheusModule.register(),
+    PrometheusModule.register({ path: '/metrics' }),
     LoggerModule,
     ConfigModule.forRoot({
       envFilePath: `.env.${process.env.NODE_ENV}`,
@@ -115,7 +116,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     },
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: MetricsThrottlerGuard,
     },
     {
       provide: APP_GUARD,
