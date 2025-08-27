@@ -39,6 +39,7 @@ export class AuthService {
       user: {
         id: user.id,
         username: user.username,
+        email: user.email,
         role: user.role,
       },
     };
@@ -51,8 +52,8 @@ export class AuthService {
     return this.usersService.create(registerDto);
   }
 
-  async requestPasswordReset(username: string): Promise<void> {
-    await this.usersService.requestPasswordReset(username);
+  async requestPasswordReset(email: string): Promise<void> {
+    await this.usersService.requestPasswordReset(email);
   }
 
   async resetPassword(token: string, password: string): Promise<void> {

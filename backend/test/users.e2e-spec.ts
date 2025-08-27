@@ -31,7 +31,11 @@ describe('UsersController (e2e)', () => {
   it('POST /users returns 403 for non-admin', () => {
     return request(app.getHttpServer())
       .post('/users')
-      .send({ username: 'user', password: 'SecurePass123!' })
+      .send({
+        username: 'user',
+        email: 'user@example.com',
+        password: 'SecurePass123!',
+      })
       .expect(403);
   });
 });

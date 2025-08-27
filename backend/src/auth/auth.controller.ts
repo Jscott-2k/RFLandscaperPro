@@ -47,7 +47,7 @@ export class AuthController {
   async requestPasswordReset(
     @Body() requestDto: RequestPasswordResetDto,
   ): Promise<{ message: string }> {
-    await this.authService.requestPasswordReset(requestDto.username);
+    await this.authService.requestPasswordReset(requestDto.email);
     return { message: 'Password reset token sent' };
   }
 

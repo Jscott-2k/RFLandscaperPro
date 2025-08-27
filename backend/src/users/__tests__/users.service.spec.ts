@@ -47,9 +47,14 @@ describe('UsersService', () => {
 
   it('hashes passwords before saving', async () => {
     const password = 'plainpassword';
-    const user = await service.create({ username: 'user1', password });
+    const user = await service.create({
+      username: 'user1',
+      email: 'user1@example.com',
+      password,
+    });
     expect(usersRepository.create).toHaveBeenCalledWith({
       username: 'user1',
+      email: 'user1@example.com',
       password,
     });
     expect(user.password).not.toBe(password);
@@ -60,6 +65,7 @@ describe('UsersService', () => {
   it('assigns default role when none provided', async () => {
     const user = await service.create({
       username: 'user2',
+      email: 'user2@example.com',
       password: 'secret',
     });
     expect(user.role).toBe(UserRole.Customer);
@@ -74,26 +80,33 @@ describe('UsersService', () => {
     usersRepository.save.mockRejectedValueOnce(error);
 
     await expect(
-      service.create({ username: 'existing', password: 'secret' }),
+      service.create({
+        username: 'existing',
+        email: 'existing@example.com',
+        password: 'secret',
+      }),
     ).rejects.toMatchObject({
-      message: 'Username already exists',
+      message: 'Username or email already exists',
       status: 409,
     });
   });
 
   it('generates reset token and emails user', async () => {
-    const user = Object.assign(new User(), { username: 'user3' });
+    const user = Object.assign(new User(), {
+      username: 'user3',
+      email: 'user3@example.com',
+    });
     usersRepository.findOne.mockResolvedValueOnce(user);
 
-    await service.requestPasswordReset('user3');
-    const [[emailUsername, rawToken]] =
+    await service.requestPasswordReset('user3@example.com');
+    const [[emailAddress, rawToken]] =
       emailService.sendPasswordResetEmail.mock.calls;
     const hashedToken = crypto
       .createHash('sha256')
       .update(rawToken)
       .digest('hex');
 
-    expect(emailUsername).toBe('user3');
+    expect(emailAddress).toBe('user3@example.com');
     expect(user.passwordResetToken).toBe(hashedToken);
     expect(user.passwordResetExpires).toBeInstanceOf(Date);
     expect(usersRepository.save).toHaveBeenCalledWith(user);
@@ -125,16 +138,19 @@ describe('UsersService', () => {
     const user = Object.assign(new User(), {
       id: 1,
       username: 'old',
+      email: 'old@example.com',
       password: 'oldpass',
     });
     usersRepository.findOne.mockResolvedValue(user);
 
     const updated = await service.updateProfile(1, {
       username: 'new',
+      email: 'new@example.com',
       password: 'Newpass1!',
     });
 
     expect(updated.username).toBe('new');
+    expect(updated.email).toBe('new@example.com');
     const isMatch = await bcrypt.compare('Newpass1!', updated.password);
     expect(isMatch).toBe(true);
     expect(usersRepository.save).toHaveBeenCalledWith(user);

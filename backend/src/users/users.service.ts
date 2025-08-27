@@ -28,6 +28,10 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { username } });
   }
 
+  findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { email } });
+  }
+
   findById(id: number): Promise<User | null> {
     return this.usersRepository.findOne({ where: { id } });
   }
@@ -41,15 +45,15 @@ export class UsersService {
       if (error instanceof QueryFailedError) {
         const { code } = error.driverError as { code?: string };
         if (code === UNIQUE_VIOLATION) {
-          throw new ConflictException('Username already exists');
+          throw new ConflictException('Username or email already exists');
         }
       }
       throw error;
     }
   }
 
-  async requestPasswordReset(username: string): Promise<void> {
-    const user = await this.findByUsername(username);
+  async requestPasswordReset(email: string): Promise<void> {
+    const user = await this.findByEmail(email);
     if (!user) {
       return;
     }
@@ -58,7 +62,7 @@ export class UsersService {
     user.passwordResetToken = hashedToken;
     user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
     await this.usersRepository.save(user);
-    await this.emailService.sendPasswordResetEmail(user.username, token);
+    await this.emailService.sendPasswordResetEmail(user.email, token);
   }
 
   async resetPassword(token: string, password: string): Promise<void> {
@@ -92,6 +96,10 @@ export class UsersService {
     if (dto.password !== undefined) {
       this.validatePasswordStrength(dto.password);
       user.password = dto.password;
+    }
+
+    if (dto.email !== undefined) {
+      user.email = dto.email;
     }
 
     return this.usersRepository.save(user);

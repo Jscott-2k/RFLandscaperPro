@@ -5,6 +5,7 @@ export function toUserResponseDto(user: User): UserResponseDto {
   return {
     id: user.id,
     username: user.username,
+    email: user.email,
     role: user.role,
     passwordResetToken: user.passwordResetToken ?? null,
     passwordResetExpires: user.passwordResetExpires ?? null,
