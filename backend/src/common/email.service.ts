@@ -1,56 +1,67 @@
 import { Injectable, Logger } from '@nestjs/common';
+import nodemailer, { Transporter } from 'nodemailer';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
+  private readonly transporter: Transporter;
 
-  sendPasswordResetEmail(username: string, token: string): void {
-    try {
-      // Integrate with an email provider to deliver the token in production.
-      // Currently logs the token for development purposes.
-      this.logger.log(`Password reset token for ${username}: ${token}`);
-
-      // Example with a hypothetical email service:
-      // await this.emailProvider.send({
-      //   to: username,
-      //   subject: 'Password Reset Request',
-      //   template: 'password-reset',
-      //   context: { token, username }
-      // });
-
-      this.logger.log(`Password reset email sent to ${username}`);
-    } catch (error) {
-      this.logger.error(
-        `Failed to send password reset email to ${username}:`,
-        error,
-      );
-      // Don't throw error to avoid exposing internal failures to user
-      // In production, you might want to queue this for retry
-    }
+  constructor() {
+    this.transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure: Number(process.env.SMTP_PORT) === 465,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
   }
 
-  sendWelcomeEmail(username: string, email: string): void {
+  private async sendMail(
+    options: nodemailer.SendMailOptions,
+  ): Promise<void> {
     try {
-      this.logger.log(`Welcome email sent to ${username} at ${email}`);
-
-      // Replace log with a real welcome email implementation.
-    } catch (error) {
-      this.logger.error(`Failed to send welcome email to ${username}:`, error);
-    }
-  }
-
-  sendJobAssignmentNotification(username: string, jobTitle: string): void {
-    try {
-      this.logger.log(
-        `Job assignment notification sent to ${username} for job: ${jobTitle}`,
-      );
-
-      // Replace log with a real job assignment notification implementation.
+      await this.transporter.sendMail({
+        from: process.env.SMTP_FROM,
+        ...options,
+      });
+      this.logger.log(`Email sent to ${options.to}`);
     } catch (error) {
       this.logger.error(
-        `Failed to send job assignment notification to ${username}:`,
+        `Failed to send email to ${options.to}:`,
         error,
       );
     }
+  }
+
+  async sendPasswordResetEmail(
+    username: string,
+    token: string,
+  ): Promise<void> {
+    await this.sendMail({
+      to: username,
+      subject: 'Password Reset Request',
+      text: `Your password reset token is: ${token}`,
+    });
+  }
+
+  async sendWelcomeEmail(username: string, email: string): Promise<void> {
+    await this.sendMail({
+      to: email,
+      subject: 'Welcome to RF Landscaper Pro',
+      text: `Welcome ${username}!`,
+    });
+  }
+
+  async sendJobAssignmentNotification(
+    username: string,
+    jobTitle: string,
+  ): Promise<void> {
+    await this.sendMail({
+      to: username,
+      subject: 'Job Assignment Notification',
+      text: `You have been assigned to job: ${jobTitle}`,
+    });
   }
 }
