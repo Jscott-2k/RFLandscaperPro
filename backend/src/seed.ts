@@ -4,7 +4,7 @@ import { User, UserRole } from './users/user.entity';
 import { Customer } from './customers/entities/customer.entity';
 
 async function seed() {
-  let dataSourceInstance: DataSource;
+  let dataSourceInstance: DataSource | undefined;
 
   try {
     dataSourceInstance = await dataSource.initialize();

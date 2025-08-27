@@ -7,6 +7,10 @@ FROM node:${NODE_VERSION}-slim AS base
 # ---- Set working directory ----
 WORKDIR /app
 
+# ---- Set default environment ----
+# Allows NestJS to fall back to .env.development when run via `docker run`
+ENV NODE_ENV=development
+
 # ---- Install dependencies ----
 COPY package*.json ./
 RUN npm install

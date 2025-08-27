@@ -15,7 +15,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as basicAuth from 'express-basic-auth';
 
 async function bootstrap() {
-  let app: INestApplication;
+  let app: INestApplication | undefined;
   const logger = new Logger('Bootstrap');
 
   try {

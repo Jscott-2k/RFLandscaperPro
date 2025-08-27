@@ -15,7 +15,7 @@ import { Request, Response } from 'express';
 import { getRequestId } from '../middleware/request-id.middleware';
 
 interface RequestWithRoute extends Request {
-  route?: { path?: string };
+  route: { path?: string };
 }
 
 @Injectable()
