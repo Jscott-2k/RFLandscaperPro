@@ -13,7 +13,9 @@ describe('UsersService', () => {
   let usersRepository: jest.Mocked<
     Pick<Repository<User>, 'create' | 'save' | 'findOne'>
   >;
-  let emailService: { sendPasswordResetEmail: jest.Mock<[string, string]> };
+  let emailService: {
+    sendPasswordResetEmail: jest.Mock<void, [string, string]>;
+  };
 
   beforeEach(() => {
     usersRepository = {
@@ -34,7 +36,9 @@ describe('UsersService', () => {
     } as unknown as jest.Mocked<
       Pick<Repository<User>, 'create' | 'save' | 'findOne'>
     >;
-    emailService = { sendPasswordResetEmail: jest.fn() };
+    emailService = {
+      sendPasswordResetEmail: jest.fn<void, [string, string]>(),
+    };
     service = new UsersService(
       usersRepository as unknown as Repository<User>,
       emailService as unknown as EmailService,
@@ -83,7 +87,7 @@ describe('UsersService', () => {
 
     await service.requestPasswordReset('user3');
     const [[emailUsername, rawToken]] =
-      emailService.sendPasswordResetEmail.mock.calls as [string, string][];
+      emailService.sendPasswordResetEmail.mock.calls;
     const hashedToken = crypto
       .createHash('sha256')
       .update(rawToken)
