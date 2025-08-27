@@ -21,11 +21,13 @@ import { MetricsThrottlerGuard } from './common/guards/metrics-throttler.guard';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { LoggerModule } from './logger/logger.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
-    PrometheusModule.register({ path: '/metrics' }),
+    PrometheusModule.register(),
     LoggerModule,
+    MetricsModule,
     ConfigModule.forRoot({
       envFilePath: `.env.${process.env.NODE_ENV}`,
       isGlobal: true,
