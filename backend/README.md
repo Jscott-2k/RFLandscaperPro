@@ -49,6 +49,8 @@ JWT_SECRET=your_secure_jwt_secret
 LOG_LEVEL=debug
 ```
 
+> **Note:** SMTP settings are only required in production. During development and testing, the app uses an Ethereal account automatically and logs preview URLs for any emails sent.
+
 ### **3. Database Setup**
 ```bash
 # Create PostgreSQL database
