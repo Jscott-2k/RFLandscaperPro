@@ -18,27 +18,28 @@ export class EmailService {
     });
   }
 
-  private async sendMail(
-    options: nodemailer.SendMailOptions,
-  ): Promise<void> {
+  private formatRecipients(to: nodemailer.SendMailOptions['to']): string {
+    const extract = (address: string | { address: string }): string =>
+      typeof address === 'string' ? address : address.address;
+    if (!to) return 'unknown';
+    return Array.isArray(to) ? to.map(extract).join(', ') : extract(to);
+  }
+
+  private async sendMail(options: nodemailer.SendMailOptions): Promise<void> {
     try {
       await this.transporter.sendMail({
         from: process.env.SMTP_FROM,
         ...options,
       });
-      this.logger.log(`Email sent to ${options.to}`);
+      const recipients = this.formatRecipients(options.to);
+      this.logger.log(`Email sent to ${recipients}`);
     } catch (error) {
-      this.logger.error(
-        `Failed to send email to ${options.to}:`,
-        error,
-      );
+      const recipients = this.formatRecipients(options.to);
+      this.logger.error(`Failed to send email to ${recipients}:`, error);
     }
   }
 
-  async sendPasswordResetEmail(
-    username: string,
-    token: string,
-  ): Promise<void> {
+  async sendPasswordResetEmail(username: string, token: string): Promise<void> {
     await this.sendMail({
       to: username,
       subject: 'Password Reset Request',
