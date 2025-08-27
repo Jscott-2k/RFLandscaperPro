@@ -47,7 +47,10 @@ export class CustomersService {
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
     const { page = 1, limit = 10 } = pagination;
     const cappedLimit = Math.min(limit, 100);
-    const queryBuilder = this.customerRepository.createQueryBuilder('customer');
+    const queryBuilder = this.customerRepository
+      .createQueryBuilder('customer')
+      .leftJoinAndSelect('customer.jobs', 'jobs')
+      .leftJoinAndSelect('customer.addresses', 'addresses');
 
     if (active !== undefined) {
       queryBuilder.andWhere('customer.active = :active', { active });
@@ -66,7 +69,10 @@ export class CustomersService {
   }
 
   async findOne(id: number): Promise<CustomerResponseDto> {
-    const customer = await this.customerRepository.findOne({ where: { id } });
+    const customer = await this.customerRepository.findOne({
+      where: { id },
+      relations: ['jobs', 'addresses'],
+    });
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${id} not found.`);
     }
