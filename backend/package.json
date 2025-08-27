@@ -23,7 +23,7 @@
     "migration:generate": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:generate -d data-source.ts src/migrations",
     "migration:run": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:run -d data-source.ts",
     "migration:revert": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:revert -d data-source.ts",
-    "seed": "ts-node -r dotenv/config src/seed.ts"
+    "seed": "ts-node src/seed.ts"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.1",
@@ -72,6 +72,7 @@
     "@types/nodemailer": "^7.0.1",
     "@types/passport-jwt": "^3.0.9",
     "@types/supertest": "^6.0.2",
+    "cross-env": "^10.0.0",
     "dotenv-cli": "^10.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
