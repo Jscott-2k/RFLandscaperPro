@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  ParseBoolPipe,
   Query,
   HttpCode,
   HttpStatus,
@@ -53,11 +54,17 @@ export class JobsController {
   @ApiOperation({ summary: 'List jobs' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'completed', required: false, type: Boolean })
+  @ApiQuery({ name: 'customerId', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'List of jobs' })
   findAll(
     @Query() pagination: PaginationQueryDto,
+    @Query('completed', new ParseBoolPipe({ optional: true }))
+    completed?: boolean,
+    @Query('customerId', new ParseIntPipe({ optional: true }))
+    customerId?: number,
   ): Promise<{ items: JobResponseDto[]; total: number }> {
-    return this.jobsService.findAll(pagination);
+    return this.jobsService.findAll(pagination, completed, customerId);
   }
 
   @Get(':id')
