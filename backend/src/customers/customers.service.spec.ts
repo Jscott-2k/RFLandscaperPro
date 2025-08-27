@@ -60,4 +60,36 @@ describe('CustomersService', () => {
       'Email already exists',
     );
   });
+
+  it('activates a customer', async () => {
+    const customer = {} as any;
+    const findOneSpy = jest
+      .spyOn(service, 'findOne')
+      .mockResolvedValue(customer);
+    const updateSpy = jest
+      .spyOn(service, 'update')
+      .mockResolvedValue(customer);
+
+    const result = await service.activate(1);
+
+    expect(findOneSpy).toHaveBeenCalledWith(1);
+    expect(updateSpy).toHaveBeenCalledWith(1, { active: true });
+    expect(result).toBe(customer);
+  });
+
+  it('deactivates a customer', async () => {
+    const customer = {} as any;
+    const findOneSpy = jest
+      .spyOn(service, 'findOne')
+      .mockResolvedValue(customer);
+    const updateSpy = jest
+      .spyOn(service, 'update')
+      .mockResolvedValue(customer);
+
+    const result = await service.deactivate(2);
+
+    expect(findOneSpy).toHaveBeenCalledWith(2);
+    expect(updateSpy).toHaveBeenCalledWith(2, { active: false });
+    expect(result).toBe(customer);
+  });
 });
