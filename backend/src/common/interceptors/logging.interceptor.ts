@@ -14,6 +14,10 @@ import { finalize } from 'rxjs/operators';
 import { Request, Response } from 'express';
 import { getRequestId } from '../middleware/request-id.middleware';
 
+interface RequestWithRoute extends Request {
+  route?: { path?: string };
+}
+
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   constructor(
@@ -27,7 +31,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest<Request>();
     const { method, url } = request;
-    const routePath = (request.route?.path as string | undefined) ?? url;
+    const routePath = (request as RequestWithRoute).route?.path ?? url;
     const start = Date.now();
 
     return next.handle().pipe(
