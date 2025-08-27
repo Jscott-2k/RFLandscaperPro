@@ -1,12 +1,9 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { User, UserRole } from '../users/user.entity';
 import { RegisterDto } from './dto/register.dto';
+import { validatePasswordStrength } from './password.util';
 
 @Injectable()
 export class AuthService {
@@ -46,7 +43,7 @@ export class AuthService {
 
   async register(registerDto: RegisterDto): Promise<User> {
     // Validate password strength
-    this.validatePasswordStrength(registerDto.password);
+    validatePasswordStrength(registerDto.password);
 
     return this.usersService.create(registerDto);
   }
@@ -57,7 +54,7 @@ export class AuthService {
 
   async resetPassword(token: string, password: string): Promise<void> {
     // Validate new password strength
-    this.validatePasswordStrength(password);
+    validatePasswordStrength(password);
 
     await this.usersService.resetPassword(token, password);
   }
@@ -78,38 +75,6 @@ export class AuthService {
       };
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
-    }
-  }
-
-  private validatePasswordStrength(password: string): void {
-    if (password.length < 8) {
-      throw new BadRequestException(
-        'Password must be at least 8 characters long',
-      );
-    }
-
-    if (!/(?=.*[a-z])/.test(password)) {
-      throw new BadRequestException(
-        'Password must contain at least one lowercase letter',
-      );
-    }
-
-    if (!/(?=.*[A-Z])/.test(password)) {
-      throw new BadRequestException(
-        'Password must contain at least one uppercase letter',
-      );
-    }
-
-    if (!/(?=.*\d)/.test(password)) {
-      throw new BadRequestException(
-        'Password must contain at least one number',
-      );
-    }
-
-    if (!/(?=.*[@$!%*?&])/.test(password)) {
-      throw new BadRequestException(
-        'Password must contain at least one special character (@$!%*?&)',
-      );
     }
   }
 }

@@ -13,6 +13,7 @@ import { EmailService } from '../common/email.service';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { validatePasswordStrength } from '../auth/password.util';
 
 const UNIQUE_VIOLATION = '23505';
 
@@ -90,42 +91,10 @@ export class UsersService {
     }
 
     if (dto.password !== undefined) {
-      this.validatePasswordStrength(dto.password);
+      validatePasswordStrength(dto.password);
       user.password = dto.password;
     }
 
     return this.usersRepository.save(user);
-  }
-
-  private validatePasswordStrength(password: string): void {
-    if (password.length < 8) {
-      throw new BadRequestException(
-        'Password must be at least 8 characters long',
-      );
-    }
-
-    if (!/(?=.*[a-z])/.test(password)) {
-      throw new BadRequestException(
-        'Password must contain at least one lowercase letter',
-      );
-    }
-
-    if (!/(?=.*[A-Z])/.test(password)) {
-      throw new BadRequestException(
-        'Password must contain at least one uppercase letter',
-      );
-    }
-
-    if (!/(?=.*\d)/.test(password)) {
-      throw new BadRequestException(
-        'Password must contain at least one number',
-      );
-    }
-
-    if (!/(?=.*[@$!%*?&])/.test(password)) {
-      throw new BadRequestException(
-        'Password must contain at least one special character (@$!%*?&)',
-      );
-    }
   }
 }
