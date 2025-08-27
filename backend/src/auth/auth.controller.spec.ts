@@ -36,10 +36,15 @@ describe('AuthController', () => {
   });
 
   it('registers a new user without returning password', async () => {
-    const dto: RegisterDto = { username: 'user', password: 'pass' };
+    const dto: RegisterDto = {
+      username: 'user',
+      email: 'user@example.com',
+      password: 'pass',
+    };
     const user: User = {
       id: 1,
       username: 'user',
+      email: 'user@example.com',
       password: 'hashed',
       role: UserRole.Customer,
       passwordResetToken: null,
@@ -53,14 +58,17 @@ describe('AuthController', () => {
     expect(result).toEqual({
       id: 1,
       username: 'user',
+      email: 'user@example.com',
       role: UserRole.Customer,
     });
   });
 
   it('requests password reset', async () => {
-    const dto: RequestPasswordResetDto = { username: 'user' };
+    const dto: RequestPasswordResetDto = { email: 'user@example.com' };
     await controller.requestPasswordReset(dto);
-    expect(authService.requestPasswordReset).toHaveBeenCalledWith('user');
+    expect(authService.requestPasswordReset).toHaveBeenCalledWith(
+      'user@example.com',
+    );
   });
 
   it('resets password', async () => {

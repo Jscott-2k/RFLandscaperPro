@@ -6,6 +6,8 @@ export class UserResponseDto {
   id!: number;
   @ApiProperty()
   username!: string;
+  @ApiProperty()
+  email!: string;
   @ApiProperty({ enum: UserRole })
   role!: UserRole;
   @ApiProperty({ nullable: true })

@@ -25,6 +25,7 @@ async function seed() {
     if (!adminExists) {
       const admin = userRepo.create({
         username: 'admin',
+        email: 'admin@example.com',
         password: 'AdminSecure123!', // More secure password
         role: UserRole.Admin,
       });

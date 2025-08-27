@@ -1,4 +1,4 @@
-import { IsString, MinLength, Matches } from 'class-validator';
+import { IsEmail, IsString, MinLength, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { PASSWORD_REGEX } from '../password.util';
 
@@ -7,6 +7,10 @@ export class RegisterDto {
   @IsString()
   @MinLength(3, { message: 'Username must be at least 3 characters long' })
   username: string;
+
+  @ApiProperty({ description: 'Email must be unique' })
+  @IsEmail()
+  email: string;
 
   @ApiProperty({
     description:
