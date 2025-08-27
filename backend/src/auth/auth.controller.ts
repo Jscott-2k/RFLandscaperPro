@@ -31,12 +31,11 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'Created user' })
   async register(@Body() registerDto: RegisterDto) {
     const user = await this.authService.register(registerDto);
-    const {
-      password: _p,
-      passwordResetToken: _rt,
-      passwordResetExpires: _re,
-      ...result
-    } = user;
+    const { password, passwordResetToken, passwordResetExpires, ...result } =
+      user;
+    void passwordResetToken; // mark intentionally unused
+    void passwordResetExpires;
+    void password;
     return result;
   }
 
