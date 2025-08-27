@@ -73,7 +73,6 @@ export class UsersService {
       throw new BadRequestException('Invalid or expired token');
     }
     user.password = password;
-    await user.hashPassword();
     user.passwordResetToken = null;
     user.passwordResetExpires = null;
     await this.usersRepository.save(user);
