@@ -27,7 +27,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     PrometheusModule.register({ path: '/metrics' }),
     LoggerModule,
     ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV}`,
+      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
       isGlobal: true,
       validationSchema: Joi.object({
         NODE_ENV: Joi.string()
