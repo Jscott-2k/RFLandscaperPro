@@ -63,9 +63,12 @@ npm run migration:run
 npm run seed
 ```
 
-### **4. Start Development Server**
+### **4. Start Development Environment**
 ```bash
-# Start with hot reload
+# Preferred: start the full environment with Docker
+npm run dev:compose
+
+# Alternatively, run the NestJS server with hot reload
 npm run start:dev
 
 # Start with debugger
