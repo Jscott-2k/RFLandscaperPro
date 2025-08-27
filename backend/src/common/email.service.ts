@@ -1,43 +1,83 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
+type MailDriver = 'smtp' | 'ethereal';
+
+function parsePort(v: string | undefined, fallback: number): number {
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+function toError(e: unknown): Error {
+  return e instanceof Error
+    ? e
+    : new Error(typeof e === 'string' ? e : JSON.stringify(e));
+}
 
 @Injectable()
-export class EmailService {
+export class EmailService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(EmailService.name);
-  private transporter!: nodemailer.Transporter;
+  private transporter!: nodemailer.Transporter<SMTPTransport.SentMessageInfo>;
   private testAccount?: nodemailer.TestAccount;
-  private readonly ready: Promise<void>;
 
-  constructor() {
-    if (process.env.NODE_ENV === 'production') {
+  private readyResolve!: () => void;
+  private readonly ready = new Promise<void>(
+    (res) => (this.readyResolve = res),
+  );
+
+  private get driver(): MailDriver {
+    return process.env.NODE_ENV === 'production' ? 'smtp' : 'ethereal';
+  }
+
+  async onModuleInit(): Promise<void> {
+    const driver = this.driver;
+    this.logger.log(`Initializing EmailService with driver: ${driver}`);
+
+    if (driver === 'ethereal') {
+      this.testAccount = await nodemailer.createTestAccount();
+      this.transporter = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false,
+        auth: {
+          user: this.testAccount.user,
+          pass: this.testAccount.pass,
+        },
+      });
+    } else {
+      const port = parsePort(process.env.SMTP_PORT, 587);
       this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT) || 587,
-        secure: Number(process.env.SMTP_PORT) === 465,
+        port,
+        secure: port === 465,
         auth: {
           user: process.env.SMTP_USER,
           pass: process.env.SMTP_PASS,
         },
       });
-      this.ready = Promise.resolve();
-    } else {
-      this.ready = nodemailer
-        .createTestAccount()
-        .then((account: nodemailer.TestAccount) => {
-          this.testAccount = account;
-          this.transporter = nodemailer.createTransport({
-            host: 'smtp.ethereal.email',
-            port: 587,
-            secure: false,
-            auth: {
-              user: account.user,
-              pass: account.pass,
-            },
-          });
-        });
+
+      try {
+        await this.transporter.verify();
+        this.logger.log('SMTP transporter verified.');
+      } catch (e) {
+        const err = toError(e);
+        this.logger.warn(
+          `SMTP verify failed (will still try to send): ${err.message}`,
+        );
+      }
     }
+
+    this.readyResolve();
+  }
+
+  onModuleDestroy(): void {
+    this.transporter.close?.();
   }
 
   private formatRecipients(to: nodemailer.SendMailOptions['to']): string {
@@ -47,49 +87,78 @@ export class EmailService {
     return Array.isArray(to) ? to.map(extract).join(', ') : extract(to);
   }
 
-  private async sendMail(options: nodemailer.SendMailOptions): Promise<void> {
+  private async sendMail(
+    options: nodemailer.SendMailOptions,
+  ): Promise<{ messageId: string; previewUrl?: string }> {
     await this.ready;
+
+    const from =
+      process.env.SMTP_FROM ??
+      (this.testAccount?.user
+        ? `RF Landscaper Pro <${this.testAccount.user}>`
+        : 'RF Landscaper Pro <no-reply@rflandscaperpro.com>');
+
     try {
-      const info = await this.transporter.sendMail({
-        from: process.env.SMTP_FROM || this.testAccount?.user,
+      const mailOptions = {
+        from,
         ...options,
-      });
+      } satisfies nodemailer.SendMailOptions;
+      const info = await this.transporter.sendMail(mailOptions);
+
       const recipients = this.formatRecipients(options.to);
-      this.logger.log(`Email sent to ${recipients}`);
-      if (process.env.NODE_ENV !== 'production') {
+      this.logger.log(`Email sent to ${recipients} (id: ${info.messageId})`);
+
+      let previewUrl: string | undefined;
+      if (this.driver === 'ethereal') {
         const url = nodemailer.getTestMessageUrl(info);
-        if (url) this.logger.log(`Preview URL: ${url}`);
+        previewUrl = typeof url === 'string' ? url : undefined;
+        if (previewUrl) this.logger.log(`Preview URL: ${previewUrl}`);
       }
-    } catch (error: unknown) {
+
+      return { messageId: info.messageId, previewUrl };
+    } catch (e) {
+      const err = toError(e);
       const recipients = this.formatRecipients(options.to);
-      this.logger.error(`Failed to send email to ${recipients}:`, error);
+      this.logger.error(
+        `Failed to send email to ${recipients}: ${err.message}`,
+      );
+      throw err;
     }
   }
 
-  async sendPasswordResetEmail(username: string, token: string): Promise<void> {
-    await this.sendMail({
-      to: username,
+  async sendPasswordResetEmail(
+    to: string,
+    token: string,
+  ): Promise<{ messageId: string; previewUrl?: string }> {
+    return this.sendMail({
+      to,
       subject: 'Password Reset Request',
       text: `Your password reset token is: ${token}`,
+      html: `<p>Your password reset token is: <strong>${token}</strong></p>`,
     });
   }
 
-  async sendWelcomeEmail(username: string, email: string): Promise<void> {
-    await this.sendMail({
-      to: email,
+  async sendWelcomeEmail(
+    to: string,
+    username: string,
+  ): Promise<{ messageId: string; previewUrl?: string }> {
+    return this.sendMail({
+      to,
       subject: 'Welcome to RF Landscaper Pro',
       text: `Welcome ${username}!`,
+      html: `<p>Welcome <strong>${username}</strong>!</p>`,
     });
   }
 
   async sendJobAssignmentNotification(
-    username: string,
+    to: string,
     jobTitle: string,
-  ): Promise<void> {
-    await this.sendMail({
-      to: username,
+  ): Promise<{ messageId: string; previewUrl?: string }> {
+    return this.sendMail({
+      to,
       subject: 'Job Assignment Notification',
       text: `You have been assigned to job: ${jobTitle}`,
+      html: `<p>You have been assigned to job: <strong>${jobTitle}</strong></p>`,
     });
   }
 }
