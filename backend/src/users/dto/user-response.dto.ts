@@ -11,7 +11,9 @@ export class UserResponseDto {
   @ApiProperty({ enum: UserRole })
   role!: UserRole;
   @ApiProperty({ nullable: true })
-  passwordResetToken!: string | null;
-  @ApiProperty({ nullable: true, type: String, format: 'date-time' })
-  passwordResetExpires!: Date | null;
+  firstName!: string | null;
+  @ApiProperty({ nullable: true })
+  lastName!: string | null;
+  @ApiProperty({ nullable: true })
+  phone!: string | null;
 }

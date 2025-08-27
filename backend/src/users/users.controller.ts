@@ -4,14 +4,22 @@ import {
   Get,
   Post,
   Put,
+  Patch,
+  Delete,
+  Param,
+  ParseIntPipe,
   Req,
   NotFoundException,
   BadRequestException,
+  HttpCode,
+  HttpStatus,
+
 } from '@nestjs/common';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { UserRole } from './user.entity';
 import {
   ApiBearerAuth,
@@ -52,6 +60,76 @@ export class UsersController {
       createUserDto.companyId = owner.companyId;
     }
     const user = await this.usersService.create(createUserDto);
+    return toUserResponseDto(user);
+  }
+
+  @Get()
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'List users' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of users',
+    type: [UserResponseDto],
+  })
+  async findAll(): Promise<UserResponseDto[]> {
+    const users = await this.usersService.findAll();
+    return users.map(toUserResponseDto);
+  }
+
+  @Get(':id')
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Get user by id' })
+  @ApiResponse({
+    status: 200,
+    description: 'User retrieved',
+    type: UserResponseDto,
+  })
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<UserResponseDto> {
+    const user = await this.usersService.findById(id);
+    if (!user) throw new NotFoundException('User not found');
+    return toUserResponseDto(user);
+  }
+
+  @Patch(':id')
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Update user' })
+  @ApiResponse({
+    status: 200,
+    description: 'User updated',
+    type: UserResponseDto,
+  })
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseDto> {
+    const user = await this.usersService.update(id, updateUserDto);
+    return toUserResponseDto(user);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Delete user' })
+  @ApiResponse({ status: 204, description: 'User deleted' })
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    await this.usersService.remove(id);
+  }
+
+  @Patch(':id/role')
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Update user role' })
+  @ApiResponse({
+    status: 200,
+    description: 'User role updated',
+    type: UserResponseDto,
+  })
+  async updateRole(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateUserRoleDto,
+  ): Promise<UserResponseDto> {
+    const user = await this.usersService.updateRole(id, dto.role);
     return toUserResponseDto(user);
   }
 

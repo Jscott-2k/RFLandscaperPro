@@ -13,7 +13,10 @@ const UNIQUE_VIOLATION = '23505';
 describe('UsersService', () => {
   let service: UsersService;
   let usersRepository: jest.Mocked<
-    Pick<Repository<User>, 'create' | 'save' | 'findOne'>
+    Pick<
+      Repository<User>,
+      'create' | 'save' | 'findOne' | 'find' | 'remove'
+    >
   >;
   let customerRepository: jest.Mocked<
     Pick<Repository<Customer>, 'create' | 'save'>
@@ -44,8 +47,13 @@ describe('UsersService', () => {
         return user;
       }),
       findOne: jest.fn(),
+      find: jest.fn(),
+      remove: jest.fn(),
     } as unknown as jest.Mocked<
-      Pick<Repository<User>, 'create' | 'save' | 'findOne'>
+      Pick<
+        Repository<User>,
+        'create' | 'save' | 'findOne' | 'find' | 'remove'
+      >
     >;
     customerRepository = {
       create: jest.fn((dto) => Object.assign(new Customer(), dto) as Customer),
@@ -217,6 +225,40 @@ describe('UsersService', () => {
     expect(updated.email).toBe('new@example.com');
     const isMatch = await bcrypt.compare('Newpass1!', updated.password);
     expect(isMatch).toBe(true);
+    expect(usersRepository.save).toHaveBeenCalledWith(user);
+  });
+
+  it('finds all users', async () => {
+    const users = [
+      Object.assign(new User(), { id: 1, username: 'u1' }),
+      Object.assign(new User(), { id: 2, username: 'u2' }),
+    ];
+    usersRepository.find.mockResolvedValue(users);
+    const result = await service.findAll();
+    expect(result).toBe(users);
+    expect(usersRepository.find).toHaveBeenCalled();
+  });
+
+  it('updates user by id', async () => {
+    const user = Object.assign(new User(), { id: 1, username: 'old' });
+    usersRepository.findOne.mockResolvedValue(user);
+    const updated = await service.update(1, { username: 'new' });
+    expect(updated.username).toBe('new');
+    expect(usersRepository.save).toHaveBeenCalledWith(user);
+  });
+
+  it('removes user by id', async () => {
+    const user = Object.assign(new User(), { id: 1 });
+    usersRepository.findOne.mockResolvedValue(user);
+    await service.remove(1);
+    expect(usersRepository.remove).toHaveBeenCalledWith(user);
+  });
+
+  it('updates user role', async () => {
+    const user = Object.assign(new User(), { id: 1, role: UserRole.Customer });
+    usersRepository.findOne.mockResolvedValue(user);
+    const updated = await service.updateRole(1, UserRole.Admin);
+    expect(updated.role).toBe(UserRole.Admin);
     expect(usersRepository.save).toHaveBeenCalledWith(user);
   });
 });

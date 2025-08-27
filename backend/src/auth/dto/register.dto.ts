@@ -1,4 +1,6 @@
+
 import { IsEmail, IsString, MinLength, Matches, IsEnum, IsOptional } from 'class-validator';
+
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PASSWORD_REGEX } from '../password.util';
 import { UserRole } from '../../users/user.entity';
@@ -35,4 +37,20 @@ export class RegisterDto {
   @IsString()
   @IsOptional()
   companyName?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  firstName?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  lastName?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  phone?: string;
+
 }

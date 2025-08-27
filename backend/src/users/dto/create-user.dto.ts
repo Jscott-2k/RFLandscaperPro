@@ -42,4 +42,20 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   companyName?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  firstName?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  lastName?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  phone?: string;
+
 }

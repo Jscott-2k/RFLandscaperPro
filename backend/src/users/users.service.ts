@@ -43,6 +43,10 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { id } });
   }
 
+  findAll(): Promise<User[]> {
+    return this.usersRepository.find();
+  }
+
   async create(createUserDto: CreateUserDto): Promise<User> {
     const user = this.usersRepository.create(createUserDto);
 
@@ -140,6 +144,39 @@ export class UsersService {
       user.email = dto.email;
     }
 
+    if (dto.firstName !== undefined) {
+      user.firstName = dto.firstName;
+    }
+
+    if (dto.lastName !== undefined) {
+      user.lastName = dto.lastName;
+    }
+
+    if (dto.phone !== undefined) {
+      user.phone = dto.phone;
+    }
+
+    return this.usersRepository.save(user);
+  }
+
+  async update(id: number, dto: UpdateUserDto): Promise<User> {
+    return this.updateProfile(id, dto);
+  }
+
+  async remove(id: number): Promise<void> {
+    const user = await this.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    await this.usersRepository.remove(user);
+  }
+
+  async updateRole(id: number, role: UserRole): Promise<User> {
+    const user = await this.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    user.role = role;
     return this.usersRepository.save(user);
   }
 }
