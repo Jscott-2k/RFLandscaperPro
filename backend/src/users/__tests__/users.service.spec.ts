@@ -4,6 +4,7 @@ import { QueryFailedError, Repository } from 'typeorm';
 
 import { UsersService } from '../users.service';
 import { User, UserRole } from '../user.entity';
+import { EmailService } from '../../common/email.service';
 
 const UNIQUE_VIOLATION = '23505';
 
@@ -12,7 +13,7 @@ describe('UsersService', () => {
   let usersRepository: jest.Mocked<
     Pick<Repository<User>, 'create' | 'save' | 'findOne'>
   >;
-  let emailService: { sendPasswordResetEmail: jest.Mock };
+  let emailService: { sendPasswordResetEmail: jest.Mock<[string, string]> };
 
   beforeEach(() => {
     usersRepository = {
@@ -36,7 +37,7 @@ describe('UsersService', () => {
     emailService = { sendPasswordResetEmail: jest.fn() };
     service = new UsersService(
       usersRepository as unknown as Repository<User>,
-      emailService as any,
+      emailService as unknown as EmailService,
     );
   });
 
@@ -82,7 +83,7 @@ describe('UsersService', () => {
 
     await service.requestPasswordReset('user3');
     const [[emailUsername, rawToken]] =
-      emailService.sendPasswordResetEmail.mock.calls;
+      emailService.sendPasswordResetEmail.mock.calls as [string, string][];
     const hashedToken = crypto
       .createHash('sha256')
       .update(rawToken)
