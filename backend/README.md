@@ -262,14 +262,11 @@ src/
 
 ### **Docker Deployment**
 ```bash
-# Development with Docker Compose
-docker-compose up --build
+# Run with production settings
+docker compose up
 
-# Production build
-docker build -t rflandscaperpro-backend .
-
-# Run production container
-docker run -p 3000:3000 rflandscaperpro-backend
+# Run with local development overrides
+docker compose -f docker-compose.yml -f docker-compose.override.yml up
 ```
 
 ### **Fly.io Deployment**

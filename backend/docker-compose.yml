@@ -1,16 +1,11 @@
 services:
   backend:
-    image: rflandscaperpro/backend:dev
-    container_name: rflandscaperpro_backend_dev
+    image: rflandscaperpro/backend
+    container_name: rflandscaperpro_backend
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
     env_file:
-      - .env.development
-    environment:
-      - NODE_ENV=development
+      - .env
