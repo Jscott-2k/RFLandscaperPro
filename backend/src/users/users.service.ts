@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThan, QueryFailedError, Repository } from 'typeorm';
@@ -11,6 +12,7 @@ import { EmailService } from '../common/email.service';
 
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 const UNIQUE_VIOLATION = '23505';
 
@@ -24,6 +26,10 @@ export class UsersService {
 
   findByUsername(username: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { username } });
+  }
+
+  findById(id: number): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { id } });
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -67,9 +73,59 @@ export class UsersService {
       throw new BadRequestException('Invalid or expired token');
     }
     user.password = password;
-    user.hashPassword();
+    await user.hashPassword();
     user.passwordResetToken = null;
     user.passwordResetExpires = null;
     await this.usersRepository.save(user);
+  }
+
+  async updateProfile(id: number, dto: UpdateUserDto): Promise<User> {
+    const user = await this.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (dto.username !== undefined) {
+      user.username = dto.username;
+    }
+
+    if (dto.password !== undefined) {
+      this.validatePasswordStrength(dto.password);
+      user.password = dto.password;
+    }
+
+    return this.usersRepository.save(user);
+  }
+
+  private validatePasswordStrength(password: string): void {
+    if (password.length < 8) {
+      throw new BadRequestException(
+        'Password must be at least 8 characters long',
+      );
+    }
+
+    if (!/(?=.*[a-z])/.test(password)) {
+      throw new BadRequestException(
+        'Password must contain at least one lowercase letter',
+      );
+    }
+
+    if (!/(?=.*[A-Z])/.test(password)) {
+      throw new BadRequestException(
+        'Password must contain at least one uppercase letter',
+      );
+    }
+
+    if (!/(?=.*\d)/.test(password)) {
+      throw new BadRequestException(
+        'Password must contain at least one number',
+      );
+    }
+
+    if (!/(?=.*[@$!%*?&])/.test(password)) {
+      throw new BadRequestException(
+        'Password must contain at least one special character (@$!%*?&)',
+      );
+    }
   }
 }

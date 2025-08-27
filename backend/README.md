@@ -60,6 +60,8 @@ createdb rflandscaperpro
 npm run migration:run
 
 # Seed initial data (creates admin user and sample customer)
+# This script is intended for local development only and will
+# automatically skip execution when `NODE_ENV=production`.
 npm run seed
 ```
 

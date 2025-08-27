@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { User } from '../users/user.entity';
+import { User, UserRole } from '../users/user.entity';
 import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
@@ -33,6 +33,9 @@ export class AuthService {
     const payload = { username: user.username, sub: user.id, role: user.role };
     return {
       access_token: await this.jwtService.signAsync(payload),
+      refresh_token: await this.jwtService.signAsync(payload, {
+        expiresIn: '7d',
+      }),
       user: {
         id: user.id,
         username: user.username,
@@ -57,6 +60,25 @@ export class AuthService {
     this.validatePasswordStrength(password);
 
     await this.usersService.resetPassword(token, password);
+  }
+
+  async refresh(token: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync<{
+        username: string;
+        sub: number;
+        role: UserRole;
+      }>(token);
+      return {
+        access_token: await this.jwtService.signAsync({
+          username: payload.username,
+          sub: payload.sub,
+          role: payload.role,
+        }),
+      };
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
   }
 
   private validatePasswordStrength(password: string): void {

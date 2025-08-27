@@ -4,6 +4,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { Public } from '../common/decorators/public.decorator';
 import { User } from '../users/user.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -59,5 +60,21 @@ export class AuthController {
   ): Promise<{ message: string }> {
     await this.authService.resetPassword(dto.token, dto.password);
     return { message: 'Password reset successful' };
+  }
+
+  @Public()
+  @Post('refresh')
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({ status: 200, description: 'New access token' })
+  async refresh(@Body() dto: RefreshTokenDto) {
+    return this.authService.refresh(dto.refreshToken);
+  }
+
+  @Public()
+  @Post('logout')
+  @ApiOperation({ summary: 'Logout current user' })
+  @ApiResponse({ status: 200, description: 'Logged out' })
+  logout(): { message: string } {
+    return { message: 'Logged out' };
   }
 }

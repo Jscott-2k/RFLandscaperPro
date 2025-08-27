@@ -3,6 +3,11 @@ import { DataSource } from 'typeorm';
 import { User, UserRole } from './users/user.entity';
 import { Customer } from './customers/entities/customer.entity';
 
+if (process.env.NODE_ENV === 'production') {
+  console.log('Seeding skipped in production');
+  process.exit(0);
+}
+
 async function seed() {
   let dataSourceInstance: DataSource | undefined;
 

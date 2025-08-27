@@ -120,4 +120,23 @@ describe('UsersService', () => {
     const isMatch = await bcrypt.compare('newpass', user.password);
     expect(isMatch).toBe(true);
   });
+
+  it('updates profile and hashes new password', async () => {
+    const user = Object.assign(new User(), {
+      id: 1,
+      username: 'old',
+      password: 'oldpass',
+    });
+    usersRepository.findOne.mockResolvedValue(user);
+
+    const updated = await service.updateProfile(1, {
+      username: 'new',
+      password: 'Newpass1!',
+    });
+
+    expect(updated.username).toBe('new');
+    const isMatch = await bcrypt.compare('Newpass1!', updated.password);
+    expect(isMatch).toBe(true);
+    expect(usersRepository.save).toHaveBeenCalledWith(user);
+  });
 });
