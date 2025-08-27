@@ -11,6 +11,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 
 import { JobsService } from './jobs.service';
@@ -45,8 +46,11 @@ export class JobsController {
     description: 'Job created',
     type: JobResponseDto,
   })
-  create(@Body() createJobDto: CreateJobDto): Promise<JobResponseDto> {
-    return this.jobsService.create(createJobDto);
+  create(
+    @Body() createJobDto: CreateJobDto,
+    @Req() req: { user: { companyId: number } },
+  ): Promise<JobResponseDto> {
+    return this.jobsService.create(createJobDto, req.user.companyId);
   }
 
   @Get()
@@ -65,6 +69,7 @@ export class JobsController {
     customerId?: number,
   ): Promise<{ items: JobResponseDto[]; total: number }> {
     return this.jobsService.findAll(pagination, completed, customerId);
+
   }
 
   @Get(':id')
@@ -75,8 +80,11 @@ export class JobsController {
     description: 'Job retrieved',
     type: JobResponseDto,
   })
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<JobResponseDto> {
-    return this.jobsService.findOne(id);
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: { user: { companyId: number } },
+  ): Promise<JobResponseDto> {
+    return this.jobsService.findOne(id, req.user.companyId);
   }
 
   @Patch(':id')
@@ -90,8 +98,9 @@ export class JobsController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateJobDto: UpdateJobDto,
+    @Req() req: { user: { companyId: number } },
   ): Promise<JobResponseDto> {
-    return this.jobsService.update(id, updateJobDto);
+    return this.jobsService.update(id, updateJobDto, req.user.companyId);
   }
 
   @Post(':id/schedule')
@@ -105,8 +114,9 @@ export class JobsController {
   schedule(
     @Param('id', ParseIntPipe) id: number,
     @Body() scheduleJobDto: ScheduleJobDto,
+    @Req() req: { user: { companyId: number } },
   ): Promise<JobResponseDto> {
-    return this.jobsService.schedule(id, scheduleJobDto);
+    return this.jobsService.schedule(id, scheduleJobDto, req.user.companyId);
   }
 
   @Post(':id/assign')
@@ -120,8 +130,9 @@ export class JobsController {
   assign(
     @Param('id', ParseIntPipe) id: number,
     @Body() assignJobDto: AssignJobDto,
+    @Req() req: { user: { companyId: number } },
   ): Promise<JobResponseDto> {
-    return this.jobsService.assign(id, assignJobDto);
+    return this.jobsService.assign(id, assignJobDto, req.user.companyId);
   }
 
   @Post(':id/bulk-assign')
@@ -135,8 +146,13 @@ export class JobsController {
   bulkAssign(
     @Param('id', ParseIntPipe) id: number,
     @Body() bulkAssignJobDto: BulkAssignJobDto,
+    @Req() req: { user: { companyId: number } },
   ): Promise<JobResponseDto> {
-    return this.jobsService.bulkAssign(id, bulkAssignJobDto);
+    return this.jobsService.bulkAssign(
+      id,
+      bulkAssignJobDto,
+      req.user.companyId,
+    );
   }
 
   @Delete(':id/assignments/:assignmentId')
@@ -150,8 +166,13 @@ export class JobsController {
   removeAssignment(
     @Param('id', ParseIntPipe) jobId: number,
     @Param('assignmentId', ParseIntPipe) assignmentId: number,
+    @Req() req: { user: { companyId: number } },
   ): Promise<JobResponseDto> {
-    return this.jobsService.removeAssignment(jobId, assignmentId);
+    return this.jobsService.removeAssignment(
+      jobId,
+      assignmentId,
+      req.user.companyId,
+    );
   }
 
   @Delete(':id')
@@ -159,7 +180,10 @@ export class JobsController {
   @Roles(UserRole.Admin, UserRole.Worker)
   @ApiOperation({ summary: 'Delete job' })
   @ApiResponse({ status: 204, description: 'Job deleted' })
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.jobsService.remove(id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: { user: { companyId: number } },
+  ): Promise<void> {
+    await this.jobsService.remove(id, req.user.companyId);
   }
 }

@@ -11,6 +11,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { EquipmentService } from './equipment.service';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
@@ -44,8 +45,12 @@ export class EquipmentController {
   })
   async create(
     @Body() createEquipmentDto: CreateEquipmentDto,
+    @Req() req: { user: { companyId: number } },
   ): Promise<EquipmentResponseDto> {
-    return this.equipmentService.create(createEquipmentDto);
+    return this.equipmentService.create(
+      createEquipmentDto,
+      req.user.companyId,
+    );
   }
 
   @Get()
@@ -76,8 +81,9 @@ export class EquipmentController {
   })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
+    @Req() req: { user: { companyId: number } },
   ): Promise<EquipmentResponseDto> {
-    return this.equipmentService.findOne(id);
+    return this.equipmentService.findOne(id, req.user.companyId);
   }
 
   @Patch(':id')
@@ -91,8 +97,13 @@ export class EquipmentController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEquipmentDto: UpdateEquipmentDto,
+    @Req() req: { user: { companyId: number } },
   ): Promise<EquipmentResponseDto> {
-    return this.equipmentService.update(id, updateEquipmentDto);
+    return this.equipmentService.update(
+      id,
+      updateEquipmentDto,
+      req.user.companyId,
+    );
   }
 
   @Delete(':id')
@@ -100,7 +111,10 @@ export class EquipmentController {
   @Roles(UserRole.Admin, UserRole.Worker)
   @ApiOperation({ summary: 'Delete equipment' })
   @ApiResponse({ status: 204, description: 'Equipment deleted' })
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.equipmentService.remove(id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: { user: { companyId: number } },
+  ): Promise<void> {
+    await this.equipmentService.remove(id, req.user.companyId);
   }
 }
