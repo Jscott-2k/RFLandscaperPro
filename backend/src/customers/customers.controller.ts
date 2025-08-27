@@ -68,7 +68,9 @@ export class CustomersController {
     description: 'Customer profile',
     type: CustomerResponseDto,
   })
-  async getProfile(@Req() req): Promise<CustomerResponseDto> {
+  async getProfile(
+    @Req() req: { user: { userId: number } },
+  ): Promise<CustomerResponseDto> {
     return this.customersService.findByUserId(req.user.userId);
   }
 
