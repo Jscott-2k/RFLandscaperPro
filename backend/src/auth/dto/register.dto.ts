@@ -1,5 +1,6 @@
 import { IsString, MinLength, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { PASSWORD_REGEX } from '../password.util';
 
 export class RegisterDto {
   @ApiProperty({ description: 'Username must be unique' })
@@ -14,7 +15,7 @@ export class RegisterDto {
   })
   @IsString()
   @MinLength(8, { message: 'Password must be at least 8 characters long' })
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+  @Matches(PASSWORD_REGEX, {
     message:
       'Password must contain uppercase, lowercase, number, and special character',
   })
