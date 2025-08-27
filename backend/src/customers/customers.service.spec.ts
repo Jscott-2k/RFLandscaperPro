@@ -4,6 +4,7 @@ import { CustomersService } from './customers.service';
 import { Customer } from './entities/customer.entity';
 import { Repository, QueryFailedError } from 'typeorm';
 import { ConflictException } from '@nestjs/common';
+import { CreateCustomerDto } from './dto/create-customer.dto';
 
 describe('CustomersService', () => {
   let service: CustomersService;
@@ -38,10 +39,23 @@ describe('CustomersService', () => {
       new QueryFailedError('', [], { code: '23505' } as any),
     );
 
-    await expect(service.create({} as any)).rejects.toBeInstanceOf(
+    const createCustomerDto: CreateCustomerDto = {
+      name: 'John Doe',
+      email: 'john@example.com',
+      addresses: [
+        {
+          street: '123 Main St',
+          city: 'Anytown',
+          state: 'CA',
+          zip: '12345',
+        },
+      ],
+    };
+
+    await expect(service.create(createCustomerDto)).rejects.toBeInstanceOf(
       ConflictException,
     );
-    await expect(service.create({} as any)).rejects.toHaveProperty(
+    await expect(service.create(createCustomerDto)).rejects.toHaveProperty(
       'message',
       'Email already exists',
     );
