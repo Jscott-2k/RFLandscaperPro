@@ -310,6 +310,16 @@ Ensure all required environment variables are set:
 - Database connection status
 - Application health indicators
 
+### **Prometheus server**
+Use the included Prometheus service to scrape and inspect metrics locally:
+
+```bash
+docker compose up prometheus
+```
+
+The container uses `prometheus.yml` to scrape the `backend` service and exposes
+the Prometheus UI at [http://localhost:9090](http://localhost:9090).
+
 ### **Logging**
 - Structured logging with Winston
 - Request ID tracking for debugging
