@@ -24,6 +24,7 @@
     "migration:run": "cross-env NODE_ENV=${NODE_ENV:-development} ts-node --transpile-only ./node_modules/typeorm/cli.js migration:run -d data-source.ts",
     "migration:revert": "cross-env NODE_ENV=${NODE_ENV:-development} ts-node --transpile-only ./node_modules/typeorm/cli.js migration:revert -d data-source.ts",
     "seed": "cross-env NODE_ENV=${NODE_ENV:-development} ts-node src/seed.ts"
+
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.1",
