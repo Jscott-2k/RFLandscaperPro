@@ -27,6 +27,9 @@ async function seed() {
         email: 'admin@example.com',
         password: 'AdminSecure123!',
         role: UserRole.Admin,
+        firstName: 'Admin',
+        lastName: 'User',
+        phone: '555-0000',
       });
       await userRepo.save(admin);
       console.log('Admin user created successfully');

@@ -31,4 +31,19 @@ export class CreateUserDto {
   @IsEnum(UserRole)
   @IsOptional()
   role?: UserRole;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  firstName?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  lastName?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  phone?: string;
 }

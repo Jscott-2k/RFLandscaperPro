@@ -31,6 +31,15 @@ export class User {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.Customer })
   role: UserRole;
 
+  @Column({ nullable: true })
+  firstName: string | null;
+
+  @Column({ nullable: true })
+  lastName: string | null;
+
+  @Column({ nullable: true })
+  phone: string | null;
+
   @Index('IDX_user_password_reset_token')
   @Column({ type: 'varchar', length: 64, nullable: true })
   passwordResetToken: string | null;
