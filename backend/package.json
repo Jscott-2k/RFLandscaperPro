@@ -19,12 +19,11 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:watch": "jest --watch",
-    "migration:create": "cross-env NODE_ENV=${NODE_ENV:-development} ts-node --transpile-only ./node_modules/typeorm/cli.js migration:create",
-    "migration:generate": "cross-env NODE_ENV=${NODE_ENV:-development} ts-node --transpile-only ./node_modules/typeorm/cli.js migration:generate -d data-source.ts src/migrations",
-    "migration:run": "cross-env NODE_ENV=${NODE_ENV:-development} ts-node --transpile-only ./node_modules/typeorm/cli.js migration:run -d data-source.ts",
-    "migration:revert": "cross-env NODE_ENV=${NODE_ENV:-development} ts-node --transpile-only ./node_modules/typeorm/cli.js migration:revert -d data-source.ts",
-    "seed": "cross-env NODE_ENV=${NODE_ENV:-development} ts-node src/seed.ts"
-
+    "migration:create": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:create",
+    "migration:generate": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:generate -d data-source.ts src/migrations",
+    "migration:run": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:run -d data-source.ts",
+    "migration:revert": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:revert -d data-source.ts",
+    "seed": "ts-node src/seed.ts"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.1",
