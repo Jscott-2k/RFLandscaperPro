@@ -8,6 +8,7 @@ import {
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { join } from 'path';
 import { CustomersModule } from './customers/customers.module';
 import { JobsModule } from './jobs/jobs.module';
 import { EquipmentModule } from './equipment/equipment.module';
@@ -82,7 +83,9 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
           password: config.get<string>('DB_PASSWORD'),
           database: config.get<string>('DB_NAME'),
           autoLoadEntities: true,
-          synchronize: !isProduction,
+          synchronize: false,
+          migrations: [join(__dirname, 'migrations/*{.ts,.js}')],
+          migrationsRun: true,
           ssl: isProduction
             ? {
                 rejectUnauthorized: false,
