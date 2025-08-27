@@ -1,5 +1,11 @@
-import { IsEmail, IsString, MinLength, Matches } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  MinLength,
+  Matches,
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PASSWORD_REGEX } from '../password.util';
 
 export class RegisterDto {
@@ -24,4 +30,19 @@ export class RegisterDto {
       'Password must contain uppercase, lowercase, number, and special character',
   })
   password: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  firstName?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  lastName?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  phone?: string;
 }

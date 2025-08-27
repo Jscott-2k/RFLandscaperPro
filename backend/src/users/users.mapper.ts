@@ -7,7 +7,8 @@ export function toUserResponseDto(user: User): UserResponseDto {
     username: user.username,
     email: user.email,
     role: user.role,
-    passwordResetToken: user.passwordResetToken ?? null,
-    passwordResetExpires: user.passwordResetExpires ?? null,
+    firstName: user.firstName ?? null,
+    lastName: user.lastName ?? null,
+    phone: user.phone ?? null,
   };
 }

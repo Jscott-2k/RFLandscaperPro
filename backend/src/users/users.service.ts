@@ -106,6 +106,18 @@ export class UsersService {
       user.email = dto.email;
     }
 
+    if (dto.firstName !== undefined) {
+      user.firstName = dto.firstName;
+    }
+
+    if (dto.lastName !== undefined) {
+      user.lastName = dto.lastName;
+    }
+
+    if (dto.phone !== undefined) {
+      user.phone = dto.phone;
+    }
+
     return this.usersRepository.save(user);
   }
 
