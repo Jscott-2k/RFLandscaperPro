@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  ParseBoolPipe,
   Query,
   HttpCode,
   HttpStatus,
@@ -44,8 +45,12 @@ export class CustomersController {
   })
   async create(
     @Body() createCustomerDto: CreateCustomerDto,
+    @Req() req: { user: { companyId: number } },
   ): Promise<CustomerResponseDto> {
-    return this.customersService.create(createCustomerDto);
+    return this.customersService.create(
+      createCustomerDto,
+      req.user.companyId,
+    );
   }
 
   @Get()
@@ -53,11 +58,14 @@ export class CustomersController {
   @ApiOperation({ summary: 'List customers' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'active', required: false, type: Boolean })
   @ApiResponse({ status: 200, description: 'List of customers' })
   async findAll(
     @Query() pagination: PaginationQueryDto,
+    @Query('active', new ParseBoolPipe({ optional: true }))
+    active?: boolean,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
-    return this.customersService.findAll(pagination);
+    return this.customersService.findAll(pagination, active);
   }
 
   @Get('profile')
@@ -69,9 +77,12 @@ export class CustomersController {
     type: CustomerResponseDto,
   })
   async getProfile(
-    @Req() req: { user: { userId: number } },
+    @Req() req: { user: { userId: number; companyId: number } },
   ): Promise<CustomerResponseDto> {
-    return this.customersService.findByUserId(req.user.userId);
+    return this.customersService.findByUserId(
+      req.user.userId,
+      req.user.companyId,
+    );
   }
 
   @Get(':id')
@@ -84,8 +95,9 @@ export class CustomersController {
   })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
+    @Req() req: { user: { companyId: number } },
   ): Promise<CustomerResponseDto> {
-    return this.customersService.findOne(id);
+    return this.customersService.findOne(id, req.user.companyId);
   }
 
   @Patch(':id')
@@ -99,8 +111,41 @@ export class CustomersController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
+    @Req() req: { user: { companyId: number } },
   ): Promise<CustomerResponseDto> {
-    return this.customersService.update(id, updateCustomerDto);
+    return this.customersService.update(
+      id,
+      updateCustomerDto,
+      req.user.companyId,
+    );
+  }
+
+  @Patch(':id/activate')
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Activate customer' })
+  @ApiResponse({
+    status: 200,
+    description: 'Customer activated',
+    type: CustomerResponseDto,
+  })
+  async activate(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<CustomerResponseDto> {
+    return this.customersService.activate(id);
+  }
+
+  @Patch(':id/deactivate')
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Deactivate customer' })
+  @ApiResponse({
+    status: 200,
+    description: 'Customer deactivated',
+    type: CustomerResponseDto,
+  })
+  async deactivate(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<CustomerResponseDto> {
+    return this.customersService.deactivate(id);
   }
 
   @Delete(':id')
@@ -108,7 +153,10 @@ export class CustomersController {
   @Roles(UserRole.Admin)
   @ApiOperation({ summary: 'Delete customer' })
   @ApiResponse({ status: 204, description: 'Customer deleted' })
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    await this.customersService.remove(id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: { user: { companyId: number } },
+  ): Promise<void> {
+    await this.customersService.remove(id, req.user.companyId);
   }
 }
