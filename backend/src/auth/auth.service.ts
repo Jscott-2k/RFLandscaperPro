@@ -27,7 +27,12 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload = { username: user.username, sub: user.id, role: user.role };
+    const payload = {
+      username: user.username,
+      sub: user.id,
+      role: user.role,
+      companyId: user.companyId,
+    };
     return {
       access_token: await this.jwtService.signAsync(payload),
       refresh_token: await this.jwtService.signAsync(payload, {
@@ -66,12 +71,14 @@ export class AuthService {
         username: string;
         sub: number;
         role: UserRole;
+        companyId: number;
       }>(token);
       return {
         access_token: await this.jwtService.signAsync({
           username: payload.username,
           sub: payload.sub,
           role: payload.role,
+          companyId: payload.companyId,
         }),
       };
     } catch {

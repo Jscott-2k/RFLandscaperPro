@@ -77,13 +77,10 @@ describe('JobsService', () => {
   });
 
   it('should throw NotFoundException when job does not exist', async () => {
-    const qb = {
-      leftJoinAndSelect: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      getOne: jest.fn().mockResolvedValue(null),
-    };
-    jobRepository.createQueryBuilder.mockReturnValue(qb);
-    await expect(service.findOne(1)).rejects.toBeInstanceOf(NotFoundException);
+    jobRepository.findOne.mockResolvedValue(null);
+    await expect(service.findOne(1, 1)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('should throw NotFoundException when customer does not exist on create', async () => {
@@ -92,7 +89,7 @@ describe('JobsService', () => {
       title: 'Test',
       customerId: 1,
     };
-    await expect(service.create(createJobDto)).rejects.toBeInstanceOf(
+    await expect(service.create(createJobDto, 1)).rejects.toBeInstanceOf(
       NotFoundException,
     );
   });
@@ -119,9 +116,9 @@ describe('JobsService', () => {
     assignmentRepository.createQueryBuilder.mockReturnValue(qb);
 
     const scheduleJobDto: ScheduleJobDto = { scheduledDate: date };
-    await expect(service.schedule(1, scheduleJobDto)).rejects.toBeInstanceOf(
-      ConflictException,
-    );
+    await expect(
+      service.schedule(1, scheduleJobDto, 1),
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('should throw ConflictException when assigning user or equipment already booked', async () => {
@@ -143,8 +140,8 @@ describe('JobsService', () => {
     assignmentRepository.createQueryBuilder.mockReturnValue(qb);
 
     const assignJobDto: AssignJobDto = { userId: 1, equipmentId: 2 };
-    await expect(service.assign(1, assignJobDto)).rejects.toBeInstanceOf(
-      ConflictException,
-    );
+    await expect(
+      service.assign(1, assignJobDto, 1),
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 });

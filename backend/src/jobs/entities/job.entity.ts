@@ -7,9 +7,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  JoinColumn,
 } from 'typeorm';
 import { Customer } from '../../customers/entities/customer.entity';
 import { Assignment } from './assignment.entity';
+import { Company } from '../../companies/entities/company.entity';
 
 @Entity()
 @Index(['scheduledDate', 'completed']) // Add index for common queries
@@ -38,6 +40,15 @@ export class Job {
 
   @Column({ type: 'text', nullable: true })
   notes?: string;
+
+  @Column()
+  companyId: number;
+
+  @ManyToOne(() => Company, (company) => company.jobs, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'companyId' })
+  company: Company;
 
   @ManyToOne(() => Customer, (customer) => customer.jobs, {
     onDelete: 'CASCADE',

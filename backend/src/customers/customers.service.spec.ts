@@ -52,12 +52,11 @@ describe('CustomersService', () => {
       ],
     };
 
-    await expect(service.create(createCustomerDto)).rejects.toBeInstanceOf(
-      ConflictException,
-    );
-    await expect(service.create(createCustomerDto)).rejects.toHaveProperty(
-      'message',
-      'Email already exists',
-    );
+    await expect(
+      service.create(createCustomerDto, 1),
+    ).rejects.toBeInstanceOf(ConflictException);
+    await expect(
+      service.create(createCustomerDto, 1),
+    ).rejects.toHaveProperty('message', 'Email already exists');
   });
 });
