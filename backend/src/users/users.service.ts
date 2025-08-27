@@ -14,6 +14,8 @@ import { User, UserRole } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { validatePasswordStrength } from '../auth/password.util';
+import { Customer } from '../customers/entities/customer.entity';
+import { Company } from '../companies/entities/company.entity';
 
 const UNIQUE_VIOLATION = '23505';
 
@@ -22,6 +24,10 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Customer)
+    private readonly customerRepository: Repository<Customer>,
+    @InjectRepository(Company)
+    private readonly companyRepository: Repository<Company>,
     private readonly emailService: EmailService,
   ) {}
 
@@ -45,7 +51,39 @@ export class UsersService {
     const user = this.usersRepository.create(createUserDto);
 
     try {
-      return await this.usersRepository.save(user);
+      const savedUser = await this.usersRepository.save(user);
+
+      if (savedUser.role === UserRole.Customer) {
+        const customer = this.customerRepository.create({
+          name: savedUser.username,
+          email: savedUser.email,
+          userId: savedUser.id,
+        });
+        await this.customerRepository.save(customer);
+      } else if (savedUser.role === UserRole.Owner) {
+        if (!createUserDto.companyName) {
+          throw new BadRequestException(
+            'Company name is required for owner accounts',
+          );
+        }
+        const company = this.companyRepository.create({
+          name: createUserDto.companyName,
+          ownerId: savedUser.id,
+        });
+        const savedCompany = await this.companyRepository.save(company);
+        savedUser.companyId = savedCompany.id;
+        await this.usersRepository.save(savedUser);
+      } else if (savedUser.role === UserRole.Worker) {
+        if (!createUserDto.companyId) {
+          throw new BadRequestException(
+            'companyId is required for worker accounts',
+          );
+        }
+        savedUser.companyId = createUserDto.companyId;
+        await this.usersRepository.save(savedUser);
+      }
+
+      return savedUser;
     } catch (error) {
       if (error instanceof QueryFailedError) {
         const { code } = error.driverError as { code?: string };

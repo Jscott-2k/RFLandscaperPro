@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 import { UserRole } from '../user.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsInt } from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -32,6 +33,16 @@ export class CreateUserDto {
   @IsOptional()
   role?: UserRole;
 
+  @ApiPropertyOptional({ description: 'Company ID for worker accounts' })
+  @IsInt()
+  @IsOptional()
+  companyId?: number;
+
+  @ApiPropertyOptional({ description: 'Company name for owner accounts' })
+  @IsString()
+  @IsOptional()
+  companyName?: string;
+
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
@@ -46,4 +57,5 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   phone?: string;
+
 }

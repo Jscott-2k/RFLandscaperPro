@@ -4,6 +4,8 @@ import { QueryFailedError, Repository } from 'typeorm';
 
 import { UsersService } from '../users.service';
 import { User, UserRole } from '../user.entity';
+import { Company } from '../../companies/entities/company.entity';
+import { Customer } from '../../customers/entities/customer.entity';
 import { EmailService } from '../../common/email.service';
 
 const UNIQUE_VIOLATION = '23505';
@@ -15,6 +17,12 @@ describe('UsersService', () => {
       Repository<User>,
       'create' | 'save' | 'findOne' | 'find' | 'remove'
     >
+  >;
+  let customerRepository: jest.Mocked<
+    Pick<Repository<Customer>, 'create' | 'save'>
+  >;
+  let companyRepository: jest.Mocked<
+    Pick<Repository<Company>, 'create' | 'save'>
   >;
   let emailService: {
     sendPasswordResetEmail: jest.Mock<void, [string, string]>;
@@ -33,6 +41,9 @@ describe('UsersService', () => {
         if (user.password) {
           await user.hashPassword();
         }
+        if (!user.id) {
+          user.id = 1;
+        }
         return user;
       }),
       findOne: jest.fn(),
@@ -44,11 +55,30 @@ describe('UsersService', () => {
         'create' | 'save' | 'findOne' | 'find' | 'remove'
       >
     >;
+    customerRepository = {
+      create: jest.fn((dto) => Object.assign(new Customer(), dto) as Customer),
+      save: jest.fn(async (customer: Customer) => customer),
+    } as unknown as jest.Mocked<
+      Pick<Repository<Customer>, 'create' | 'save'>
+    >;
+    companyRepository = {
+      create: jest.fn((dto) => Object.assign(new Company(), dto) as Company),
+      save: jest.fn(async (company: Company) => {
+        if (!company.id) {
+          company.id = 1;
+        }
+        return company;
+      }),
+    } as unknown as jest.Mocked<
+      Pick<Repository<Company>, 'create' | 'save'>
+    >;
     emailService = {
       sendPasswordResetEmail: jest.fn<void, [string, string]>(),
     };
     service = new UsersService(
       usersRepository as unknown as Repository<User>,
+      customerRepository as unknown as Repository<Customer>,
+      companyRepository as unknown as Repository<Company>,
       emailService as unknown as EmailService,
     );
   });
@@ -77,6 +107,40 @@ describe('UsersService', () => {
       password: 'secret',
     });
     expect(user.role).toBe(UserRole.Customer);
+    expect(customerRepository.create).toHaveBeenCalledWith({
+      name: 'user2',
+      email: 'user2@example.com',
+      userId: 1,
+    });
+    expect(customerRepository.save).toHaveBeenCalled();
+  });
+
+  it('creates company for owner accounts', async () => {
+    const user = await service.create({
+      username: 'owner',
+      email: 'owner@example.com',
+      password: 'secret',
+      role: UserRole.Owner,
+      companyName: 'ACME Landscaping',
+    });
+    expect(companyRepository.create).toHaveBeenCalledWith({
+      name: 'ACME Landscaping',
+      ownerId: 1,
+    });
+    expect(companyRepository.save).toHaveBeenCalled();
+    expect(usersRepository.save).toHaveBeenCalledTimes(2);
+    expect(user.companyId).toBe(1);
+  });
+
+  it('requires companyId for worker accounts', async () => {
+    await expect(
+      service.create({
+        username: 'worker',
+        email: 'w@example.com',
+        password: 'secret',
+        role: UserRole.Worker,
+      }),
+    ).rejects.toMatchObject({ status: 400 });
   });
 
   it('throws conflict when username exists', async () => {

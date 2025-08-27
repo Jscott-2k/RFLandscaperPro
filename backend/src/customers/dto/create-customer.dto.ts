@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsBoolean,
   Length,
+  IsInt,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -68,6 +69,11 @@ export class CreateCustomerDto {
   @IsOptional()
   @IsBoolean()
   active?: boolean = true;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  userId?: number;
 
   @ApiProperty({ type: [CreateAddressDto] })
   @IsArray()

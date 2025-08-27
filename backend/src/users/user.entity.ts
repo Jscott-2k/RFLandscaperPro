@@ -5,11 +5,17 @@ import {
   BeforeInsert,
   BeforeUpdate,
   Index,
+  OneToOne,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Customer } from '../customers/entities/customer.entity';
+import { Company } from '../companies/entities/company.entity';
 
 export enum UserRole {
   Admin = 'admin',
+  Owner = 'owner',
   Worker = 'worker',
   Customer = 'customer',
 }
@@ -46,6 +52,16 @@ export class User {
 
   @Column({ type: 'timestamptz', nullable: true })
   passwordResetExpires: Date | null;
+
+  @OneToOne(() => Customer, (customer) => customer.user)
+  customer?: Customer;
+
+  @ManyToOne(() => Company, (company) => company.users, { nullable: true })
+  @JoinColumn({ name: 'companyId' })
+  company?: Company;
+
+  @Column({ nullable: true })
+  companyId?: number;
 
   @BeforeInsert()
   @BeforeUpdate()

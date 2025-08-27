@@ -47,4 +47,6 @@ export class CustomerResponseDto {
   jobs?: CustomerJobDto[];
   @ApiProperty({ type: [CustomerAddressDto] })
   addresses?: CustomerAddressDto[];
+  @ApiPropertyOptional()
+  userId?: number;
 }

@@ -1,12 +1,9 @@
-import {
-  IsEmail,
-  IsOptional,
-  IsString,
-  MinLength,
-  Matches,
-} from 'class-validator';
+
+import { IsEmail, IsString, MinLength, Matches, IsEnum, IsOptional } from 'class-validator';
+
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PASSWORD_REGEX } from '../password.util';
+import { UserRole } from '../../users/user.entity';
 
 export class RegisterDto {
   @ApiProperty({ description: 'Username must be unique' })
@@ -31,6 +28,16 @@ export class RegisterDto {
   })
   password: string;
 
+  @ApiPropertyOptional({ enum: UserRole })
+  @IsEnum(UserRole)
+  @IsOptional()
+  role?: UserRole;
+
+  @ApiPropertyOptional({ description: 'Company name for owner accounts' })
+  @IsString()
+  @IsOptional()
+  companyName?: string;
+
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
@@ -45,4 +52,5 @@ export class RegisterDto {
   @IsString()
   @IsOptional()
   phone?: string;
+
 }

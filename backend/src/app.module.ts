@@ -14,6 +14,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { EquipmentModule } from './equipment/equipment.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { CompaniesModule } from './companies/companies.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -101,6 +102,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     EquipmentModule,
     UsersModule,
     AuthModule,
+    CompaniesModule,
   ],
   controllers: [],
   providers: [

@@ -10,6 +10,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 
 import { CustomersService } from './customers.service';
@@ -57,6 +58,18 @@ export class CustomersController {
     @Query() pagination: PaginationQueryDto,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
     return this.customersService.findAll(pagination);
+  }
+
+  @Get('profile')
+  @Roles(UserRole.Customer)
+  @ApiOperation({ summary: 'Get customer profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'Customer profile',
+    type: CustomerResponseDto,
+  })
+  async getProfile(@Req() req): Promise<CustomerResponseDto> {
+    return this.customersService.findByUserId(req.user.userId);
   }
 
   @Get(':id')
