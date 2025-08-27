@@ -74,7 +74,8 @@ export class AuthController {
   @Post('logout')
   @ApiOperation({ summary: 'Logout current user' })
   @ApiResponse({ status: 200, description: 'Logged out' })
-  logout(): { message: string } {
+  async logout(@Body() dto: RefreshTokenDto): Promise<{ message: string }> {
+    await this.authService.logout(dto.refreshToken);
     return { message: 'Logged out' };
   }
 }
