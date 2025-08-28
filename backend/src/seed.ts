@@ -5,6 +5,11 @@ import { DataSource } from 'typeorm';
 import { User, UserRole } from './users/user.entity';
 import { Customer } from './customers/entities/customer.entity';
 import { Company } from './companies/entities/company.entity';
+import {
+  Contract,
+  ContractFrequency,
+} from './contracts/entities/contract.entity';
+import { Job } from './jobs/entities/job.entity';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
 
@@ -30,6 +35,8 @@ async function main() {
       const userRepo = trx.getRepository(User);
       const customerRepo = trx.getRepository(Customer);
       const companyRepo = trx.getRepository(Company);
+      const contractRepo = trx.getRepository(Contract);
+      const jobRepo = trx.getRepository(Job);
 
       // --- Admin user ---
       const adminUsername = process.env.ADMIN_USERNAME ?? 'admin';
@@ -80,10 +87,11 @@ async function main() {
       console.log('Sample company ensured.');
 
       // --- Sample customer ---
+      const customerEmail = 'customer@example.com';
       await customerRepo.upsert(
         {
           name: 'John Doe',
-          email: 'customer@example.com',
+          email: customerEmail,
           phone: '555-1234',
           companyId: company.id,
           addresses: [
@@ -100,8 +108,57 @@ async function main() {
           skipUpdateIfNoValuesChanged: true,
         },
       );
-
+      const customer = await customerRepo.findOneOrFail({
+        where: { email: customerEmail },
+      });
       console.log('Sample customer ensured.');
+
+      // --- Sample contract ---
+      const contractStart = new Date('2024-01-01');
+      let contract = await contractRepo.findOne({
+        where: {
+          companyId: company.id,
+          customer: { id: customer.id },
+          startDate: contractStart,
+        },
+        relations: ['customer'],
+      });
+      if (!contract) {
+        contract = contractRepo.create({
+          companyId: company.id,
+          customer,
+          startDate: contractStart,
+          frequency: ContractFrequency.MONTHLY,
+          jobTemplate: {
+            title: 'Monthly Lawn Care',
+            description: 'Recurring maintenance service',
+            estimatedHours: 2,
+            notes: 'Includes mowing and trimming',
+          },
+          active: true,
+        });
+        contract = await contractRepo.save(contract);
+      }
+      console.log('Sample contract ensured.');
+
+      // --- Sample job ---
+      const existingJob = await jobRepo.findOne({
+        where: {
+          title: 'Initial Lawn Care Visit',
+          customer: { id: customer.id },
+        },
+      });
+      if (!existingJob) {
+        await jobRepo.save({
+          title: 'Initial Lawn Care Visit',
+          description: 'Kick-off job for the sample contract',
+          scheduledDate: new Date(),
+          companyId: company.id,
+          customer,
+          contract,
+        });
+      }
+      console.log('Sample job ensured.');
     });
 
     console.log('Database seeding completed successfully');
