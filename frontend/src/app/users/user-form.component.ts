@@ -37,12 +37,26 @@ import { UserService } from './user.service';
       </label>
       <label>
         Role:
-        <input formControlName="role" />
+        <select formControlName="role">
+          <option value="customer">Customer</option>
+          <option value="owner">Owner</option>
+          <option value="worker">Worker</option>
+        </select>
       </label>
-      <label *ngIf="isOwner">
-        Company Name:
-        <input formControlName="companyName" />
-      </label>
+      <div formGroupName="company" *ngIf="isOwner">
+        <label>
+          Company Name:
+          <input formControlName="name" />
+        </label>
+        <label>
+          Address:
+          <input formControlName="address" />
+        </label>
+        <label>
+          Phone:
+          <input formControlName="phone" />
+        </label>
+      </div>
       <button type="submit" [disabled]="form.invalid">Save</button>
     </form>
   `
@@ -59,8 +73,12 @@ export class UserFormComponent {
     firstName: [''],
     lastName: [''],
     phone: [''],
-    role: [''],
-    companyName: ['']
+    role: ['customer'],
+    company: this.fb.nonNullable.group({
+      name: [''],
+      address: [''],
+      phone: [''],
+    }),
   });
 
   onSubmit(): void {
@@ -73,14 +91,14 @@ export class UserFormComponent {
         lastName,
         phone,
         role,
-        companyName
+        company,
       } = this.form.getRawValue();
       const payload: any = { username, email, password };
       if (firstName) payload.firstName = firstName;
       if (lastName) payload.lastName = lastName;
       if (phone) payload.phone = phone;
       if (role) payload.role = role;
-      if (companyName) payload.companyName = companyName;
+      if (this.isOwner) payload.company = company;
       this.userService
         .createUser(payload)
         .subscribe(() => {
