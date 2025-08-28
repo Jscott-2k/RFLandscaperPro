@@ -49,15 +49,16 @@ describe('EquipmentController', () => {
   });
 
   describe('findAll', () => {
-    it('should call equipmentService.findAll with companyId', async () => {
+    it('should call equipmentService.findAll with companyId and search term', async () => {
       const pagination = { page: 1, limit: 10 };
       const req = { user: { companyId: 1 } };
       const status = EquipmentStatus.AVAILABLE;
       const type = EquipmentType.MOWER;
+      const search = 'mower';
       const expectedResult = { items: [], total: 0 };
       (service.findAll as jest.Mock).mockResolvedValue(expectedResult);
 
-      const result = await controller.findAll(pagination, req, status, type);
+      const result = await controller.findAll(pagination, req, status, type, search);
       expect(result).toEqual(expectedResult);
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(service.findAll).toHaveBeenCalledWith(
@@ -65,6 +66,7 @@ describe('EquipmentController', () => {
         req.user.companyId,
         status,
         type,
+        search,
       );
     });
   });
