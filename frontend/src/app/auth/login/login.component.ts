@@ -29,7 +29,7 @@ export class LoginComponent {
   submit(): void {
     if (this.form.valid) {
       this.auth.login(this.form.getRawValue()).subscribe(() => {
-        this.router.navigate(['/']);
+        this.router.navigate(['/dashboard']);
       });
     }
   }
