@@ -27,6 +27,10 @@ import { UserService } from './user.service';
         Roles:
         <input formControlName="roles" />
       </label>
+      <label *ngIf="isOwner">
+        Company Name:
+        <input formControlName="companyName" />
+      </label>
       <button type="submit" [disabled]="form.invalid">Save</button>
     </form>
   `
@@ -40,22 +44,35 @@ export class UserFormComponent {
     name: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
-    roles: ['']
+    roles: [''],
+    companyName: ['']
   });
 
   onSubmit(): void {
     if (this.form.valid) {
-      const { name, email, password, roles } = this.form.getRawValue();
+      const { name, email, password, roles, companyName } =
+        this.form.getRawValue();
       const roleList = roles
         .split(',')
         .map(r => r.trim())
         .filter(r => r.length);
+      const payload: any = { name, email, password, roles: roleList };
+      if (companyName) {
+        payload.companyName = companyName;
+      }
       this.userService
-        .createUser({ name, email, password, roles: roleList } as any)
+        .createUser(payload)
         .subscribe(() => {
           this.router.navigate(['/users']);
         });
     }
+  }
+
+  get isOwner(): boolean {
+    return this.form.controls.roles.value
+      .split(',')
+      .map(r => r.trim())
+      .includes('owner');
   }
 }
 
