@@ -6,7 +6,8 @@ import { Request } from 'express';
 export class MetricsThrottlerGuard extends ThrottlerGuard {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<Request>();
-    if (req.path?.startsWith('/metrics')) {
+    const path = req.path || req.originalUrl || '';
+    if (path.startsWith('/api/metrics') || path.startsWith('/metrics')) {
       return true;
     }
     return super.canActivate(context);
