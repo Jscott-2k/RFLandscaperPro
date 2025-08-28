@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EquipmentController } from './equipment.controller';
 import { EquipmentService } from './equipment.service';
-import { EquipmentStatus } from './entities/equipment.entity';
 import { EquipmentResponseDto } from './dto/equipment-response.dto';
+import { EquipmentStatus, EquipmentType } from './entities/equipment.entity';
 
 describe('EquipmentController', () => {
   let controller: EquipmentController;
@@ -16,6 +16,7 @@ describe('EquipmentController', () => {
           provide: EquipmentService,
           useValue: {
             updateStatus: jest.fn(),
+            findAll: jest.fn()
           },
         },
       ],
@@ -28,6 +29,7 @@ describe('EquipmentController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
 
   describe('updateStatus', () => {
     it('should pass companyId to equipmentService.updateStatus', async () => {
@@ -45,5 +47,23 @@ describe('EquipmentController', () => {
       );
       expect(result).toBe(response);
     });
+
+  it('should call equipmentService.findAll with companyId', async () => {
+    const pagination = { page: 1, limit: 10 };
+    const req = { user: { companyId: 1 } };
+    const status = EquipmentStatus.AVAILABLE;
+    const type = EquipmentType.MOWER;
+    const expectedResult = { items: [], total: 0 };
+    (service.findAll as jest.Mock).mockResolvedValue(expectedResult);
+
+    const result = await controller.findAll(pagination, req, status, type);
+    expect(result).toEqual(expectedResult);
+    expect(service.findAll).toHaveBeenCalledWith(
+      pagination,
+      req.user.companyId,
+      status,
+      type,
+    );
+
   });
 });

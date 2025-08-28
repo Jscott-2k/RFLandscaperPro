@@ -63,13 +63,18 @@ export class JobsController {
   @ApiResponse({ status: 200, description: 'List of jobs' })
   findAll(
     @Query() pagination: PaginationQueryDto,
+    @Req() req: { user: { companyId: number } },
     @Query('completed', new ParseBoolPipe({ optional: true }))
     completed?: boolean,
     @Query('customerId', new ParseIntPipe({ optional: true }))
     customerId?: number,
   ): Promise<{ items: JobResponseDto[]; total: number }> {
-    return this.jobsService.findAll(pagination, completed, customerId);
-
+    return this.jobsService.findAll(
+      pagination,
+      req.user.companyId,
+      completed,
+      customerId,
+    );
   }
 
   @Get(':id')

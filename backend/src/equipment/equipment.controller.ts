@@ -62,6 +62,7 @@ export class EquipmentController {
   async findAll(
     @Req() req: { user: { companyId: number } },
     @Query() pagination: PaginationQueryDto,
+    @Req() req: { user: { companyId: number } },
     @Query('status', new ParseEnumPipe(EquipmentStatus, { optional: true }))
     status?: EquipmentStatus,
     @Query('type', new ParseEnumPipe(EquipmentType, { optional: true }))
