@@ -1,22 +1,11 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { ApiService } from './api.service';
+import { Component } from '@angular/core';
+import { LayoutComponent } from './layout/layout.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [LayoutComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App implements OnInit {
-  protected readonly title = signal('frontend');
-  protected readonly backendStatus = signal('checking');
-  private readonly api = inject(ApiService);
+export class App {}
 
-  ngOnInit(): void {
-    this.api.getHealth().subscribe({
-      next: () => this.backendStatus.set('online'),
-      error: () => this.backendStatus.set('offline')
-    });
-  }
-}

@@ -1,0 +1,28 @@
+<h2>Job Editor</h2>
+<form (ngSubmit)="save()" #jobForm="ngForm">
+  <label>
+    Title
+    <input type="text" name="title" [(ngModel)]="job.title" required />
+  </label>
+  <label>
+    Description
+    <textarea name="description" [(ngModel)]="job.description"></textarea>
+  </label>
+  <label>
+    Schedule Date
+    <input type="date" name="scheduledDate" [(ngModel)]="job.scheduledDate" (change)="schedule()" />
+  </label>
+  <fieldset>
+    <legend>Assign</legend>
+    <label>
+      Worker ID
+      <input type="number" #worker />
+    </label>
+    <label>
+      Equipment ID
+      <input type="number" #equipment />
+    </label>
+    <button type="button" (click)="assign(worker.valueAsNumber, equipment.valueAsNumber)">Assign</button>
+  </fieldset>
+  <button type="submit" [disabled]="jobForm.invalid">Save</button>
+</form>
