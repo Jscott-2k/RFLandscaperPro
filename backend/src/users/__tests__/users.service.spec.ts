@@ -19,7 +19,7 @@ describe('UsersService', () => {
     Pick<Repository<Customer>, 'create' | 'save'>
   >;
   let companyRepository: jest.Mocked<
-    Pick<Repository<Company>, 'create' | 'save'>
+    Pick<Repository<Company>, 'create' | 'save' | 'findOne'>
   >;
   let emailService: {
     sendPasswordResetEmail: jest.Mock<void, [string, string]>;
@@ -61,7 +61,10 @@ describe('UsersService', () => {
         }
         return company;
       }),
-    } as unknown as jest.Mocked<Pick<Repository<Company>, 'create' | 'save'>>;
+      findOne: jest.fn(),
+    } as unknown as jest.Mocked<
+      Pick<Repository<Company>, 'create' | 'save' | 'findOne'>
+    >;
     emailService = {
       sendPasswordResetEmail: jest.fn<void, [string, string]>(),
     };
@@ -106,12 +109,13 @@ describe('UsersService', () => {
   });
 
   it('creates company for owner accounts', async () => {
+    companyRepository.findOne.mockResolvedValueOnce(null);
     const user = await service.create({
       username: 'owner',
       email: 'owner@example.com',
       password: 'secret',
       role: UserRole.Owner,
-      companyName: 'ACME Landscaping',
+      company: { name: 'ACME Landscaping' },
     });
     expect(companyRepository.create).toHaveBeenCalledWith({
       name: 'ACME Landscaping',
@@ -122,7 +126,7 @@ describe('UsersService', () => {
     expect(user.companyId).toBe(1);
   });
 
-  it('requires companyId for worker accounts', async () => {
+  it('requires company for worker accounts', async () => {
     await expect(
       service.create({
         username: 'worker',

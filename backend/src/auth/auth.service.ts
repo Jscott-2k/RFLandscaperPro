@@ -61,7 +61,10 @@ export class AuthService {
     // Validate password strength
     validatePasswordStrength(registerDto.password);
 
-    const user = await this.usersService.create(registerDto);
+    const user = await this.usersService.create({
+      ...registerDto,
+      company: registerDto.company,
+    });
     return this.login(user);
   }
 

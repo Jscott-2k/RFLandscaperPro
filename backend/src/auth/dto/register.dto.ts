@@ -5,11 +5,15 @@ import {
   Matches,
   IsEnum,
   IsOptional,
+  ValidateNested,
 } from 'class-validator';
+
+import { Type } from 'class-transformer';
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PASSWORD_REGEX } from '../password.util';
 import { UserRole } from '../../users/user.entity';
+import { CreateCompanyDto } from '../../companies/dto/create-company.dto';
 
 export class RegisterDto {
   @ApiProperty({ description: 'Username must be unique' })
@@ -39,10 +43,11 @@ export class RegisterDto {
   @IsOptional()
   role?: UserRole;
 
-  @ApiPropertyOptional({ description: 'Company name for owner accounts' })
-  @IsString()
+  @ApiPropertyOptional({ type: () => CreateCompanyDto })
+  @ValidateNested()
+  @Type(() => CreateCompanyDto)
   @IsOptional()
-  companyName?: string;
+  company?: CreateCompanyDto;
 
   @ApiPropertyOptional()
   @IsString()
