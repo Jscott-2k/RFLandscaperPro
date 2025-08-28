@@ -73,3 +73,25 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Docker
+
+### Development
+
+To start the frontend in a container with hot reload, run:
+
+```bash
+docker compose up
+```
+
+This uses `Dockerfile.dev` and serves the app at <http://localhost:4200>.
+
+### Production build
+
+To build and run the production image:
+
+```bash
+docker compose -f docker-compose.yml up --build -d
+```
+
+The compiled application is served by Nginx on port 80.
