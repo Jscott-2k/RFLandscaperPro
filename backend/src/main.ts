@@ -21,6 +21,9 @@ async function bootstrap() {
   try {
     app = await NestFactory.create(AppModule, { bufferLogs: true });
 
+    // Prefix all routes with /api
+    app.setGlobalPrefix('api');
+
     // Apply middleware
     app.use(requestIdMiddleware);
 
