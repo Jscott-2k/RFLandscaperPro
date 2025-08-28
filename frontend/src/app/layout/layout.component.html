@@ -6,6 +6,7 @@
     <a *ngIf="!auth.isAuthenticated()" routerLink="/login" routerLinkActive="active">Login</a>
     <button *ngIf="auth.isAuthenticated()" (click)="logout()">Logout</button>
     <a *ngIf="auth.hasRole('admin')" routerLink="/users" routerLinkActive="active">Admin Panel</a>
+    <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
     <a routerLink="/customers" routerLinkActive="active">Customers</a>
     <a routerLink="/equipment" routerLinkActive="active">Equipment</a>
     <a routerLink="/jobs" routerLinkActive="active">Jobs</a>
