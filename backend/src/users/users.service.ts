@@ -48,7 +48,8 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.usersRepository.create(createUserDto);
+    const { company, ...userData } = createUserDto;
+    const user = this.usersRepository.create(userData);
 
     try {
       const savedUser = await this.usersRepository.save(user);
@@ -60,26 +61,29 @@ export class UsersService {
           userId: savedUser.id,
         });
         await this.customerRepository.save(customer);
-      } else if (savedUser.role === UserRole.Owner) {
-        if (!createUserDto.companyName) {
+      } else if (
+        savedUser.role === UserRole.Owner ||
+        savedUser.role === UserRole.Worker
+      ) {
+        if (!company) {
           throw new BadRequestException(
-            'Company name is required for owner accounts',
+            'Company information is required for owner and worker accounts',
           );
         }
-        const company = this.companyRepository.create({
-          name: createUserDto.companyName,
-          ownerId: savedUser.id,
+
+        let existing = await this.companyRepository.findOne({
+          where: { name: company.name },
         });
-        const savedCompany = await this.companyRepository.save(company);
-        savedUser.companyId = savedCompany.id;
-        await this.usersRepository.save(savedUser);
-      } else if (savedUser.role === UserRole.Worker) {
-        if (!createUserDto.companyId) {
-          throw new BadRequestException(
-            'companyId is required for worker accounts',
-          );
+
+        if (!existing) {
+          existing = this.companyRepository.create({
+            ...company,
+            ownerId: savedUser.role === UserRole.Owner ? savedUser.id : undefined,
+          });
+          existing = await this.companyRepository.save(existing);
         }
-        savedUser.companyId = createUserDto.companyId;
+
+        savedUser.companyId = existing.id;
         await this.usersRepository.save(savedUser);
       }
 

@@ -5,10 +5,12 @@ import {
   MinLength,
   Matches,
   IsEmail,
+  ValidateNested,
 } from 'class-validator';
 import { UserRole } from '../user.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt } from 'class-validator';
+import { Type } from 'class-transformer';
+import { CreateCompanyDto } from '../../companies/dto/create-company.dto';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -33,15 +35,11 @@ export class CreateUserDto {
   @IsOptional()
   role?: UserRole;
 
-  @ApiPropertyOptional({ description: 'Company ID for worker accounts' })
-  @IsInt()
+  @ApiPropertyOptional({ type: () => CreateCompanyDto })
+  @ValidateNested()
+  @Type(() => CreateCompanyDto)
   @IsOptional()
-  companyId?: number;
-
-  @ApiPropertyOptional({ description: 'Company name for owner accounts' })
-  @IsString()
-  @IsOptional()
-  companyName?: string;
+  company?: CreateCompanyDto;
 
   @ApiPropertyOptional()
   @IsString()
