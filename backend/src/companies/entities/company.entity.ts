@@ -21,6 +21,15 @@ export class Company {
   name: string;
 
   @Column({ nullable: true })
+  address?: string;
+
+  @Column({ nullable: true })
+  phone?: string;
+
+  @Column({ nullable: true })
+  email?: string;
+
+  @Column({ nullable: true })
   ownerId?: number;
 
   @ManyToOne(() => User, { nullable: true })

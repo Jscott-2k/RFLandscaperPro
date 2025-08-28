@@ -59,13 +59,15 @@ SMTP settings are only required in production. During development and testing th
 createdb rflandscaperpro
 
 # Run database migrations (when available)
-npm run migration:run
+npm run migration:run:dev
 
 # Seed initial data (creates admin user and sample customer)
-npm run seed
+# This script is intended for local development only and will
+# automatically skip execution when `NODE_ENV=production`.
+npm run seed:dev
 
 # Drop and re-seed the database from scratch
-npm run seed:drop
+npm run seed:drop:dev
 ```
 
 ### 4. Start Development Server
@@ -203,22 +205,22 @@ npm run format
 ### Database
 ```bash
 # Create new migration
-npm run migration:create
+npm run migration:create:dev
 
 # Generate migration from entity changes
-npm run migration:generate
+npm run migration:generate:dev
 
 # Run pending migrations
-npm run migration:run
+npm run migration:run:dev
 
 # Revert last migration
-npm run migration:revert
+npm run migration:revert:dev
 
 # Seed database with sample data
-npm run seed
+npm run seed:dev
 
 # Drop and re-seed the database from scratch
-npm run seed:drop
+npm run seed:drop:dev
 ```
 
 ## Database Schema

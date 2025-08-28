@@ -5,6 +5,7 @@ import { Company } from './entities/company.entity';
 import { User, UserRole } from '../users/user.entity';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
+import { CompanyResponseDto } from './dto/company-response.dto';
 
 @Injectable()
 export class CompaniesService {
@@ -15,11 +16,12 @@ export class CompaniesService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  findByUserId(userId: number): Promise<Company | null> {
-    return this.companyRepository
+  async findByUserId(userId: number): Promise<CompanyResponseDto | null> {
+    const company = await this.companyRepository
       .createQueryBuilder('company')
       .innerJoin('company.users', 'user', 'user.id = :userId', { userId })
       .getOne();
+    return company ? this.toCompanyResponseDto(company) : null;
   }
 
   findWorkers(companyId: number): Promise<User[]> {
@@ -28,15 +30,30 @@ export class CompaniesService {
     });
   }
 
-  async create(dto: CreateCompanyDto, ownerId: number): Promise<Company> {
+  async create(
+    dto: CreateCompanyDto,
+    ownerId: number,
+  ): Promise<CompanyResponseDto> {
     const company = this.companyRepository.create({ ...dto, ownerId });
-    return this.companyRepository.save(company);
+    const saved = await this.companyRepository.save(company);
+    return this.toCompanyResponseDto(saved);
   }
 
-  async update(id: number, dto: UpdateCompanyDto): Promise<Company> {
+  async update(id: number, dto: UpdateCompanyDto): Promise<CompanyResponseDto> {
     const company = await this.companyRepository.findOne({ where: { id } });
     if (!company) throw new NotFoundException('Company not found');
     Object.assign(company, dto);
-    return this.companyRepository.save(company);
+    const saved = await this.companyRepository.save(company);
+    return this.toCompanyResponseDto(saved);
+  }
+
+  private toCompanyResponseDto(company: Company): CompanyResponseDto {
+    return {
+      id: company.id,
+      name: company.name,
+      address: company.address ?? null,
+      phone: company.phone ?? null,
+      email: company.email ?? null,
+    };
   }
 }
