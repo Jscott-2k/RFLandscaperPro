@@ -60,16 +60,34 @@ export class JobsController {
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'completed', required: false, type: Boolean })
   @ApiQuery({ name: 'customerId', required: false, type: Number })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
+  @ApiQuery({ name: 'workerId', required: false, type: Number })
+  @ApiQuery({ name: 'equipmentId', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'List of jobs' })
   findAll(
     @Query() pagination: PaginationQueryDto,
+    @Req() req: { user: { companyId: number } },
     @Query('completed', new ParseBoolPipe({ optional: true }))
     completed?: boolean,
     @Query('customerId', new ParseIntPipe({ optional: true }))
     customerId?: number,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('workerId', new ParseIntPipe({ optional: true })) workerId?: number,
+    @Query('equipmentId', new ParseIntPipe({ optional: true }))
+    equipmentId?: number,
   ): Promise<{ items: JobResponseDto[]; total: number }> {
-    return this.jobsService.findAll(pagination, completed, customerId);
-
+    return this.jobsService.findAll(
+      pagination,
+      req.user.companyId,
+      completed,
+      customerId,
+      startDate ? new Date(startDate) : undefined,
+      endDate ? new Date(endDate) : undefined,
+      workerId,
+      equipmentId,
+    );
   }
 
   @Get(':id')
