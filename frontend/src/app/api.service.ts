@@ -10,4 +10,20 @@ export class ApiService {
   getHealth(): Observable<unknown> {
     return this.http.get(`${environment.apiUrl}/health`);
   }
+
+  getUpcomingJobs(): Observable<{ items: unknown[]; total: number }> {
+    return this.http.get<{ items: unknown[]; total: number }>(
+      `${environment.apiUrl}/jobs?completed=false&limit=5`
+    );
+  }
+
+  getEquipmentCount(status: string): Observable<{ items: unknown[]; total: number }> {
+    return this.http.get<{ items: unknown[]; total: number }>(
+      `${environment.apiUrl}/equipment?status=${status}&limit=1`
+    );
+  }
+
+  getUsers(): Observable<unknown[]> {
+    return this.http.get<unknown[]>(`${environment.apiUrl}/users`);
+  }
 }
