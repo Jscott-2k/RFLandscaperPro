@@ -20,6 +20,7 @@ describe('CustomersService', () => {
           useValue: {
             create: jest.fn(),
             save: jest.fn(),
+            createQueryBuilder: jest.fn(),
           },
         },
       ],
@@ -59,5 +60,28 @@ describe('CustomersService', () => {
       'message',
       'Email already exists',
     );
+  });
+
+  it('should apply search filter when finding all customers', async () => {
+    const qb = {
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      take: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+    } as any;
+
+    (repo.createQueryBuilder as jest.Mock).mockReturnValue(qb);
+
+    const pagination = { page: 1, limit: 10 } as any;
+    await service.findAll(pagination, 1, undefined, 'Jane');
+
+    expect(qb.andWhere).toHaveBeenCalledWith(
+      '(customer.name ILIKE :search OR customer.email ILIKE :search OR customer.phone ILIKE :search)',
+      { search: '%Jane%' },
+    );
+    expect(qb.getManyAndCount).toHaveBeenCalled();
   });
 });

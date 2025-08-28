@@ -56,16 +56,19 @@ export class CustomersController {
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'active', required: false, type: Boolean })
+  @ApiQuery({ name: 'search', required: false })
   @ApiResponse({ status: 200, description: 'List of customers' })
   async findAll(
     @Query() pagination: PaginationQueryDto,
     @Req() req: { user: { companyId: number } },
     @Query('active', new ParseBoolPipe({ optional: true })) active?: boolean,
+    @Query('search') search?: string,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
     return this.customersService.findAll(
       pagination,
       req.user.companyId,
       active,
+      search,
     );
   }
 

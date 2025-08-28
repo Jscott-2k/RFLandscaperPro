@@ -58,6 +58,7 @@ export class EquipmentController {
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'status', required: false, enum: EquipmentStatus })
   @ApiQuery({ name: 'type', required: false, enum: EquipmentType })
+  @ApiQuery({ name: 'search', required: false })
   @ApiResponse({ status: 200, description: 'List of equipment' })
   async findAll(
     @Query() pagination: PaginationQueryDto,
@@ -66,12 +67,14 @@ export class EquipmentController {
     status?: EquipmentStatus,
     @Query('type', new ParseEnumPipe(EquipmentType, { optional: true }))
     type?: EquipmentType,
+    @Query('search') search?: string,
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
     return this.equipmentService.findAll(
       pagination,
       req.user.companyId,
       status,
       type,
+      search,
     );
   }
 

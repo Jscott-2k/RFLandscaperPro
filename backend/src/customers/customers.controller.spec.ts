@@ -29,7 +29,7 @@ describe('CustomersController', () => {
   });
 
   describe('findAll', () => {
-    it('should call service with companyId and active flag', async () => {
+    it('should call service with companyId, active flag, and search term', async () => {
       const pagination = new PaginationQueryDto();
       pagination.page = 1;
       pagination.limit = 10;
@@ -39,9 +39,9 @@ describe('CustomersController', () => {
         .spyOn(service, 'findAll')
         .mockResolvedValue(result);
 
-      const response = await controller.findAll(pagination, req, true);
+      const response = await controller.findAll(pagination, req, true, 'john');
 
-      expect(findAllSpy).toHaveBeenCalledWith(pagination, 1, true);
+      expect(findAllSpy).toHaveBeenCalledWith(pagination, 1, true, 'john');
       expect(response).toBe(result);
     });
   });

@@ -35,6 +35,7 @@ export class EquipmentService {
     companyId: number,
     status?: EquipmentStatus,
     type?: string,
+    search?: string,
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
     const { page = 1, limit = 10 } = pagination;
     const cappedLimit = Math.min(limit, 100);
@@ -48,6 +49,13 @@ export class EquipmentService {
 
     if (type) {
       queryBuilder.andWhere('equipment.type = :type', { type });
+    }
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(equipment.name ILIKE :search OR equipment.type ILIKE :search OR equipment.description ILIKE :search)',
+        { search: `%${search}%` },
+      );
     }
 
     const [equipments, total] = await queryBuilder

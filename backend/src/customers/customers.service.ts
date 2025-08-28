@@ -49,6 +49,7 @@ export class CustomersService {
     pagination: PaginationQueryDto,
     companyId: number,
     active?: boolean,
+    search?: string,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
     const { page = 1, limit = 10 } = pagination;
     const cappedLimit = Math.min(limit, 100);
@@ -60,6 +61,13 @@ export class CustomersService {
 
     if (active !== undefined) {
       queryBuilder.andWhere('customer.active = :active', { active });
+    }
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(customer.name ILIKE :search OR customer.email ILIKE :search OR customer.phone ILIKE :search)',
+        { search: `%${search}%` },
+      );
     }
 
     const [customers, total] = await queryBuilder
