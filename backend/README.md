@@ -49,9 +49,15 @@ DB_PASSWORD=your_password
 DB_NAME=rflandscaperpro
 JWT_SECRET=your_secure_jwt_secret
 LOG_LEVEL=debug
+# Remote log forwarding (optional)
+# REMOTE_LOG_HOST=logs.example.com
+# REMOTE_LOG_PORT=1234
+# REMOTE_LOG_PATH=/
 ```
 
 SMTP settings are only required in production. During development and testing the application uses an Ethereal account automatically and logs preview URLs for any emails sent.
+
+Remote logging is only enabled when `REMOTE_LOG_HOST` is defined. When omitted, logs are written to the console and `app.log` file only.
 
 ### 3. Database Setup
 ```bash
