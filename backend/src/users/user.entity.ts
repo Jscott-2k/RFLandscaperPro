@@ -37,13 +37,13 @@ export class User {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.Customer })
   role: UserRole;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   firstName: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   lastName: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   phone: string | null;
 
   @Index('IDX_user_password_reset_token')
