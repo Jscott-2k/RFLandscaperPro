@@ -23,7 +23,10 @@ RFLandscaperPro/
 │   ├── Dockerfile          # Production container
 │   ├── docker-compose.yml  # Development environment
 │   └── fly.toml            # Fly.io deployment configuration
+├── frontend/                # Angular web client
+│   ├── Dockerfile          # Production container
+│   ├── docker-compose.yml  # Development environment
+│   └── README.md           # Frontend documentation
 ├── LICENSE                 # MIT License
 └── README.md               # Project documentation
 ```
-

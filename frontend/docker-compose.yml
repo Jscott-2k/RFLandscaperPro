@@ -1,0 +1,9 @@
+services:
+  frontend:
+    image: rflandscaperpro/frontend
+    container_name: rflandscaperpro_frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
