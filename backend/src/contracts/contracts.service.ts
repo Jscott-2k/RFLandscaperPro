@@ -141,8 +141,20 @@ export class ContractsService {
 
   private addFrequency(date: Date, frequency: ContractFrequency): Date {
     const result = new Date(date);
-    const days = frequency === ContractFrequency.WEEKLY ? 7 : 14;
-    result.setDate(result.getDate() + days);
+    switch (frequency) {
+      case ContractFrequency.WEEKLY:
+        result.setDate(result.getDate() + 7);
+        break;
+      case ContractFrequency.BIWEEKLY:
+        result.setDate(result.getDate() + 14);
+        break;
+      case ContractFrequency.MONTHLY:
+        result.setMonth(result.getMonth() + 1);
+        break;
+      case ContractFrequency.BIMONTHLY:
+        result.setMonth(result.getMonth() + 2);
+        break;
+    }
     return result;
   }
 

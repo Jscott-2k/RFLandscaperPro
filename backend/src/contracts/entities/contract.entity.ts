@@ -15,6 +15,8 @@ import { Job } from '../../jobs/entities/job.entity';
 export enum ContractFrequency {
   WEEKLY = 'weekly',
   BIWEEKLY = 'bi-weekly',
+  MONTHLY = 'monthly',
+  BIMONTHLY = 'bi-monthly',
 }
 
 @Entity()
