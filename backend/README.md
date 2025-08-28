@@ -1,42 +1,44 @@
-# RF Landscaper Pro - Backend API 🚀
+# RF Landscaper Pro - Backend API
 
-A robust, secure, and scalable NestJS backend API for landscaping business management. Built with enterprise-grade security, performance optimization, and comprehensive business logic validation.
+A robust and scalable NestJS backend API for landscaping business management. It provides enterprise-grade security, performance optimization, and thorough business logic validation.
 
-## 🎯 **Features**
+## Features
 
-### **Core Modules**
-- 🔐 **Authentication & Authorization**: JWT-based auth with role-based access control
-- 👥 **Customer Management**: Comprehensive customer profiles with address management
-- 🚜 **Equipment Tracking**: Status management, maintenance scheduling, conflict detection
-- 📋 **Job Management**: Scheduling, assignments, time tracking, resource optimization
-- 👷 **User Management**: Multi-role user system with secure password handling
+### Core Modules
+- Authentication and Authorization: JWT-based authentication with role-based access control.
+- Company Management: Company profiles, contact details, and hierarchies.
+- Contract Management: Service contracts with automated status tracking.
+- Customer Management: Comprehensive customer profiles and address management.
+- Equipment Tracking: Status management, maintenance scheduling, conflict detection.
+- Job Management: Scheduling, assignments, time tracking, resource optimization.
+- User Management: Multi-role user system with secure password handling.
 
-### **Technical Features**
-- 🚀 **Performance**: Optimized database queries with strategic indexing
-- 🛡️ **Security**: Enhanced password validation, input sanitization, error handling
-- 📊 **Monitoring**: Prometheus metrics, structured logging, request tracking
-- 🧪 **Testing**: Comprehensive test coverage with Jest
-- 📚 **Documentation**: Interactive Swagger API documentation
+### Technical Features
+- Performance: Optimized database queries with strategic indexing.
+- Security: Enhanced password validation, input sanitization, error handling.
+- Monitoring: Prometheus metrics, structured logging, request tracking.
+- Testing: Comprehensive test coverage with Jest.
+- Documentation: Interactive Swagger API documentation.
 
-## 🚀 **Quick Start**
+## Quick Start
 
-### **Prerequisites**
-- **Node.js**: 18+ (LTS recommended)
-- **PostgreSQL**: 14+ 
-- **npm**: 8+ or **yarn**: 1.22+
-- **Docker & Docker Compose** (optional, for containerized development)
+### Prerequisites
+- Node.js 18 or later (LTS recommended)
+- PostgreSQL 14 or later
+- npm 8+ or yarn 1.22+
+- Docker and Docker Compose (optional for containerized development)
 
-### **1. Installation**
+### 1. Installation
 ```bash
-# Install dependencies
 npm install
 
 # Copy environment configuration
 cp env.example .env.development
 ```
 
-### **2. Environment Configuration**
+### 2. Environment Configuration
 Edit `.env.development` with your database credentials:
+
 ```env
 NODE_ENV=development
 PORT=3000
@@ -49,29 +51,26 @@ JWT_SECRET=your_secure_jwt_secret
 LOG_LEVEL=debug
 ```
 
-> **Note:** SMTP settings are only required in production. During development and testing, the app uses an Ethereal account automatically and logs preview URLs for any emails sent.
+SMTP settings are only required in production. During development and testing the application uses an Ethereal account automatically and logs preview URLs for any emails sent.
 
-### **3. Database Setup**
+### 3. Database Setup
 ```bash
 # Create PostgreSQL database
 createdb rflandscaperpro
 
 # Run database migrations (when available)
-npx cross-env NODE_ENV=development npm run migration:run
+npm run migration:run
 
 # Seed initial data (creates admin user and sample customer)
-# This script is intended for local development only and will
-# automatically skip execution when `NODE_ENV=production`.
-npx cross-env NODE_ENV=development npm run seed
+npm run seed
 
 # Drop and re-seed the database from scratch
-npx cross-env NODE_ENV=development npm run seed:drop
-
+npm run seed:drop
 ```
 
-### **4. Start Development Server**
+### 4. Start Development Server
 
-**Recommended (Docker):** Use a fully managed environment:
+Recommended: use a fully managed environment with Docker.
 
 ```bash
 npm run dev:compose
@@ -79,13 +78,10 @@ npm run dev:compose
 docker compose -f docker-compose.yml -f docker-compose.override.yml up
 ```
 
-`npm run start:dev` and the other commands below are executed **inside the Docker container**. Run them directly only if all dependent services (e.g., PostgreSQL) are available locally.
+`npm run start:dev` and other commands below are executed inside the Docker container. Run them directly only if all dependent services, such as PostgreSQL, are available locally.
 
 ```bash
-# Preferred: start the full environment with Docker
-npm run dev:compose
-
-# Alternatively, run the NestJS server with hot reload
+# Run the NestJS server with hot reload
 npm run start:dev
 
 # Start with debugger
@@ -95,61 +91,74 @@ npm run start:debug
 npm run start:prod
 ```
 
-### **5. Access the API**
-- **API Base URL**: http://localhost:3000/api
-- **Swagger Docs**: http://localhost:3000/api/docs (admin/admin)
-- **Health Check**: http://localhost:3000/api/health
-- **Metrics**: http://localhost:3000/api/metrics
-- **Production Base URL**: https://rflandscaperpro.com/api
+### 5. Access the API
+- API Base URL: http://localhost:3000/api
+- Swagger Docs: http://localhost:3000/api/docs (admin/admin)
+- Health Check: http://localhost:3000/api/health
+- Metrics: http://localhost:3000/api/metrics
+- Production Base URL: https://rflandscaperpro.com/api
 
-## 🏗️ **Project Structure**
-
+## Project Structure
 ```
 src/
-├── auth/                   # Authentication & authorization
-│   ├── dto/               # Data transfer objects
-│   ├── auth.controller.ts # Auth endpoints
-│   ├── auth.service.ts    # Auth business logic
-│   └── auth.module.ts     # Auth module configuration
-├── customers/             # Customer management
-│   ├── dto/               # Customer DTOs
-│   ├── entities/          # Customer & address entities
-│   ├── customers.controller.ts
-│   ├── customers.service.ts
-│   └── customers.module.ts
-├── equipment/             # Equipment tracking
-│   ├── dto/               # Equipment DTOs
-│   ├── entities/          # Equipment entity
-│   ├── equipment.controller.ts
-│   ├── equipment.service.ts
-│   └── equipment.module.ts
-├── jobs/                  # Job management
-│   ├── dto/               # Job DTOs
-│   ├── entities/          # Job & assignment entities
-│   ├── jobs.controller.ts
-│   ├── jobs.service.ts
-│   └── jobs.module.ts
-├── users/                 # User management
-│   ├── dto/               # User DTOs
-│   ├── user.entity.ts     # User entity
-│   ├── users.controller.ts
-│   ├── users.service.ts
-│   └── users.module.ts
-├── common/                # Shared utilities
-│   ├── decorators/        # Custom decorators
-│   ├── filters/           # Exception filters
-│   ├── guards/            # Authentication guards
-│   ├── interceptors/      # Request/response interceptors
-│   ├── middleware/        # Custom middleware
-│   └── email.service.ts   # Email service (placeholder)
-├── logger/                # Logging configuration
-├── app.module.ts          # Root application module
-└── main.ts                # Application entry point
+|-- auth/                   # Authentication and authorization
+|   |-- dto/                # Data transfer objects
+|   |-- auth.controller.ts
+|   |-- auth.service.ts
+|   |-- auth.module.ts
+|-- companies/              # Company management
+|   |-- dto/
+|   |-- entities/
+|   |-- companies.controller.ts
+|   |-- companies.service.ts
+|   |-- companies.module.ts
+|-- contracts/              # Contract management
+|   |-- dto/
+|   |-- entities/
+|   |-- contracts.controller.ts
+|   |-- contracts.service.ts
+|   |-- contracts.module.ts
+|-- customers/              # Customer management
+|   |-- dto/
+|   |-- entities/
+|   |-- customers.controller.ts
+|   |-- customers.service.ts
+|   |-- customers.module.ts
+|-- equipment/              # Equipment tracking
+|   |-- dto/
+|   |-- entities/
+|   |-- equipment.controller.ts
+|   |-- equipment.service.ts
+|   |-- equipment.module.ts
+|-- jobs/                   # Job management
+|   |-- dto/
+|   |-- entities/
+|   |-- jobs.controller.ts
+|   |-- jobs.service.ts
+|   |-- jobs.module.ts
+|-- users/                  # User management
+|   |-- dto/
+|   |-- user.entity.ts
+|   |-- users.controller.ts
+|   |-- users.service.ts
+|   |-- users.module.ts
+|-- common/                 # Shared utilities
+|   |-- decorators/
+|   |-- filters/
+|   |-- guards/
+|   |-- interceptors/
+|   |-- middleware/
+|   |-- email.service.ts
+|-- logger/                 # Logging configuration
+|-- metrics/                # Metrics controller and module
+|-- app.module.ts           # Root application module
+|-- main.ts                 # Application entry point
+|-- seed.ts                 # Development data seeding
 ```
 
-## 🔧 **Development Commands**
+## Development Commands
 
-### **Development**
+### Development
 ```bash
 # Start development server with hot reload
 npm run start:dev
@@ -164,10 +173,10 @@ npm run build
 npm run start:prod
 ```
 
-### **Testing**
+### Testing
 ```bash
 # Run unit tests
-npm run test
+npm test
 
 # Run tests with coverage
 npm run test:cov
@@ -182,7 +191,7 @@ npm run test:watch
 npm run test:debug
 ```
 
-### **Code Quality**
+### Code Quality
 ```bash
 # Lint code with auto-fix
 npm run lint
@@ -191,102 +200,102 @@ npm run lint
 npm run format
 ```
 
-### **Database**
+### Database
 ```bash
 # Create new migration
-npx cross-env NODE_ENV=development npm run migration:create
+npm run migration:create
 
 # Generate migration from entity changes
-npx cross-env NODE_ENV=development npm run migration:generate
+npm run migration:generate
 
 # Run pending migrations
-npx cross-env NODE_ENV=development npm run migration:run
+npm run migration:run
 
 # Revert last migration
-npx cross-env NODE_ENV=development npm run migration:revert
+npm run migration:revert
 
 # Seed database with sample data
-npx cross-env NODE_ENV=development npm run seed
+npm run seed
 
 # Drop and re-seed the database from scratch
-npx cross-env NODE_ENV=development npm run seed:drop
+npm run seed:drop
 ```
 
-## 🗄️ **Database Schema**
+## Database Schema
 
-### **Core Entities**
-- **Users**: Authentication, roles, password management
-- **Customers**: Business relationships, contact information
-- **Addresses**: Customer location management
-- **Equipment**: Asset tracking, status management
-- **Jobs**: Work order management, scheduling
-- **Assignments**: Resource allocation, conflict detection
+### Core Entities
+- Users: authentication, roles, password management
+- Customers: business relationships, contact information
+- Addresses: customer location management
+- Equipment: asset tracking, status management
+- Jobs: work order management, scheduling
+- Assignments: resource allocation, conflict detection
 
-### **Key Relationships**
+### Key Relationships
 - Customers have multiple addresses and jobs
 - Jobs are assigned to customers and can have multiple assignments
 - Assignments link users and equipment to specific jobs
 - Equipment has status tracking and maintenance history
 
-## 🔐 **Security Features**
+## Security Features
 
-### **Authentication**
+### Authentication
 - JWT-based authentication with configurable expiration
 - Role-based access control (Admin, Worker, Customer)
 - Secure password hashing with bcrypt (12 salt rounds)
-- Password strength validation (8+ chars, complexity requirements)
+- Password strength validation (8+ characters with complexity requirements)
 
-### **Authorization**
+### Authorization
 - Route-level role protection with `@Roles()` decorator
 - Public route marking with `@Public()` decorator
 - JWT strategy with proper token validation
 
-### **Input Validation**
+### Input Validation
 - Comprehensive DTO validation with class-validator
 - Business rule validation and sanitization
 - SQL injection prevention through TypeORM
 - XSS protection through input sanitization
 
-## 📊 **Performance Features**
+## Performance Features
 
-### **Database Optimization**
+### Database Optimization
 - Strategic database indexes for common queries
 - Query optimization with TypeORM QueryBuilder
 - Lazy loading to prevent N+1 query problems
 - Efficient pagination with filtering and sorting
 
-### **Caching & Monitoring**
+### Caching and Monitoring
 - Redis-based caching (configurable)
 - Prometheus metrics for performance monitoring
-- Request/response logging and tracking
+- Request and response logging and tracking
 - Performance profiling and optimization
 
-## 🧪 **Testing Strategy**
+## Testing Strategy
 
-### **Test Coverage**
-- **Unit Tests**: Service methods, business logic, utilities
-- **Integration Tests**: Database operations, API endpoints
-- **E2E Tests**: Complete user workflows and scenarios
-- **Coverage Target**: Minimum 80% code coverage
+### Test Coverage
+- Unit tests: service methods, business logic, utilities
+- Integration tests: database operations, API endpoints
+- End-to-end tests: complete user workflows and scenarios
+- Coverage target: minimum 80 percent code coverage
 
-### **Test Structure**
+### Test Structure
 ```
 test/
-├── app.e2e-spec.ts        # Application E2E tests
-├── users.e2e-spec.ts      # User management E2E tests
-└── jest-e2e.json          # E2E test configuration
+|-- app.e2e-spec.ts        # Application E2E tests
+|-- users.e2e-spec.ts      # User management E2E tests
+|-- jest-e2e.json          # E2E test configuration
 
 src/
-├── auth/                  # Auth module tests
-├── customers/             # Customer module tests
-├── equipment/             # Equipment module tests
-├── jobs/                  # Job module tests
-└── users/                 # User module tests
+|-- auth/                  # Auth module tests
+|-- customers/             # Customer module tests
+|-- equipment/             # Equipment module tests
+|-- jobs/                  # Job module tests
+|-- users/                 # User module tests
 ```
 
-## 🚀 **Deployment**
+## Deployment
 
-### **Docker Deployment**
+### Docker Deployment
 ```bash
 # Run with production settings
 docker compose up
@@ -295,7 +304,7 @@ docker compose up
 docker compose -f docker-compose.yml -f docker-compose.override.yml up
 ```
 
-### **Fly.io Deployment**
+### Fly.io Deployment
 ```bash
 # Build and deploy
 npm run build
@@ -305,79 +314,35 @@ fly deploy
 fly status
 ```
 
-### **Environment Configuration**
+### Environment Configuration
 Ensure all required environment variables are set:
 - Database connection details
 - JWT secrets and expiration times
 - Logging and monitoring configuration
 - CORS and security settings
 
-## 📚 **API Documentation**
+## API Documentation
 
-### **Swagger/OpenAPI**
+### Swagger/OpenAPI
 - Interactive API documentation at `/docs`
 - Comprehensive endpoint descriptions
-- Request/response examples
-- Authentication requirements
-- Error response documentation
+- Request and response examples
 
-### **API Endpoints**
-- **Authentication**: `/auth/login`, `/auth/register`, `/auth/reset-password`
-- **Users**: `/users` (CRUD operations)
-- **Customers**: `/customers` (CRUD operations)
-- **Equipment**: `/equipment` (CRUD operations)
-- **Jobs**: `/jobs` (CRUD operations, assignments, scheduling)
-
-## 🔍 **Monitoring & Logging**
-
-### **Metrics**
-- Prometheus metrics at `/metrics`
-- HTTP request duration and status codes
-- Database connection status
-- Application health indicators
-
-### **Prometheus server**
-Use the included Prometheus service to scrape and inspect metrics locally:
-
-```bash
-docker compose up prometheus
-```
-
-The container uses `prometheus.yml` to scrape the `backend` service and exposes
-the Prometheus UI at [http://localhost:9090](http://localhost:9090).
-
-### **Logging**
-- Structured logging with Winston
-- Request ID tracking for debugging
-- Error logging with stack traces
-- Performance monitoring and alerting
-
-## 🤝 **Contributing**
-
-### **Development Workflow**
-1. Fork the repository
-2. Create a feature branch
-3. Implement changes with tests
-4. Ensure all tests pass
-5. Submit a pull request
-
-### **Code Standards**
+## Code Standards
 - Follow NestJS best practices
 - Write comprehensive tests
 - Update documentation
 - Use conventional commit messages
-- Maintain code coverage above 80%
+- Maintain code coverage above 80 percent
 
-## 📄 **License**
-
+## License
 This project is licensed under the [MIT License](../LICENSE).
 
-## 🆘 **Support & Issues**
-
-- **GitHub Issues**: Report bugs and feature requests
-- **Documentation**: Check this README and inline code comments
-- **Security**: Report vulnerabilities privately to maintainers
+## Support and Issues
+- GitHub Issues: report bugs and feature requests
+- Documentation: check this README and inline code comments
+- Security: report vulnerabilities privately to maintainers
 
 ---
+Built with modern technologies for the landscaping industry.
 
-**Built with modern technologies for the landscaping industry** 🏡🌿
