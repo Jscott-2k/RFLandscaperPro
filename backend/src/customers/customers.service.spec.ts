@@ -2,9 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CustomersService } from './customers.service';
 import { Customer } from './entities/customer.entity';
-import { Repository, QueryFailedError } from 'typeorm';
+import { Repository, QueryFailedError, SelectQueryBuilder } from 'typeorm';
 import { ConflictException } from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 describe('CustomersService', () => {
   let service: CustomersService;
@@ -63,7 +64,7 @@ describe('CustomersService', () => {
   });
 
   it('should apply search filter when finding all customers', async () => {
-    const qb = {
+    const qb: Record<string, jest.Mock> = {
       leftJoinAndSelect: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
@@ -71,11 +72,13 @@ describe('CustomersService', () => {
       take: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
       getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
-    } as any;
+    };
 
-    (repo.createQueryBuilder as jest.Mock).mockReturnValue(qb);
+    (repo.createQueryBuilder as jest.Mock).mockReturnValue(
+      qb as unknown as SelectQueryBuilder<Customer>,
+    );
 
-    const pagination = { page: 1, limit: 10 } as any;
+    const pagination: PaginationQueryDto = { page: 1, limit: 10 };
     await service.findAll(pagination, 1, undefined, 'Jane');
 
     expect(qb.andWhere).toHaveBeenCalledWith(

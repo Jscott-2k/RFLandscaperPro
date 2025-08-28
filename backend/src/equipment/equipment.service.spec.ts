@@ -3,6 +3,8 @@ import { EquipmentService } from './equipment.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Equipment, EquipmentStatus } from './entities/equipment.entity';
 import { EquipmentResponseDto } from './dto/equipment-response.dto';
+import { SelectQueryBuilder } from 'typeorm';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 describe('EquipmentService', () => {
   let service: EquipmentService;
@@ -48,17 +50,19 @@ describe('EquipmentService', () => {
   });
 
   it('should apply search filter when finding all equipment', async () => {
-    const qb = {
+    const qb: Record<string, jest.Mock> = {
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
       skip: jest.fn().mockReturnThis(),
       take: jest.fn().mockReturnThis(),
       getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
-    } as any;
+    };
 
-    repo.createQueryBuilder.mockReturnValue(qb);
+    repo.createQueryBuilder.mockReturnValue(
+      qb as unknown as SelectQueryBuilder<Equipment>,
+    );
 
-    const pagination = { page: 1, limit: 10 } as any;
+    const pagination: PaginationQueryDto = { page: 1, limit: 10 };
     await service.findAll(pagination, 1, undefined, undefined, 'truck');
 
     expect(qb.andWhere).toHaveBeenCalledWith(
