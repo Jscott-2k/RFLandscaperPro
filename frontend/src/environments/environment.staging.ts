@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://staging.rflandscaperpro.com/api'
+  apiUrl: process.env['API_URL'] || 'https://staging.rflandscaperpro.com/api'
 };
