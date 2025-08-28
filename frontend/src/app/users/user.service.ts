@@ -3,12 +3,18 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+export interface Company {
+  name: string;
+  address?: string;
+  phone?: string;
+}
+
 export interface User {
   id: number;
   username: string;
   email: string;
   role: string;
-  companyName?: string;
+  company?: Company;
   firstName?: string;
   lastName?: string;
   phone?: string;

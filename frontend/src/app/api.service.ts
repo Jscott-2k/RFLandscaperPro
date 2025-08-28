@@ -56,7 +56,11 @@ export interface User {
   firstName?: string;
   lastName?: string;
   phone?: string;
-  companyName?: string;
+  company?: {
+    name: string;
+    address?: string;
+    phone?: string;
+  };
 }
 
 export type CreateUser = Partial<Omit<User, 'id'>>;
@@ -65,6 +69,8 @@ export type UpdateUser = Partial<CreateUser>;
 export interface Company {
   id: number;
   name: string;
+  address?: string;
+  phone?: string;
 }
 
 export type CreateCompany = Partial<Omit<Company, 'id'>>;

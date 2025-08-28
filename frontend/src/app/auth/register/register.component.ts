@@ -13,6 +13,19 @@ import { AuthService } from '../auth.service';
       <input type="text" formControlName="username" placeholder="Username" />
       <input type="email" formControlName="email" placeholder="Email" />
       <input type="password" formControlName="password" placeholder="Password" />
+      <label>
+        Role:
+        <select formControlName="role">
+          <option value="customer">Customer</option>
+          <option value="owner">Owner</option>
+          <option value="worker">Worker</option>
+        </select>
+      </label>
+      <div formGroupName="company" *ngIf="isOwner">
+        <input type="text" formControlName="name" placeholder="Company Name" />
+        <input type="text" formControlName="address" placeholder="Address" />
+        <input type="text" formControlName="phone" placeholder="Phone" />
+      </div>
       <button type="submit">Register</button>
     </form>
   `
@@ -25,12 +38,27 @@ export class RegisterComponent {
   form = this.fb.nonNullable.group({
     username: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required]
+    password: ['', Validators.required],
+    role: ['customer', Validators.required],
+    company: this.fb.nonNullable.group({
+      name: [''],
+      address: [''],
+      phone: [''],
+    }),
   });
+
+  get isOwner(): boolean {
+    return this.form.controls.role.value === 'owner';
+  }
 
   submit(): void {
     if (this.form.valid) {
-      this.auth.register(this.form.getRawValue()).subscribe(() => {
+      const { username, email, password, role, company } = this.form.getRawValue();
+      const payload: any = { username, email, password, role };
+      if (this.isOwner) {
+        payload.company = company;
+      }
+      this.auth.register(payload).subscribe(() => {
         this.router.navigate(['/dashboard']);
       });
     }
