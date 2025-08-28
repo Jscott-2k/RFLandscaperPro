@@ -1,12 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NgIf } from '@angular/common';
 import { ApiService } from '../api.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, NgIf],
+  imports: [RouterLink],
   template: `
     <div class="dashboard">
       <a routerLink="/jobs" class="widget">
