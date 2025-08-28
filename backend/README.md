@@ -57,15 +57,15 @@ LOG_LEVEL=debug
 createdb rflandscaperpro
 
 # Run database migrations (when available)
-npx cross-env NODE_ENV=development npm run migration:run
+npm run migration:run:dev
 
 # Seed initial data (creates admin user and sample customer)
 # This script is intended for local development only and will
 # automatically skip execution when `NODE_ENV=production`.
-npx cross-env NODE_ENV=development npm run seed
+npm run seed:dev
 
 # Drop and re-seed the database from scratch
-npx cross-env NODE_ENV=development npm run seed:drop
+npm run seed:drop:dev
 
 ```
 
@@ -194,22 +194,22 @@ npm run format
 ### **Database**
 ```bash
 # Create new migration
-npx cross-env NODE_ENV=development npm run migration:create
+npm run migration:create:dev
 
 # Generate migration from entity changes
-npx cross-env NODE_ENV=development npm run migration:generate
+npm run migration:generate:dev
 
 # Run pending migrations
-npx cross-env NODE_ENV=development npm run migration:run
+npm run migration:run:dev
 
 # Revert last migration
-npx cross-env NODE_ENV=development npm run migration:revert
+npm run migration:revert:dev
 
 # Seed database with sample data
-npx cross-env NODE_ENV=development npm run seed
+npm run seed:dev
 
 # Drop and re-seed the database from scratch
-npx cross-env NODE_ENV=development npm run seed:drop
+npm run seed:drop:dev
 ```
 
 ## 🗄️ **Database Schema**
