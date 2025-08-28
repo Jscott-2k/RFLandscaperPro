@@ -1,0 +1,5 @@
+<h2>Job Calendar</h2>
+<input type="date" [(ngModel)]="selectedDate" (change)="loadJobs()">
+<ul>
+  <li *ngFor="let job of jobs">{{ job.title }} - {{ job.scheduledDate }}</li>
+</ul>
