@@ -57,6 +57,14 @@ export interface User {
 export type CreateUser = Partial<Omit<User, 'id'>>;
 export type UpdateUser = Partial<CreateUser>;
 
+export interface Company {
+  id: number;
+  name: string;
+}
+
+export type CreateCompany = Partial<Omit<Company, 'id'>>;
+export type UpdateCompany = Partial<CreateCompany>;
+
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
@@ -240,6 +248,31 @@ export class ApiService {
       .pipe(catchError(this.handleError));
   }
 
+  // Companies
+  getCompanyProfile(): Observable<Company> {
+    return this.http
+      .get<Company>(`${environment.apiUrl}/companies/profile`)
+      .pipe(catchError(this.handleError));
+  }
+
+  getCompanyWorkers(): Observable<User[]> {
+    return this.http
+      .get<User[]>(`${environment.apiUrl}/companies/workers`)
+      .pipe(catchError(this.handleError));
+  }
+
+  createCompany(payload: CreateCompany): Observable<Company> {
+    return this.http
+      .post<Company>(`${environment.apiUrl}/companies`, payload)
+      .pipe(catchError(this.handleError));
+  }
+
+  updateCompany(id: number, payload: UpdateCompany): Observable<Company> {
+    return this.http
+      .patch<Company>(`${environment.apiUrl}/companies/${id}`, payload)
+      .pipe(catchError(this.handleError));
+  }
+
   getUpcomingJobs(): Observable<{ items: unknown[]; total: number }> {
     return this.http.get<{ items: unknown[]; total: number }>(
       `${environment.apiUrl}/jobs?completed=false&limit=5`
@@ -252,7 +285,4 @@ export class ApiService {
     );
   }
 
-  getUsers(): Observable<unknown[]> {
-    return this.http.get<unknown[]>(`${environment.apiUrl}/users`);
-  }
 }
