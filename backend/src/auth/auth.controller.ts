@@ -20,7 +20,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'JWT token payload' })
   async login(@Body() loginDto: LoginDto) {
     const user: User = await this.authService.validateUser(
-      loginDto.username,
+      loginDto.email,
       loginDto.password,
     );
     return this.authService.login(user);
@@ -31,13 +31,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({ status: 201, description: 'Created user' })
   async register(@Body() registerDto: RegisterDto) {
-    const user = await this.authService.register(registerDto);
-    const { password, passwordResetToken, passwordResetExpires, ...result } =
-      user;
-    void passwordResetToken; // mark intentionally unused
-    void passwordResetExpires;
-    void password;
-    return result;
+    return this.authService.register(registerDto);
   }
 
   @Public()

@@ -18,8 +18,8 @@ export class AuthService {
     private readonly refreshTokenRepository: Repository<RefreshToken>,
   ) {}
 
-  async validateUser(username: string, pass: string): Promise<User> {
-    const user = await this.usersService.findByUsername(username);
+  async validateUser(email: string, pass: string): Promise<User> {
+    const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -57,11 +57,12 @@ export class AuthService {
     };
   }
 
-  async register(registerDto: RegisterDto): Promise<User> {
+  async register(registerDto: RegisterDto) {
     // Validate password strength
     validatePasswordStrength(registerDto.password);
 
-    return this.usersService.create(registerDto);
+    const user = await this.usersService.create(registerDto);
+    return this.login(user);
   }
 
   async requestPasswordReset(email: string): Promise<void> {

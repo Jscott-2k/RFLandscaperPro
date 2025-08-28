@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { User, UserRole } from '../users/user.entity';
+import { UserRole } from '../users/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -37,32 +37,28 @@ describe('AuthController', () => {
     controller = module.get<AuthController>(AuthController);
   });
 
-  it('registers a new user without returning password', async () => {
+  it('registers a new user and returns auth tokens', async () => {
     const dto: RegisterDto = {
       username: 'user',
       email: 'user@example.com',
       password: 'pass',
     };
-    const user: User = {
-      id: 1,
-      username: 'user',
-      email: 'user@example.com',
-      password: 'hashed',
-      role: UserRole.Customer,
-      passwordResetToken: null,
-      passwordResetExpires: null,
-    } as User;
-    authService.register.mockResolvedValue(user);
+    const response = {
+      access_token: 'access',
+      refresh_token: 'refresh',
+      user: {
+        id: 1,
+        username: 'user',
+        email: 'user@example.com',
+        role: UserRole.Customer,
+      },
+    };
+    authService.register.mockResolvedValue(response);
 
     const result = await controller.register(dto);
 
     expect(authService.register).toHaveBeenCalledWith(dto);
-    expect(result).toEqual({
-      id: 1,
-      username: 'user',
-      email: 'user@example.com',
-      role: UserRole.Customer,
-    });
+    expect(result).toEqual(response);
   });
 
   it('requests password reset', async () => {
