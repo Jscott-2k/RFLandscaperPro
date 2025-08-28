@@ -93,10 +93,11 @@ npm run start:prod
 ```
 
 ### **5. Access the API**
-- **API Base URL**: http://localhost:3000
-- **Swagger Docs**: http://localhost:3000/docs (admin/admin)
-- **Health Check**: http://localhost:3000/health
-- **Metrics**: http://localhost:3000/metrics
+- **API Base URL**: http://localhost:3000/api
+- **Swagger Docs**: http://localhost:3000/api/docs (admin/admin)
+- **Health Check**: http://localhost:3000/api/health
+- **Metrics**: http://localhost:3000/api/metrics
+- **Production Base URL**: https://rflandscaperpro.com/api
 
 ## 🏗️ **Project Structure**
 

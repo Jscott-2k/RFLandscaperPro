@@ -15,6 +15,7 @@ describe('UsersController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api');
     app.use(
       (
         req: Request & { user?: unknown },
@@ -30,7 +31,7 @@ describe('UsersController (e2e)', () => {
 
   it('POST /users returns 403 for non-admin', () => {
     return request(app.getHttpServer())
-      .post('/users')
+      .post('/api/users')
       .send({
         username: 'user',
         email: 'user@example.com',
