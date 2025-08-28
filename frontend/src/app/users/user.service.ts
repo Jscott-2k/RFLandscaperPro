@@ -2,12 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-
-export interface Company {
-  name: string;
-  address?: string;
-  phone?: string;
-}
+import { Company } from '../companies/company.model';
 
 export interface User {
   id: number;

@@ -56,6 +56,10 @@ import { UserService } from './user.service';
           Phone:
           <input formControlName="phone" />
         </label>
+        <label>
+          Email:
+          <input formControlName="email" />
+        </label>
       </div>
       <button type="submit" [disabled]="form.invalid">Save</button>
     </form>
@@ -78,6 +82,7 @@ export class UserFormComponent {
       name: [''],
       address: [''],
       phone: [''],
+      email: [''],
     }),
   });
 

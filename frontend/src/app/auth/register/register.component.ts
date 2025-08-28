@@ -25,6 +25,7 @@ import { AuthService } from '../auth.service';
         <input type="text" formControlName="name" placeholder="Company Name" />
         <input type="text" formControlName="address" placeholder="Address" />
         <input type="text" formControlName="phone" placeholder="Phone" />
+        <input type="email" formControlName="email" placeholder="Email" />
       </div>
       <button type="submit">Register</button>
     </form>
@@ -44,6 +45,7 @@ export class RegisterComponent {
       name: [''],
       address: [''],
       phone: [''],
+      email: [''],
     }),
   });
 
