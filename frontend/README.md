@@ -1,6 +1,7 @@
 # Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.1.
+This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.1 and
+includes Angular Universal for server‑side rendering (SSR).
 
 ## Backend integration
 
@@ -20,7 +21,7 @@ When running `ng serve`, requests to `/api` are proxied to `http://localhost:300
 
 ## Development server
 
-To start a local development server, run:
+To start a local development server with SSR enabled, run:
 
 ```bash
 ng serve
@@ -44,13 +45,19 @@ ng generate --help
 
 ## Building
 
-To build the project run:
+To build the project for SSR, run:
 
 ```bash
-ng build
+npm run build:ssr
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+After building, you can serve the application using:
+
+```bash
+npm run serve:ssr
+```
+
+This compiles the project and stores the build artifacts in the `dist/` directory. The server bundle is then executed with Node to render pages on the server.
 
 ## Running unit tests
 
@@ -94,4 +101,4 @@ To build and run the production image:
 docker compose -f docker-compose.yml up --build -d
 ```
 
-The compiled application is served by Nginx on port 80.
+The application is built and served by a Node Express server on port 4000.
