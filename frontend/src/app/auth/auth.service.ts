@@ -1,6 +1,4 @@
-
-import { Injectable, signal,inject } from '@angular/core';
-
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -12,6 +10,7 @@ export class AuthService {
 
   hasRole(role: string): boolean {
     return this.roles().includes(role);
+  }
 
   login(data: { email: string; password: string }): Observable<{ access_token: string }> {
     return this.http
@@ -35,6 +34,6 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return !!this.getToken();
-
   }
 }
+
