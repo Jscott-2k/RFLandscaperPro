@@ -18,13 +18,20 @@ COPY . .
 RUN npm run build
 
 # ---------- Production Stage ----------
-FROM nginx:alpine AS prod
+FROM node:${NODE_VERSION}-slim AS prod
 
-# Copy compiled app to Nginx html directory
-COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
+# Set working directory for the runtime image
+WORKDIR /app
 
-# Expose port 80
-EXPOSE 80
+# Install only production dependencies
+COPY --from=build /app/package*.json ./
+RUN npm ci --omit=dev
 
-# Start Nginx server
-CMD ["nginx", "-g", "daemon off;"]
+# Copy the built application
+COPY --from=build /app/dist ./dist
+
+# Expose the port used by the Node server
+EXPOSE 4000
+
+# Start the server
+CMD ["node", "dist/frontend/server/server.mjs"]
