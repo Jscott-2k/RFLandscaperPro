@@ -48,15 +48,12 @@ export class EquipmentController {
     @Body() createEquipmentDto: CreateEquipmentDto,
     @Req() req: { user: { companyId: number } },
   ): Promise<EquipmentResponseDto> {
-    return this.equipmentService.create(
-      createEquipmentDto,
-      req.user.companyId,
-    );
+    return this.equipmentService.create(createEquipmentDto, req.user.companyId);
   }
 
   @Get()
   @Roles(UserRole.Admin, UserRole.Worker, UserRole.Customer)
-  @ApiOperation({ summary: 'List equipment' })
+  @ApiOperation({ summary: 'List equipment for the authenticated company' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'status', required: false, enum: EquipmentStatus })
@@ -64,12 +61,18 @@ export class EquipmentController {
   @ApiResponse({ status: 200, description: 'List of equipment' })
   async findAll(
     @Query() pagination: PaginationQueryDto,
+    @Req() req: { user: { companyId: number } },
     @Query('status', new ParseEnumPipe(EquipmentStatus, { optional: true }))
     status?: EquipmentStatus,
     @Query('type', new ParseEnumPipe(EquipmentType, { optional: true }))
     type?: EquipmentType,
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
-    return this.equipmentService.findAll(pagination, status, type);
+    return this.equipmentService.findAll(
+      pagination,
+      req.user.companyId,
+      status,
+      type,
+    );
   }
 
   @Get(':id')
@@ -118,10 +121,12 @@ export class EquipmentController {
   async updateStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEquipmentStatusDto: UpdateEquipmentStatusDto,
+    @Req() req: { user: { companyId: number } },
   ): Promise<EquipmentResponseDto> {
     return this.equipmentService.updateStatus(
       id,
       updateEquipmentStatusDto.status,
+      req.user.companyId,
     );
   }
 

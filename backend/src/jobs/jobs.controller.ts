@@ -55,7 +55,7 @@ export class JobsController {
 
   @Get()
   @Roles(UserRole.Admin, UserRole.Worker, UserRole.Customer)
-  @ApiOperation({ summary: 'List jobs' })
+  @ApiOperation({ summary: 'List jobs for the authenticated company' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'completed', required: false, type: Boolean })
@@ -63,13 +63,18 @@ export class JobsController {
   @ApiResponse({ status: 200, description: 'List of jobs' })
   findAll(
     @Query() pagination: PaginationQueryDto,
+    @Req() req: { user: { companyId: number } },
     @Query('completed', new ParseBoolPipe({ optional: true }))
     completed?: boolean,
     @Query('customerId', new ParseIntPipe({ optional: true }))
     customerId?: number,
   ): Promise<{ items: JobResponseDto[]; total: number }> {
-    return this.jobsService.findAll(pagination, completed, customerId);
-
+    return this.jobsService.findAll(
+      pagination,
+      req.user.companyId,
+      completed,
+      customerId,
+    );
   }
 
   @Get(':id')
