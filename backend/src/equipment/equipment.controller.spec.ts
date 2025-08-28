@@ -58,7 +58,13 @@ describe('EquipmentController', () => {
       const expectedResult = { items: [], total: 0 };
       (service.findAll as jest.Mock).mockResolvedValue(expectedResult);
 
-      const result = await controller.findAll(pagination, req, status, type, search);
+      const result = await controller.findAll(
+        pagination,
+        req,
+        status,
+        type,
+        search,
+      );
       expect(result).toEqual(expectedResult);
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(service.findAll).toHaveBeenCalledWith(
