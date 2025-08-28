@@ -58,6 +58,10 @@ export class JobsService {
     companyId: number,
     completed?: boolean,
     customerId?: number,
+    startDate?: Date,
+    endDate?: Date,
+    workerId?: number,
+    equipmentId?: number,
   ): Promise<{ items: JobResponseDto[]; total: number }> {
     const { page = 1, limit = 10 } = pagination;
     const cappedLimit = Math.min(limit, 100);
@@ -75,6 +79,22 @@ export class JobsService {
 
     if (customerId) {
       queryBuilder.andWhere('job.customer.id = :customerId', { customerId });
+    }
+
+    if (startDate) {
+      queryBuilder.andWhere('job.scheduledDate >= :startDate', { startDate });
+    }
+
+    if (endDate) {
+      queryBuilder.andWhere('job.scheduledDate <= :endDate', { endDate });
+    }
+
+    if (workerId) {
+      queryBuilder.andWhere('user.id = :workerId', { workerId });
+    }
+
+    if (equipmentId) {
+      queryBuilder.andWhere('equipment.id = :equipmentId', { equipmentId });
     }
 
     const [jobs, total] = await queryBuilder

@@ -76,6 +76,56 @@ describe('JobsService', () => {
     expect(service).toBeDefined();
   });
 
+  it('should apply filters when finding all jobs', async () => {
+    const qb = {
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      take: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      addOrderBy: jest.fn().mockReturnThis(),
+      getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+    };
+    jobRepository.createQueryBuilder.mockReturnValue(qb);
+
+    const pagination = { page: 1, limit: 10 } as any;
+    const startDate = new Date('2023-01-01');
+    const endDate = new Date('2023-01-31');
+    await service.findAll(
+      pagination,
+      1,
+      true,
+      2,
+      startDate,
+      endDate,
+      3,
+      4,
+    );
+
+    expect(qb.andWhere).toHaveBeenCalledWith('job.completed = :completed', {
+      completed: true,
+    });
+    expect(qb.andWhere).toHaveBeenCalledWith('job.customer.id = :customerId', {
+      customerId: 2,
+    });
+    expect(qb.andWhere).toHaveBeenCalledWith(
+      'job.scheduledDate >= :startDate',
+      { startDate },
+    );
+    expect(qb.andWhere).toHaveBeenCalledWith(
+      'job.scheduledDate <= :endDate',
+      { endDate },
+    );
+    expect(qb.andWhere).toHaveBeenCalledWith('user.id = :workerId', {
+      workerId: 3,
+    });
+    expect(qb.andWhere).toHaveBeenCalledWith('equipment.id = :equipmentId', {
+      equipmentId: 4,
+    });
+    expect(qb.getManyAndCount).toHaveBeenCalled();
+  });
+
   it('should throw NotFoundException when job does not exist', async () => {
     jobRepository.findOne.mockResolvedValue(null);
     await expect(service.findOne(1, 1)).rejects.toBeInstanceOf(
