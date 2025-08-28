@@ -54,6 +54,7 @@ export class CompaniesService {
       address: company.address ?? null,
       phone: company.phone ?? null,
       email: company.email ?? null,
+      ownerId: company.ownerId ?? null,
     };
   }
 }

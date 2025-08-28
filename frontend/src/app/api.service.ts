@@ -71,6 +71,8 @@ export interface Company {
   name: string;
   address?: string;
   phone?: string;
+  email?: string;
+  ownerId?: number;
 }
 
 export type CreateCompany = Partial<Omit<Company, 'id'>>;

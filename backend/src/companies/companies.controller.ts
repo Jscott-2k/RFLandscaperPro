@@ -34,7 +34,9 @@ export class CompaniesController {
     @Req() req: { user: { userId: number } },
   ): Promise<CompanyResponseDto> {
     const company = await this.companiesService.findByUserId(req.user.userId);
-    if (!company) throw new NotFoundException('Company not found');
+    if (!company) {
+      throw new NotFoundException('Company not found');
+    }
     return company;
   }
 

@@ -31,7 +31,7 @@ export class AuthService {
     email: string;
     password: string;
     role?: string;
-    company?: { name: string; address?: string; phone?: string };
+    company?: { name: string; address?: string; phone?: string; email?: string };
   }): Observable<{ access_token: string }> {
     return this.http
       .post<{ access_token: string }>(`${environment.apiUrl}/auth/register`, data)
