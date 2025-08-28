@@ -11,17 +11,26 @@ import { AuthService } from '../auth/auth.service';
   imports: [CommonModule, FormsModule],
   template: `
     <div *ngIf="user">
-      <h3>{{ user.name }}</h3>
+      <h3>{{ user.username }}</h3>
       <form (ngSubmit)="save()">
-        <label>Name:
-          <input name="name" [(ngModel)]="user.name" />
+        <label>Username:
+          <input name="username" [(ngModel)]="user.username" />
         </label>
         <label>Email:
           <input name="email" [(ngModel)]="user.email" />
         </label>
+        <label>First Name:
+          <input name="firstName" [(ngModel)]="user.firstName" />
+        </label>
+        <label>Last Name:
+          <input name="lastName" [(ngModel)]="user.lastName" />
+        </label>
+        <label>Phone:
+          <input name="phone" [(ngModel)]="user.phone" />
+        </label>
         <div *ngIf="auth.hasRole('admin')">
-          <label>Roles:
-            <input name="roles" [(ngModel)]="rolesText" />
+          <label>Role:
+            <input name="role" [(ngModel)]="user.role" />
           </label>
         </div>
         <button type="submit">Save</button>
@@ -34,25 +43,17 @@ export class UserDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   protected readonly auth = inject(AuthService);
   user?: User;
-  rolesText = '';
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.userService.getUser(id).subscribe(u => {
       this.user = u;
-      this.rolesText = u.roles.join(', ');
     });
   }
 
   save(): void {
     if (!this.user) {
       return;
-    }
-    if (this.auth.hasRole('admin')) {
-      this.user.roles = this.rolesText
-        .split(',')
-        .map(r => r.trim())
-        .filter(r => r.length);
     }
     this.userService.updateUser(this.user).subscribe();
   }

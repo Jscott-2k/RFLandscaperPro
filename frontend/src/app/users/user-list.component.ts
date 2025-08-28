@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { UserService, User } from './user.service';
 import { AuthService } from '../auth/auth.service';
 
@@ -12,7 +12,7 @@ import { AuthService } from '../auth/auth.service';
     <h2>Users</h2>
     <ul>
       <li *ngFor="let u of users">
-        <a [routerLink]="[u.id]">{{ u.name }}</a>
+        <a [routerLink]="[u.id]">{{ u.username }}</a>
         <button *ngIf="auth.hasRole('admin')" (click)="delete(u.id)">Delete</button>
       </li>
     </ul>
@@ -22,6 +22,7 @@ import { AuthService } from '../auth/auth.service';
 export class UserListComponent implements OnInit {
   private readonly userService = inject(UserService);
   protected readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
   users: User[] = [];
 
   ngOnInit(): void {
@@ -35,6 +36,6 @@ export class UserListComponent implements OnInit {
   }
 
   addUser(): void {
-    // Placeholder for creating a new user
+    this.router.navigate(['/users/new']);
   }
 }

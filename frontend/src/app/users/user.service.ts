@@ -5,9 +5,13 @@ import { environment } from '../../environments/environment';
 
 export interface User {
   id: number;
-  name: string;
+  username: string;
   email: string;
-  roles: string[];
+  role: string;
+  companyName?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
 }
 
 @Injectable({ providedIn: 'root' })
