@@ -9,6 +9,12 @@ export const usersRoutes: Routes = [
     loadComponent: () => import('./user-list.component').then(m => m.UserListComponent)
   },
   {
+    path: 'new',
+    canActivate: [roleGuard],
+    data: { roles: ['admin'] },
+    loadComponent: () => import('./user-form.component').then(m => m.UserFormComponent)
+  },
+  {
     path: ':id',
     canActivate: [roleGuard],
     data: { roles: ['admin'] },
