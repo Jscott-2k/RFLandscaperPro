@@ -2,6 +2,22 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.1.
 
+## Backend integration
+
+API endpoints are configured through environment files located in `src/environments`.
+
+- `environment.ts` – local development (default)
+- `environment.staging.ts` – staging deployment
+- `environment.production.ts` – production deployment
+
+Each file defines an `apiUrl` pointing to the backend. The Angular build configuration
+replaces `environment.ts` with the appropriate file when building for `staging` or `production`.
+
+### Development proxy
+
+When running `ng serve`, requests to `/api` are proxied to `http://localhost:3000` using
+`proxy.conf.json`. Update this file if your backend runs on a different host or port.
+
 ## Development server
 
 To start a local development server, run:
