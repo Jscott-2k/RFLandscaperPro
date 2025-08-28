@@ -6,6 +6,9 @@ import { environment } from '../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
+  private hasLocalStorage(): boolean {
+    return typeof localStorage !== 'undefined';
+  }
   private readonly roles = signal<string[]>(this.getRolesFromToken());
   private hasLocalStorage = () => typeof localStorage !== 'undefined';
 
