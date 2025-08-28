@@ -27,7 +27,7 @@ export class AuthService {
   }
 
   register(data: {
-    name?: string;
+    username: string;
     email: string;
     password: string;
   }): Observable<{ access_token: string }> {
