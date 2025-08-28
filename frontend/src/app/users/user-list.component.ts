@@ -12,7 +12,7 @@ import { AuthService } from '../auth/auth.service';
     <h2>Users</h2>
     <ul>
       <li *ngFor="let u of users">
-        <a [routerLink]="[u.id]">{{ u.name }}</a>
+        <a [routerLink]="[u.id]">{{ u.username }}</a>
         <button *ngIf="auth.hasRole('admin')" (click)="delete(u.id)">Delete</button>
       </li>
     </ul>

@@ -12,8 +12,8 @@ import { UserService } from './user.service';
     <h2>New User</h2>
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <label>
-        Name:
-        <input formControlName="name" />
+        Username:
+        <input formControlName="username" />
       </label>
       <label>
         Email:
@@ -24,8 +24,20 @@ import { UserService } from './user.service';
         <input type="password" formControlName="password" />
       </label>
       <label>
-        Roles:
-        <input formControlName="roles" />
+        First Name:
+        <input formControlName="firstName" />
+      </label>
+      <label>
+        Last Name:
+        <input formControlName="lastName" />
+      </label>
+      <label>
+        Phone:
+        <input formControlName="phone" />
+      </label>
+      <label>
+        Role:
+        <input formControlName="role" />
       </label>
       <label *ngIf="isOwner">
         Company Name:
@@ -41,25 +53,34 @@ export class UserFormComponent {
   private router = inject(Router);
 
   form = this.fb.nonNullable.group({
-    name: ['', Validators.required],
+    username: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
-    roles: [''],
+    firstName: [''],
+    lastName: [''],
+    phone: [''],
+    role: [''],
     companyName: ['']
   });
 
   onSubmit(): void {
     if (this.form.valid) {
-      const { name, email, password, roles, companyName } =
-        this.form.getRawValue();
-      const roleList = roles
-        .split(',')
-        .map(r => r.trim())
-        .filter(r => r.length);
-      const payload: any = { name, email, password, roles: roleList };
-      if (companyName) {
-        payload.companyName = companyName;
-      }
+      const {
+        username,
+        email,
+        password,
+        firstName,
+        lastName,
+        phone,
+        role,
+        companyName
+      } = this.form.getRawValue();
+      const payload: any = { username, email, password };
+      if (firstName) payload.firstName = firstName;
+      if (lastName) payload.lastName = lastName;
+      if (phone) payload.phone = phone;
+      if (role) payload.role = role;
+      if (companyName) payload.companyName = companyName;
       this.userService
         .createUser(payload)
         .subscribe(() => {
@@ -69,10 +90,7 @@ export class UserFormComponent {
   }
 
   get isOwner(): boolean {
-    return this.form.controls.roles.value
-      .split(',')
-      .map(r => r.trim())
-      .includes('owner');
+    return this.form.controls.role.value === 'owner';
   }
 }
 

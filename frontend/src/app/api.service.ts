@@ -50,8 +50,13 @@ export type UpdateJob = Partial<CreateJob>;
 
 export interface User {
   id: number;
+  username: string;
   email: string;
   role: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  companyName?: string;
 }
 
 export type CreateUser = Partial<Omit<User, 'id'>>;
