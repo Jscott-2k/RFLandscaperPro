@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EquipmentController } from './equipment.controller';
 import { EquipmentService } from './equipment.service';
+import { EquipmentResponseDto } from './dto/equipment-response.dto';
 import { EquipmentStatus, EquipmentType } from './entities/equipment.entity';
 
 describe('EquipmentController', () => {
@@ -14,7 +15,8 @@ describe('EquipmentController', () => {
         {
           provide: EquipmentService,
           useValue: {
-            findAll: jest.fn(),
+            updateStatus: jest.fn(),
+            findAll: jest.fn()
           },
         },
       ],
@@ -27,6 +29,24 @@ describe('EquipmentController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+
+  describe('updateStatus', () => {
+    it('should pass companyId to equipmentService.updateStatus', async () => {
+      const req = { user: { companyId: 2 } };
+      const dto = { status: EquipmentStatus.AVAILABLE };
+      const response = {} as EquipmentResponseDto;
+      (service.updateStatus as jest.Mock).mockResolvedValue(response);
+
+      const result = await controller.updateStatus(1, dto, req);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(service.updateStatus).toHaveBeenCalledWith(
+        1,
+        dto.status,
+        req.user.companyId,
+      );
+      expect(result).toBe(response);
+    });
 
   it('should call equipmentService.findAll with companyId', async () => {
     const pagination = { page: 1, limit: 10 };
@@ -44,5 +64,6 @@ describe('EquipmentController', () => {
       status,
       type,
     );
+
   });
 });
