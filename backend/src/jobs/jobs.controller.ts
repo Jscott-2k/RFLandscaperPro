@@ -55,7 +55,7 @@ export class JobsController {
 
   @Get()
   @Roles(UserRole.Admin, UserRole.Worker, UserRole.Customer)
-  @ApiOperation({ summary: 'List jobs' })
+  @ApiOperation({ summary: 'List jobs for the authenticated company' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'completed', required: false, type: Boolean })

@@ -47,15 +47,12 @@ export class CustomersController {
     @Body() createCustomerDto: CreateCustomerDto,
     @Req() req: { user: { companyId: number } },
   ): Promise<CustomerResponseDto> {
-    return this.customersService.create(
-      createCustomerDto,
-      req.user.companyId,
-    );
+    return this.customersService.create(createCustomerDto, req.user.companyId);
   }
 
   @Get()
   @Roles(UserRole.Admin, UserRole.Worker)
-  @ApiOperation({ summary: 'List customers' })
+  @ApiOperation({ summary: 'List customers for the authenticated company' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'active', required: false, type: Boolean })
@@ -63,8 +60,7 @@ export class CustomersController {
   async findAll(
     @Query() pagination: PaginationQueryDto,
     @Req() req: { user: { companyId: number } },
-    @Query('active', new ParseBoolPipe({ optional: true }))
-    active?: boolean,
+    @Query('active', new ParseBoolPipe({ optional: true })) active?: boolean,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
     return this.customersService.findAll(
       pagination,
