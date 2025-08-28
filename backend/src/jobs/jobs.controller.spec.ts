@@ -2,12 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JobsController } from './jobs.controller';
 import { JobsService } from './jobs.service';
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access */
+
 describe('JobsController', () => {
   let controller: JobsController;
   let jobsService: { findAll: jest.Mock };
 
   beforeEach(async () => {
-    
     jobsService = {
       findAll: jest.fn(),
     };
@@ -28,7 +29,6 @@ describe('JobsController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
-
 
   it('should forward filters to service.findAll', async () => {
     jobsService.findAll.mockResolvedValue({ items: [], total: 0 });
@@ -54,6 +54,7 @@ describe('JobsController', () => {
       4,
     );
     expect(result).toEqual({ items: [], total: 0 });
+  });
 
   describe('findAll', () => {
     it('should call jobsService.findAll with companyId', async () => {
@@ -76,9 +77,12 @@ describe('JobsController', () => {
         req.user.companyId,
         completed,
         customerId,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
       );
       expect(response).toBe(result);
     });
-
   });
 });

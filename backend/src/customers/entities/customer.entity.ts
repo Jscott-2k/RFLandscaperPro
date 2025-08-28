@@ -1,4 +1,5 @@
 import { Job } from '../../jobs/entities/job.entity';
+import { Contract } from '../../contracts/entities/contract.entity';
 import { Address } from './address.entity';
 import { User } from '../../users/user.entity';
 import { Company } from '../../companies/entities/company.entity';
@@ -65,6 +66,11 @@ export class Customer {
 
   @OneToMany(() => Job, (job) => job.customer, { onDelete: 'CASCADE' })
   jobs: Job[];
+
+  @OneToMany(() => Contract, (contract) => contract.customer, {
+    onDelete: 'CASCADE',
+  })
+  contracts: Contract[];
 
   @OneToMany(() => Address, (address) => address.customer, {
     cascade: true,
