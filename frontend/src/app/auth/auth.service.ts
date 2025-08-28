@@ -10,7 +10,6 @@ export class AuthService {
     return typeof localStorage !== 'undefined';
   }
   private readonly roles = signal<string[]>(this.getRolesFromToken());
-  private hasLocalStorage = () => typeof localStorage !== 'undefined';
 
   hasRole(role: string): boolean {
     return this.roles().includes(role);
