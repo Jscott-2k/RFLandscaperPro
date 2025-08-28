@@ -31,7 +31,7 @@ export class RegisterComponent {
   submit(): void {
     if (this.form.valid) {
       this.auth.register(this.form.getRawValue()).subscribe(() => {
-        this.router.navigate(['/']);
+        this.router.navigate(['/dashboard']);
       });
     }
   }
