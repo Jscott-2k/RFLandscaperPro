@@ -66,13 +66,17 @@ export class AddCustomerCompanyUser1724786000000 implements MigrationInterface {
         'customer',
         'FK_customer_companyId_company_id',
       );
-    } catch {}
+    } catch {
+      // ignore if foreign key does not exist
+    }
     try {
       await queryRunner.dropForeignKey(
         'customer',
         'FK_customer_userId_user_id',
       );
-    } catch {}
+    } catch {
+      // ignore if foreign key does not exist
+    }
 
     // drop columns
     if (await queryRunner.hasColumn('customer', 'companyId')) {
