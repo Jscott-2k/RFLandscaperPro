@@ -33,14 +33,12 @@ export class AuthService {
   }
 
   async login(user: User) {
-
     const payload = {
       username: user.username,
       sub: user.id,
       role: user.role,
       companyId: user.companyId,
     };
-
 
     const refreshToken = await this.jwtService.signAsync(payload, {
       expiresIn: '7d',

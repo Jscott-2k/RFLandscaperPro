@@ -4,4 +4,3 @@ export class CreateCompanyDto {
   @IsString()
   name: string;
 }
-

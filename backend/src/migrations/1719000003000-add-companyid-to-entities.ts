@@ -5,9 +5,7 @@ import {
   TableForeignKey,
 } from 'typeorm';
 
-export class AddCompanyIdToEntities1719000003000
-  implements MigrationInterface
-{
+export class AddCompanyIdToEntities1719000003000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Customer
     await queryRunner.addColumn(
@@ -81,4 +79,3 @@ export class AddCompanyIdToEntities1719000003000
     await queryRunner.dropColumn('customer', 'companyId');
   }
 }
-

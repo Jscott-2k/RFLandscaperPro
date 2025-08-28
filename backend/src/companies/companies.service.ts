@@ -28,10 +28,7 @@ export class CompaniesService {
     });
   }
 
-  async create(
-    dto: CreateCompanyDto,
-    ownerId: number,
-  ): Promise<Company> {
+  async create(dto: CreateCompanyDto, ownerId: number): Promise<Company> {
     const company = this.companyRepository.create({ ...dto, ownerId });
     return this.companyRepository.save(company);
   }

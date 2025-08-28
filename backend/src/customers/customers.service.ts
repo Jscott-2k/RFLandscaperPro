@@ -133,10 +133,7 @@ export class CustomersService {
     return this.update(id, { active: false }, companyId);
   }
 
-  async activate(
-    id: number,
-    companyId: number,
-  ): Promise<CustomerResponseDto> {
+  async activate(id: number, companyId: number): Promise<CustomerResponseDto> {
     await this.findOne(id, companyId);
     return this.update(id, { active: true }, companyId);
   }

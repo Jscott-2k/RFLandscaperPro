@@ -5,4 +5,3 @@ export class UpdateCompanyDto {
   @IsString()
   name?: string;
 }
-
