@@ -64,6 +64,9 @@ npx cross-env NODE_ENV=development npm run migration:run
 # automatically skip execution when `NODE_ENV=production`.
 npx cross-env NODE_ENV=development npm run seed
 
+# Drop and re-seed the database from scratch
+npx cross-env NODE_ENV=development npm run seed:drop
+
 ```
 
 ### **4. Start Development Server**
@@ -204,6 +207,9 @@ npx cross-env NODE_ENV=development npm run migration:revert
 
 # Seed database with sample data
 npx cross-env NODE_ENV=development npm run seed
+
+# Drop and re-seed the database from scratch
+npx cross-env NODE_ENV=development npm run seed:drop
 ```
 
 ## 🗄️ **Database Schema**

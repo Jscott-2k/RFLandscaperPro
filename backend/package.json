@@ -23,7 +23,8 @@
     "migration:generate": "node scripts/generate-migration.mjs",
     "migration:run": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:run -d data-source.ts",
     "migration:revert": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:revert -d data-source.ts",
-    "seed": "ts-node src/seed.ts"
+    "seed": "ts-node src/seed.ts",
+    "seed:drop": "ts-node src/seed.ts --drop"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.1",
