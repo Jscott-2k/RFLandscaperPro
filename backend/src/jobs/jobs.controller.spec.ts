@@ -7,7 +7,11 @@ describe('JobsController', () => {
   let jobsService: { findAll: jest.Mock };
 
   beforeEach(async () => {
-    jobsService = { findAll: jest.fn() };
+    
+    jobsService = {
+      findAll: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [JobsController],
       providers: [
@@ -24,6 +28,7 @@ describe('JobsController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
 
   it('should forward filters to service.findAll', async () => {
     jobsService.findAll.mockResolvedValue({ items: [], total: 0 });
@@ -49,5 +54,31 @@ describe('JobsController', () => {
       4,
     );
     expect(result).toEqual({ items: [], total: 0 });
+
+  describe('findAll', () => {
+    it('should call jobsService.findAll with companyId', async () => {
+      const pagination = { page: 1, limit: 10 } as any;
+      const completed = true;
+      const customerId = 2;
+      const req = { user: { companyId: 1 } } as any;
+      const result = { items: [], total: 0 };
+      jobsService.findAll.mockResolvedValue(result);
+
+      const response = await controller.findAll(
+        pagination,
+        req,
+        completed,
+        customerId,
+      );
+
+      expect(jobsService.findAll).toHaveBeenCalledWith(
+        pagination,
+        req.user.companyId,
+        completed,
+        customerId,
+      );
+      expect(response).toBe(result);
+    });
+
   });
 });

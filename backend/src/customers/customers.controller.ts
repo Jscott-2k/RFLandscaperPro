@@ -47,25 +47,26 @@ export class CustomersController {
     @Body() createCustomerDto: CreateCustomerDto,
     @Req() req: { user: { companyId: number } },
   ): Promise<CustomerResponseDto> {
-    return this.customersService.create(
-      createCustomerDto,
-      req.user.companyId,
-    );
+    return this.customersService.create(createCustomerDto, req.user.companyId);
   }
 
   @Get()
   @Roles(UserRole.Admin, UserRole.Worker)
-  @ApiOperation({ summary: 'List customers' })
+  @ApiOperation({ summary: 'List customers for the authenticated company' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'active', required: false, type: Boolean })
   @ApiResponse({ status: 200, description: 'List of customers' })
   async findAll(
     @Query() pagination: PaginationQueryDto,
-    @Query('active', new ParseBoolPipe({ optional: true }))
-    active?: boolean,
+    @Req() req: { user: { companyId: number } },
+    @Query('active', new ParseBoolPipe({ optional: true })) active?: boolean,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
-    return this.customersService.findAll(pagination, active);
+    return this.customersService.findAll(
+      pagination,
+      req.user.companyId,
+      active,
+    );
   }
 
   @Get('profile')
@@ -130,8 +131,9 @@ export class CustomersController {
   })
   async activate(
     @Param('id', ParseIntPipe) id: number,
+    @Req() req: { user: { companyId: number } },
   ): Promise<CustomerResponseDto> {
-    return this.customersService.activate(id);
+    return this.customersService.activate(id, req.user.companyId);
   }
 
   @Patch(':id/deactivate')
@@ -144,8 +146,9 @@ export class CustomersController {
   })
   async deactivate(
     @Param('id', ParseIntPipe) id: number,
+    @Req() req: { user: { companyId: number } },
   ): Promise<CustomerResponseDto> {
-    return this.customersService.deactivate(id);
+    return this.customersService.deactivate(id, req.user.companyId);
   }
 
   @Delete(':id')
