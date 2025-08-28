@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "dev:ssr": "ng serve",
+    "dev:ssr": "ng serve --host 0.0.0.0",
     "dev:compose": "docker compose -f docker-compose.yml -f docker-compose.override.yml up --build",
     "build": "ng build",
     "build:ssr": "ng build",
