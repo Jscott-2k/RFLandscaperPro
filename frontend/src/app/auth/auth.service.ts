@@ -7,39 +7,51 @@ import { environment } from '../../environments/environment';
 export class AuthService {
   private http = inject(HttpClient);
   private readonly roles = signal<string[]>(this.getRolesFromToken());
+  private hasLocalStorage = () => typeof localStorage !== 'undefined';
 
   hasRole(role: string): boolean {
     return this.roles().includes(role);
   }
 
   login(data: { email: string; password: string }): Observable<{ access_token: string }> {
-    return this.http
-      .post<{ access_token: string }>(`${environment.apiUrl}/auth/login`, data)
-      .pipe(
-        tap(res => {
+    return this.http.post<{ access_token: string }>(`${environment.apiUrl}/auth/login`, data).pipe(
+      tap((res) => {
+        if (this.hasLocalStorage()) {
           localStorage.setItem('token', res.access_token);
           this.roles.set(this.getRolesFromToken());
-        })
-      );
+        }
+      }),
+    );
   }
 
-  register(data: { name?: string; email: string; password: string }): Observable<{ access_token: string }> {
+  register(data: {
+    name?: string;
+    email: string;
+    password: string;
+  }): Observable<{ access_token: string }> {
     return this.http
       .post<{ access_token: string }>(`${environment.apiUrl}/auth/register`, data)
       .pipe(
-        tap(res => {
-          localStorage.setItem('token', res.access_token);
-          this.roles.set(this.getRolesFromToken());
-        })
+        tap((res) => {
+          if (this.hasLocalStorage()) {
+            localStorage.setItem('token', res.access_token);
+            this.roles.set(this.getRolesFromToken());
+          }
+        }),
       );
   }
 
   logout(): void {
-    localStorage.removeItem('token');
+    if (this.hasLocalStorage()) {
+      localStorage.removeItem('token');
+    }
     this.roles.set([]);
   }
 
   getToken(): string | null {
+    if (!this.hasLocalStorage()) {
+      return null;
+    }
     return localStorage.getItem('token');
   }
 
@@ -66,4 +78,3 @@ export class AuthService {
     }
   }
 }
-
