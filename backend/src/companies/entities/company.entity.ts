@@ -10,6 +10,7 @@ import { User } from '../../users/user.entity';
 import { Customer } from '../../customers/entities/customer.entity';
 import { Equipment } from '../../equipment/entities/equipment.entity';
 import { Job } from '../../jobs/entities/job.entity';
+import { Contract } from '../../contracts/entities/contract.entity';
 
 @Entity()
 export class Company {
@@ -37,4 +38,7 @@ export class Company {
 
   @OneToMany(() => Job, (job) => job.company)
   jobs: Job[];
+
+  @OneToMany(() => Contract, (contract) => contract.company)
+  contracts: Contract[];
 }

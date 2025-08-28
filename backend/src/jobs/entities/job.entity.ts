@@ -12,6 +12,7 @@ import {
 import { Customer } from '../../customers/entities/customer.entity';
 import { Assignment } from './assignment.entity';
 import { Company } from '../../companies/entities/company.entity';
+import { Contract } from '../../contracts/entities/contract.entity';
 
 @Entity()
 @Index(['scheduledDate', 'completed']) // Add index for common queries
@@ -61,6 +62,15 @@ export class Job {
     onDelete: 'CASCADE',
   })
   assignments: Assignment[];
+
+  @Column({ nullable: true })
+  contractId?: number;
+
+  @ManyToOne(() => Contract, (contract) => contract.jobs, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'contractId' })
+  contract?: Contract;
 
   @CreateDateColumn()
   createdAt: Date;

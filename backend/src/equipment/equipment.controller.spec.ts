@@ -16,7 +16,7 @@ describe('EquipmentController', () => {
           provide: EquipmentService,
           useValue: {
             updateStatus: jest.fn(),
-            findAll: jest.fn()
+            findAll: jest.fn(),
           },
         },
       ],
@@ -29,7 +29,6 @@ describe('EquipmentController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
-
 
   describe('updateStatus', () => {
     it('should pass companyId to equipmentService.updateStatus', async () => {
@@ -47,23 +46,26 @@ describe('EquipmentController', () => {
       );
       expect(result).toBe(response);
     });
+  });
 
-  it('should call equipmentService.findAll with companyId', async () => {
-    const pagination = { page: 1, limit: 10 };
-    const req = { user: { companyId: 1 } };
-    const status = EquipmentStatus.AVAILABLE;
-    const type = EquipmentType.MOWER;
-    const expectedResult = { items: [], total: 0 };
-    (service.findAll as jest.Mock).mockResolvedValue(expectedResult);
+  describe('findAll', () => {
+    it('should call equipmentService.findAll with companyId', async () => {
+      const pagination = { page: 1, limit: 10 };
+      const req = { user: { companyId: 1 } };
+      const status = EquipmentStatus.AVAILABLE;
+      const type = EquipmentType.MOWER;
+      const expectedResult = { items: [], total: 0 };
+      (service.findAll as jest.Mock).mockResolvedValue(expectedResult);
 
-    const result = await controller.findAll(pagination, req, status, type);
-    expect(result).toEqual(expectedResult);
-    expect(service.findAll).toHaveBeenCalledWith(
-      pagination,
-      req.user.companyId,
-      status,
-      type,
-    );
-
+      const result = await controller.findAll(pagination, req, status, type);
+      expect(result).toEqual(expectedResult);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(service.findAll).toHaveBeenCalledWith(
+        pagination,
+        req.user.companyId,
+        status,
+        type,
+      );
+    });
   });
 });

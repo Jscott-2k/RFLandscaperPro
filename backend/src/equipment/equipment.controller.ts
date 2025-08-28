@@ -60,7 +60,6 @@ export class EquipmentController {
   @ApiQuery({ name: 'type', required: false, enum: EquipmentType })
   @ApiResponse({ status: 200, description: 'List of equipment' })
   async findAll(
-    @Req() req: { user: { companyId: number } },
     @Query() pagination: PaginationQueryDto,
     @Req() req: { user: { companyId: number } },
     @Query('status', new ParseEnumPipe(EquipmentStatus, { optional: true }))
