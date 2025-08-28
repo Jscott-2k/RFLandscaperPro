@@ -6,7 +6,7 @@ import { environment } from '../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
-  private readonly roles = signal<string[]>(['admin']);
+  private readonly roles = signal<string[]>(this.getRolesFromToken());
 
   hasRole(role: string): boolean {
     return this.roles().includes(role);
@@ -15,17 +15,28 @@ export class AuthService {
   login(data: { email: string; password: string }): Observable<{ access_token: string }> {
     return this.http
       .post<{ access_token: string }>(`${environment.apiUrl}/auth/login`, data)
-      .pipe(tap(res => localStorage.setItem('token', res.access_token)));
+      .pipe(
+        tap(res => {
+          localStorage.setItem('token', res.access_token);
+          this.roles.set(this.getRolesFromToken());
+        })
+      );
   }
 
   register(data: { name?: string; email: string; password: string }): Observable<{ access_token: string }> {
     return this.http
       .post<{ access_token: string }>(`${environment.apiUrl}/auth/register`, data)
-      .pipe(tap(res => localStorage.setItem('token', res.access_token)));
+      .pipe(
+        tap(res => {
+          localStorage.setItem('token', res.access_token);
+          this.roles.set(this.getRolesFromToken());
+        })
+      );
   }
 
   logout(): void {
     localStorage.removeItem('token');
+    this.roles.set([]);
   }
 
   getToken(): string | null {
@@ -34,6 +45,25 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return !!this.getToken();
+  }
+
+  private getRolesFromToken(): string[] {
+    const token = this.getToken();
+    if (!token) {
+      return [];
+    }
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (Array.isArray(payload.roles)) {
+        return payload.roles;
+      }
+      if (payload.role) {
+        return [payload.role];
+      }
+      return [];
+    } catch {
+      return [];
+    }
   }
 }
 
