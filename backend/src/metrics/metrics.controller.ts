@@ -1,5 +1,4 @@
-import { Controller, Get, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Get, Header } from '@nestjs/common';
 import { register } from 'prom-client';
 import { Public } from '../common/decorators/public.decorator';
 
@@ -7,8 +6,8 @@ import { Public } from '../common/decorators/public.decorator';
 export class MetricsController {
   @Get('metrics')
   @Public()
-  async getMetrics(@Res() res: Response): Promise<void> {
-    res.set('Content-Type', register.contentType);
-    res.send(await register.metrics());
+  @Header('Content-Type', register.contentType)
+  metrics(): Promise<string> {
+    return register.metrics();
   }
 }

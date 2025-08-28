@@ -20,7 +20,7 @@
     "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
     "migration:create": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:create",
-    "migration:generate": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:generate -d data-source.ts src/migrations",
+    "migration:generate": "node scripts/generate-migration.mjs",
     "migration:run": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:run -d data-source.ts",
     "migration:revert": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:revert -d data-source.ts",
     "seed": "ts-node src/seed.ts"
