@@ -35,7 +35,7 @@ export class CompaniesController {
   ): Promise<CompanyResponseDto> {
     const company = await this.companiesService.findByUserId(req.user.userId);
     if (!company) throw new NotFoundException('Company not found');
-    return { id: company.id, name: company.name };
+    return company;
   }
 
   @Roles(UserRole.Owner)
@@ -56,8 +56,7 @@ export class CompaniesController {
     @Body() dto: CreateCompanyDto,
     @Req() req: { user: { userId: number } },
   ): Promise<CompanyResponseDto> {
-    const company = await this.companiesService.create(dto, req.user.userId);
-    return { id: company.id, name: company.name };
+    return this.companiesService.create(dto, req.user.userId);
   }
 
   @Roles(UserRole.Owner, UserRole.Admin)
@@ -69,7 +68,6 @@ export class CompaniesController {
   ): Promise<CompanyResponseDto> {
     if (req.user.companyId !== id)
       throw new NotFoundException('Company not found');
-    const company = await this.companiesService.update(id, dto);
-    return { id: company.id, name: company.name };
+    return this.companiesService.update(id, dto);
   }
 }
