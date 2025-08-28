@@ -4,6 +4,7 @@ import dataSource from '../data-source';
 import { DataSource } from 'typeorm';
 import { User, UserRole } from './users/user.entity';
 import { Customer } from './customers/entities/customer.entity';
+import { Company } from './companies/entities/company.entity';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
 
@@ -28,6 +29,7 @@ async function main() {
     await ds.transaction(async (trx) => {
       const userRepo = trx.getRepository(User);
       const customerRepo = trx.getRepository(Customer);
+      const companyRepo = trx.getRepository(Company);
 
       // --- Admin user ---
       const adminUsername = process.env.ADMIN_USERNAME ?? 'admin';
@@ -63,12 +65,27 @@ async function main() {
         console.log('Admin user ensured (password from environment variable).');
       }
 
+      // --- Sample company ---
+      const companyName = 'Sample Company';
+      await companyRepo.upsert(
+        { name: companyName },
+        {
+          conflictPaths: ['name'],
+          skipUpdateIfNoValuesChanged: true,
+        },
+      );
+      const company = await companyRepo.findOneOrFail({
+        where: { name: companyName },
+      });
+      console.log('Sample company ensured.');
+
       // --- Sample customer ---
       await customerRepo.upsert(
         {
           name: 'John Doe',
           email: 'customer@example.com',
           phone: '555-1234',
+          companyId: company.id,
           addresses: [
             {
               street: '123 Main St',
