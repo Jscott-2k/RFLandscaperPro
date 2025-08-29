@@ -27,18 +27,7 @@ export class AuthService {
         access_token: string;
         companies?: string[];
       }>(`${environment.apiUrl}/auth/login`, data)
-      .pipe(
-        tap((res) => {
-          if (this.hasLocalStorage()) {
-            localStorage.setItem('token', res.access_token);
-            this.roles.set(this.getRolesFromToken());
-            const company = this.getCompanyFromToken(res.access_token) ?? data.company;
-            const companies = res.companies ?? [company];
-            this.setCompany(company);
-            this.setCompanies(companies);
-          }
-        }),
-      );
+      .pipe(tap((res) => this.handleAuth(res, data.company)));
   }
 
   signupOwner(data: {
@@ -49,19 +38,7 @@ export class AuthService {
   }): Observable<{ access_token: string }> {
     return this.http
       .post<{ access_token: string }>(`${environment.apiUrl}/auth/signup-owner`, data)
-      .pipe(
-        tap((res) => {
-          if (this.hasLocalStorage()) {
-            localStorage.setItem('token', res.access_token);
-            this.roles.set(this.getRolesFromToken());
-            const company = this.getCompanyFromToken(res.access_token);
-            if (company) {
-              this.setCompany(company);
-              this.setCompanies([company]);
-            }
-          }
-        }),
-      );
+      .pipe(tap((res) => this.handleAuth(res)));
   }
 
   register(data: {
@@ -99,18 +76,22 @@ export class AuthService {
       .post<{
         access_token: string;
       }>(`${environment.apiUrl}/auth/refresh`, { token: this.getToken() })
-      .pipe(
-        tap((res) => {
-          if (this.hasLocalStorage()) {
-            localStorage.setItem('token', res.access_token);
-            this.roles.set(this.getRolesFromToken());
-            const company = this.getCompanyFromToken(res.access_token);
-            if (company) {
-              this.setCompany(company);
-            }
-          }
-        }),
-      );
+      .pipe(tap((res) => this.handleAuth(res)));
+  }
+
+  handleAuth(res: { access_token: string; companies?: string[] }, companyHint?: string): void {
+    if (this.hasLocalStorage()) {
+      localStorage.setItem('token', res.access_token);
+      this.roles.set(this.getRolesFromToken(res.access_token));
+      const company = this.getCompanyFromToken(res.access_token) ?? companyHint;
+      const companies = res.companies ?? (company ? [company] : []);
+      if (company) {
+        this.setCompany(company);
+      }
+      if (companies.length) {
+        this.setCompanies(companies);
+      }
+    }
   }
 
   logout(): Observable<void> {
