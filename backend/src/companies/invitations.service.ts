@@ -364,7 +364,7 @@ export class InvitationsService {
 
     await this.emailService.send(
       addedToCompanyMail(
-        savedUser.email,
+        savedUser.email.value,
         company?.name ?? 'Your company',
         invitation.role,
       ),

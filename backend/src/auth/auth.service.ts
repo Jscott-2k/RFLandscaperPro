@@ -1,5 +1,4 @@
 import {
-  ConflictException,
   Injectable,
   UnauthorizedException,
   Inject,
@@ -118,48 +117,21 @@ export class AuthService {
     });
 
     const token = await this.createVerificationToken(user.id);
-    await this.emailService.send(verificationMail(user.email, token));
+    await this.emailService.send(verificationMail(user.email.value, token));
     return { message: 'Verification email sent' };
   }
 
   async signupOwner(dto: SignupOwnerDto) {
     validatePasswordStrength(dto.password);
 
-    const user = await this.userCreationService.createUser({
-      username: dto.name,
-      email: dto.email,
-      password: dto.password,
-      role: UserRole.Owner,
-      company: { name: dto.companyName },
-      isVerified: true,
-    });
-
-    if (existing) {
-      throw new ConflictException('Email already exists');
-    }
-
-    try {
-      const user = await this.usersRepository.manager.transaction(
-        async (manager) => {
-          const userRepo = manager.getRepository(User);
-          const companyRepo = manager.getRepository(Company);
-          const membershipRepo = manager.getRepository(CompanyUser);
-
-          const newUser = userRepo.create({
-            username: dto.name,
-            email: new Email(dto.email),
-            password: dto.password,
-            role: UserRole.Owner,
-            isVerified: true,
-          });
-          const savedUser = await userRepo.save(newUser);
-
-          const company = companyRepo.create({
-            name: dto.companyName,
-            ownerId: savedUser.id,
-          });
-          const savedCompany = await companyRepo.save(company);
-
+      const user = await this.userCreationService.createUser({
+        username: dto.name,
+        email: new Email(dto.email),
+        password: dto.password,
+        role: UserRole.Owner,
+        company: { name: dto.companyName },
+        isVerified: true,
+      });
 
     return this.login(user);
   }

@@ -3,7 +3,8 @@ import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { UserRole } from '../users/user.entity';
+import { User, UserRole } from '../users/user.entity';
+import { Email } from '../users/value-objects/email.vo';
 import {
   CompanyUser,
   CompanyUserRole,
@@ -99,10 +100,11 @@ describe('AuthService.signupOwner', () => {
       userCreationService as unknown as UserCreationService,
       { signAsync: jest.fn() } as unknown as JwtService,
       {} as ConfigService,
-      {} as unknown as Repository<RefreshToken>,
-      {} as unknown as Repository<VerificationToken>,
+      {} as RefreshTokenRepository,
+      {} as VerificationTokenRepository,
+      {} as unknown as any, // Repository<User>
       {} as EmailService,
-      { findOne: jest.fn() } as unknown as Repository<CompanyUser>,
+      { findOne: jest.fn() } as unknown as CompanyMembershipRepository,
     );
     jest.spyOn(service, 'login').mockResolvedValue({} as any);
   });
@@ -125,7 +127,7 @@ describe('AuthService.signupOwner', () => {
 
     expect(userCreationService.createUser).toHaveBeenCalledWith({
       username: 'owner',
-      email: 'owner@example.com',
+      email: new Email('owner@example.com'),
       password: 'Password123!',
       role: UserRole.Owner,
       company: { name: 'ACME' },
