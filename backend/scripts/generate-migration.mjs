@@ -24,6 +24,10 @@ const result = spawnSync(
   { stdio: 'inherit' },
 );
 
+if (result.status !== 0) {
+  process.exit(result.status ?? 1);
+}
+
 spawnSync('npx', ['prettier', outPath + '.ts', '--write'], {
   stdio: 'inherit',
 });
