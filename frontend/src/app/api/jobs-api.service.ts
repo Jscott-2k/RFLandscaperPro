@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService, Paginated, PaginationQuery } from '../api.service';
 import { environment } from '../../environments/environment';
+import { UpcomingJobSummary } from '../models/dashboard.models';
 
 export interface Job {
   id: number;
@@ -57,8 +58,8 @@ export class JobsApiService extends ApiService {
     return this.request<void>('DELETE', `${environment.apiUrl}/jobs/${id}`);
   }
 
-  getUpcomingJobs(): Observable<{ items: unknown[]; total: number }> {
-    return this.request<{ items: unknown[]; total: number }>('GET', `${environment.apiUrl}/jobs`, {
+  getUpcomingJobs(): Observable<{ items: UpcomingJobSummary[]; total: number }> {
+    return this.request<{ items: UpcomingJobSummary[]; total: number }>('GET', `${environment.apiUrl}/jobs`, {
       params: { completed: false, limit: 5 },
     });
   }

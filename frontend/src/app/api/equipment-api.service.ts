@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService, Paginated, PaginationQuery } from '../api.service';
 import { environment } from '../../environments/environment';
+import { EquipmentCount } from '../models/dashboard.models';
 
 export interface Equipment {
   id: number;
@@ -47,8 +48,8 @@ export class EquipmentApiService extends ApiService {
     return this.request<void>('DELETE', `${environment.apiUrl}/equipment/${id}`);
   }
 
-  getEquipmentCount(status: string): Observable<{ items: unknown[]; total: number }> {
-    return this.request<{ items: unknown[]; total: number }>(
+  getEquipmentCount(status: string): Observable<{ items: EquipmentCount[]; total: number }> {
+    return this.request<{ items: EquipmentCount[]; total: number }>(
       'GET',
       `${environment.apiUrl}/equipment`,
       {
