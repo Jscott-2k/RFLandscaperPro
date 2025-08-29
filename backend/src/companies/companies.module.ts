@@ -10,11 +10,13 @@ import { User } from '../users/user.entity';
 import { UsersModule } from '../users/users.module';
 import { InvitationsService } from './invitations.service';
 import { EmailService } from '../common/email.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Company, User, CompanyUser, Invitation]),
     UsersModule,
+    AuthModule,
   ],
   providers: [CompaniesService, InvitationsService, EmailService],
   controllers: [CompaniesController, InvitationsController],
