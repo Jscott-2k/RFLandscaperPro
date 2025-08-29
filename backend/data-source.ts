@@ -2,6 +2,7 @@ import { config } from 'dotenv';
 config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
 import { DataSource } from 'typeorm';
 import { join } from 'path';
+import { CompanyIdSubscriber } from './src/common/tenant/company-id.subscriber';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -17,4 +18,5 @@ export default new DataSource({
   migrationsRun: true,
   synchronize: false,
   ssl: isProduction ? { rejectUnauthorized: false } : false,
+  subscribers: [CompanyIdSubscriber],
 });
