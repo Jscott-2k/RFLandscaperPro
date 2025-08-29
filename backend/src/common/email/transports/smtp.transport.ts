@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import * as nodemailer from 'nodemailer';
 import { EmailTransport, MailDriver } from './transport.interface';
 
 function parsePort(v: string | undefined, fallback: number): number {
