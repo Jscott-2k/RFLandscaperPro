@@ -8,6 +8,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { BadRequestException } from '@nestjs/common';
 import { Company } from '../../companies/entities/company.entity';
 
 export enum EquipmentType {
@@ -70,4 +71,34 @@ export class Equipment {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  changeStatus(newStatus: EquipmentStatus): void {
+    const validTransitions: Record<EquipmentStatus, EquipmentStatus[]> = {
+      [EquipmentStatus.AVAILABLE]: [
+        EquipmentStatus.IN_USE,
+        EquipmentStatus.MAINTENANCE,
+        EquipmentStatus.OUT_OF_SERVICE,
+      ],
+      [EquipmentStatus.IN_USE]: [
+        EquipmentStatus.AVAILABLE,
+        EquipmentStatus.MAINTENANCE,
+      ],
+      [EquipmentStatus.MAINTENANCE]: [
+        EquipmentStatus.AVAILABLE,
+        EquipmentStatus.OUT_OF_SERVICE,
+      ],
+      [EquipmentStatus.OUT_OF_SERVICE]: [
+        EquipmentStatus.AVAILABLE,
+        EquipmentStatus.MAINTENANCE,
+      ],
+    };
+
+    if (!validTransitions[this.status]?.includes(newStatus)) {
+      throw new BadRequestException(
+        `Invalid status transition from ${this.status} to ${newStatus}`,
+      );
+    }
+
+    this.status = newStatus;
+  }
 }

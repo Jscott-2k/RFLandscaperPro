@@ -8,13 +8,14 @@ import { Customer } from '../customers/entities/customer.entity';
 import { Assignment } from './entities/assignment.entity';
 import { User } from '../users/user.entity';
 import { Equipment } from '../equipment/entities/equipment.entity';
+import { SchedulingService } from './scheduling.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Job, Customer, Assignment, User, Equipment]),
   ],
   controllers: [JobsController],
-  providers: [JobsService],
-  exports: [JobsService],
+  providers: [JobsService, SchedulingService],
+  exports: [JobsService, SchedulingService],
 })
 export class JobsModule {}

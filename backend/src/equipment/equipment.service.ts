@@ -91,18 +91,12 @@ export class EquipmentService {
       throw new NotFoundException(`Equipment with ID ${id} not found.`);
     }
 
-    // Validate status transitions
-    if (
-      updateEquipmentDto.status &&
-      equipment.status !== updateEquipmentDto.status
-    ) {
-      this.validateStatusTransition(
-        equipment.status,
-        updateEquipmentDto.status,
-      );
+    const { status, ...rest } = updateEquipmentDto;
+    if (status && equipment.status !== status) {
+      equipment.changeStatus(status);
     }
 
-    Object.assign(equipment, updateEquipmentDto);
+    Object.assign(equipment, rest);
     const updatedEquipment = await this.equipmentRepository.save(equipment);
     return this.toEquipmentResponseDto(updatedEquipment);
   }
@@ -132,37 +126,6 @@ export class EquipmentService {
   ): Promise<EquipmentResponseDto> {
     await this.findOne(id, companyId);
     return this.update(id, { status }, companyId);
-  }
-
-  private validateStatusTransition(
-    currentStatus: EquipmentStatus,
-    newStatus: EquipmentStatus,
-  ): void {
-    const validTransitions: Record<EquipmentStatus, EquipmentStatus[]> = {
-      [EquipmentStatus.AVAILABLE]: [
-        EquipmentStatus.IN_USE,
-        EquipmentStatus.MAINTENANCE,
-        EquipmentStatus.OUT_OF_SERVICE,
-      ],
-      [EquipmentStatus.IN_USE]: [
-        EquipmentStatus.AVAILABLE,
-        EquipmentStatus.MAINTENANCE,
-      ],
-      [EquipmentStatus.MAINTENANCE]: [
-        EquipmentStatus.AVAILABLE,
-        EquipmentStatus.OUT_OF_SERVICE,
-      ],
-      [EquipmentStatus.OUT_OF_SERVICE]: [
-        EquipmentStatus.AVAILABLE,
-        EquipmentStatus.MAINTENANCE,
-      ],
-    };
-
-    if (!validTransitions[currentStatus]?.includes(newStatus)) {
-      throw new BadRequestException(
-        `Invalid status transition from ${currentStatus} to ${newStatus}`,
-      );
-    }
   }
 
   private toEquipmentResponseDto(equipment: Equipment): EquipmentResponseDto {

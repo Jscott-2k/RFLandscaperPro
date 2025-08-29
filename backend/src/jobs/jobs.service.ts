@@ -17,6 +17,7 @@ import { AssignJobDto } from './dto/assign-job.dto';
 import { BulkAssignJobDto } from './dto/bulk-assign-job.dto';
 import { ScheduleJobDto } from './dto/schedule-job.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { SchedulingService } from './scheduling.service';
 
 @Injectable()
 export class JobsService {
@@ -31,6 +32,7 @@ export class JobsService {
     private readonly equipmentRepository: Repository<Equipment>,
     @InjectRepository(Assignment)
     private readonly assignmentRepository: Repository<Assignment>,
+    private readonly schedulingService: SchedulingService,
   ) {}
 
   async create(
@@ -196,31 +198,6 @@ export class JobsService {
     };
   }
 
-  private async checkResourceConflicts(
-    date: Date,
-    userId: number,
-    equipmentId: number,
-    companyId: number,
-    jobId?: number,
-  ): Promise<boolean> {
-    const query = this.assignmentRepository
-      .createQueryBuilder('assignment')
-      .leftJoin('assignment.job', 'job')
-      .where('job.scheduledDate = :date', { date })
-      .andWhere('assignment.companyId = :companyId', { companyId })
-      .andWhere(
-        '(assignment.userId = :userId OR assignment.equipmentId = :equipmentId)',
-        { userId, equipmentId },
-      );
-
-    if (jobId !== undefined) {
-      query.andWhere('job.id != :jobId', { jobId });
-    }
-
-    const conflict = await query.getOne();
-    return !!conflict;
-  }
-
   async schedule(
     id: number,
     scheduleJobDto: ScheduleJobDto,
@@ -235,7 +212,7 @@ export class JobsService {
     }
 
     for (const assignment of job.assignments || []) {
-      const conflict = await this.checkResourceConflicts(
+      const conflict = await this.schedulingService.checkResourceConflicts(
         scheduleJobDto.scheduledDate,
         assignment.user.id,
         assignment.equipment.id,
@@ -284,7 +261,7 @@ export class JobsService {
     }
 
     if (job.scheduledDate) {
-      const conflict = await this.checkResourceConflicts(
+      const conflict = await this.schedulingService.checkResourceConflicts(
         job.scheduledDate,
         dto.userId,
         dto.equipmentId,
@@ -346,7 +323,7 @@ export class JobsService {
     // Check for conflicts if job is scheduled
     if (job.scheduledDate) {
       for (const assignment of dto.assignments) {
-        const conflict = await this.checkResourceConflicts(
+        const conflict = await this.schedulingService.checkResourceConflicts(
           job.scheduledDate,
           assignment.userId,
           assignment.equipmentId,

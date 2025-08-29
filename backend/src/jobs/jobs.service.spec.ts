@@ -10,6 +10,7 @@ import { Assignment } from './entities/assignment.entity';
 import { CreateJobDto } from './dto/create-job.dto';
 import { ScheduleJobDto } from './dto/schedule-job.dto';
 import { AssignJobDto } from './dto/assign-job.dto';
+import { SchedulingService } from './scheduling.service';
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument */
 describe('JobsService', () => {
@@ -30,6 +31,7 @@ describe('JobsService', () => {
     createQueryBuilder: jest.Mock;
     manager: { transaction: jest.Mock };
   };
+  let schedulingService: { checkResourceConflicts: jest.Mock };
 
   beforeEach(async () => {
     jobRepository = {
@@ -48,6 +50,7 @@ describe('JobsService', () => {
       createQueryBuilder: jest.fn(),
       manager: { transaction: jest.fn() },
     };
+    schedulingService = { checkResourceConflicts: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -68,6 +71,10 @@ describe('JobsService', () => {
         {
           provide: getRepositoryToken(Assignment),
           useValue: assignmentRepository,
+        },
+        {
+          provide: SchedulingService,
+          useValue: schedulingService,
         },
       ],
     }).compile();
@@ -149,19 +156,13 @@ describe('JobsService', () => {
       ],
       customer: {},
     });
-
-    const qb = {
-      leftJoin: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      getOne: jest.fn().mockResolvedValue({ id: 99 }),
-    };
-    assignmentRepository.createQueryBuilder.mockReturnValue(qb);
+    schedulingService.checkResourceConflicts.mockResolvedValue(true);
 
     const scheduleJobDto: ScheduleJobDto = { scheduledDate: date };
     await expect(service.schedule(1, scheduleJobDto, 1)).rejects.toBeInstanceOf(
       ConflictException,
     );
+    expect(schedulingService.checkResourceConflicts).toHaveBeenCalled();
   });
 
   it('should throw ConflictException when assigning user or equipment already booked', async () => {
@@ -173,19 +174,13 @@ describe('JobsService', () => {
     });
     userRepository.findOne.mockResolvedValue({ id: 1 });
     equipmentRepository.findOne.mockResolvedValue({ id: 2 });
-
-    const qb = {
-      leftJoin: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      getOne: jest.fn().mockResolvedValue({ id: 99 }),
-    };
-    assignmentRepository.createQueryBuilder.mockReturnValue(qb);
+    schedulingService.checkResourceConflicts.mockResolvedValue(true);
 
     const assignJobDto: AssignJobDto = { userId: 1, equipmentId: 2 };
     await expect(service.assign(1, assignJobDto, 1)).rejects.toBeInstanceOf(
       ConflictException,
     );
+    expect(schedulingService.checkResourceConflicts).toHaveBeenCalled();
   });
 
   it('should include companyId when creating assignment', async () => {
