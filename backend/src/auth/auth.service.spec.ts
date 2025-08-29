@@ -9,12 +9,13 @@ import {
   CompanyUserRole,
   CompanyUserStatus,
 } from '../companies/entities/company-user.entity';
-import { EmailService } from '../common/email.service';
+import { EmailService } from '../common/email';
 import { JwtUserPayload } from './interfaces/jwt-user-payload.interface';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository';
 import { VerificationTokenRepository } from './repositories/verification-token.repository';
 import { CompanyMembershipRepository } from './repositories/company-membership.repository';
 import { UserCreationService } from '../users/user-creation.service';
+
 
 describe('AuthService.switchCompany', () => {
   let service: AuthService;

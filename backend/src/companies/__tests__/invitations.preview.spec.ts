@@ -6,7 +6,7 @@ import { Invitation, InvitationRole } from '../entities/invitation.entity';
 import { Company } from '../entities/company.entity';
 import { CompanyUser } from '../entities/company-user.entity';
 import { User } from '../../users/user.entity';
-import { EmailService } from '../../common/email.service';
+import { EmailService } from '../../common/email';
 
 describe('InvitationsService previewInvitation', () => {
   let service: InvitationsService;

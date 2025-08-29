@@ -5,17 +5,13 @@ import { Invitation, InvitationRole } from '../entities/invitation.entity';
 import { CompanyUser } from '../entities/company-user.entity';
 import { Company } from '../entities/company.entity';
 import { User } from '../../users/user.entity';
-import { EmailService } from '../../common/email.service';
+import { EmailService } from '../../common/email';
+import { SendMailOptions } from 'nodemailer';
 
 describe('InvitationsService revoke and resend', () => {
   let invitationsRepo: jest.Mocked<Pick<Repository<Invitation>, 'findOne' | 'save'>>;
   let service: InvitationsService;
-  let emailService: {
-    sendCompanyInvitationEmail: jest.Mock<
-      void,
-      [string, string, string, InvitationRole, Date]
-    >;
-  };
+  let emailService: { send: jest.Mock<void, [SendMailOptions]> };
 
   beforeEach(() => {
     invitationsRepo = {
@@ -23,13 +19,8 @@ describe('InvitationsService revoke and resend', () => {
       save: jest.fn(async (inv) => inv),
     } as unknown as jest.Mocked<Pick<Repository<Invitation>, 'findOne' | 'save'>>;
     emailService = {
-      sendCompanyInvitationEmail: jest.fn(),
-    } as {
-      sendCompanyInvitationEmail: jest.Mock<
-        void,
-        [string, string, string, InvitationRole, Date]
-      >;
-    };
+      send: jest.fn<void, [SendMailOptions]>(),
+    } as { send: jest.Mock<void, [SendMailOptions]> };
     service = new InvitationsService(
       invitationsRepo as unknown as Repository<Invitation>,
       {} as unknown as Repository<CompanyUser>,
@@ -84,12 +75,11 @@ describe('InvitationsService revoke and resend', () => {
     });
 
     await service.resendInvitation(4, 3);
-    const [[email, newToken, companyName, role, expiry]] =
-      emailService.sendCompanyInvitationEmail.mock.calls;
-    expect(email).toBe('resend@ex.com');
-    expect(companyName).toBe('Co');
-    expect(role).toBe(InvitationRole.ADMIN);
-    expect(expiry).toBeInstanceOf(Date);
+    const [[options]] = emailService.send.mock.calls;
+    const tokenMatch = (options.html as string).match(/token=([\w]+)/);
+    const newToken = tokenMatch ? tokenMatch[1] : '';
+    expect(options.to).toBe('resend@ex.com');
+    expect(options.subject).toBe('Company Invitation');
     const newHash = crypto.createHash('sha256').update(newToken).digest('hex');
     expect(invitation.tokenHash).toBe(newHash);
     expect(invitation.expiresAt.getTime()).toBeGreaterThan(Date.now());

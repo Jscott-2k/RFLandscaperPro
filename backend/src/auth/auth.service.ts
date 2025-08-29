@@ -15,7 +15,11 @@ import { UserCreationService } from '../users/user-creation.service';
 import { RegisterDto } from './dto/register.dto';
 import { SignupOwnerDto } from './dto/signup-owner.dto';
 import { validatePasswordStrength } from './password.util';
-import { EmailService } from '../common/email.service';
+import { RefreshToken } from './refresh-token.entity';
+import { VerificationToken } from './verification-token.entity';
+import { EmailService } from '../common/email';
+import { verificationMail } from '../common/email/templates';
+import { Company } from '../companies/entities/company.entity';
 import {
   CompanyUser,
   CompanyUserRole,
@@ -109,7 +113,7 @@ export class AuthService {
     });
 
     const token = await this.createVerificationToken(user.id);
-    await this.emailService.sendVerificationEmail(user.email, token);
+    await this.emailService.send(verificationMail(user.email, token));
 
     return { message: 'Verification email sent' };
   }
