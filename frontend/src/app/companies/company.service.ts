@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Company } from './company.model';
-import { User } from '../users/user.service';
+import { Company, CreateCompany, UpdateCompany } from './company.model';
+import { User } from '../users/user.model';
 import { ApiService } from '../api.service';
 
 @Injectable({ providedIn: 'root' })
@@ -16,13 +16,11 @@ export class CompanyService {
     return this.api.getCompanyWorkers();
   }
 
-  createCompany(company: Partial<Company>): Observable<Company> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    return this.api.createCompany(company as any);
+  createCompany(company: CreateCompany): Observable<Company> {
+    return this.api.createCompany(company);
   }
 
-  updateCompany(id: number, company: Partial<Company>): Observable<Company> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    return this.api.updateCompany(id, company as any);
+  updateCompany(id: number, company: UpdateCompany): Observable<Company> {
+    return this.api.updateCompany(id, company);
   }
 }

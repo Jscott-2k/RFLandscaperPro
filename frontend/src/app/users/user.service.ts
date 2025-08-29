@@ -1,18 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Company } from '../companies/company.model';
 import { ApiService } from '../api.service';
-
-export interface User {
-  id: number;
-  username: string;
-  email: string;
-  role: string;
-  company?: Company;
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
-}
+import { User, CreateUser, UpdateUser } from './user.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -23,17 +12,16 @@ export class UserService {
   }
 
   getUser(id: number): Observable<User> {
-    return this.api.getUser(id) as Observable<User>;
+    return this.api.getUser(id);
   }
 
-  createUser(user: Partial<User>): Observable<User> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    return this.api.createUser(user as any) as Observable<User>;
+  createUser(user: CreateUser): Observable<User> {
+    return this.api.createUser(user);
   }
 
-  updateUser(user: User): Observable<User> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    return this.api.updateUser(user.id, user as any) as Observable<User>;
+  updateUser(user: UpdateUser & { id: number }): Observable<User> {
+    const { id, ...payload } = user;
+    return this.api.updateUser(id, payload);
   }
 
   deleteUser(id: number): Observable<void> {

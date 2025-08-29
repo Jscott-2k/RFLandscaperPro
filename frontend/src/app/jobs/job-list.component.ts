@@ -1,7 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { JobsService, Job } from './jobs.service';
+import { JobsService } from './jobs.service';
+import { Job } from './job.model';
 
 @Component({
   selector: 'app-job-list',
