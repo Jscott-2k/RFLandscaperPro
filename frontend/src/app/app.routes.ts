@@ -14,6 +14,11 @@ export const routes: Routes = [
       import('./auth/register/register.component').then((m) => m.RegisterComponent),
   },
   {
+    path: 'signup/company',
+    loadComponent: () =>
+      import('./auth/signup-owner/signup-owner.component').then((m) => m.SignupOwnerComponent),
+  },
+  {
     path: 'verify',
     loadComponent: () => import('./auth/verify/verify.component').then((m) => m.VerifyComponent),
   },
