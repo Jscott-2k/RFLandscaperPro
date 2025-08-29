@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
@@ -16,6 +17,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
     @InjectRepository(VerificationToken)
@@ -52,7 +54,7 @@ export class AuthService {
     };
 
     const refreshToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '7d',
+      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'),
     });
     await this.saveRefreshToken(user.id, refreshToken);
 
@@ -135,7 +137,12 @@ export class AuthService {
           sub: payload.sub,
           role: payload.role,
         },
-        { expiresIn: '7d' },
+        {
+          expiresIn: this.configService.get<string>(
+            'JWT_REFRESH_EXPIRES_IN',
+            '7d',
+          ),
+        },
       );
       await this.saveRefreshToken(payload.sub, newRefresh);
       return {
@@ -181,7 +188,8 @@ export class AuthService {
 
   private async saveRefreshToken(userId: number, token: string): Promise<void> {
     const hashed = this.hashToken(token);
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const decoded = this.jwtService.decode(token) as { exp?: number } | null;
+    const expiresAt = decoded?.exp ? new Date(decoded.exp * 1000) : new Date();
     const entity = this.refreshTokenRepository.create({
       token: hashed,
       userId,

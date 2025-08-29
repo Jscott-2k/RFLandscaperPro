@@ -48,6 +48,8 @@ DB_USERNAME=postgres
 DB_PASSWORD=your_password
 DB_NAME=rflandscaperpro
 JWT_SECRET=your_secure_jwt_secret
+JWT_EXPIRES_IN=1d
+JWT_REFRESH_EXPIRES_IN=7d
 LOG_LEVEL=debug
 # Remote log forwarding (optional)
 # REMOTE_LOG_HOST=logs.example.com
