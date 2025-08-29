@@ -186,9 +186,7 @@ export class InvitationsService {
     return invitation;
   }
 
-  async previewInvitation(
-    token: string,
-  ): Promise<{
+  async previewInvitation(token: string): Promise<{
     companyName: string;
     email: string;
     role: InvitationRole;

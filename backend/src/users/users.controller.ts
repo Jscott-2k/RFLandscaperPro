@@ -84,7 +84,9 @@ export class UsersController {
     description: 'List of workers',
     type: [UserResponseDto],
   })
-  async findWorkers(@CompanyId() companyId: number): Promise<UserResponseDto[]> {
+  async findWorkers(
+    @CompanyId() companyId: number,
+  ): Promise<UserResponseDto[]> {
     const users = await this.usersService.findAll(companyId);
     return users
       .filter((u) => u.role === UserRole.Worker)

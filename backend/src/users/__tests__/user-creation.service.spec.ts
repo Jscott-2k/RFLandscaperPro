@@ -13,7 +13,7 @@ const UNIQUE_VIOLATION = '23505';
 
 describe('UserCreationService', () => {
   let service: UserCreationService;
-    let usersRepository: Repository<User> & { manager: EntityManager };
+  let usersRepository: Repository<User> & { manager: EntityManager };
   let customerRegistrationService: jest.Mocked<
     Pick<CustomerRegistrationService, 'register'>
   >;
@@ -42,14 +42,14 @@ describe('UserCreationService', () => {
       }),
     } as unknown as Repository<User> & { manager: any };
 
-      manager = {
-        getRepository: jest.fn(() => usersRepository),
-        transaction: jest.fn(
-          async (cb: (em: EntityManager) => Promise<unknown>) => cb(manager),
-        ),
-      } as unknown as EntityManager;
+    manager = {
+      getRepository: jest.fn(() => usersRepository),
+      transaction: jest.fn(
+        async (cb: (em: EntityManager) => Promise<unknown>) => cb(manager),
+      ),
+    } as unknown as EntityManager;
 
-      usersRepository.manager = manager as unknown as EntityManager;
+    usersRepository.manager = manager as unknown as EntityManager;
 
     customerRegistrationService = {
       register: jest.fn(),

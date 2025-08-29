@@ -45,18 +45,19 @@ describe('InvitationsService revoke and resend', () => {
       tokenHash,
       expiresAt: new Date(Date.now() + 1000),
     });
-      invitationsRepo.findOne.mockImplementation(
-        (options: FindOneOptions<Invitation>) => {
-          const where = (options.where ?? (options as unknown)) as Partial<Invitation>;
-          if (where.id === 1 && where.companyId === 2) {
-            return Promise.resolve(invitation);
-          }
-          if (where.tokenHash === invitation.tokenHash) {
-            return Promise.resolve(invitation);
-          }
-          return Promise.resolve(null);
-        },
-      );
+    invitationsRepo.findOne.mockImplementation(
+      (options: FindOneOptions<Invitation>) => {
+        const where = (options.where ??
+          (options as unknown)) as Partial<Invitation>;
+        if (where.id === 1 && where.companyId === 2) {
+          return Promise.resolve(invitation);
+        }
+        if (where.tokenHash === invitation.tokenHash) {
+          return Promise.resolve(invitation);
+        }
+        return Promise.resolve(null);
+      },
+    );
 
     await service.revokeInvitation(2, 1);
 
@@ -77,18 +78,19 @@ describe('InvitationsService revoke and resend', () => {
       expiresAt: new Date(Date.now() - 1000),
       company: Object.assign(new Company(), { name: 'Co' }),
     });
-      invitationsRepo.findOne.mockImplementation(
-        (options: FindOneOptions<Invitation>) => {
-          const where = (options.where ?? (options as unknown)) as Partial<Invitation>;
-          if (where.id === 3 && where.companyId === 4) {
-            return Promise.resolve(invitation);
-          }
-          if (where.tokenHash === invitation.tokenHash) {
-            return Promise.resolve(invitation);
-          }
-          return Promise.resolve(null);
-        },
-      );
+    invitationsRepo.findOne.mockImplementation(
+      (options: FindOneOptions<Invitation>) => {
+        const where = (options.where ??
+          (options as unknown)) as Partial<Invitation>;
+        if (where.id === 3 && where.companyId === 4) {
+          return Promise.resolve(invitation);
+        }
+        if (where.tokenHash === invitation.tokenHash) {
+          return Promise.resolve(invitation);
+        }
+        return Promise.resolve(null);
+      },
+    );
 
     await service.resendInvitation(4, 3);
     const [[options]] = emailService.send.mock.calls;

@@ -88,16 +88,10 @@ export class User {
   @Column({ nullable: true })
   companyId?: number;
 
-  @OneToMany(
-    () => CompanyUser,
-    (membership) => membership.user,
-  )
+  @OneToMany(() => CompanyUser, (membership) => membership.user)
   companyMemberships: CompanyUser[];
 
-  @OneToMany(
-    () => CompanyUser,
-    (membership) => membership.invitedByUser,
-  )
+  @OneToMany(() => CompanyUser, (membership) => membership.invitedByUser)
   invitedMemberships: CompanyUser[];
 
   @OneToMany(() => Invitation, (invitation) => invitation.invitedByUser)

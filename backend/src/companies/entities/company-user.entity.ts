@@ -72,4 +72,3 @@ export class CompanyUser {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

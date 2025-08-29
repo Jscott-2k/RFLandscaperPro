@@ -26,9 +26,7 @@ export class InvitationsController {
   ) {}
 
   @Get(':token')
-  async preview(
-    @Param('token') token: string,
-  ): Promise<{
+  async preview(@Param('token') token: string): Promise<{
     companyName: string;
     email: string;
     role: InvitationRole;

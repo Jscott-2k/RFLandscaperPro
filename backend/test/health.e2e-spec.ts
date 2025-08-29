@@ -35,9 +35,7 @@ describe('HealthCheck (e2e)', () => {
       .get('/api/health')
       .expect(200)
       .expect((res) => {
-        expect(res.body).toEqual(
-          expect.objectContaining({ status: 'ok' }),
-        );
+        expect(res.body).toEqual(expect.objectContaining({ status: 'ok' }));
       });
   });
 
@@ -58,9 +56,7 @@ describe('HealthCheck (e2e)', () => {
     failingApp.setGlobalPrefix('api');
     await failingApp.init();
 
-    await request(failingApp.getHttpServer())
-      .get('/api/health')
-      .expect(503);
+    await request(failingApp.getHttpServer()).get('/api/health').expect(503);
 
     await failingApp.close();
   });

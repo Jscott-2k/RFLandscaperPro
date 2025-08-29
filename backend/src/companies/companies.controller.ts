@@ -34,7 +34,9 @@ export class CompaniesController {
   ) {}
 
   @Get('profile')
-  async getProfile(@AuthUser() user: User | undefined): Promise<CompanyResponseDto> {
+  async getProfile(
+    @AuthUser() user: User | undefined,
+  ): Promise<CompanyResponseDto> {
     const company = await this.companiesService.findByUserId(user!.id);
     if (!company) {
       throw new NotFoundException('Company not found');
@@ -42,9 +44,11 @@ export class CompaniesController {
     return company;
   }
 
-@Roles(UserRole.CompanyOwner)
+  @Roles(UserRole.CompanyOwner)
   @Get('workers')
-  async getWorkers(@AuthUser() user: User | undefined): Promise<UserResponseDto[]> {
+  async getWorkers(
+    @AuthUser() user: User | undefined,
+  ): Promise<UserResponseDto[]> {
     const owner = await this.usersService.findById(user!.id);
     if (!owner?.companyId)
       throw new NotFoundException('Owner company not found');
@@ -68,7 +72,8 @@ export class CompaniesController {
     @Body() dto: UpdateCompanyDto,
     @AuthUser() user: User | undefined,
   ): Promise<CompanyResponseDto> {
-    if (user!.companyId !== id) throw new NotFoundException('Company not found');
+    if (user!.companyId !== id)
+      throw new NotFoundException('Company not found');
     return this.companiesService.update(id, dto);
   }
 

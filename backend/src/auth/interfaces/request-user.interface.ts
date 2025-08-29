@@ -5,4 +5,3 @@ export interface RequestUser {
   companyId?: number | null;
   role: UserRole;
 }
-

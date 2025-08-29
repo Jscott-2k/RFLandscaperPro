@@ -77,7 +77,9 @@ export class CustomersController {
     description: 'Customer profile',
     type: CustomerResponseDto,
   })
-  async getProfile(@AuthUser() user: User | undefined): Promise<CustomerResponseDto> {
+  async getProfile(
+    @AuthUser() user: User | undefined,
+  ): Promise<CustomerResponseDto> {
     return this.customersService.findByUserId(user!.id, user!.companyId!);
   }
 

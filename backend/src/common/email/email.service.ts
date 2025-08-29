@@ -6,11 +6,7 @@ import {
 } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import {
-  EtherealTransport,
-  SmtpTransport,
-  MailDriver,
-} from './transports';
+import { EtherealTransport, SmtpTransport, MailDriver } from './transports';
 
 function toError(e: unknown): Error {
   return e instanceof Error
@@ -26,7 +22,9 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
   private driver!: MailDriver;
 
   private readyResolve!: () => void;
-  private readonly ready = new Promise<void>((res) => (this.readyResolve = res));
+  private readonly ready = new Promise<void>(
+    (res) => (this.readyResolve = res),
+  );
 
   async onModuleInit(): Promise<void> {
     this.driver =
@@ -69,7 +67,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleDestroy(): void {
-  this.transporter.close?.();
+    this.transporter.close?.();
   }
 
   private formatRecipients(to: nodemailer.SendMailOptions['to']): string {

@@ -108,17 +108,17 @@ describe('AuthService.signupOwner', () => {
       {} as EmailService,
       { findOne: jest.fn() } as unknown as CompanyMembershipRepository,
     );
-      loginSpy = jest.spyOn(service, 'login').mockResolvedValue({
-        access_token: '',
-        refresh_token: '',
-        user: {
-          id: 0,
-          username: '',
-          email: '',
-          role: UserRole.CompanyOwner,
-          roles: [UserRole.CompanyOwner],
-        },
-      });
+    loginSpy = jest.spyOn(service, 'login').mockResolvedValue({
+      access_token: '',
+      refresh_token: '',
+      user: {
+        id: 0,
+        username: '',
+        email: '',
+        role: UserRole.CompanyOwner,
+        roles: [UserRole.CompanyOwner],
+      },
+    });
   });
 
   it('delegates to UserCreationService.createUser', async () => {

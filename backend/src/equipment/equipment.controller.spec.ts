@@ -34,10 +34,10 @@ describe('EquipmentController', () => {
     it('should pass companyId to equipmentService.updateStatus', async () => {
       const companyId = 2;
       const dto = { status: EquipmentStatus.AVAILABLE };
-        const response = {} as EquipmentResponseDto;
-        const updateStatusMock = jest
-          .spyOn(service, 'updateStatus')
-          .mockResolvedValue(response);
+      const response = {} as EquipmentResponseDto;
+      const updateStatusMock = jest
+        .spyOn(service, 'updateStatus')
+        .mockResolvedValue(response);
 
       const result = await controller.updateStatus(1, dto, companyId);
       expect(updateStatusMock).toHaveBeenCalledWith(1, dto.status, companyId);
@@ -52,19 +52,19 @@ describe('EquipmentController', () => {
       const status = EquipmentStatus.AVAILABLE;
       const type = EquipmentType.MOWER;
       const search = 'mower';
-        const expectedResult = { items: [], total: 0 };
-        const findAllMock = jest
-          .spyOn(service, 'findAll')
-          .mockResolvedValue(expectedResult);
+      const expectedResult = { items: [], total: 0 };
+      const findAllMock = jest
+        .spyOn(service, 'findAll')
+        .mockResolvedValue(expectedResult);
 
-        const result = await controller.findAll(
-          pagination,
-          companyId,
-          status,
-          type,
-          search,
-        );
-        expect(result).toEqual(expectedResult);
+      const result = await controller.findAll(
+        pagination,
+        companyId,
+        status,
+        type,
+        search,
+      );
+      expect(result).toEqual(expectedResult);
       expect(findAllMock).toHaveBeenCalledWith(
         pagination,
         companyId,
