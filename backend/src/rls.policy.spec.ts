@@ -8,7 +8,20 @@ import dataSource from '../data-source';
 import { Company } from './companies/entities/company.entity';
 import { Customer } from './customers/entities/customer.entity';
 import { runWithCompanyId } from './common/tenant/tenant-context';
-import { EnableTenantRls1756435084873 } from './migrations/1756435084873-enable-tenant-rls';
+
+async function enableCustomerRls() {
+  const qr = dataSource.createQueryRunner();
+  await qr.query('ALTER TABLE "customer" ENABLE ROW LEVEL SECURITY');
+  await qr.query(
+    'DROP POLICY IF EXISTS customer_tenant_isolation ON "customer"',
+  );
+  await qr.query(`
+    CREATE POLICY customer_tenant_isolation ON "customer"
+      USING ("companyId" = current_setting('app.current_company_id', true)::int)
+      WITH CHECK ("companyId" = current_setting('app.current_company_id', true)::int)
+  `);
+  await qr.release();
+}
 
 describe.skip('RLS enforcement', () => {
   let company1: Company;
@@ -23,8 +36,7 @@ describe.skip('RLS enforcement', () => {
       migrationsRun: false,
     });
     await dataSource.initialize();
-    const migration = new EnableTenantRls1756435084873();
-    await migration.up(dataSource.createQueryRunner());
+    await enableCustomerRls();
     const companyRepo = dataSource.getRepository(Company);
     const customerRepo = dataSource.getRepository(Customer);
     company1 = await companyRepo.save({ name: 'Company One' });
