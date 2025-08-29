@@ -11,6 +11,7 @@ import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { paginate } from '../common/pagination';
 
 @Injectable()
 export class CustomersService {
@@ -55,30 +56,30 @@ export class CustomersService {
     active?: boolean,
     search?: string,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
-    const { page = 1, limit = 10 } = pagination;
-    const cappedLimit = Math.min(limit, 100);
-    const queryBuilder = this.customerRepository
-      .createQueryBuilder('customer')
-      .leftJoinAndSelect('customer.jobs', 'jobs')
-      .leftJoinAndSelect('customer.addresses', 'addresses')
-      .where('customer.companyId = :companyId', { companyId });
+    const { items: customers, total } = await paginate(
+      this.customerRepository,
+      pagination,
+      'customer',
+      (qb) => {
+        qb
+          .leftJoinAndSelect('customer.jobs', 'jobs')
+          .leftJoinAndSelect('customer.addresses', 'addresses')
+          .where('customer.companyId = :companyId', { companyId });
 
-    if (active !== undefined) {
-      queryBuilder.andWhere('customer.active = :active', { active });
-    }
+        if (active !== undefined) {
+          qb.andWhere('customer.active = :active', { active });
+        }
 
-    if (search) {
-      queryBuilder.andWhere(
-        '(customer.name ILIKE :search OR customer.email ILIKE :search OR customer.phone ILIKE :search)',
-        { search: `%${search}%` },
-      );
-    }
+        if (search) {
+          qb.andWhere(
+            '(customer.name ILIKE :search OR customer.email ILIKE :search OR customer.phone ILIKE :search)',
+            { search: `%${search}%` },
+          );
+        }
 
-    const [customers, total] = await queryBuilder
-      .skip((page - 1) * cappedLimit)
-      .take(cappedLimit)
-      .orderBy('customer.name', 'ASC')
-      .getManyAndCount();
+        return qb.orderBy('customer.name', 'ASC');
+      },
+    );
 
     return {
       items: customers.map((customer) => this.toCustomerResponseDto(customer)),

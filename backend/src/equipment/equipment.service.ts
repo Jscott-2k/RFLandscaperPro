@@ -10,6 +10,7 @@ import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentResponseDto } from './dto/equipment-response.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { paginate } from '../common/pagination';
 
 @Injectable()
 export class EquipmentService {
@@ -37,31 +38,31 @@ export class EquipmentService {
     type?: string,
     search?: string,
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
-    const { page = 1, limit = 10 } = pagination;
-    const cappedLimit = Math.min(limit, 100);
-    const queryBuilder = this.equipmentRepository
-      .createQueryBuilder('equipment')
-      .where('equipment.companyId = :companyId', { companyId });
+    const { items: equipments, total } = await paginate(
+      this.equipmentRepository,
+      pagination,
+      'equipment',
+      (qb) => {
+        qb.where('equipment.companyId = :companyId', { companyId });
 
-    if (status) {
-      queryBuilder.andWhere('equipment.status = :status', { status });
-    }
+        if (status) {
+          qb.andWhere('equipment.status = :status', { status });
+        }
 
-    if (type) {
-      queryBuilder.andWhere('equipment.type = :type', { type });
-    }
+        if (type) {
+          qb.andWhere('equipment.type = :type', { type });
+        }
 
-    if (search) {
-      queryBuilder.andWhere(
-        '(equipment.name ILIKE :search OR equipment.type ILIKE :search OR equipment.description ILIKE :search)',
-        { search: `%${search}%` },
-      );
-    }
+        if (search) {
+          qb.andWhere(
+            '(equipment.name ILIKE :search OR equipment.type ILIKE :search OR equipment.description ILIKE :search)',
+            { search: `%${search}%` },
+          );
+        }
 
-    const [equipments, total] = await queryBuilder
-      .skip((page - 1) * cappedLimit)
-      .take(cappedLimit)
-      .getManyAndCount();
+        return qb;
+      },
+    );
 
     return {
       items: equipments.map((eq) => this.toEquipmentResponseDto(eq)),

@@ -17,6 +17,7 @@ import { AssignJobDto } from './dto/assign-job.dto';
 import { BulkAssignJobDto } from './dto/bulk-assign-job.dto';
 import { ScheduleJobDto } from './dto/schedule-job.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { paginate } from '../common/pagination';
 
 @Injectable()
 export class JobsService {
@@ -63,46 +64,47 @@ export class JobsService {
     workerId?: number,
     equipmentId?: number,
   ): Promise<{ items: JobResponseDto[]; total: number }> {
-    const { page = 1, limit = 10 } = pagination;
-    const cappedLimit = Math.min(limit, 100);
-    const queryBuilder = this.jobRepository
-      .createQueryBuilder('job')
-      .leftJoinAndSelect('job.customer', 'customer')
-      .leftJoinAndSelect('job.assignments', 'assignments')
-      .leftJoinAndSelect('assignments.user', 'user')
-      .leftJoinAndSelect('assignments.equipment', 'equipment')
-      .where('job.companyId = :companyId', { companyId });
+    const { items: jobs, total } = await paginate(
+      this.jobRepository,
+      pagination,
+      'job',
+      (qb) => {
+        qb
+          .leftJoinAndSelect('job.customer', 'customer')
+          .leftJoinAndSelect('job.assignments', 'assignments')
+          .leftJoinAndSelect('assignments.user', 'user')
+          .leftJoinAndSelect('assignments.equipment', 'equipment')
+          .where('job.companyId = :companyId', { companyId });
 
-    if (completed !== undefined) {
-      queryBuilder.andWhere('job.completed = :completed', { completed });
-    }
+        if (completed !== undefined) {
+          qb.andWhere('job.completed = :completed', { completed });
+        }
 
-    if (customerId) {
-      queryBuilder.andWhere('job.customer.id = :customerId', { customerId });
-    }
+        if (customerId) {
+          qb.andWhere('job.customer.id = :customerId', { customerId });
+        }
 
-    if (startDate) {
-      queryBuilder.andWhere('job.scheduledDate >= :startDate', { startDate });
-    }
+        if (startDate) {
+          qb.andWhere('job.scheduledDate >= :startDate', { startDate });
+        }
 
-    if (endDate) {
-      queryBuilder.andWhere('job.scheduledDate <= :endDate', { endDate });
-    }
+        if (endDate) {
+          qb.andWhere('job.scheduledDate <= :endDate', { endDate });
+        }
 
-    if (workerId) {
-      queryBuilder.andWhere('user.id = :workerId', { workerId });
-    }
+        if (workerId) {
+          qb.andWhere('user.id = :workerId', { workerId });
+        }
 
-    if (equipmentId) {
-      queryBuilder.andWhere('equipment.id = :equipmentId', { equipmentId });
-    }
+        if (equipmentId) {
+          qb.andWhere('equipment.id = :equipmentId', { equipmentId });
+        }
 
-    const [jobs, total] = await queryBuilder
-      .skip((page - 1) * cappedLimit)
-      .take(cappedLimit)
-      .orderBy('job.scheduledDate', 'ASC')
-      .addOrderBy('job.createdAt', 'DESC')
-      .getManyAndCount();
+        return qb
+          .orderBy('job.scheduledDate', 'ASC')
+          .addOrderBy('job.createdAt', 'DESC');
+      },
+    );
 
     return {
       items: jobs.map((job) => this.toJobResponseDto(job)),
