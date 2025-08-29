@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { CompanyService } from './company.service';
 import { ApiService } from '../api.service';
-import { Company } from './company.model';
+import { Company } from '../api.service';
 
 describe('CompanyService', () => {
   let service: CompanyService;
