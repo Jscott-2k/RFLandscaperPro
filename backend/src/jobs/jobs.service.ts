@@ -207,7 +207,7 @@ export class JobsService {
       .createQueryBuilder('assignment')
       .leftJoin('assignment.job', 'job')
       .where('job.scheduledDate = :date', { date })
-      .andWhere('job.companyId = :companyId', { companyId })
+      .andWhere('assignment.companyId = :companyId', { companyId })
       .andWhere(
         '(assignment.userId = :userId OR assignment.equipmentId = :equipmentId)',
         { userId, equipmentId },
@@ -301,6 +301,7 @@ export class JobsService {
       job,
       user,
       equipment,
+      companyId,
     });
     await this.assignmentRepository.save(assignment);
 
@@ -366,6 +367,7 @@ export class JobsService {
           job,
           user: { id: assignmentData.userId } as User,
           equipment: { id: assignmentData.equipmentId } as Equipment,
+          companyId,
         }),
       );
       await manager.save(assignments);
@@ -381,7 +383,7 @@ export class JobsService {
     companyId: number,
   ): Promise<JobResponseDto> {
     const assignment = await this.assignmentRepository.findOne({
-      where: { id: assignmentId, job: { id: jobId, companyId } },
+      where: { id: assignmentId, companyId, job: { id: jobId } },
       relations: ['job'],
     });
 

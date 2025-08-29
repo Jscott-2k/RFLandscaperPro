@@ -27,6 +27,10 @@ export class CustomersService {
       const customer = this.customerRepository.create({
         ...createCustomerDto,
         companyId,
+        addresses: createCustomerDto.addresses?.map((addr) => ({
+          ...addr,
+          companyId,
+        })),
       });
       const savedCustomer = await this.customerRepository.save(customer);
       return this.toCustomerResponseDto(savedCustomer);

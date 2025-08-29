@@ -5,14 +5,17 @@ import {
   Column,
   CreateDateColumn,
   Index,
+  JoinColumn,
 } from 'typeorm';
 import { Job } from './job.entity';
 import { User } from '../../users/user.entity';
 import { Equipment } from '../../equipment/entities/equipment.entity';
+import { Company } from '../../companies/entities/company.entity';
 
 @Entity()
 @Index(['user', 'job']) // Add index for user-job queries
 @Index(['equipment', 'job']) // Add index for equipment-job queries
+@Index(['companyId']) // Add index for company-based queries
 export class Assignment {
   @PrimaryGeneratedColumn()
   id: number;
@@ -25,6 +28,13 @@ export class Assignment {
 
   @ManyToOne(() => Equipment, { onDelete: 'CASCADE' })
   equipment: Equipment;
+
+  @Column()
+  companyId: number;
+
+  @ManyToOne(() => Company, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'companyId' })
+  company: Company;
 
   @Column({ type: 'timestamp', nullable: true })
   startTime?: Date;

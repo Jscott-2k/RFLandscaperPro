@@ -100,6 +100,7 @@ async function main() {
               city: 'Townsville',
               state: 'CA',
               zip: '12345',
+              companyId: company.id,
             },
           ],
         },
