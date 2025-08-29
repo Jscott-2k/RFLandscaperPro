@@ -5,6 +5,7 @@ import { ErrorService } from './error.service';
 import { environment } from '../environments/environment';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './auth.interceptor';
+import { HttpClient } from '@angular/common/http';
 
 describe('ApiService auth interceptor', () => {
   let service: ApiService;
@@ -37,5 +38,16 @@ describe('ApiService auth interceptor', () => {
     expect(req.request.headers.get('Authorization')).toBe('Bearer abc');
     expect(req.request.headers.get('X-Company-ID')).toBe('1');
     req.flush({ status: 'ok' });
+  });
+
+  it('should not attach auth token or company header on login', () => {
+    localStorage.setItem('token', 'abc');
+    localStorage.setItem('companyId', '1');
+    const http = TestBed.inject(HttpClient);
+    http.post(`${environment.apiUrl}/auth/login`, { email: 'a', password: 'b' }).subscribe();
+    const req = httpMock.expectOne(`${environment.apiUrl}/auth/login`);
+    expect(req.request.headers.has('Authorization')).toBeFalse();
+    expect(req.request.headers.has('X-Company-ID')).toBeFalse();
+    req.flush({ access_token: 'xyz' });
   });
 });
