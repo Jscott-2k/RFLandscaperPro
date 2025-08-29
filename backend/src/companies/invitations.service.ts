@@ -3,10 +3,11 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, IsNull } from 'typeorm';
-import { Invitation } from './entities/invitation.entity';
+import { Invitation, InvitationRole } from './entities/invitation.entity';
 import { CompanyUser, CompanyUserStatus } from './entities/company-user.entity';
 import { User } from '../users/user.entity';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
@@ -98,5 +99,35 @@ export class InvitationsService {
     await this.emailService.sendCompanyInvitationEmail(dto.email, rawToken);
 
     return saved;
+  }
+
+  async previewInvitation(
+    token: string,
+  ): Promise<{
+    companyName: string;
+    email: string;
+    role: InvitationRole;
+    status: 'valid' | 'expired' | 'revoked' | 'accepted';
+  }> {
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const invitation = await this.invitationsRepository.findOne({
+      where: { tokenHash },
+      relations: ['company'],
+    });
+    if (!invitation) {
+      throw new NotFoundException('Invitation not found');
+    }
+    let status: 'valid' | 'expired' | 'revoked' | 'accepted';
+    if (invitation.acceptedAt) status = 'accepted';
+    else if (invitation.revokedAt) status = 'revoked';
+    else if (invitation.expiresAt.getTime() < Date.now()) status = 'expired';
+    else status = 'valid';
+
+    return {
+      companyName: invitation.company.name,
+      email: invitation.email,
+      role: invitation.role,
+      status,
+    };
   }
 }
