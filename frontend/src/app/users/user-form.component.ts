@@ -63,7 +63,7 @@ import { UserService } from './user.service';
       </div>
       <button type="submit" [disabled]="form.invalid">Save</button>
     </form>
-  `
+  `,
 })
 export class UserFormComponent {
   private fb = inject(FormBuilder);
@@ -88,27 +88,17 @@ export class UserFormComponent {
 
   onSubmit(): void {
     if (this.form.valid) {
-      const {
-        username,
-        email,
-        password,
-        firstName,
-        lastName,
-        phone,
-        role,
-        company,
-      } = this.form.getRawValue();
+      const { username, email, password, firstName, lastName, phone, role, company } =
+        this.form.getRawValue();
       const payload: any = { username, email, password };
       if (firstName) payload.firstName = firstName;
       if (lastName) payload.lastName = lastName;
       if (phone) payload.phone = phone;
       if (role) payload.role = role;
       if (this.isOwner) payload.company = company;
-      this.userService
-        .createUser(payload)
-        .subscribe(() => {
-          this.router.navigate(['/users']);
-        });
+      this.userService.createUser(payload).subscribe(() => {
+        this.router.navigate(['/users']);
+      });
     }
   }
 
@@ -116,4 +106,3 @@ export class UserFormComponent {
     return this.form.controls.role.value === 'owner';
   }
 }
-

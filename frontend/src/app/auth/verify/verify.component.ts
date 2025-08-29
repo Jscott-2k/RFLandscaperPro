@@ -7,9 +7,7 @@ import { AuthService } from '../auth.service';
   selector: 'app-verify',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <p>{{ message }}</p>
-  `,
+  template: ` <p>{{ message }}</p> `,
 })
 export class VerifyComponent {
   private route = inject(ActivatedRoute);

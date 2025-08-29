@@ -26,4 +26,3 @@ export class CompanyService {
     return this.http.patch<Company>(`${this.baseUrl}/${id}`, company);
   }
 }
-

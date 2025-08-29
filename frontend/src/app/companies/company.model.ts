@@ -6,4 +6,3 @@ export interface Company {
   email?: string | null;
   ownerId?: number | null;
 }
-

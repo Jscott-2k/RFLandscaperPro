@@ -15,8 +15,10 @@ import { AuthService } from '../auth.service';
       <input type="password" formControlName="password" placeholder="Password" />
       <button type="submit">Login</button>
     </form>
-    <p><small><a routerLink="/register">Create account</a></small></p>
-  `
+    <p>
+      <small><a routerLink="/register">Create account</a></small>
+    </p>
+  `,
 })
 export class LoginComponent {
   private auth = inject(AuthService);
@@ -26,7 +28,7 @@ export class LoginComponent {
   form = this.fb.nonNullable.group({
     company: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required]
+    password: ['', Validators.required],
   });
 
   submit(): void {

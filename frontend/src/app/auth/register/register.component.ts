@@ -29,7 +29,7 @@ import { AuthService } from '../auth.service';
       </div>
       <button type="submit">Register</button>
     </form>
-  `
+  `,
 })
 export class RegisterComponent {
   private auth = inject(AuthService);

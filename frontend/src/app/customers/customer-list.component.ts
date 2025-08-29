@@ -20,14 +20,16 @@ import { Customer } from './customer.model';
       </thead>
       <tbody>
         <tr *ngFor="let c of customers">
-          <td><a [routerLink]="['/customers', c.id]">{{ c.name }}</a></td>
+          <td>
+            <a [routerLink]="['/customers', c.id]">{{ c.name }}</a>
+          </td>
           <td>{{ c.email }}</td>
           <td>{{ c.phone }}</td>
         </tr>
       </tbody>
     </table>
     <a [routerLink]="['/customers', 'new']">Add Customer</a>
-  `
+  `,
 })
 export class CustomerListComponent {
   private customerService = inject(CustomerService);

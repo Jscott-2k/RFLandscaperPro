@@ -1,9 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpParams,
-} from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { environment } from '../environments/environment';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -120,9 +116,9 @@ export class ApiService {
   }
 
   // Customers
-  getCustomers(query: PaginationQuery & { active?: boolean; search?: string } = {}): Observable<
-    Paginated<Customer>
-  > {
+  getCustomers(
+    query: PaginationQuery & { active?: boolean; search?: string } = {},
+  ): Observable<Paginated<Customer>> {
     return this.request<Paginated<Customer>>('GET', `${environment.apiUrl}/customers`, {
       params: query,
     });
@@ -248,7 +244,9 @@ export class ApiService {
   }
 
   updateCompany(id: number, payload: UpdateCompany): Observable<Company> {
-    return this.request<Company>('PATCH', `${environment.apiUrl}/companies/${id}`, { body: payload });
+    return this.request<Company>('PATCH', `${environment.apiUrl}/companies/${id}`, {
+      body: payload,
+    });
   }
 
   getUpcomingJobs(): Observable<{ items: unknown[]; total: number }> {
@@ -258,9 +256,12 @@ export class ApiService {
   }
 
   getEquipmentCount(status: string): Observable<{ items: unknown[]; total: number }> {
-    return this.request<{ items: unknown[]; total: number }>('GET', `${environment.apiUrl}/equipment`, {
-      params: { status, limit: 1 },
-    });
+    return this.request<{ items: unknown[]; total: number }>(
+      'GET',
+      `${environment.apiUrl}/equipment`,
+      {
+        params: { status, limit: 1 },
+      },
+    );
   }
-
 }

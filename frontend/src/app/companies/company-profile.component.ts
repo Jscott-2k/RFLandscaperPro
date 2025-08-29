@@ -12,29 +12,33 @@ import { Company } from './company.model';
     <div *ngIf="company">
       <h2>Company Profile</h2>
       <form (ngSubmit)="save()">
-        <label>Name:
+        <label
+          >Name:
           <input name="name" [(ngModel)]="company.name" />
         </label>
-        <label>Address:
+        <label
+          >Address:
           <input name="address" [(ngModel)]="company.address" />
         </label>
-        <label>Phone:
+        <label
+          >Phone:
           <input name="phone" [(ngModel)]="company.phone" />
         </label>
-        <label>Email:
+        <label
+          >Email:
           <input name="email" [(ngModel)]="company.email" />
         </label>
         <button type="submit">Save</button>
       </form>
     </div>
-  `
+  `,
 })
 export class CompanyProfileComponent implements OnInit {
   private readonly companyService = inject(CompanyService);
   company?: Company;
 
   ngOnInit(): void {
-    this.companyService.getProfile().subscribe(c => (this.company = c));
+    this.companyService.getProfile().subscribe((c) => (this.company = c));
   }
 
   save(): void {
@@ -44,4 +48,3 @@ export class CompanyProfileComponent implements OnInit {
     this.companyService.updateCompany(this.company.id, this.company).subscribe();
   }
 }
-

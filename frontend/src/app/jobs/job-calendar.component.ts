@@ -7,7 +7,7 @@ import { JobsService, Job } from './jobs.service';
   selector: 'app-job-calendar',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './job-calendar.component.html'
+  templateUrl: './job-calendar.component.html',
 })
 export class JobCalendarComponent {
   private jobsService = inject(JobsService);
@@ -16,8 +16,8 @@ export class JobCalendarComponent {
 
   loadJobs(): void {
     if (this.selectedDate) {
-      this.jobsService.list().subscribe(jobs => {
-        this.jobs = jobs.filter(j => j.scheduledDate?.startsWith(this.selectedDate!));
+      this.jobsService.list().subscribe((jobs) => {
+        this.jobs = jobs.filter((j) => j.scheduledDate?.startsWith(this.selectedDate!));
       });
     }
   }

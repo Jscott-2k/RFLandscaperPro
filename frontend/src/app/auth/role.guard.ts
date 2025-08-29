@@ -8,5 +8,5 @@ export const roleGuard: CanActivateFn = (route) => {
   if (!roles || roles.length === 0) {
     return true;
   }
-  return roles.some(r => auth.hasRole(r));
+  return roles.some((r) => auth.hasRole(r));
 };

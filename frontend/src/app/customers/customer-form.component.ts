@@ -26,7 +26,7 @@ import { Customer } from './customer.model';
       </label>
       <button type="submit" [disabled]="form.invalid">Save</button>
     </form>
-  `
+  `,
 })
 export class CustomerFormComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -39,7 +39,7 @@ export class CustomerFormComponent implements OnInit {
   form = this.fb.nonNullable.group({
     name: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    phone: ['']
+    phone: [''],
   });
 
   ngOnInit(): void {
@@ -48,7 +48,7 @@ export class CustomerFormComponent implements OnInit {
       this.customerId = Number(idParam);
       this.customerService
         .getCustomer(this.customerId)
-        .subscribe(customer => this.form.patchValue(customer));
+        .subscribe((customer) => this.form.patchValue(customer));
     }
   }
 

@@ -9,7 +9,7 @@ import { CompanySwitcherComponent } from '../company-switcher/company-switcher.c
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, NgIf, CompanySwitcherComponent],
   templateUrl: './layout.component.html',
-  styleUrl: './layout.component.scss'
+  styleUrl: './layout.component.scss',
 })
 export class LayoutComponent {
   protected readonly auth = inject(AuthService);
@@ -18,4 +18,3 @@ export class LayoutComponent {
     this.auth.logout().subscribe();
   }
 }
-

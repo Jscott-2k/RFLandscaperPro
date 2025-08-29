@@ -17,7 +17,7 @@ import { AuthService } from '../auth/auth.service';
       </li>
     </ul>
     <button *ngIf="auth.hasRole('admin')" (click)="addUser()">Add User</button>
-  `
+  `,
 })
 export class UserListComponent implements OnInit {
   private readonly userService = inject(UserService);
@@ -26,12 +26,12 @@ export class UserListComponent implements OnInit {
   users: User[] = [];
 
   ngOnInit(): void {
-    this.userService.getUsers().subscribe(users => (this.users = users));
+    this.userService.getUsers().subscribe((users) => (this.users = users));
   }
 
   delete(id: number): void {
     this.userService.deleteUser(id).subscribe(() => {
-      this.users = this.users.filter(u => u.id !== id);
+      this.users = this.users.filter((u) => u.id !== id);
     });
   }
 

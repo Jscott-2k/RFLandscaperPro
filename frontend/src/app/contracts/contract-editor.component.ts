@@ -8,7 +8,7 @@ import { ContractsService, Contract } from './contracts.service';
   selector: 'app-contract-editor',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './contract-editor.component.html'
+  templateUrl: './contract-editor.component.html',
 })
 export class ContractEditorComponent implements OnInit {
   private contractsService = inject(ContractsService);
@@ -19,7 +19,7 @@ export class ContractEditorComponent implements OnInit {
     customerId: 1,
     startDate: '',
     frequency: 'WEEKLY',
-    jobTemplate: { title: '' }
+    jobTemplate: { title: '' },
   };
 
   ngOnInit(): void {
@@ -27,7 +27,7 @@ export class ContractEditorComponent implements OnInit {
     if (id) {
       const contractId = Number(id);
       if (!isNaN(contractId)) {
-        this.contractsService.get(contractId).subscribe(contract => (this.contract = contract));
+        this.contractsService.get(contractId).subscribe((contract) => (this.contract = contract));
       }
     }
   }
@@ -44,4 +44,3 @@ export class ContractEditorComponent implements OnInit {
     }
   }
 }
-
