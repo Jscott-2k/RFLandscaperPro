@@ -11,6 +11,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { SignupOwnerDto } from './dto/signup-owner.dto';
 import { SwitchCompanyDto } from './dto/switch-company.dto';
+import { JwtUserPayload } from './interfaces/jwt-user-payload.interface';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -51,7 +52,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'New JWT for selected company' })
   async switchCompany(
     @Body() dto: SwitchCompanyDto,
-    @Req() req: { user: { userId: number; username: string; email: string } },
+    @Req() req: { user: JwtUserPayload },
   ) {
     return this.authService.switchCompany(req.user, dto.companyId);
   }

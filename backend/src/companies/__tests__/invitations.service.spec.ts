@@ -10,7 +10,9 @@ import {
 import { Company } from '../entities/company.entity';
 import { User } from '../../users/user.entity';
 import { Email } from '../../users/value-objects/email.vo';
-import { EmailService } from '../../common/email.service';
+import { EmailService } from '../../common/email';
+import { SendMailOptions } from 'nodemailer';
+
 
 describe('InvitationsService', () => {
   let service: InvitationsService;
@@ -20,12 +22,7 @@ describe('InvitationsService', () => {
   let companyUsersRepo: jest.Mocked<Pick<Repository<CompanyUser>, 'findOne'>>;
   let usersRepo: jest.Mocked<Pick<Repository<User>, 'findOne'>>;
   let companiesRepo: jest.Mocked<Pick<Repository<Company>, 'findOne'>>;
-  let emailService: {
-    sendCompanyInvitationEmail: jest.Mock<
-      void,
-      [string, string, string, InvitationRole, Date]
-    >;
-  };
+  let emailService: { send: jest.Mock<void, [SendMailOptions]> };
 
   beforeEach(() => {
     invitationsRepo = {
@@ -49,13 +46,8 @@ describe('InvitationsService', () => {
       findOne: jest.fn(async () => Object.assign(new Company(), { id: 5, name: 'Co' })),
     } as unknown as jest.Mocked<Pick<Repository<Company>, 'findOne'>>;
     emailService = {
-      sendCompanyInvitationEmail: jest.fn(),
-    } as {
-      sendCompanyInvitationEmail: jest.Mock<
-        void,
-        [string, string, string, InvitationRole, Date]
-      >;
-    };
+      send: jest.fn<void, [SendMailOptions]>(),
+    } as { send: jest.Mock<void, [SendMailOptions]> };
     service = new InvitationsService(
       invitationsRepo as unknown as Repository<Invitation>,
       companyUsersRepo as unknown as Repository<CompanyUser>,
@@ -75,16 +67,17 @@ describe('InvitationsService', () => {
 
     const invitation = await service.createInvitation(5, dto, inviter);
 
-    const [[email, rawToken, companyName, role, expiry]] =
-      emailService.sendCompanyInvitationEmail.mock.calls;
+    const [[options]] = emailService.send.mock.calls;
+    const tokenMatch = (options.html as string).match(/token=([\w]+)/);
+    const rawToken = tokenMatch ? tokenMatch[1] : '';
     const hashed = crypto.createHash('sha256').update(rawToken).digest('hex');
 
-    expect(email).toBe('worker@example.com');
-    expect(companyName).toBe('Co');
-    expect(role).toBe(dto.role);
-    expect(expiry).toBeInstanceOf(Date);
+    expect(options.to).toBe('worker@example.com');
+    expect(options.subject).toBe('Company Invitation');
     expect(invitation.tokenHash).toBe(hashed);
     expect(invitation.expiresAt).toBeInstanceOf(Date);
+    expect((options.html as string)).toContain('Co');
+    expect((options.html as string)).toContain('Worker');
   });
 
   it('rejects inviting existing active member', async () => {

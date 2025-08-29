@@ -10,7 +10,7 @@ import { MembersController } from './members.controller';
 import { User } from '../users/user.entity';
 import { UsersModule } from '../users/users.module';
 import { InvitationsService } from './invitations.service';
-import { EmailService } from '../common/email.service';
+import { EmailService } from '../common/email';
 import { AuthModule } from '../auth/auth.module';
 import { MembersService } from './members.service';
 

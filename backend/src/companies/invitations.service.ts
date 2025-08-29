@@ -22,7 +22,8 @@ import { Email } from '../users/value-objects/email.vo';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { AcceptInvitationDto } from './dto/accept-invitation.dto';
 import * as crypto from 'crypto';
-import { EmailService } from '../common/email.service';
+import { EmailService } from '../common/email';
+import { invitationMail, addedToCompanyMail } from '../common/email/templates';
 import { validatePasswordStrength } from '../auth/password.util';
 
 @Injectable()
@@ -118,12 +119,14 @@ export class InvitationsService {
     const company = await this.companiesRepository.findOne({
       where: { id: companyId },
     });
-    await this.emailService.sendCompanyInvitationEmail(
-      dto.email,
-      rawToken,
-      company?.name ?? 'Your company',
-      dto.role,
-      invitation.expiresAt,
+    await this.emailService.send(
+      invitationMail(
+        dto.email,
+        rawToken,
+        company?.name ?? 'Your company',
+        dto.role,
+        invitation.expiresAt,
+      ),
     );
 
     return saved;
@@ -171,12 +174,14 @@ export class InvitationsService {
     invitation.tokenHash = tokenHash;
     invitation.expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await this.invitationsRepository.save(invitation);
-    await this.emailService.sendCompanyInvitationEmail(
-      invitation.email,
-      rawToken,
-      invitation.company?.name ?? 'Your company',
-      invitation.role,
-      invitation.expiresAt,
+    await this.emailService.send(
+      invitationMail(
+        invitation.email,
+        rawToken,
+        invitation.company?.name ?? 'Your company',
+        invitation.role,
+        invitation.expiresAt,
+      ),
     );
     return invitation;
   }
@@ -280,10 +285,12 @@ export class InvitationsService {
     const company = await this.companiesRepository.findOne({
       where: { id: invitation.companyId },
     });
-    await this.emailService.sendAddedToCompanyEmail(
-      user.email.value,
-      company?.name ?? 'Your company',
-      invitation.role,
+    await this.emailService.send(
+      addedToCompanyMail(
+        user.email.value,
+        company?.name ?? 'Your company',
+        invitation.role,
+      ),
     );
 
     this.acceptAttempts.delete(tokenHash);
@@ -354,10 +361,13 @@ export class InvitationsService {
     const company = await this.companiesRepository.findOne({
       where: { id: invitation.companyId },
     });
-    await this.emailService.sendAddedToCompanyEmail(
-      savedUser.email.value,
-      company?.name ?? 'Your company',
-      invitation.role,
+
+    await this.emailService.send(
+      addedToCompanyMail(
+        savedUser.email,
+        company?.name ?? 'Your company',
+        invitation.role,
+      ),
     );
 
     this.acceptAttempts.delete(tokenHash);

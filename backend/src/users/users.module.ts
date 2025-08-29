@@ -5,7 +5,7 @@ import { CompanyUser } from '../companies/entities/company-user.entity';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { MeController } from './me.controller';
-import { EmailService } from '../common/email.service';
+import { EmailService } from '../common/email';
 import { UserCreationService } from './user-creation.service';
 import { CustomerRegistrationService } from './customer-registration.service';
 import { CompanyOnboardingService } from './company-onboarding.service';
@@ -30,6 +30,6 @@ const userRepositoryProvider = {
     userRepositoryProvider,
   ],
   controllers: [UsersController, MeController],
-  exports: [UsersService, userRepositoryProvider],
+  exports: [UsersService, userRepositoryProvider, UserCreationService],
 })
 export class UsersModule {}

@@ -5,7 +5,9 @@ import { Repository } from 'typeorm';
 import { UsersService } from '../users.service';
 import { User, UserRole } from '../user.entity';
 import { Email } from '../value-objects/email.vo';
-import { EmailService } from '../../common/email.service';
+import { EmailService } from '../../common/email';
+import { SendMailOptions } from 'nodemailer';
+
 import { UserCreationService } from '../user-creation.service';
 
 describe('UsersService', () => {
@@ -14,9 +16,7 @@ describe('UsersService', () => {
     Pick<Repository<User>, 'create' | 'save' | 'findOne' | 'find' | 'remove'>
   >;
   let userCreationService: jest.Mocked<Pick<UserCreationService, 'createUser'>>;
-  let emailService: {
-    sendPasswordResetEmail: jest.Mock<void, [string, string]>;
-  };
+  let emailService: { send: jest.Mock<void, [SendMailOptions]> };
 
   beforeEach(() => {
     usersRepository = {
@@ -46,7 +46,7 @@ describe('UsersService', () => {
       createUser: jest.fn(),
     } as jest.Mocked<Pick<UserCreationService, 'createUser'>>;
     emailService = {
-      sendPasswordResetEmail: jest.fn<void, [string, string]>(),
+      send: jest.fn<void, [SendMailOptions]>(),
     };
     service = new UsersService(
       usersRepository as unknown as Repository<User>,
@@ -78,14 +78,16 @@ describe('UsersService', () => {
     usersRepository.findOne.mockResolvedValueOnce(user);
 
     await service.requestPasswordReset('user3@example.com');
-    const [[emailAddress, rawToken]] =
-      emailService.sendPasswordResetEmail.mock.calls;
+    const [[options]] = emailService.send.mock.calls;
+    const text = options.text as string;
+    const match = text.match(/token is: (.*)$/);
+    const rawToken = match ? match[1] : '';
     const hashedToken = crypto
       .createHash('sha256')
       .update(rawToken)
       .digest('hex');
 
-    expect(emailAddress).toBe('user3@example.com');
+    expect(options.to).toBe('user3@example.com');
     expect(user.passwordResetToken).toBe(hashedToken);
     expect(user.passwordResetExpires).toBeInstanceOf(Date);
     expect(usersRepository.save).toHaveBeenCalledWith(user);

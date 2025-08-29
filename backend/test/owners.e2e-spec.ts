@@ -9,7 +9,7 @@ import { User, UserRole } from '../src/users/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Customer } from '../src/customers/entities/customer.entity';
 import { Company } from '../src/companies/entities/company.entity';
-import { EmailService } from '../src/common/email.service';
+import { EmailService } from '../src/common/email';
 
 describe('Owner user endpoints (e2e)', () => {
   let app: INestApplication<App>;
@@ -81,7 +81,7 @@ describe('Owner user endpoints (e2e)', () => {
         { provide: getRepositoryToken(Company), useValue: {} },
         {
           provide: EmailService,
-          useValue: { sendPasswordResetEmail: jest.fn() },
+          useValue: { send: jest.fn() },
         },
       ],
     }).compile();

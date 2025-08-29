@@ -1,11 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from '../api.service';
+import { UsersApiService } from '../api/users-api.service';
 import { User, CreateUser, UpdateUser } from './user.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  private readonly api = inject(ApiService);
+  private readonly api = inject(UsersApiService);
 
   getUsers(): Observable<User[]> {
     return this.api.getUsers();

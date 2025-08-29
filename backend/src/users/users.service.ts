@@ -7,7 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, MoreThan, Repository } from 'typeorm';
 import * as crypto from 'crypto';
 
-import { EmailService } from '../common/email.service';
+import { EmailService } from '../common/email';
+import { passwordResetMail } from '../common/email/templates';
 
 import { User, UserRole } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -49,6 +50,10 @@ export class UsersService {
     return this.usersRepository.find({ where });
   }
 
+  async markEmailVerified(userId: number): Promise<void> {
+    await this.usersRepository.update(userId, { isVerified: true });
+  }
+
   async create(createUserDto: CreateUserDto): Promise<User> {
     return this.userCreationService.createUser(createUserDto);
   }
@@ -63,7 +68,8 @@ export class UsersService {
     user.passwordResetToken = hashedToken;
     user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
     await this.usersRepository.save(user);
-    await this.emailService.sendPasswordResetEmail(user.email.value, token);
+    await this.emailService.send(passwordResetMail(user.email.value, token));
+
   }
 
   async resetPassword(token: string, password: string): Promise<User> {

@@ -6,7 +6,8 @@ import { Invitation, InvitationRole } from '../entities/invitation.entity';
 import { CompanyUser, CompanyUserRole } from '../entities/company-user.entity';
 import { Company } from '../entities/company.entity';
 import { User } from '../../users/user.entity';
-import { EmailService } from '../../common/email.service';
+import { EmailService } from '../../common/email';
+import { SendMailOptions } from 'nodemailer';
 
 describe('InvitationsService acceptInvitation', () => {
   let service: InvitationsService;
@@ -18,12 +19,7 @@ describe('InvitationsService acceptInvitation', () => {
   >;
   let usersRepo: jest.Mocked<Pick<Repository<User>, 'create' | 'save'>>;
   let companiesRepo: jest.Mocked<Pick<Repository<Company>, 'findOne'>>;
-  let emailService: {
-    sendAddedToCompanyEmail: jest.Mock<
-      void,
-      [string, string, InvitationRole]
-    >;
-  };
+  let emailService: { send: jest.Mock<void, [SendMailOptions]> };
 
   beforeEach(() => {
     invitationsRepo = {
@@ -45,13 +41,8 @@ describe('InvitationsService acceptInvitation', () => {
       findOne: jest.fn(async () => Object.assign(new Company(), { id: 7, name: 'Co' })),
     } as unknown as jest.Mocked<Pick<Repository<Company>, 'findOne'>>;
     emailService = {
-      sendAddedToCompanyEmail: jest.fn(),
-    } as {
-      sendAddedToCompanyEmail: jest.Mock<
-        void,
-        [string, string, InvitationRole]
-      >;
-    };
+      send: jest.fn<void, [SendMailOptions]>(),
+    } as { send: jest.Mock<void, [SendMailOptions]> };
     service = new InvitationsService(
       invitationsRepo as unknown as Repository<Invitation>,
       companyUsersRepo as unknown as Repository<CompanyUser>,
@@ -88,11 +79,11 @@ describe('InvitationsService acceptInvitation', () => {
       invitedBy: 1,
     });
     expect(invitation.acceptedAt).toBeInstanceOf(Date);
-    expect(emailService.sendAddedToCompanyEmail).toHaveBeenCalledWith(
-      'new@user.com',
-      'Co',
-      InvitationRole.ADMIN,
-    );
+    const [[options]] = emailService.send.mock.calls;
+    expect(options.to).toBe('new@user.com');
+    expect(options.subject).toBe('You were added to a company');
+    expect((options.html as string)).toContain('Co');
+    expect((options.html as string)).toContain('Admin');
   });
 
   it('rejects expired token', async () => {

@@ -5,6 +5,7 @@ import {
   MinLength,
   Matches,
   ValidateNested,
+  IsBoolean,
 } from 'class-validator';
 import { UserRole } from '../user.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -56,4 +57,9 @@ export class CreateUserDto {
   @IsOptional()
   @Transform(({ value }) => (value ? new PhoneNumber(value) : undefined))
   phone?: PhoneNumber;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  isVerified?: boolean;
 }
