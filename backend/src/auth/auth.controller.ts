@@ -9,11 +9,20 @@ import { Public } from '../common/decorators/public.decorator';
 import { User } from '../users/user.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { SignupOwnerDto } from './dto/signup-owner.dto';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Public()
+  @Post('signup-owner')
+  @ApiOperation({ summary: 'Self-register a new company owner' })
+  @ApiResponse({ status: 201, description: 'Created owner and company' })
+  async signupOwner(@Body() dto: SignupOwnerDto) {
+    return this.authService.signupOwner(dto);
+  }
 
   @Public()
   @Post('login')

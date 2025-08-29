@@ -17,6 +17,7 @@ describe('AuthController', () => {
     resetPassword: jest.Mock;
     refresh: jest.Mock;
     logout: jest.Mock;
+    signupOwner: jest.Mock;
   };
 
   beforeEach(async () => {
@@ -29,6 +30,7 @@ describe('AuthController', () => {
       resetPassword: jest.fn(),
       refresh: jest.fn(),
       logout: jest.fn(),
+      signupOwner: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -77,6 +79,22 @@ describe('AuthController', () => {
     );
     expect(authService.login).toHaveBeenCalledWith(user);
     expect(result).toEqual(resultPayload);
+  });
+
+  it('signs up a new owner', async () => {
+    const dto = {
+      name: 'Owner',
+      email: 'owner@example.com',
+      password: 'Password1!',
+      companyName: 'Acme Co',
+    };
+    const response = { access_token: 'jwt' };
+    authService.signupOwner.mockResolvedValue(response);
+
+    const result = await controller.signupOwner(dto as any);
+
+    expect(authService.signupOwner).toHaveBeenCalledWith(dto);
+    expect(result).toEqual(response);
   });
 
   it('registers a new user and sends verification email', async () => {

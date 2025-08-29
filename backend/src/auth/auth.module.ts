@@ -10,12 +10,14 @@ import { RefreshToken } from './refresh-token.entity';
 import { VerificationToken } from './verification-token.entity';
 import { User } from '../users/user.entity';
 import { EmailService } from '../common/email.service';
+import { Company } from '../companies/entities/company.entity';
+import { CompanyUser } from '../companies/entities/company-user.entity';
 
 @Module({
   imports: [
     UsersModule,
     ConfigModule,
-    TypeOrmModule.forFeature([RefreshToken, VerificationToken, User]),
+    TypeOrmModule.forFeature([RefreshToken, VerificationToken, User, Company, CompanyUser]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
