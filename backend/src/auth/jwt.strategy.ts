@@ -7,7 +7,9 @@ import { UserRole } from '../users/user.entity';
 interface JwtPayload {
   sub: number;
   username: string;
-  role: UserRole;
+  email: string;
+  roles: UserRole[];
+  role?: UserRole;
   companyId: number;
 }
 
@@ -25,7 +27,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return {
       userId: payload.sub,
       username: payload.username,
-      role: payload.role,
+      email: payload.email,
+      roles: payload.roles,
+      role: payload.role ?? payload.roles?.[0],
       companyId: payload.companyId,
     };
   }

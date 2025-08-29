@@ -23,7 +23,7 @@ import { ScheduleJobDto } from './dto/schedule-job.dto';
 import { AssignJobDto } from './dto/assign-job.dto';
 import { BulkAssignJobDto } from './dto/bulk-assign-job.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
-import { Company } from '../common/decorators/company.decorator';
+import { CompanyId } from '../common/decorators/company-id.decorator';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -48,7 +48,7 @@ export class JobsController {
   })
   create(
     @Body() createJobDto: CreateJobDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<JobResponseDto> {
     return this.jobsService.create(createJobDto, companyId);
   }
@@ -67,7 +67,7 @@ export class JobsController {
   @ApiResponse({ status: 200, description: 'List of jobs' })
   findAll(
     @Query() pagination: PaginationQueryDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
     @Query('completed', new ParseBoolPipe({ optional: true }))
     completed?: boolean,
     @Query('customerId', new ParseIntPipe({ optional: true }))
@@ -100,7 +100,7 @@ export class JobsController {
   })
   findOne(
     @Param('id', ParseIntPipe) id: number,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<JobResponseDto> {
     return this.jobsService.findOne(id, companyId);
   }
@@ -116,7 +116,7 @@ export class JobsController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateJobDto: UpdateJobDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<JobResponseDto> {
     return this.jobsService.update(id, updateJobDto, companyId);
   }
@@ -132,7 +132,7 @@ export class JobsController {
   schedule(
     @Param('id', ParseIntPipe) id: number,
     @Body() scheduleJobDto: ScheduleJobDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<JobResponseDto> {
     return this.jobsService.schedule(id, scheduleJobDto, companyId);
   }
@@ -148,7 +148,7 @@ export class JobsController {
   assign(
     @Param('id', ParseIntPipe) id: number,
     @Body() assignJobDto: AssignJobDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<JobResponseDto> {
     return this.jobsService.assign(id, assignJobDto, companyId);
   }
@@ -164,7 +164,7 @@ export class JobsController {
   bulkAssign(
     @Param('id', ParseIntPipe) id: number,
     @Body() bulkAssignJobDto: BulkAssignJobDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<JobResponseDto> {
     return this.jobsService.bulkAssign(id, bulkAssignJobDto, companyId);
   }
@@ -180,7 +180,7 @@ export class JobsController {
   removeAssignment(
     @Param('id', ParseIntPipe) jobId: number,
     @Param('assignmentId', ParseIntPipe) assignmentId: number,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<JobResponseDto> {
     return this.jobsService.removeAssignment(jobId, assignmentId, companyId);
   }
@@ -192,7 +192,7 @@ export class JobsController {
   @ApiResponse({ status: 204, description: 'Job deleted' })
   async remove(
     @Param('id', ParseIntPipe) id: number,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<void> {
     await this.jobsService.remove(id, companyId);
   }

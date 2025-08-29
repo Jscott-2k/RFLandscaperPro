@@ -1,4 +1,9 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Injectable,
+  ForbiddenException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
@@ -25,5 +30,20 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return true;
     }
     return super.canActivate(context);
+  }
+
+  handleRequest(err: unknown, user: any, _info: unknown, context: ExecutionContext) {
+    if (err || !user) {
+      throw err || new UnauthorizedException();
+    }
+    const req = context.switchToHttp().getRequest<Request>();
+    const header = req.headers['x-company-id'];
+    if (header) {
+      const parsed = parseInt(header as string, 10);
+      if (!isNaN(parsed) && user.companyId !== parsed) {
+        throw new ForbiddenException('Invalid company access');
+      }
+    }
+    return user;
   }
 }

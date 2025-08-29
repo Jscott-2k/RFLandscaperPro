@@ -20,7 +20,7 @@ import { CustomerResponseDto } from './dto/customer-response.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
-import { Company } from '../common/decorators/company.decorator';
+import { CompanyId } from '../common/decorators/company-id.decorator';
 import { AuthUser } from '../common/decorators/auth-user.decorator';
 import { User } from '../users/user.entity';
 import {
@@ -47,7 +47,7 @@ export class CustomersController {
   })
   async create(
     @Body() createCustomerDto: CreateCustomerDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<CustomerResponseDto> {
     return this.customersService.create(createCustomerDto, companyId);
   }
@@ -62,7 +62,7 @@ export class CustomersController {
   @ApiResponse({ status: 200, description: 'List of customers' })
   async findAll(
     @Query() pagination: PaginationQueryDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
     @Query('active', new ParseBoolPipe({ optional: true })) active?: boolean,
     @Query('search') search?: string,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
@@ -91,7 +91,7 @@ export class CustomersController {
   })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<CustomerResponseDto> {
     return this.customersService.findOne(id, companyId);
   }
@@ -107,7 +107,7 @@ export class CustomersController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<CustomerResponseDto> {
     return this.customersService.update(id, updateCustomerDto, companyId);
   }
@@ -122,7 +122,7 @@ export class CustomersController {
   })
   async activate(
     @Param('id', ParseIntPipe) id: number,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<CustomerResponseDto> {
     return this.customersService.activate(id, companyId);
   }
@@ -137,7 +137,7 @@ export class CustomersController {
   })
   async deactivate(
     @Param('id', ParseIntPipe) id: number,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<CustomerResponseDto> {
     return this.customersService.deactivate(id, companyId);
   }
@@ -149,7 +149,7 @@ export class CustomersController {
   @ApiResponse({ status: 204, description: 'Customer deleted' })
   async remove(
     @Param('id', ParseIntPipe) id: number,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<void> {
     await this.customersService.remove(id, companyId);
   }

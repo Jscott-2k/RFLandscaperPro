@@ -21,7 +21,7 @@ import { EquipmentStatus, EquipmentType } from './entities/equipment.entity';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
-import { Company } from '../common/decorators/company.decorator';
+import { CompanyId } from '../common/decorators/company-id.decorator';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -46,7 +46,7 @@ export class EquipmentController {
   })
   async create(
     @Body() createEquipmentDto: CreateEquipmentDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<EquipmentResponseDto> {
     return this.equipmentService.create(createEquipmentDto, companyId);
   }
@@ -62,7 +62,7 @@ export class EquipmentController {
   @ApiResponse({ status: 200, description: 'List of equipment' })
   async findAll(
     @Query() pagination: PaginationQueryDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
     @Query('status', new ParseEnumPipe(EquipmentStatus, { optional: true }))
     status?: EquipmentStatus,
     @Query('type', new ParseEnumPipe(EquipmentType, { optional: true }))
@@ -88,7 +88,7 @@ export class EquipmentController {
   })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<EquipmentResponseDto> {
     return this.equipmentService.findOne(id, companyId);
   }
@@ -104,7 +104,7 @@ export class EquipmentController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEquipmentDto: UpdateEquipmentDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<EquipmentResponseDto> {
     return this.equipmentService.update(id, updateEquipmentDto, companyId);
   }
@@ -120,7 +120,7 @@ export class EquipmentController {
   async updateStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEquipmentStatusDto: UpdateEquipmentStatusDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<EquipmentResponseDto> {
     return this.equipmentService.updateStatus(
       id,
@@ -136,7 +136,7 @@ export class EquipmentController {
   @ApiResponse({ status: 204, description: 'Equipment deleted' })
   async remove(
     @Param('id', ParseIntPipe) id: number,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<void> {
     await this.equipmentService.remove(id, companyId);
   }

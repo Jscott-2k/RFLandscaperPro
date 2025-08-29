@@ -13,7 +13,7 @@ import { UpdateContractDto } from './dto/update-contract.dto';
 import { ContractResponseDto } from './dto/contract-response.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
-import { Company } from '../common/decorators/company.decorator';
+import { CompanyId } from '../common/decorators/company-id.decorator';
 import {
   ApiBearerAuth,
   ApiTags,
@@ -33,7 +33,7 @@ export class ContractsController {
   @ApiResponse({ status: 201, type: ContractResponseDto })
   create(
     @Body() dto: CreateContractDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<ContractResponseDto> {
     return this.contractsService.create(dto, companyId);
   }
@@ -42,7 +42,7 @@ export class ContractsController {
   @Roles(UserRole.Admin, UserRole.Worker)
   @ApiOperation({ summary: 'List contracts' })
   @ApiResponse({ status: 200, type: [ContractResponseDto] })
-  findAll(@Company() companyId: number): Promise<ContractResponseDto[]> {
+  findAll(@CompanyId() companyId: number): Promise<ContractResponseDto[]> {
     return this.contractsService.findAll(companyId);
   }
 
@@ -53,7 +53,7 @@ export class ContractsController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateContractDto,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<ContractResponseDto> {
     return this.contractsService.update(id, dto, companyId);
   }
@@ -64,7 +64,7 @@ export class ContractsController {
   @ApiResponse({ status: 200, description: 'Contract cancelled' })
   cancel(
     @Param('id', ParseIntPipe) id: number,
-    @Company() companyId: number,
+    @CompanyId() companyId: number,
   ): Promise<void> {
     return this.contractsService.cancel(id, companyId);
   }
