@@ -11,6 +11,9 @@ import { ErrorService } from '../../error.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
+    <p>
+      <small>Company details are required to create an owner account.</small>
+    </p>
     <form [formGroup]="form" (ngSubmit)="submit()">
       <input type="text" formControlName="name" placeholder="Name" />
       <input type="email" formControlName="email" placeholder="Email" />
