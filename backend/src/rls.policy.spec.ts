@@ -17,7 +17,11 @@ describe.skip('RLS enforcement', () => {
   let customer2: Customer;
 
   beforeAll(async () => {
-    dataSource.setOptions({ synchronize: true, dropSchema: true, migrationsRun: false });
+    dataSource.setOptions({
+      synchronize: true,
+      dropSchema: true,
+      migrationsRun: false,
+    });
     await dataSource.initialize();
     const migration = new EnableTenantRls1756435084873();
     await migration.up(dataSource.createQueryRunner());
@@ -26,10 +30,18 @@ describe.skip('RLS enforcement', () => {
     company1 = await companyRepo.save({ name: 'Company One' });
     company2 = await companyRepo.save({ name: 'Company Two' });
     customer1 = await runWithCompanyId(company1.id, () =>
-      customerRepo.save({ name: 'Alice', email: 'alice@example.com', companyId: company1.id }),
+      customerRepo.save({
+        name: 'Alice',
+        email: 'alice@example.com',
+        companyId: company1.id,
+      }),
     );
     customer2 = await runWithCompanyId(company2.id, () =>
-      customerRepo.save({ name: 'Bob', email: 'bob@example.com', companyId: company2.id }),
+      customerRepo.save({
+        name: 'Bob',
+        email: 'bob@example.com',
+        companyId: company2.id,
+      }),
     );
   });
 

@@ -140,7 +140,11 @@ export class UsersController {
     if (!worker || worker.role !== UserRole.Worker) {
       throw new NotFoundException('Worker not found');
     }
-    const updated = await this.usersService.update(id, updateUserDto, companyId);
+    const updated = await this.usersService.update(
+      id,
+      updateUserDto,
+      companyId,
+    );
     return toUserResponseDto(updated);
   }
 

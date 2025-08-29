@@ -1,4 +1,8 @@
-import { EntitySubscriberInterface, EventSubscriber, BeforeQueryEvent } from 'typeorm';
+import {
+  EntitySubscriberInterface,
+  EventSubscriber,
+  BeforeQueryEvent,
+} from 'typeorm';
 import { getCurrentCompanyId } from './tenant-context';
 
 @EventSubscriber()

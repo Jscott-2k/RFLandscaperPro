@@ -64,8 +64,7 @@ export class CompaniesController {
     @Body() dto: UpdateCompanyDto,
     @AuthUser() user: User,
   ): Promise<CompanyResponseDto> {
-    if (user.companyId !== id)
-      throw new NotFoundException('Company not found');
+    if (user.companyId !== id) throw new NotFoundException('Company not found');
     return this.companiesService.update(id, dto);
   }
 }

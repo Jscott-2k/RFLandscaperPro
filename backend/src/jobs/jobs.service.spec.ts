@@ -1,10 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { JobsService } from './jobs.service';
-import {
-  JOB_REPOSITORY,
-  IJobRepository,
-} from './repositories/job.repository';
+import { JOB_REPOSITORY, IJobRepository } from './repositories/job.repository';
 import {
   CUSTOMER_REPOSITORY,
   ICustomerRepository,
@@ -80,7 +77,9 @@ describe('JobsService', () => {
   it('throws NotFoundException when customer missing on create', async () => {
     customerRepo.findById.mockResolvedValue(null);
     const dto: CreateJobDto = { title: 'Test', customerId: 1 };
-    await expect(service.create(dto, 1)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.create(dto, 1)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
   });
 
   it('throws ConflictException when scheduling with resource conflict', async () => {

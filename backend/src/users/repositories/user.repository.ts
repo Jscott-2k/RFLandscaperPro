@@ -11,7 +11,9 @@ export interface IUserRepository {
 
 @Injectable()
 export class UserRepository implements IUserRepository {
-  constructor(@InjectRepository(User) private readonly repo: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private readonly repo: Repository<User>,
+  ) {}
 
   findById(id: number, companyId: number): Promise<User | null> {
     return this.repo.findOne({ where: { id, companyId } });

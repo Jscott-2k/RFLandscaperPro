@@ -1,6 +1,8 @@
 import { MigrationInterface, QueryRunner, TableUnique } from 'typeorm';
 
-export class CustomerEmailCompositeUnique1756434856215 implements MigrationInterface {
+export class CustomerEmailCompositeUnique1756434856215
+  implements MigrationInterface
+{
   name = 'CustomerEmailCompositeUnique1756434856215';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

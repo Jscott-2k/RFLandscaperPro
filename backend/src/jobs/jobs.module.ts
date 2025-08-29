@@ -8,10 +8,7 @@ import { Assignment } from './entities/assignment.entity';
 import { CustomersModule } from '../customers/customers.module';
 import { UsersModule } from '../users/users.module';
 import { EquipmentModule } from '../equipment/equipment.module';
-import {
-  JobRepository,
-  JOB_REPOSITORY,
-} from './repositories/job.repository';
+import { JobRepository, JOB_REPOSITORY } from './repositories/job.repository';
 import {
   AssignmentRepository,
   ASSIGNMENT_REPOSITORY,

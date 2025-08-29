@@ -18,7 +18,9 @@ describe('paginate', () => {
     };
 
     repo = {
-      createQueryBuilder: jest.fn().mockReturnValue(qb as unknown as SelectQueryBuilder<any>),
+      createQueryBuilder: jest
+        .fn()
+        .mockReturnValue(qb as unknown as SelectQueryBuilder<any>),
     } as unknown as jest.Mocked<Repository<any>>;
   });
 

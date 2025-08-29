@@ -125,10 +125,12 @@ describe('UsersService', () => {
     });
     usersRepository.findOne.mockResolvedValueOnce(user);
 
-    await expect(service.resetPassword(rawToken, 'weak')).rejects.toMatchObject({
-      message: 'Password must be at least 8 characters long',
-      status: 400,
-    });
+    await expect(service.resetPassword(rawToken, 'weak')).rejects.toMatchObject(
+      {
+        message: 'Password must be at least 8 characters long',
+        status: 400,
+      },
+    );
     expect(usersRepository.save).not.toHaveBeenCalled();
   });
 

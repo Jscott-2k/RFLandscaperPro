@@ -66,14 +66,8 @@ export class JobRepository implements IJobRepository {
       .leftJoinAndSelect('assignments.equipment', 'equipment')
       .where('job.companyId = :companyId', { companyId });
 
-    const {
-      completed,
-      customerId,
-      startDate,
-      endDate,
-      workerId,
-      equipmentId,
-    } = filters;
+    const { completed, customerId, startDate, endDate, workerId, equipmentId } =
+      filters;
 
     if (completed !== undefined) {
       queryBuilder.andWhere('job.completed = :completed', { completed });
