@@ -7,15 +7,15 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
 import { User, UserRole } from '../users/user.entity';
+import { UserCreationService } from '../users/user-creation.service';
 import { RegisterDto } from './dto/register.dto';
 import { SignupOwnerDto } from './dto/signup-owner.dto';
 import { validatePasswordStrength } from './password.util';
 import { EmailService } from '../common/email.service';
-import { Company } from '../companies/entities/company.entity';
 import {
   CompanyUser,
   CompanyUserRole,
@@ -38,6 +38,7 @@ import {
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
+    private readonly userCreationService: UserCreationService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     @Inject(REFRESH_TOKEN_REPOSITORY)
@@ -46,13 +47,14 @@ export class AuthService {
     private readonly verificationTokenRepository: VerificationTokenRepository,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+     
     private readonly emailService: EmailService,
     @Inject(COMPANY_MEMBERSHIP_REPOSITORY)
     private readonly companyMembershipRepository: CompanyMembershipRepository,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<User> {
-    const user = await this.usersRepository.findOne({ where: { email } });
+    const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -114,59 +116,16 @@ export class AuthService {
   async signupOwner(dto: SignupOwnerDto) {
     validatePasswordStrength(dto.password);
 
-    const existing = await this.usersRepository.findOne({
-      where: { email: dto.email },
+    const user = await this.userCreationService.createUser({
+      username: dto.name,
+      email: dto.email,
+      password: dto.password,
+      role: UserRole.Owner,
+      company: { name: dto.companyName },
+      isVerified: true,
     });
-    if (existing) {
-      throw new ConflictException('Email already exists');
-    }
 
-    try {
-      const user = await this.usersRepository.manager.transaction(
-        async (manager) => {
-          const userRepo = manager.getRepository(User);
-          const companyRepo = manager.getRepository(Company);
-          const membershipRepo = manager.getRepository(CompanyUser);
-
-          const newUser = userRepo.create({
-            username: dto.name,
-            email: dto.email,
-            password: dto.password,
-            role: UserRole.Owner,
-            isVerified: true,
-          });
-          const savedUser = await userRepo.save(newUser);
-
-          const company = companyRepo.create({
-            name: dto.companyName,
-            ownerId: savedUser.id,
-          });
-          const savedCompany = await companyRepo.save(company);
-
-          savedUser.companyId = savedCompany.id;
-          await userRepo.save(savedUser);
-
-          const membership = membershipRepo.create({
-            companyId: savedCompany.id,
-            userId: savedUser.id,
-            role: CompanyUserRole.OWNER,
-          });
-          await membershipRepo.save(membership);
-
-          return savedUser;
-        },
-      );
-
-      return this.login(user);
-    } catch (error) {
-      if (error instanceof QueryFailedError) {
-        const { code } = error.driverError as { code?: string };
-        if (code === '23505') {
-          throw new ConflictException('Email already exists');
-        }
-      }
-      throw error;
-    }
+    return this.login(user);
   }
 
   async switchCompany(
@@ -218,7 +177,7 @@ export class AuthService {
     if (!record || record.expiresAt < new Date()) {
       throw new UnauthorizedException('Invalid or expired token');
     }
-    await this.usersRepository.update(record.userId, { isVerified: true });
+    await this.usersService.markEmailVerified(record.userId);
     await this.verificationTokenRepository.delete({ userId: record.userId });
   }
 

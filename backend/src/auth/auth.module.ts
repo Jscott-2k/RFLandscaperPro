@@ -8,9 +8,7 @@ import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './jwt.strategy';
 import { RefreshToken } from './refresh-token.entity';
 import { VerificationToken } from './verification-token.entity';
-import { User } from '../users/user.entity';
 import { EmailService } from '../common/email.service';
-import { Company } from '../companies/entities/company.entity';
 import { CompanyUser } from '../companies/entities/company-user.entity';
 import {
   REFRESH_TOKEN_REPOSITORY,
