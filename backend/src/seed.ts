@@ -69,6 +69,7 @@ async function main() {
           firstName: 'Master',
           lastName: 'User',
           phone: new PhoneNumber('555-000-0000'),
+          isVerified: true,
         },
         {
           conflictPaths: ['username'],
@@ -109,6 +110,7 @@ async function main() {
           firstName: 'Admin',
           lastName: 'User',
           phone: new PhoneNumber('555-000-0000'),
+          isVerified: true,
         },
         {
           conflictPaths: ['username'],
