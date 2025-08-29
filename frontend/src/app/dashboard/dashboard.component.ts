@@ -23,7 +23,7 @@ import { ApiService } from '../api.service';
       </a>
     </div>
   `,
-  styleUrl: './dashboard.component.scss'
+  styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
   private readonly api = inject(ApiService);
@@ -34,9 +34,11 @@ export class DashboardComponent implements OnInit {
   protected readonly activeUsers = signal(0);
 
   ngOnInit(): void {
-    this.api.getUpcomingJobs().subscribe(data => this.upcomingJobs.set(data.total));
-    this.api.getEquipmentCount('available').subscribe(data => this.equipmentAvailable.set(data.total));
-    this.api.getEquipmentCount('in_use').subscribe(data => this.equipmentInUse.set(data.total));
-    this.api.getUsers().subscribe(data => this.activeUsers.set(data.length));
+    this.api.getUpcomingJobs().subscribe((data) => this.upcomingJobs.set(data.total));
+    this.api
+      .getEquipmentCount('available')
+      .subscribe((data) => this.equipmentAvailable.set(data.total));
+    this.api.getEquipmentCount('in_use').subscribe((data) => this.equipmentInUse.set(data.total));
+    this.api.getUsers().subscribe((data) => this.activeUsers.set(data.length));
   }
 }

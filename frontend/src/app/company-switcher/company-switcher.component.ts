@@ -11,7 +11,7 @@ import { AuthService } from '../auth/auth.service';
     <select [(ngModel)]="selected" (ngModelChange)="onChange($event)">
       <option *ngFor="let c of auth.getCompanies()" [ngValue]="c">{{ c }}</option>
     </select>
-  `
+  `,
 })
 export class CompanySwitcherComponent {
   protected auth = inject(AuthService);

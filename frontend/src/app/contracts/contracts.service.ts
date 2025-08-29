@@ -45,4 +45,3 @@ export class ContractsService {
     return this.http.post<void>(`${this.baseUrl}/${id}/cancel`, {});
   }
 }
-

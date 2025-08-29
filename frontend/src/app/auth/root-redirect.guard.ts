@@ -6,8 +6,5 @@ export const RootRedirectGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  return auth.isAuthenticated()
-    ? router.parseUrl('/dashboard')
-    : router.parseUrl('/login');
+  return auth.isAuthenticated() ? router.parseUrl('/dashboard') : router.parseUrl('/login');
 };
-

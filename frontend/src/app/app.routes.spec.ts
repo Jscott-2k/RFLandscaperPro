@@ -8,8 +8,8 @@ describe('App Routes', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter(routes),
-        { provide: AuthService, useValue: { isAuthenticated: () => false } }
-      ]
+        { provide: AuthService, useValue: { isAuthenticated: () => false } },
+      ],
     });
 
     const router = TestBed.inject(Router);

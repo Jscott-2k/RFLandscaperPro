@@ -7,13 +7,13 @@ import { JobsService, Job } from './jobs.service';
   selector: 'app-job-list',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './job-list.component.html'
+  templateUrl: './job-list.component.html',
 })
 export class JobListComponent implements OnInit {
   private jobsService = inject(JobsService);
   jobs: Job[] = [];
 
   ngOnInit(): void {
-    this.jobsService.list().subscribe(jobs => (this.jobs = jobs));
+    this.jobsService.list().subscribe((jobs) => (this.jobs = jobs));
   }
 }
