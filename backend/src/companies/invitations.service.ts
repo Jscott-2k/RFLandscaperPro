@@ -116,6 +116,51 @@ export class InvitationsService {
     return saved;
   }
 
+  async revokeInvitation(
+    companyId: number,
+    invitationId: number,
+  ): Promise<void> {
+    const invitation = await this.invitationsRepository.findOne({
+      where: { id: invitationId, companyId },
+    });
+    if (!invitation) {
+      throw new NotFoundException('Invitation not found');
+    }
+    if (invitation.acceptedAt || invitation.revokedAt) {
+      throw new BadRequestException('Invitation cannot be revoked');
+    }
+    invitation.revokedAt = new Date();
+    await this.invitationsRepository.save(invitation);
+  }
+
+  async resendInvitation(
+    companyId: number,
+    invitationId: number,
+  ): Promise<Invitation> {
+    const invitation = await this.invitationsRepository.findOne({
+      where: {
+        id: invitationId,
+        companyId,
+        acceptedAt: IsNull(),
+        revokedAt: IsNull(),
+      },
+    });
+    if (!invitation) {
+      throw new NotFoundException('Invitation not found');
+    }
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
+    invitation.tokenHash = tokenHash;
+    invitation.expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    await this.invitationsRepository.save(invitation);
+    await this.emailService.sendCompanyInvitationEmail(invitation.email, rawToken);
+    return invitation;
+  }
+
   async previewInvitation(
     token: string,
   ): Promise<{
