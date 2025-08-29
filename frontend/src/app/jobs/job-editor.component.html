@@ -1,17 +1,30 @@
 <h2>Job Editor</h2>
-<form (ngSubmit)="save()" #jobForm="ngForm">
+<form [formGroup]="form" (ngSubmit)="save()">
   <label>
     Title
-    <input type="text" name="title" [(ngModel)]="job.title" required />
+    <input type="text" formControlName="title" />
   </label>
+  <div *ngIf="form.controls.title.errors && (form.controls.title.dirty || form.controls.title.touched)">
+    {{ form.controls.title.errors | json }}
+  </div>
   <label>
     Description
-    <textarea name="description" [(ngModel)]="job.description"></textarea>
+    <textarea formControlName="description"></textarea>
   </label>
+  <div
+    *ngIf="form.controls.description.errors && (form.controls.description.dirty || form.controls.description.touched)"
+  >
+    {{ form.controls.description.errors | json }}
+  </div>
   <label>
     Schedule Date
-    <input type="date" name="scheduledDate" [(ngModel)]="job.scheduledDate" (change)="schedule()" />
+    <input type="date" formControlName="scheduledDate" (change)="schedule()" />
   </label>
+  <div
+    *ngIf="form.controls.scheduledDate.errors && (form.controls.scheduledDate.dirty || form.controls.scheduledDate.touched)"
+  >
+    {{ form.controls.scheduledDate.errors | json }}
+  </div>
   <fieldset>
     <legend>Assign</legend>
     <label>
@@ -24,5 +37,5 @@
     </label>
     <button type="button" (click)="assign(worker.valueAsNumber, equipment.valueAsNumber)">Assign</button>
   </fieldset>
-  <button type="submit" [disabled]="jobForm.invalid">Save</button>
+  <button type="submit">Save</button>
 </form>

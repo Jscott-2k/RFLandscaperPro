@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EquipmentService, Equipment } from './equipment.service';
 import { ErrorService } from '../error.service';
@@ -8,45 +8,75 @@ import { ErrorService } from '../error.service';
 @Component({
   selector: 'app-equipment-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   template: `
     <div>
       <h2>Equipment Detail</h2>
-      <form (ngSubmit)="save()">
+      <form [formGroup]="form" (ngSubmit)="save()">
         <label>
           Name:
-          <input [(ngModel)]="equipment.name" name="name" />
+          <input formControlName="name" />
         </label>
+        <div
+          *ngIf="
+            form.controls.name.errors && (form.controls.name.dirty || form.controls.name.touched)
+          "
+        >
+          {{ form.controls.name.errors | json }}
+        </div>
         <label>
           Status:
-          <input [(ngModel)]="equipment.status" name="status" />
+          <input formControlName="status" />
         </label>
+        <div
+          *ngIf="
+            form.controls.status.errors &&
+            (form.controls.status.dirty || form.controls.status.touched)
+          "
+        >
+          {{ form.controls.status.errors | json }}
+        </div>
         <button type="submit">Save</button>
-        <button type="button" (click)="remove()" *ngIf="equipment.id">Delete</button>
+        <button type="button" (click)="remove()" *ngIf="equipmentId">Delete</button>
       </form>
     </div>
   `,
 })
 export class EquipmentDetailComponent {
-  equipment: Partial<Equipment> = { name: '', status: '' };
   private equipmentService = inject(EquipmentService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private errorService = inject(ErrorService);
+  private fb = inject(FormBuilder);
+
+  equipmentId?: number;
+
+  form = this.fb.nonNullable.group({
+    name: ['', Validators.required.bind(Validators)],
+    status: ['', Validators.required.bind(Validators)],
+  });
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id && id !== 'new') {
       this.equipmentService.getEquipment(+id).subscribe({
-        next: (data) => (this.equipment = data),
+        next: (data) => {
+          this.equipmentId = data.id;
+          this.form.patchValue(data);
+        },
         error: () => this.errorService.show('Failed to load equipment'),
       });
     }
   }
 
   save(): void {
-    if (this.equipment.id) {
-      this.equipmentService.updateEquipment(this.equipment.id, this.equipment).subscribe({
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const payload = this.form.getRawValue() as Partial<Equipment>;
+    if (this.equipmentId) {
+      this.equipmentService.updateEquipment(this.equipmentId, payload).subscribe({
         next: () => {
           if (typeof window !== 'undefined') {
             window.alert('Equipment updated successfully');
@@ -56,7 +86,7 @@ export class EquipmentDetailComponent {
         error: () => this.errorService.show('Failed to update equipment'),
       });
     } else {
-      this.equipmentService.createEquipment(this.equipment).subscribe({
+      this.equipmentService.createEquipment(payload).subscribe({
         next: () => {
           if (typeof window !== 'undefined') {
             window.alert('Equipment created successfully');
@@ -69,8 +99,8 @@ export class EquipmentDetailComponent {
   }
 
   remove(): void {
-    if (this.equipment.id) {
-      this.equipmentService.deleteEquipment(this.equipment.id).subscribe({
+    if (this.equipmentId) {
+      this.equipmentService.deleteEquipment(this.equipmentId).subscribe({
         next: () => {
           if (typeof window !== 'undefined') {
             window.alert('Equipment deleted successfully');

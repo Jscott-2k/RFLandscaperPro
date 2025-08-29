@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { JobsService, Job } from './jobs.service';
 import { ErrorService } from '../error.service';
@@ -8,7 +8,7 @@ import { ErrorService } from '../error.service';
 @Component({
   selector: 'app-job-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './job-editor.component.html',
 })
 export class JobEditorComponent implements OnInit {
@@ -16,8 +16,14 @@ export class JobEditorComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private errorService = inject(ErrorService);
-
+  private fb = inject(FormBuilder);
   job: Job = { title: '', customerId: 1 };
+
+  form = this.fb.nonNullable.group({
+    title: ['', Validators.required.bind(Validators)],
+    description: [''],
+    scheduledDate: [''],
+  });
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -25,7 +31,10 @@ export class JobEditorComponent implements OnInit {
       const jobId = Number(id);
       if (!isNaN(jobId)) {
         this.jobsService.get(jobId).subscribe({
-          next: (job) => (this.job = job),
+          next: (job) => {
+            this.job = job;
+            this.form.patchValue(job);
+          },
           error: () => this.errorService.show('Failed to load job'),
         });
       }
@@ -33,8 +42,13 @@ export class JobEditorComponent implements OnInit {
   }
 
   save(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const payload: Job = { ...this.job, ...this.form.getRawValue() } as Job;
     if (this.job.id) {
-      this.jobsService.update(this.job.id, this.job).subscribe({
+      this.jobsService.update(this.job.id, payload).subscribe({
         next: () => {
           if (typeof window !== 'undefined') {
             window.alert('Job updated successfully');
@@ -44,7 +58,7 @@ export class JobEditorComponent implements OnInit {
         error: () => this.errorService.show('Failed to update job'),
       });
     } else {
-      this.jobsService.create(this.job).subscribe({
+      this.jobsService.create(payload).subscribe({
         next: () => {
           if (typeof window !== 'undefined') {
             window.alert('Job created successfully');
@@ -57,10 +71,12 @@ export class JobEditorComponent implements OnInit {
   }
 
   schedule(): void {
-    if (this.job.id && this.job.scheduledDate) {
-      this.jobsService.schedule(this.job.id, this.job.scheduledDate).subscribe({
+    const date = this.form.controls.scheduledDate.value;
+    if (this.job.id && date) {
+      this.jobsService.schedule(this.job.id, date).subscribe({
         next: (job) => {
           this.job = job;
+          this.form.patchValue(job);
           if (typeof window !== 'undefined') {
             window.alert('Job scheduled successfully');
           }
