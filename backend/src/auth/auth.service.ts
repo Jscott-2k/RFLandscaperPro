@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  Inject,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,13 +12,9 @@ import { UserCreationService } from '../users/user-creation.service';
 import { RegisterDto } from './dto/register.dto';
 import { SignupOwnerDto } from './dto/signup-owner.dto';
 import { validatePasswordStrength } from './password.util';
-import { RefreshToken } from './refresh-token.entity';
-import { VerificationToken } from './verification-token.entity';
 import { EmailService } from '../common/email';
 import { verificationMail } from '../common/email/templates';
-import { Company } from '../companies/entities/company.entity';
 import {
-  CompanyUser,
   CompanyUserRole,
   CompanyUserStatus,
 } from '../companies/entities/company-user.entity';
@@ -53,7 +45,7 @@ export class AuthService {
     private readonly verificationTokenRepository: VerificationTokenRepository,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-     
+
     private readonly emailService: EmailService,
     @Inject(COMPANY_MEMBERSHIP_REPOSITORY)
     private readonly companyMembershipRepository: CompanyMembershipRepository,
@@ -124,14 +116,14 @@ export class AuthService {
   async signupOwner(dto: SignupOwnerDto) {
     validatePasswordStrength(dto.password);
 
-      const user = await this.userCreationService.createUser({
-        username: dto.name,
-        email: new Email(dto.email),
-        password: dto.password,
-        role: UserRole.Owner,
-        company: { name: dto.companyName },
-        isVerified: true,
-      });
+    const user = await this.userCreationService.createUser({
+      username: dto.name,
+      email: new Email(dto.email),
+      password: dto.password,
+      role: UserRole.Owner,
+      company: { name: dto.companyName },
+      isVerified: true,
+    });
 
     return this.login(user);
   }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return */
 import * as crypto from 'crypto';
 import { Repository } from 'typeorm';
 import { InvitationsService } from '../invitations.service';
@@ -10,10 +9,11 @@ import { Email } from '../../users/value-objects/email.vo';
 import { EmailService } from '../../common/email';
 import { SendMailOptions } from 'nodemailer';
 
-
 describe('InvitationsService acceptExistingUser', () => {
   let service: InvitationsService;
-  let invitationsRepo: jest.Mocked<Pick<Repository<Invitation>, 'findOne' | 'save'>>;
+  let invitationsRepo: jest.Mocked<
+    Pick<Repository<Invitation>, 'findOne' | 'save'>
+  >;
   let companyUsersRepo: jest.Mocked<
     Pick<Repository<CompanyUser>, 'create' | 'save'>
   >;
@@ -24,18 +24,26 @@ describe('InvitationsService acceptExistingUser', () => {
   beforeEach(() => {
     invitationsRepo = {
       findOne: jest.fn(),
-      save: jest.fn(async (inv) => inv),
-    } as unknown as jest.Mocked<Pick<Repository<Invitation>, 'findOne' | 'save'>>;
+      save: jest.fn((inv: Invitation) => Promise.resolve(inv)),
+    } as unknown as jest.Mocked<
+      Pick<Repository<Invitation>, 'findOne' | 'save'>
+    >;
     companyUsersRepo = {
-      create: jest.fn((dto) => Object.assign(new CompanyUser(), dto)),
-      save: jest.fn(async (m) => m),
-    } as unknown as jest.Mocked<Pick<Repository<CompanyUser>, 'create' | 'save'>>;
+      create: jest.fn((dto: Partial<CompanyUser>) =>
+        Object.assign(new CompanyUser(), dto),
+      ),
+      save: jest.fn((m: CompanyUser) => Promise.resolve(m)),
+    } as unknown as jest.Mocked<
+      Pick<Repository<CompanyUser>, 'create' | 'save'>
+    >;
     usersRepo = {
       findOne: jest.fn(),
-      save: jest.fn(async (u) => u),
+      save: jest.fn((u: User) => Promise.resolve(u)),
     } as unknown as jest.Mocked<Pick<Repository<User>, 'findOne' | 'save'>>;
     companiesRepo = {
-      findOne: jest.fn(async () => Object.assign(new Company(), { id: 7, name: 'Co' })),
+      findOne: jest.fn(() =>
+        Promise.resolve(Object.assign(new Company(), { id: 7, name: 'Co' })),
+      ),
     } as unknown as jest.Mocked<Pick<Repository<Company>, 'findOne'>>;
     emailService = {
       send: jest.fn<void, [SendMailOptions]>(),
@@ -62,7 +70,10 @@ describe('InvitationsService acceptExistingUser', () => {
     });
     invitationsRepo.findOne.mockResolvedValue(invitation);
     usersRepo.findOne.mockResolvedValue(
-      Object.assign(new User(), { id: 5, email: new Email('existing@user.com') }),
+      Object.assign(new User(), {
+        id: 5,
+        email: new Email('existing@user.com'),
+      }),
     );
 
     const user = await service.acceptExistingUser(token, {
@@ -81,8 +92,8 @@ describe('InvitationsService acceptExistingUser', () => {
     const [[options]] = emailService.send.mock.calls;
     expect(options.to).toBe('existing@user.com');
     expect(options.subject).toBe('You were added to a company');
-    expect((options.html as string)).toContain('Co');
-    expect((options.html as string)).toContain('Admin');
+    expect(options.html as string).toContain('Co');
+    expect(options.html as string).toContain('Admin');
   });
 
   it('rejects when email mismatch', async () => {
@@ -97,7 +108,10 @@ describe('InvitationsService acceptExistingUser', () => {
     });
     invitationsRepo.findOne.mockResolvedValue(invitation);
     usersRepo.findOne.mockResolvedValue(
-      Object.assign(new User(), { id: 5, email: new Email('invited@user.com') }),
+      Object.assign(new User(), {
+        id: 5,
+        email: new Email('invited@user.com'),
+      }),
     );
     await expect(
       service.acceptExistingUser(token, {

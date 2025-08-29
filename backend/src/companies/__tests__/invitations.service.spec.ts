@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/require-await */
 import * as crypto from 'crypto';
 import { Repository } from 'typeorm';
 import { InvitationsService } from '../invitations.service';
@@ -13,7 +12,6 @@ import { Email } from '../../users/value-objects/email.vo';
 import { EmailService } from '../../common/email';
 import { SendMailOptions } from 'nodemailer';
 
-
 describe('InvitationsService', () => {
   let service: InvitationsService;
   let invitationsRepo: jest.Mocked<
@@ -26,10 +24,12 @@ describe('InvitationsService', () => {
 
   beforeEach(() => {
     invitationsRepo = {
-      create: jest.fn((dto) => Object.assign(new Invitation(), dto)),
-      save: jest.fn(async (inv) => {
+      create: jest.fn((dto: Partial<Invitation>) =>
+        Object.assign(new Invitation(), dto),
+      ),
+      save: jest.fn((inv: Invitation) => {
         inv.id = inv.id ?? 1;
-        return inv;
+        return Promise.resolve(inv);
       }),
       findOne: jest.fn(),
       count: jest.fn(),
@@ -43,7 +43,9 @@ describe('InvitationsService', () => {
       findOne: jest.fn(),
     } as unknown as jest.Mocked<Pick<Repository<User>, 'findOne'>>;
     companiesRepo = {
-      findOne: jest.fn(async () => Object.assign(new Company(), { id: 5, name: 'Co' })),
+      findOne: jest.fn(() =>
+        Promise.resolve(Object.assign(new Company(), { id: 5, name: 'Co' })),
+      ),
     } as unknown as jest.Mocked<Pick<Repository<Company>, 'findOne'>>;
     emailService = {
       send: jest.fn<void, [SendMailOptions]>(),
@@ -76,8 +78,8 @@ describe('InvitationsService', () => {
     expect(options.subject).toBe('Company Invitation');
     expect(invitation.tokenHash).toBe(hashed);
     expect(invitation.expiresAt).toBeInstanceOf(Date);
-    expect((options.html as string)).toContain('Co');
-    expect((options.html as string)).toContain('Worker');
+    expect(options.html as string).toContain('Co');
+    expect(options.html as string).toContain('Worker');
   });
 
   it('rejects inviting existing active member', async () => {

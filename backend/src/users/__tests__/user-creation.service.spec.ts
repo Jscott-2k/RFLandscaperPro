@@ -13,14 +13,14 @@ const UNIQUE_VIOLATION = '23505';
 
 describe('UserCreationService', () => {
   let service: UserCreationService;
-  let usersRepository: Repository<User> & { manager: any };
+    let usersRepository: Repository<User> & { manager: EntityManager };
   let customerRegistrationService: jest.Mocked<
     Pick<CustomerRegistrationService, 'register'>
   >;
   let companyOnboardingService: jest.Mocked<
     Pick<CompanyOnboardingService, 'onboard'>
   >;
-  let manager: any;
+  let manager: EntityManager;
 
   beforeEach(() => {
     usersRepository = {
@@ -42,16 +42,14 @@ describe('UserCreationService', () => {
       }),
     } as unknown as Repository<User> & { manager: any };
 
-    manager = {
-      getRepository: jest.fn(() => usersRepository),
-    };
+      manager = {
+        getRepository: jest.fn(() => usersRepository),
+        transaction: jest.fn(
+          async (cb: (em: EntityManager) => Promise<unknown>) => cb(manager),
+        ),
+      } as unknown as EntityManager;
 
-    usersRepository.manager = {
-      transaction: jest.fn(async (cb) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        return (await cb(manager)) as unknown;
-      }),
-    };
+      usersRepository.manager = manager as unknown as EntityManager;
 
     customerRegistrationService = {
       register: jest.fn(),
@@ -75,10 +73,10 @@ describe('UserCreationService', () => {
       email: new Email('user1@example.com'),
       password,
     });
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(usersRepository.create).toHaveBeenCalledWith({
+    const createMock = jest.spyOn(usersRepository, 'create');
+    expect(createMock).toHaveBeenCalledWith({
       username: 'user1',
-      email: expect.any(Email),
+      email: expect.any(Email) as unknown as Email,
       password,
     });
     expect(customerRegistrationService.register).toHaveBeenCalled();
@@ -91,12 +89,12 @@ describe('UserCreationService', () => {
     companyOnboardingService.onboard.mockImplementation(
       async (
         user: User,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         _company?: CreateCompanyDto,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         _manager?: EntityManager,
       ): Promise<Company> => {
         user.companyId = 1;
+        void _company;
+        void _manager;
         await Promise.resolve();
         return {} as Company;
       },

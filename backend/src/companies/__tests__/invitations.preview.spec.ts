@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/require-await */
 import * as crypto from 'crypto';
 import { Repository } from 'typeorm';
 import { InvitationsService } from '../invitations.service';

@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import { Repository } from 'typeorm';
+import { Repository, FindOneOptions } from 'typeorm';
 import { InvitationsService } from '../invitations.service';
 import { Invitation, InvitationRole } from '../entities/invitation.entity';
 import { CompanyUser } from '../entities/company-user.entity';
@@ -9,15 +9,19 @@ import { EmailService } from '../../common/email';
 import { SendMailOptions } from 'nodemailer';
 
 describe('InvitationsService revoke and resend', () => {
-  let invitationsRepo: jest.Mocked<Pick<Repository<Invitation>, 'findOne' | 'save'>>;
+  let invitationsRepo: jest.Mocked<
+    Pick<Repository<Invitation>, 'findOne' | 'save'>
+  >;
   let service: InvitationsService;
   let emailService: { send: jest.Mock<void, [SendMailOptions]> };
 
   beforeEach(() => {
     invitationsRepo = {
       findOne: jest.fn(),
-      save: jest.fn(async (inv) => inv),
-    } as unknown as jest.Mocked<Pick<Repository<Invitation>, 'findOne' | 'save'>>;
+      save: jest.fn((inv) => Promise.resolve(inv)),
+    } as unknown as jest.Mocked<
+      Pick<Repository<Invitation>, 'findOne' | 'save'>
+    >;
     emailService = {
       send: jest.fn<void, [SendMailOptions]>(),
     } as { send: jest.Mock<void, [SendMailOptions]> };
@@ -41,12 +45,18 @@ describe('InvitationsService revoke and resend', () => {
       tokenHash,
       expiresAt: new Date(Date.now() + 1000),
     });
-    invitationsRepo.findOne.mockImplementation(async (opts: any) => {
-      const where = opts.where ?? opts;
-      if (where.id === 1 && where.companyId === 2) return invitation;
-      if (where.tokenHash === invitation.tokenHash) return invitation;
-      return null;
-    });
+      invitationsRepo.findOne.mockImplementation(
+        (options: FindOneOptions<Invitation>) => {
+          const where = (options.where ?? (options as unknown)) as Partial<Invitation>;
+          if (where.id === 1 && where.companyId === 2) {
+            return Promise.resolve(invitation);
+          }
+          if (where.tokenHash === invitation.tokenHash) {
+            return Promise.resolve(invitation);
+          }
+          return Promise.resolve(null);
+        },
+      );
 
     await service.revokeInvitation(2, 1);
 
@@ -65,14 +75,20 @@ describe('InvitationsService revoke and resend', () => {
       role: InvitationRole.ADMIN,
       tokenHash,
       expiresAt: new Date(Date.now() - 1000),
-      company: { name: 'Co' } as any,
+      company: Object.assign(new Company(), { name: 'Co' }),
     });
-    invitationsRepo.findOne.mockImplementation(async (opts: any) => {
-      const where = opts.where ?? opts;
-      if (where.id === 3 && where.companyId === 4) return invitation;
-      if (where.tokenHash === invitation.tokenHash) return invitation;
-      return null;
-    });
+      invitationsRepo.findOne.mockImplementation(
+        (options: FindOneOptions<Invitation>) => {
+          const where = (options.where ?? (options as unknown)) as Partial<Invitation>;
+          if (where.id === 3 && where.companyId === 4) {
+            return Promise.resolve(invitation);
+          }
+          if (where.tokenHash === invitation.tokenHash) {
+            return Promise.resolve(invitation);
+          }
+          return Promise.resolve(null);
+        },
+      );
 
     await service.resendInvitation(4, 3);
     const [[options]] = emailService.send.mock.calls;
@@ -84,9 +100,10 @@ describe('InvitationsService revoke and resend', () => {
     expect(invitation.tokenHash).toBe(newHash);
     expect(invitation.expiresAt.getTime()).toBeGreaterThan(Date.now());
 
-    await expect(service.previewInvitation(token)).rejects.toMatchObject({ status: 404 });
+    await expect(service.previewInvitation(token)).rejects.toMatchObject({
+      status: 404,
+    });
     const preview = await service.previewInvitation(newToken);
     expect(preview.status).toBe('valid');
   });
 });
-

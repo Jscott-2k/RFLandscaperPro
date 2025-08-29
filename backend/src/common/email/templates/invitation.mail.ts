@@ -2,7 +2,7 @@ import { SendMailOptions } from 'nodemailer';
 import { InvitationRole } from '../../../companies/entities/invitation.entity';
 
 function formatRole(role: InvitationRole): string {
-  return role === 'ADMIN' ? 'Admin' : 'Worker';
+  return role === InvitationRole.ADMIN ? 'Admin' : 'Worker';
 }
 
 export function invitationMail(
@@ -12,8 +12,7 @@ export function invitationMail(
   role: InvitationRole,
   expiresAt: Date,
 ): SendMailOptions {
-  const baseUrl =
-    process.env.APP_BASE_URL ?? 'https://app.rflandscaperpro.com';
+  const baseUrl = process.env.APP_BASE_URL ?? 'https://app.rflandscaperpro.com';
   const link = `${baseUrl}/invite/accept?token=${token}`;
   const roleName = formatRole(role);
   const expiry = expiresAt.toDateString();

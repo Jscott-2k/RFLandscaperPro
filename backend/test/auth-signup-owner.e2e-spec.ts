@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ConflictException, ValidationPipe } from '@nestjs/common';
+import {
+  INestApplication,
+  ConflictException,
+  ValidationPipe,
+} from '@nestjs/common';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import { AuthController } from '../src/auth/auth.controller';
@@ -46,7 +50,8 @@ describe('Auth signup-owner endpoint (e2e)', () => {
       })
       .expect(201)
       .expect((res: request.Response) => {
-        expect(res.body.access_token).toBe('jwt');
+        const body = res.body as { access_token: string };
+        expect(body.access_token).toBe('jwt');
         expect(signupOwner).toHaveBeenCalled();
       });
   });

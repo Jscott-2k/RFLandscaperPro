@@ -16,7 +16,7 @@ import { RefreshTokenRepository } from './repositories/refresh-token.repository'
 import { VerificationTokenRepository } from './repositories/verification-token.repository';
 import { CompanyMembershipRepository } from './repositories/company-membership.repository';
 import { UserCreationService } from '../users/user-creation.service';
-
+import { Repository } from 'typeorm';
 
 describe('AuthService.switchCompany', () => {
   let service: AuthService;
@@ -25,7 +25,9 @@ describe('AuthService.switchCompany', () => {
   let userCreationService: jest.Mocked<Pick<UserCreationService, 'createUser'>>;
 
   beforeEach(() => {
-    repo = { findOne: jest.fn() } as any;
+    repo = {
+      findOne: jest.fn(),
+    } as unknown as jest.Mocked<CompanyMembershipRepository>;
     jwt = { signAsync: jest.fn() };
     userCreationService = {
       createUser: jest.fn(),
@@ -37,7 +39,7 @@ describe('AuthService.switchCompany', () => {
       {} as ConfigService,
       {} as RefreshTokenRepository,
       {} as VerificationTokenRepository,
-      {} as unknown as any, // Repository<User>
+      {} as unknown as Repository<User>,
       {} as EmailService,
       repo as CompanyMembershipRepository,
     );
@@ -54,7 +56,6 @@ describe('AuthService.switchCompany', () => {
     await expect(service.switchCompany(user, 2)).rejects.toBeInstanceOf(
       UnauthorizedException,
     );
-
   });
 
   it('returns token for valid membership', async () => {
@@ -90,6 +91,7 @@ describe('AuthService.switchCompany', () => {
 describe('AuthService.signupOwner', () => {
   let service: AuthService;
   let userCreationService: jest.Mocked<Pick<UserCreationService, 'createUser'>>;
+  let loginSpy: jest.SpyInstance;
 
   beforeEach(() => {
     userCreationService = {
@@ -102,11 +104,15 @@ describe('AuthService.signupOwner', () => {
       {} as ConfigService,
       {} as RefreshTokenRepository,
       {} as VerificationTokenRepository,
-      {} as unknown as any, // Repository<User>
+      {} as unknown as Repository<User>,
       {} as EmailService,
       { findOne: jest.fn() } as unknown as CompanyMembershipRepository,
     );
-    jest.spyOn(service, 'login').mockResolvedValue({} as any);
+    loginSpy = jest.spyOn(service, 'login').mockResolvedValue({
+      access_token: '',
+      refresh_token: '',
+      user: { id: 0, username: '', email: '', role: UserRole.Owner },
+    });
   });
 
   it('delegates to UserCreationService.createUser', async () => {
@@ -133,6 +139,6 @@ describe('AuthService.signupOwner', () => {
       company: { name: 'ACME' },
       isVerified: true,
     });
-    expect(service.login).toHaveBeenCalledWith(user);
+    expect(loginSpy).toHaveBeenCalledWith(user);
   });
 });
