@@ -1,5 +1,6 @@
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { UserRole } from '../../users/user.entity';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 describe('JwtAuthGuard', () => {
@@ -25,7 +26,12 @@ describe('JwtAuthGuard', () => {
     } as unknown as ExecutionContext;
 
     expect(() =>
-      guard.handleRequest(null, { companyId: 1 }, null, context),
+      guard.handleRequest(
+        null,
+        { id: 1, companyId: 1, role: UserRole.Admin },
+        null,
+        context,
+      ),
     ).toThrow(ForbiddenException);
   });
 });
