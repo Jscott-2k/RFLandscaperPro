@@ -11,7 +11,6 @@ import {
   Query,
   HttpCode,
   HttpStatus,
-  Req,
 } from '@nestjs/common';
 import { EquipmentService } from './equipment.service';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
@@ -22,6 +21,7 @@ import { EquipmentStatus, EquipmentType } from './entities/equipment.entity';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { Company } from '../common/decorators/company.decorator';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -46,9 +46,9 @@ export class EquipmentController {
   })
   async create(
     @Body() createEquipmentDto: CreateEquipmentDto,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
   ): Promise<EquipmentResponseDto> {
-    return this.equipmentService.create(createEquipmentDto, req.user.companyId);
+    return this.equipmentService.create(createEquipmentDto, companyId);
   }
 
   @Get()
@@ -62,7 +62,7 @@ export class EquipmentController {
   @ApiResponse({ status: 200, description: 'List of equipment' })
   async findAll(
     @Query() pagination: PaginationQueryDto,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
     @Query('status', new ParseEnumPipe(EquipmentStatus, { optional: true }))
     status?: EquipmentStatus,
     @Query('type', new ParseEnumPipe(EquipmentType, { optional: true }))
@@ -71,7 +71,7 @@ export class EquipmentController {
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
     return this.equipmentService.findAll(
       pagination,
-      req.user.companyId,
+      companyId,
       status,
       type,
       search,
@@ -88,9 +88,9 @@ export class EquipmentController {
   })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
   ): Promise<EquipmentResponseDto> {
-    return this.equipmentService.findOne(id, req.user.companyId);
+    return this.equipmentService.findOne(id, companyId);
   }
 
   @Patch(':id')
@@ -104,13 +104,9 @@ export class EquipmentController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEquipmentDto: UpdateEquipmentDto,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
   ): Promise<EquipmentResponseDto> {
-    return this.equipmentService.update(
-      id,
-      updateEquipmentDto,
-      req.user.companyId,
-    );
+    return this.equipmentService.update(id, updateEquipmentDto, companyId);
   }
 
   @Patch(':id/status')
@@ -124,12 +120,12 @@ export class EquipmentController {
   async updateStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEquipmentStatusDto: UpdateEquipmentStatusDto,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
   ): Promise<EquipmentResponseDto> {
     return this.equipmentService.updateStatus(
       id,
       updateEquipmentStatusDto.status,
-      req.user.companyId,
+      companyId,
     );
   }
 
@@ -140,8 +136,8 @@ export class EquipmentController {
   @ApiResponse({ status: 204, description: 'Equipment deleted' })
   async remove(
     @Param('id', ParseIntPipe) id: number,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
   ): Promise<void> {
-    await this.equipmentService.remove(id, req.user.companyId);
+    await this.equipmentService.remove(id, companyId);
   }
 }

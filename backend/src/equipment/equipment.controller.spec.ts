@@ -32,17 +32,17 @@ describe('EquipmentController', () => {
 
   describe('updateStatus', () => {
     it('should pass companyId to equipmentService.updateStatus', async () => {
-      const req = { user: { companyId: 2 } };
+      const companyId = 2;
       const dto = { status: EquipmentStatus.AVAILABLE };
       const response = {} as EquipmentResponseDto;
       (service.updateStatus as jest.Mock).mockResolvedValue(response);
 
-      const result = await controller.updateStatus(1, dto, req);
+      const result = await controller.updateStatus(1, dto, companyId);
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(service.updateStatus).toHaveBeenCalledWith(
         1,
         dto.status,
-        req.user.companyId,
+        companyId,
       );
       expect(result).toBe(response);
     });
@@ -51,7 +51,7 @@ describe('EquipmentController', () => {
   describe('findAll', () => {
     it('should call equipmentService.findAll with companyId and search term', async () => {
       const pagination = { page: 1, limit: 10 };
-      const req = { user: { companyId: 1 } };
+      const companyId = 1;
       const status = EquipmentStatus.AVAILABLE;
       const type = EquipmentType.MOWER;
       const search = 'mower';
@@ -60,7 +60,7 @@ describe('EquipmentController', () => {
 
       const result = await controller.findAll(
         pagination,
-        req,
+        companyId,
         status,
         type,
         search,
@@ -69,7 +69,7 @@ describe('EquipmentController', () => {
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(service.findAll).toHaveBeenCalledWith(
         pagination,
-        req.user.companyId,
+        companyId,
         status,
         type,
         search,
