@@ -80,7 +80,7 @@ describe('InvitationsService acceptInvitation', () => {
     });
 
     expect(user.id).toBe(42);
-    expect(user.email).toBe('new@user.com');
+    expect(user.email.value).toBe('new@user.com');
     expect(companyUsersRepo.create).toHaveBeenCalledWith({
       companyId: 7,
       userId: 42,

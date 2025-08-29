@@ -2,6 +2,7 @@ import * as bcrypt from 'bcrypt';
 import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import { UserCreationService } from '../user-creation.service';
 import { User, UserRole } from '../user.entity';
+import { Email } from '../value-objects/email.vo';
 import { CustomerRegistrationService } from '../customer-registration.service';
 import { CompanyOnboardingService } from '../company-onboarding.service';
 import { CreateCompanyDto } from '../../companies/dto/create-company.dto';
@@ -71,13 +72,13 @@ describe('UserCreationService', () => {
     const password = 'plainpassword';
     const user = await service.createUser({
       username: 'user1',
-      email: 'user1@example.com',
+      email: new Email('user1@example.com'),
       password,
     });
     // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(usersRepository.create).toHaveBeenCalledWith({
       username: 'user1',
-      email: 'user1@example.com',
+      email: expect.any(Email),
       password,
     });
     expect(customerRegistrationService.register).toHaveBeenCalled();
@@ -102,7 +103,7 @@ describe('UserCreationService', () => {
     );
     const user = await service.createUser({
       username: 'owner',
-      email: 'owner@example.com',
+      email: new Email('owner@example.com'),
       password: 'secret',
       role: UserRole.Owner,
       company: { name: 'ACME Landscaping' },
@@ -119,7 +120,7 @@ describe('UserCreationService', () => {
     await expect(
       service.createUser({
         username: 'worker',
-        email: 'w@example.com',
+        email: new Email('w@example.com'),
         password: 'secret',
         role: UserRole.Worker,
       }),
@@ -139,7 +140,7 @@ describe('UserCreationService', () => {
     await expect(
       service.createUser({
         username: 'existing',
-        email: 'existing@example.com',
+        email: new Email('existing@example.com'),
         password: 'secret',
       }),
     ).rejects.toMatchObject({

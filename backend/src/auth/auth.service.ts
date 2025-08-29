@@ -10,6 +10,8 @@ import { QueryFailedError, Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
 import { User, UserRole } from '../users/user.entity';
+import { Email } from '../users/value-objects/email.vo';
+import { PhoneNumber } from '../users/value-objects/phone-number.vo';
 import { RegisterDto } from './dto/register.dto';
 import { SignupOwnerDto } from './dto/signup-owner.dto';
 import { validatePasswordStrength } from './password.util';
@@ -79,7 +81,7 @@ export class AuthService {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email,
+        email: user.email.value,
         role: user.role,
       },
     };
@@ -89,13 +91,16 @@ export class AuthService {
     // Validate password strength
     validatePasswordStrength(registerDto.password);
 
+    const { email, phone, ...rest } = registerDto;
     const user = await this.usersService.create({
-      ...registerDto,
+      ...rest,
+      email: new Email(email),
+      phone: phone ? new PhoneNumber(phone) : undefined,
       company: registerDto.company,
     });
 
     const token = await this.createVerificationToken(user.id);
-    await this.emailService.sendVerificationEmail(user.email, token);
+    await this.emailService.sendVerificationEmail(user.email.value, token);
 
     return { message: 'Verification email sent' };
   }
@@ -119,7 +124,7 @@ export class AuthService {
 
           const newUser = userRepo.create({
             username: dto.name,
-            email: dto.email,
+            email: new Email(dto.email),
             password: dto.password,
             role: UserRole.Owner,
             isVerified: true,

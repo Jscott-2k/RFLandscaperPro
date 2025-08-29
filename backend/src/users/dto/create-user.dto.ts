@@ -4,13 +4,14 @@ import {
   IsString,
   MinLength,
   Matches,
-  IsEmail,
   ValidateNested,
 } from 'class-validator';
 import { UserRole } from '../user.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { CreateCompanyDto } from '../../companies/dto/create-company.dto';
+import { Email } from '../value-objects/email.vo';
+import { PhoneNumber } from '../value-objects/phone-number.vo';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -18,8 +19,8 @@ export class CreateUserDto {
   username: string;
 
   @ApiProperty()
-  @IsEmail()
-  email: string;
+  @Transform(({ value }) => new Email(value))
+  email: Email;
 
   @ApiProperty()
   @IsString()
@@ -52,7 +53,7 @@ export class CreateUserDto {
   lastName?: string;
 
   @ApiPropertyOptional()
-  @IsString()
   @IsOptional()
-  phone?: string;
+  @Transform(({ value }) => (value ? new PhoneNumber(value) : undefined))
+  phone?: PhoneNumber;
 }

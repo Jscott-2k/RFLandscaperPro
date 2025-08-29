@@ -85,7 +85,7 @@ export class MembersService {
     return {
       userId: m.userId,
       username: m.user?.username ?? '',
-      email: m.user?.email ?? '',
+      email: m.user?.email.value ?? '',
       role: m.role,
       status: m.status,
     };

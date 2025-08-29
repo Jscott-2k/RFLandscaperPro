@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 
 import { UsersService } from '../users.service';
 import { User, UserRole } from '../user.entity';
+import { Email } from '../value-objects/email.vo';
 import { EmailService } from '../../common/email.service';
 import { UserCreationService } from '../user-creation.service';
 
@@ -57,7 +58,7 @@ describe('UsersService', () => {
   it('delegates user creation to UserCreationService', async () => {
     const dto = {
       username: 'user1',
-      email: 'user1@example.com',
+      email: new Email('user1@example.com'),
       password: 'secret',
     };
     const created = Object.assign(new User(), dto);
@@ -72,7 +73,7 @@ describe('UsersService', () => {
   it('generates reset token and emails user', async () => {
     const user = Object.assign(new User(), {
       username: 'user3',
-      email: 'user3@example.com',
+      email: new Email('user3@example.com'),
     });
     usersRepository.findOne.mockResolvedValueOnce(user);
 
@@ -138,19 +139,19 @@ describe('UsersService', () => {
     const user = Object.assign(new User(), {
       id: 1,
       username: 'old',
-      email: 'old@example.com',
+      email: new Email('old@example.com'),
       password: 'oldpass',
     });
     usersRepository.findOne.mockResolvedValue(user);
 
     const updated = await service.updateProfile(1, {
       username: 'new',
-      email: 'new@example.com',
+      email: new Email('new@example.com'),
       password: 'Newpass1!',
     });
 
     expect(updated.username).toBe('new');
-    expect(updated.email).toBe('new@example.com');
+    expect(updated.email.value).toBe('new@example.com');
     const isMatch = await bcrypt.compare('Newpass1!', updated.password);
     expect(isMatch).toBe(true);
     expect(usersRepository.save).toHaveBeenCalledWith(user);

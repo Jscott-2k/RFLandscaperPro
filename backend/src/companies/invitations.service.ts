@@ -18,6 +18,7 @@ import {
 } from './entities/company-user.entity';
 import { Company } from './entities/company.entity';
 import { User, UserRole } from '../users/user.entity';
+import { Email } from '../users/value-objects/email.vo';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { AcceptInvitationDto } from './dto/accept-invitation.dto';
 import * as crypto from 'crypto';
@@ -280,7 +281,7 @@ export class InvitationsService {
       where: { id: invitation.companyId },
     });
     await this.emailService.sendAddedToCompanyEmail(
-      user.email,
+      user.email.value,
       company?.name ?? 'Your company',
       invitation.role,
     );
@@ -316,7 +317,7 @@ export class InvitationsService {
 
     const user = this.usersRepository.create({
       username: dto.name,
-      email: invitation.email,
+      email: new Email(invitation.email),
       password: dto.password,
       role: UserRole.Worker,
       isVerified: true,
@@ -354,7 +355,7 @@ export class InvitationsService {
       where: { id: invitation.companyId },
     });
     await this.emailService.sendAddedToCompanyEmail(
-      savedUser.email,
+      savedUser.email.value,
       company?.name ?? 'Your company',
       invitation.role,
     );

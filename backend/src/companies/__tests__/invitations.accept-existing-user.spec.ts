@@ -6,6 +6,7 @@ import { Invitation, InvitationRole } from '../entities/invitation.entity';
 import { CompanyUser, CompanyUserRole } from '../entities/company-user.entity';
 import { Company } from '../entities/company.entity';
 import { User } from '../../users/user.entity';
+import { Email } from '../../users/value-objects/email.vo';
 import { EmailService } from '../../common/email.service';
 
 describe('InvitationsService acceptExistingUser', () => {
@@ -69,7 +70,7 @@ describe('InvitationsService acceptExistingUser', () => {
     });
     invitationsRepo.findOne.mockResolvedValue(invitation);
     usersRepo.findOne.mockResolvedValue(
-      Object.assign(new User(), { id: 5, email: 'existing@user.com' }),
+      Object.assign(new User(), { id: 5, email: new Email('existing@user.com') }),
     );
 
     const user = await service.acceptExistingUser(token, {
@@ -104,7 +105,7 @@ describe('InvitationsService acceptExistingUser', () => {
     });
     invitationsRepo.findOne.mockResolvedValue(invitation);
     usersRepo.findOne.mockResolvedValue(
-      Object.assign(new User(), { id: 5, email: 'invited@user.com' }),
+      Object.assign(new User(), { id: 5, email: new Email('invited@user.com') }),
     );
     await expect(
       service.acceptExistingUser(token, {
@@ -126,7 +127,7 @@ describe('InvitationsService acceptExistingUser', () => {
     });
     invitationsRepo.findOne.mockResolvedValue(invitation);
     usersRepo.findOne.mockResolvedValue(
-      Object.assign(new User(), { id: 1, email: 'a@b.com' }),
+      Object.assign(new User(), { id: 1, email: new Email('a@b.com') }),
     );
     await expect(
       service.acceptExistingUser(token, {
@@ -149,7 +150,7 @@ describe('InvitationsService acceptExistingUser', () => {
     });
     invitationsRepo.findOne.mockResolvedValueOnce(invitation);
     usersRepo.findOne.mockResolvedValue(
-      Object.assign(new User(), { id: 1, email: 'a@b.com' }),
+      Object.assign(new User(), { id: 1, email: new Email('a@b.com') }),
     );
     await expect(
       service.acceptExistingUser(token, {
