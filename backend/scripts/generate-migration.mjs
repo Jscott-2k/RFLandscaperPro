@@ -1,8 +1,7 @@
 import { spawnSync } from "node:child_process";
 
 const name = process.argv[2] || "auto";
-const ts = Date.now();
-const outPath = `src/migrations/${ts}-${name}`;
+const outPath = `src/migrations/${name}`;
 
 const result = spawnSync(
   "ts-node",
@@ -10,5 +9,5 @@ const result = spawnSync(
    "migration:generate", "-d", "data-source.ts", outPath],
   { stdio: "inherit" }
 );
-
+spawnSync("npx", ["prettier", outPath + ".ts", "--write"], { stdio: "inherit" });
 process.exit(result.status ?? 0);
