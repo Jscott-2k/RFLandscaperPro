@@ -3,6 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+export interface CompanyMembership {
+  companyId: number;
+  companyName: string;
+  role: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
@@ -10,8 +16,8 @@ export class AuthService {
     return typeof localStorage !== 'undefined';
   }
   private readonly roles = signal<string[]>(this.getRolesFromToken());
-  private readonly company = signal<string | null>(this.getCompanyFromStorage());
-  private readonly companies = signal<string[]>(this.getCompaniesFromStorage());
+  private readonly company = signal<number | null>(this.getCompanyFromStorage());
+  private readonly companies = signal<CompanyMembership[]>(this.getCompaniesFromStorage());
 
   hasRole(role: string): boolean {
     return this.roles().includes(role);
@@ -31,13 +37,13 @@ export class AuthService {
     );
   }
 
-  loadCompanies(): Observable<string[]> {
+  loadCompanies(): Observable<CompanyMembership[]> {
     return this.http
-      .get<string[]>(`${environment.apiUrl}/me/companies`)
+      .get<CompanyMembership[]>(`${environment.apiUrl}/me/companies`)
       .pipe(tap((companies) => this.setCompanies(companies)));
   }
 
-  switchCompany(companyId: string): Observable<{ access_token: string }> {
+  switchCompany(companyId: number): Observable<{ access_token: string }> {
     return this.http
       .post<{ access_token: string }>(`${environment.apiUrl}/auth/switch-company`, { companyId })
       .pipe(
@@ -100,12 +106,16 @@ export class AuthService {
       .pipe(tap((res) => this.handleAuth(res)));
   }
 
-  handleAuth(res: { access_token: string; companies?: string[] }, companyHint?: string): void {
+  handleAuth(
+    res: { access_token: string; companies?: CompanyMembership[] },
+    companyHint?: number,
+  ): void {
     if (this.hasLocalStorage()) {
       localStorage.setItem('token', res.access_token);
       this.roles.set(this.getRolesFromToken(res.access_token));
       const company = this.getCompanyFromToken(res.access_token) ?? companyHint ?? null;
-      const companies = res.companies ?? (company ? [company] : []);
+      const companies =
+        res.companies ?? (company ? [{ companyId: company, companyName: '', role: '' }] : []);
       this.setCompany(company);
       this.setCompanies(companies);
     }
@@ -137,18 +147,18 @@ export class AuthService {
     return !!this.getToken();
   }
 
-  getCompany(): string | null {
+  getCompany(): number | null {
     return this.company();
   }
 
-  getCompanies(): string[] {
+  getCompanies(): CompanyMembership[] {
     return this.companies();
   }
 
-  setCompany(company: string | null): void {
+  setCompany(company: number | null): void {
     if (this.hasLocalStorage()) {
-      if (company) {
-        localStorage.setItem('companyId', company);
+      if (company !== null) {
+        localStorage.setItem('companyId', String(company));
       } else {
         localStorage.removeItem('companyId');
       }
@@ -156,39 +166,40 @@ export class AuthService {
     this.company.set(company);
   }
 
-  private setCompanies(companies: string[]): void {
+  private setCompanies(companies: CompanyMembership[]): void {
     if (this.hasLocalStorage()) {
       localStorage.setItem('companies', JSON.stringify(companies));
     }
     this.companies.set(companies);
   }
 
-  private getCompanyFromStorage(): string | null {
+  private getCompanyFromStorage(): number | null {
     if (!this.hasLocalStorage()) {
       return null;
     }
     const stored = localStorage.getItem('companyId');
     if (stored) {
-      return stored;
+      const parsed = Number(stored);
+      return Number.isNaN(parsed) ? null : parsed;
     }
     const token = localStorage.getItem('token');
     if (token) {
       const company = this.getCompanyFromToken(token);
-      if (company) {
-        localStorage.setItem('companyId', company);
+      if (company !== null) {
+        localStorage.setItem('companyId', String(company));
         return company;
       }
     }
     return null;
   }
 
-  private getCompaniesFromStorage(): string[] {
+  private getCompaniesFromStorage(): CompanyMembership[] {
     if (!this.hasLocalStorage()) {
       return [];
     }
     const raw = localStorage.getItem('companies');
     try {
-      return raw ? (JSON.parse(raw) as string[]) : [];
+      return raw ? (JSON.parse(raw) as CompanyMembership[]) : [];
     } catch {
       return [];
     }
@@ -229,7 +240,7 @@ export class AuthService {
     return [];
   }
 
-  private getCompanyFromToken(token?: string): string | null {
+  private getCompanyFromToken(token?: string): number | null {
     const payload: unknown = this.decodeTokenPayload(token);
     if (
       payload &&
@@ -237,7 +248,9 @@ export class AuthService {
       'companyId' in payload &&
       typeof (payload as { companyId: unknown }).companyId !== 'undefined'
     ) {
-      return String((payload as { companyId: unknown }).companyId);
+      const raw = (payload as { companyId: unknown }).companyId;
+      const num = typeof raw === 'string' ? Number(raw) : (raw as number);
+      return Number.isNaN(num) ? null : num;
     }
     return null;
   }
