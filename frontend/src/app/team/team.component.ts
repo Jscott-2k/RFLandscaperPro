@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TeamService } from './team.service';
-import { CompanyMember, CompanyInvitation } from '../api.service';
+import { CompanyMember, CompanyInvitation } from '../api/companies-api.service';
 
 @Component({
   selector: 'app-team',
