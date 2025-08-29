@@ -3,7 +3,6 @@ import {
   HttpClient,
   HttpErrorResponse,
   HttpParams,
-  HttpHeaders,
 } from '@angular/common/http';
 import { environment } from '../environments/environment';
 import { Observable, throwError } from 'rxjs';
@@ -103,28 +102,15 @@ export class ApiService {
     return httpParams;
   }
 
-  private getCompanyId(): string | null {
-    if (typeof localStorage === 'undefined') {
-      return null;
-    }
-    return localStorage.getItem('companyId');
-  }
-
   private request<T>(
     method: string,
     url: string,
     options: { params?: Record<string, unknown>; body?: unknown } = {},
   ): Observable<T> {
-    let headers = new HttpHeaders();
-    const companyId = this.getCompanyId();
-    if (companyId) {
-      headers = headers.set('X-Company-ID', companyId);
-    }
     return this.http
       .request<T>(method, url, {
         body: options.body,
         params: this.toHttpParams(options.params),
-        headers,
       })
       .pipe(catchError(this.handleError));
   }
