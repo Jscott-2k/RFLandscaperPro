@@ -58,6 +58,7 @@ describe('EquipmentService', () => {
     repo.findAll.mockResolvedValue([[], 0]);
     const pagination: PaginationQueryDto = { page: 1, limit: 10 };
     await service.findAll(pagination, 1, undefined, undefined, 'truck');
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(repo.findAll).toHaveBeenCalledWith(
       pagination,
       1,

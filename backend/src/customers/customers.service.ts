@@ -5,7 +5,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
-import { Customer } from './entities/customer.entity';
+import { Address } from './entities/address.entity';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
@@ -15,9 +15,7 @@ import {
   CUSTOMER_REPOSITORY,
 } from './repositories/customer.repository';
 import { Inject } from '@nestjs/common';
-import { paginate } from '../common/pagination';
 import { toCustomerResponseDto } from './customers.mapper';
-
 
 @Injectable()
 export class CustomersService {
@@ -37,7 +35,7 @@ export class CustomersService {
         addresses: createCustomerDto.addresses?.map((addr) => ({
           ...addr,
           companyId,
-        })) as any,
+        })) as Address[],
       });
       const savedCustomer = await this.customerRepository.save(customer);
       return toCustomerResponseDto(savedCustomer);
@@ -62,37 +60,11 @@ export class CustomersService {
     active?: boolean,
     search?: string,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
-
     const [customers, total] = await this.customerRepository.findAll(
       pagination,
       companyId,
       active,
       search,
-
-    const { items: customers, total } = await paginate(
-      this.customerRepository,
-      pagination,
-      'customer',
-      (qb) => {
-        qb
-          .leftJoinAndSelect('customer.jobs', 'jobs')
-          .leftJoinAndSelect('customer.addresses', 'addresses')
-          .where('customer.companyId = :companyId', { companyId });
-
-        if (active !== undefined) {
-          qb.andWhere('customer.active = :active', { active });
-        }
-
-        if (search) {
-          qb.andWhere(
-            '(customer.name ILIKE :search OR customer.email ILIKE :search OR customer.phone ILIKE :search)',
-            { search: `%${search}%` },
-          );
-        }
-
-        return qb.orderBy('customer.name', 'ASC');
-      },
-
     );
 
     return {

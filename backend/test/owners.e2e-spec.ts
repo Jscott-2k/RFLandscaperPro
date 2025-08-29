@@ -46,20 +46,22 @@ describe('Owner user endpoints (e2e)', () => {
     ];
 
     const usersRepository = {
-      find: jest.fn(({ where }) => {
-        if (where?.companyId !== undefined) {
-          return users.filter((u) => u.companyId === where.companyId);
+      find: jest.fn((options: { where?: { companyId?: number } }) => {
+        if (options.where?.companyId !== undefined) {
+          return users.filter((u) => u.companyId === options.where.companyId);
         }
         return users;
       }),
-      findOne: jest.fn(({ where }) =>
-        users.find(
-          (u) =>
-            u.id === where.id &&
-            (where.companyId === undefined || u.companyId === where.companyId),
-        ),
+      findOne: jest.fn(
+        (options: { where: { id: number; companyId?: number } }) =>
+          users.find(
+            (u) =>
+              u.id === options.where.id &&
+              (options.where.companyId === undefined ||
+                u.companyId === options.where.companyId),
+          ),
       ),
-      save: jest.fn(async (user: User) => {
+      save: jest.fn((user: User) => {
         const existing = users.find((u) => u.id === user.id);
         if (existing) {
           Object.assign(existing, user);
@@ -77,16 +79,27 @@ describe('Owner user endpoints (e2e)', () => {
         { provide: getRepositoryToken(User), useValue: usersRepository },
         { provide: getRepositoryToken(Customer), useValue: {} },
         { provide: getRepositoryToken(Company), useValue: {} },
-        { provide: EmailService, useValue: { sendPasswordResetEmail: jest.fn() } },
+        {
+          provide: EmailService,
+          useValue: { sendPasswordResetEmail: jest.fn() },
+        },
       ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
-    app.use((req: Request & { user?: unknown }, _res: Response, next: NextFunction) => {
-      req.user = { userId: 1, role: UserRole.Owner, companyId: 1 };
-      next();
-    });
+    app.use(
+      (
+        req: Request & {
+          user?: { userId: number; role: UserRole; companyId: number };
+        },
+        _res: Response,
+        next: NextFunction,
+      ) => {
+        req.user = { userId: 1, role: UserRole.Owner, companyId: 1 };
+        next();
+      },
+    );
     await app.init();
   });
 
@@ -98,9 +111,10 @@ describe('Owner user endpoints (e2e)', () => {
     return request(app.getHttpServer())
       .get('/api/users/workers')
       .expect(200)
-      .expect((res) => {
-        expect(res.body).toHaveLength(1);
-        expect(res.body[0].id).toBe(2);
+      .expect((res: request.Response) => {
+        const body = res.body as { id: number }[];
+        expect(body).toHaveLength(1);
+        expect(body[0].id).toBe(2);
       });
   });
 
@@ -109,8 +123,9 @@ describe('Owner user endpoints (e2e)', () => {
       .patch('/api/users/workers/2')
       .send({ firstName: 'Updated' })
       .expect(200)
-      .expect((res) => {
-        expect(res.body.firstName).toBe('Updated');
+      .expect((res: request.Response) => {
+        const body = res.body as { firstName: string };
+        expect(body.firstName).toBe('Updated');
       });
   });
 
@@ -121,4 +136,3 @@ describe('Owner user endpoints (e2e)', () => {
       .expect(404);
   });
 });
-

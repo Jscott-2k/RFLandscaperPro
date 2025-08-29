@@ -3,7 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { Equipment, EquipmentStatus } from './entities/equipment.entity';
+import { EquipmentStatus } from './entities/equipment.entity';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentResponseDto } from './dto/equipment-response.dto';
@@ -13,9 +13,7 @@ import {
   IEquipmentRepository,
 } from './repositories/equipment.repository';
 import { Inject } from '@nestjs/common';
-import { paginate } from '../common/pagination';
 import { toEquipmentResponseDto } from './equipment.mapper';
-
 
 @Injectable()
 export class EquipmentService {
@@ -46,38 +44,12 @@ export class EquipmentService {
     type?: string,
     search?: string,
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
-
     const [equipments, total] = await this.equipmentRepository.findAll(
       pagination,
       companyId,
       status,
       type,
       search,
-
-    const { items: equipments, total } = await paginate(
-      this.equipmentRepository,
-      pagination,
-      'equipment',
-      (qb) => {
-        qb.where('equipment.companyId = :companyId', { companyId });
-
-        if (status) {
-          qb.andWhere('equipment.status = :status', { status });
-        }
-
-        if (type) {
-          qb.andWhere('equipment.type = :type', { type });
-        }
-
-        if (search) {
-          qb.andWhere(
-            '(equipment.name ILIKE :search OR equipment.type ILIKE :search OR equipment.description ILIKE :search)',
-            { search: `%${search}%` },
-          );
-        }
-
-        return qb;
-      },
     );
 
     return {
