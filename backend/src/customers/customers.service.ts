@@ -4,19 +4,23 @@ import {
   InternalServerErrorException,
   ConflictException,
 } from '@nestjs/common';
-import { Repository, QueryFailedError } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { QueryFailedError } from 'typeorm';
 import { Customer } from './entities/customer.entity';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import {
+  ICustomerRepository,
+  CUSTOMER_REPOSITORY,
+} from './repositories/customer.repository';
+import { Inject } from '@nestjs/common';
 
 @Injectable()
 export class CustomersService {
   constructor(
-    @InjectRepository(Customer)
-    private readonly customerRepository: Repository<Customer>,
+    @Inject(CUSTOMER_REPOSITORY)
+    private readonly customerRepository: ICustomerRepository,
   ) {}
 
   async create(
@@ -30,7 +34,7 @@ export class CustomersService {
         addresses: createCustomerDto.addresses?.map((addr) => ({
           ...addr,
           companyId,
-        })),
+        })) as any,
       });
       const savedCustomer = await this.customerRepository.save(customer);
       return this.toCustomerResponseDto(savedCustomer);
@@ -55,30 +59,12 @@ export class CustomersService {
     active?: boolean,
     search?: string,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
-    const { page = 1, limit = 10 } = pagination;
-    const cappedLimit = Math.min(limit, 100);
-    const queryBuilder = this.customerRepository
-      .createQueryBuilder('customer')
-      .leftJoinAndSelect('customer.jobs', 'jobs')
-      .leftJoinAndSelect('customer.addresses', 'addresses')
-      .where('customer.companyId = :companyId', { companyId });
-
-    if (active !== undefined) {
-      queryBuilder.andWhere('customer.active = :active', { active });
-    }
-
-    if (search) {
-      queryBuilder.andWhere(
-        '(customer.name ILIKE :search OR customer.email ILIKE :search OR customer.phone ILIKE :search)',
-        { search: `%${search}%` },
-      );
-    }
-
-    const [customers, total] = await queryBuilder
-      .skip((page - 1) * cappedLimit)
-      .take(cappedLimit)
-      .orderBy('customer.name', 'ASC')
-      .getManyAndCount();
+    const [customers, total] = await this.customerRepository.findAll(
+      pagination,
+      companyId,
+      active,
+      search,
+    );
 
     return {
       items: customers.map((customer) => this.toCustomerResponseDto(customer)),
@@ -87,10 +73,7 @@ export class CustomersService {
   }
 
   async findOne(id: number, companyId: number): Promise<CustomerResponseDto> {
-    const customer = await this.customerRepository.findOne({
-      where: { id, companyId },
-      relations: ['jobs', 'addresses'],
-    });
+    const customer = await this.customerRepository.findById(id, companyId);
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${id} not found.`);
     }
@@ -101,10 +84,10 @@ export class CustomersService {
     userId: number,
     companyId: number,
   ): Promise<CustomerResponseDto> {
-    const customer = await this.customerRepository.findOne({
-      where: { userId, companyId },
-      relations: ['jobs', 'addresses'],
-    });
+    const customer = await this.customerRepository.findByUserId(
+      userId,
+      companyId,
+    );
     if (!customer) {
       throw new NotFoundException(`Customer with userId ${userId} not found.`);
     }
@@ -116,9 +99,7 @@ export class CustomersService {
     updateCustomerDto: UpdateCustomerDto,
     companyId: number,
   ): Promise<CustomerResponseDto> {
-    const customer = await this.customerRepository.findOne({
-      where: { id, companyId },
-    });
+    const customer = await this.customerRepository.findById(id, companyId);
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${id} not found.`);
     }
@@ -128,9 +109,7 @@ export class CustomersService {
   }
 
   async remove(id: number, companyId: number): Promise<void> {
-    const customer = await this.customerRepository.findOne({
-      where: { id, companyId },
-    });
+    const customer = await this.customerRepository.findById(id, companyId);
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${id} not found.`);
     }

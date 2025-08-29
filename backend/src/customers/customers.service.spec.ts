@@ -1,34 +1,40 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { CustomersService } from './customers.service';
 import { Customer } from './entities/customer.entity';
-import { Repository, QueryFailedError, SelectQueryBuilder } from 'typeorm';
+import { QueryFailedError } from 'typeorm';
 import { ConflictException } from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import {
+  CUSTOMER_REPOSITORY,
+  ICustomerRepository,
+} from './repositories/customer.repository';
 
 describe('CustomersService', () => {
   let service: CustomersService;
 
-  let repo: jest.Mocked<Repository<Customer>>;
+  let repo: jest.Mocked<ICustomerRepository>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CustomersService,
         {
-          provide: getRepositoryToken(Customer),
+          provide: CUSTOMER_REPOSITORY,
           useValue: {
             create: jest.fn(),
             save: jest.fn(),
-            createQueryBuilder: jest.fn(),
+            findAll: jest.fn(),
+            findById: jest.fn(),
+            findByUserId: jest.fn(),
+            remove: jest.fn(),
           },
         },
       ],
     }).compile();
 
     service = module.get<CustomersService>(CustomersService);
-    repo = module.get(getRepositoryToken(Customer));
+    repo = module.get(CUSTOMER_REPOSITORY);
   });
 
   it('should be defined', () => {
@@ -105,27 +111,9 @@ describe('CustomersService', () => {
   });
 
   it('should apply search filter when finding all customers', async () => {
-    const qb: Record<string, jest.Mock> = {
-      leftJoinAndSelect: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      skip: jest.fn().mockReturnThis(),
-      take: jest.fn().mockReturnThis(),
-      orderBy: jest.fn().mockReturnThis(),
-      getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
-    };
-
-    (repo.createQueryBuilder as jest.Mock).mockReturnValue(
-      qb as unknown as SelectQueryBuilder<Customer>,
-    );
-
+    repo.findAll.mockResolvedValue([[], 0]);
     const pagination: PaginationQueryDto = { page: 1, limit: 10 };
     await service.findAll(pagination, 1, undefined, 'Jane');
-
-    expect(qb.andWhere).toHaveBeenCalledWith(
-      '(customer.name ILIKE :search OR customer.email ILIKE :search OR customer.phone ILIKE :search)',
-      { search: '%Jane%' },
-    );
-    expect(qb.getManyAndCount).toHaveBeenCalled();
+    expect(repo.findAll).toHaveBeenCalledWith(pagination, 1, undefined, 'Jane');
   });
 });
