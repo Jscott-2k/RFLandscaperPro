@@ -53,15 +53,46 @@ export class AuthService {
     );
   }
 
-  logout(): void {
-    if (this.hasLocalStorage()) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('companyId');
-      localStorage.removeItem('companies');
-    }
-    this.roles.set([]);
-    this.company.set(null);
-    this.companies.set([]);
+  requestPasswordReset(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.apiUrl}/auth/request-password-reset`,
+      { email },
+    );
+  }
+
+  resetPassword(token: string, password: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.apiUrl}/auth/reset-password`,
+      { token, password },
+    );
+  }
+
+  refreshToken(): Observable<{ access_token: string }> {
+    return this.http
+      .post<{ access_token: string }>(`${environment.apiUrl}/auth/refresh`, { token: this.getToken() })
+      .pipe(
+        tap((res) => {
+          if (this.hasLocalStorage()) {
+            localStorage.setItem('token', res.access_token);
+            this.roles.set(this.getRolesFromToken());
+          }
+        }),
+      );
+  }
+
+  logout(): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/auth/logout`, {}).pipe(
+      tap(() => {
+        if (this.hasLocalStorage()) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('companyId');
+          localStorage.removeItem('companies');
+        }
+        this.roles.set([]);
+        this.company.set(null);
+        this.companies.set([]);
+      }),
+    );
   }
 
   getToken(): string | null {
