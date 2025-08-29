@@ -11,6 +11,7 @@ import { AssignJobDto } from './dto/assign-job.dto';
 import { BulkAssignJobDto } from './dto/bulk-assign-job.dto';
 import { ScheduleJobDto } from './dto/schedule-job.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+
 import { Inject } from '@nestjs/common';
 import {
   JOB_REPOSITORY,
@@ -32,6 +33,10 @@ import {
   ASSIGNMENT_REPOSITORY,
   IAssignmentRepository,
 } from './repositories/assignment.repository';
+
+import { paginate } from '../common/pagination';
+import { toJobResponseDto } from './jobs.mapper';
+
 
 @Injectable()
 export class JobsService {
@@ -66,7 +71,7 @@ export class JobsService {
       companyId,
     });
     const savedJob = await this.jobRepository.save(job);
-    return this.toJobResponseDto(savedJob);
+    return toJobResponseDto(savedJob);
   }
 
   async findAll(
@@ -79,6 +84,7 @@ export class JobsService {
     workerId?: number,
     equipmentId?: number,
   ): Promise<{ items: JobResponseDto[]; total: number }> {
+
     const [jobs, total] = await this.jobRepository.findAll(pagination, companyId, {
       completed,
       customerId,
@@ -88,8 +94,51 @@ export class JobsService {
       equipmentId,
     });
 
+    const { items: jobs, total } = await paginate(
+      this.jobRepository,
+      pagination,
+      'job',
+      (qb) => {
+        qb
+          .leftJoinAndSelect('job.customer', 'customer')
+          .leftJoinAndSelect('job.assignments', 'assignments')
+          .leftJoinAndSelect('assignments.user', 'user')
+          .leftJoinAndSelect('assignments.equipment', 'equipment')
+          .where('job.companyId = :companyId', { companyId });
+
+        if (completed !== undefined) {
+          qb.andWhere('job.completed = :completed', { completed });
+        }
+
+        if (customerId) {
+          qb.andWhere('job.customer.id = :customerId', { customerId });
+        }
+
+        if (startDate) {
+          qb.andWhere('job.scheduledDate >= :startDate', { startDate });
+        }
+
+        if (endDate) {
+          qb.andWhere('job.scheduledDate <= :endDate', { endDate });
+        }
+
+        if (workerId) {
+          qb.andWhere('user.id = :workerId', { workerId });
+        }
+
+        if (equipmentId) {
+          qb.andWhere('equipment.id = :equipmentId', { equipmentId });
+        }
+
+        return qb
+          .orderBy('job.scheduledDate', 'ASC')
+          .addOrderBy('job.createdAt', 'DESC');
+      },
+    );
+
+
     return {
-      items: jobs.map((job) => this.toJobResponseDto(job)),
+      items: jobs.map((job) => toJobResponseDto(job)),
       total,
     };
   }
@@ -118,7 +167,7 @@ export class JobsService {
     }
     Object.assign(job, updateData);
     const updatedJob = await this.jobRepository.save(job);
-    return this.toJobResponseDto(updatedJob);
+    return toJobResponseDto(updatedJob);
   }
 
   async findOne(id: number, companyId: number): Promise<JobResponseDto> {
@@ -133,7 +182,7 @@ export class JobsService {
       throw new NotFoundException(`Job with ID ${id} not found.`);
     }
 
-    return this.toJobResponseDto(job);
+    return toJobResponseDto(job);
   }
 
   async remove(id: number, companyId: number): Promise<void> {
@@ -143,6 +192,7 @@ export class JobsService {
     }
     await this.jobRepository.remove(job);
   }
+
 
   private toJobResponseDto(job: Job): JobResponseDto {
     return {
@@ -173,6 +223,31 @@ export class JobsService {
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
     };
+
+  private async checkResourceConflicts(
+    date: Date,
+    userId: number,
+    equipmentId: number,
+    companyId: number,
+    jobId?: number,
+  ): Promise<boolean> {
+    const query = this.assignmentRepository
+      .createQueryBuilder('assignment')
+      .leftJoin('assignment.job', 'job')
+      .where('job.scheduledDate = :date', { date })
+      .andWhere('assignment.companyId = :companyId', { companyId })
+      .andWhere(
+        '(assignment.userId = :userId OR assignment.equipmentId = :equipmentId)',
+        { userId, equipmentId },
+      );
+
+    if (jobId !== undefined) {
+      query.andWhere('job.id != :jobId', { jobId });
+    }
+
+    const conflict = await query.getOne();
+    return !!conflict;
+
   }
 
   async schedule(
@@ -204,7 +279,7 @@ export class JobsService {
 
     job.scheduledDate = scheduleJobDto.scheduledDate;
     const saved = await this.jobRepository.save(job);
-    return this.toJobResponseDto(saved);
+    return toJobResponseDto(saved);
   }
 
   async assign(

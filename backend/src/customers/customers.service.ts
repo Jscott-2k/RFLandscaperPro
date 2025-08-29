@@ -15,6 +15,9 @@ import {
   CUSTOMER_REPOSITORY,
 } from './repositories/customer.repository';
 import { Inject } from '@nestjs/common';
+import { paginate } from '../common/pagination';
+import { toCustomerResponseDto } from './customers.mapper';
+
 
 @Injectable()
 export class CustomersService {
@@ -37,7 +40,7 @@ export class CustomersService {
         })) as any,
       });
       const savedCustomer = await this.customerRepository.save(customer);
-      return this.toCustomerResponseDto(savedCustomer);
+      return toCustomerResponseDto(savedCustomer);
     } catch (error) {
       if (
         error instanceof QueryFailedError &&
@@ -59,15 +62,41 @@ export class CustomersService {
     active?: boolean,
     search?: string,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
+
     const [customers, total] = await this.customerRepository.findAll(
       pagination,
       companyId,
       active,
       search,
+
+    const { items: customers, total } = await paginate(
+      this.customerRepository,
+      pagination,
+      'customer',
+      (qb) => {
+        qb
+          .leftJoinAndSelect('customer.jobs', 'jobs')
+          .leftJoinAndSelect('customer.addresses', 'addresses')
+          .where('customer.companyId = :companyId', { companyId });
+
+        if (active !== undefined) {
+          qb.andWhere('customer.active = :active', { active });
+        }
+
+        if (search) {
+          qb.andWhere(
+            '(customer.name ILIKE :search OR customer.email ILIKE :search OR customer.phone ILIKE :search)',
+            { search: `%${search}%` },
+          );
+        }
+
+        return qb.orderBy('customer.name', 'ASC');
+      },
+
     );
 
     return {
-      items: customers.map((customer) => this.toCustomerResponseDto(customer)),
+      items: customers.map((customer) => toCustomerResponseDto(customer)),
       total,
     };
   }
@@ -77,7 +106,7 @@ export class CustomersService {
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${id} not found.`);
     }
-    return this.toCustomerResponseDto(customer);
+    return toCustomerResponseDto(customer);
   }
 
   async findByUserId(
@@ -91,7 +120,7 @@ export class CustomersService {
     if (!customer) {
       throw new NotFoundException(`Customer with userId ${userId} not found.`);
     }
-    return this.toCustomerResponseDto(customer);
+    return toCustomerResponseDto(customer);
   }
 
   async update(
@@ -105,7 +134,7 @@ export class CustomersService {
     }
     Object.assign(customer, updateCustomerDto);
     const updatedCustomer = await this.customerRepository.save(customer);
-    return this.toCustomerResponseDto(updatedCustomer);
+    return toCustomerResponseDto(updatedCustomer);
   }
 
   async remove(id: number, companyId: number): Promise<void> {
@@ -127,33 +156,5 @@ export class CustomersService {
   async activate(id: number, companyId: number): Promise<CustomerResponseDto> {
     await this.findOne(id, companyId);
     return this.update(id, { active: true }, companyId);
-  }
-
-  private toCustomerResponseDto(customer: Customer): CustomerResponseDto {
-    return {
-      id: customer.id,
-      name: customer.name,
-      email: customer.email,
-      phone: customer.phone,
-      notes: customer.notes,
-      active: customer.active,
-      createdAt: customer.createdAt,
-      updatedAt: customer.updatedAt,
-      userId: customer.userId,
-      jobs: customer.jobs?.map((job) => ({
-        id: job.id,
-        title: job.title,
-      })),
-      addresses: customer.addresses?.map((addr) => ({
-        id: addr.id,
-        street: addr.street,
-        city: addr.city,
-        state: addr.state,
-        zip: addr.zip,
-        unit: addr.unit,
-        notes: addr.notes,
-        primary: addr.primary,
-      })),
-    };
   }
 }

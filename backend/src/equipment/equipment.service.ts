@@ -13,6 +13,9 @@ import {
   IEquipmentRepository,
 } from './repositories/equipment.repository';
 import { Inject } from '@nestjs/common';
+import { paginate } from '../common/pagination';
+import { toEquipmentResponseDto } from './equipment.mapper';
+
 
 @Injectable()
 export class EquipmentService {
@@ -33,7 +36,7 @@ export class EquipmentService {
       companyId,
     });
     const savedEquipment = await this.equipmentRepository.save(equipment);
-    return this.toEquipmentResponseDto(savedEquipment);
+    return toEquipmentResponseDto(savedEquipment);
   }
 
   async findAll(
@@ -43,16 +46,42 @@ export class EquipmentService {
     type?: string,
     search?: string,
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
+
     const [equipments, total] = await this.equipmentRepository.findAll(
       pagination,
       companyId,
       status,
       type,
       search,
+
+    const { items: equipments, total } = await paginate(
+      this.equipmentRepository,
+      pagination,
+      'equipment',
+      (qb) => {
+        qb.where('equipment.companyId = :companyId', { companyId });
+
+        if (status) {
+          qb.andWhere('equipment.status = :status', { status });
+        }
+
+        if (type) {
+          qb.andWhere('equipment.type = :type', { type });
+        }
+
+        if (search) {
+          qb.andWhere(
+            '(equipment.name ILIKE :search OR equipment.type ILIKE :search OR equipment.description ILIKE :search)',
+            { search: `%${search}%` },
+          );
+        }
+
+        return qb;
+      },
     );
 
     return {
-      items: equipments.map((eq) => this.toEquipmentResponseDto(eq)),
+      items: equipments.map((eq) => toEquipmentResponseDto(eq)),
       total,
     };
   }
@@ -62,7 +91,7 @@ export class EquipmentService {
     if (!equipment) {
       throw new NotFoundException(`Equipment with ID ${id} not found.`);
     }
-    return this.toEquipmentResponseDto(equipment);
+    return toEquipmentResponseDto(equipment);
   }
 
   async update(
@@ -88,7 +117,7 @@ export class EquipmentService {
 
     Object.assign(equipment, updateEquipmentDto);
     const updatedEquipment = await this.equipmentRepository.save(equipment);
-    return this.toEquipmentResponseDto(updatedEquipment);
+    return toEquipmentResponseDto(updatedEquipment);
   }
 
   async remove(id: number, companyId: number): Promise<void> {
@@ -145,19 +174,5 @@ export class EquipmentService {
         `Invalid status transition from ${currentStatus} to ${newStatus}`,
       );
     }
-  }
-
-  private toEquipmentResponseDto(equipment: Equipment): EquipmentResponseDto {
-    return {
-      id: equipment.id,
-      name: equipment.name,
-      type: equipment.type,
-      status: equipment.status,
-      location: equipment.location,
-      description: equipment.description,
-      lastMaintenanceDate: equipment.lastMaintenanceDate,
-      createdAt: equipment.createdAt,
-      updatedAt: equipment.updatedAt,
-    };
   }
 }
