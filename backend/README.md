@@ -51,6 +51,8 @@ DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=your_password
 DB_NAME=rflandscaperpro
+# Auto-run migrations on startup (set to true in production if desired)
+# RUN_MIGRATIONS=false
 JWT_SECRET=your_secure_jwt_secret
 JWT_EXPIRES_IN=1d
 JWT_REFRESH_EXPIRES_IN=7d
@@ -66,13 +68,15 @@ account and logs preview URLs for emails.
 
 Remote logging is only enabled when `REMOTE_LOG_HOST` is defined. When omitted, logs are written to the console and `app.log` file only.
 
+To automatically apply database changes on startup (such as in production), set `RUN_MIGRATIONS=true`. In development, omit this variable and run migrations manually with `npm run migration:run`.
+
 ### 3. Database Setup
 ```bash
 # Create PostgreSQL database
 createdb rflandscaperpro
 
 # Run database migrations (when available)
-npm run migration:run:dev
+npm run migration:run
 
 # Seed initial data (creates admin user and sample customer)
 # This script is intended for local development only and will
@@ -224,7 +228,7 @@ npm run migration:create:dev
 npm run migration:generate:dev
 
 # Run pending migrations
-npm run migration:run:dev
+npm run migration:run
 
 # Revert last migration
 npm run migration:revert:dev

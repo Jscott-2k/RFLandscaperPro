@@ -15,7 +15,7 @@ export default new DataSource({
   database: process.env.DB_NAME,
   entities: [join(__dirname, '**/*.entity{.ts,.js}')],
   migrations: [join(__dirname, 'src/migrations/*{.ts,.js}')],
-  migrationsRun: true,
+  migrationsRun: process.env.RUN_MIGRATIONS === 'true',
   synchronize: false,
   ssl: isProduction ? { rejectUnauthorized: false } : false,
   subscribers: [CompanyIdSubscriber],
