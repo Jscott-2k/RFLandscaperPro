@@ -27,8 +27,15 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<User> {
-    const user = await this.usersService.findByEmail(email);
+  async validateUser(
+    email: string,
+    pass: string,
+    company?: string,
+  ): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { email },
+      relations: ['company'],
+    });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -40,6 +47,12 @@ export class AuthService {
 
     if (!user.isVerified) {
       throw new UnauthorizedException('Email not verified');
+    }
+
+    if (company !== undefined) {
+      if (!user.company || user.company.name !== company) {
+        throw new UnauthorizedException('Invalid company');
+      }
     }
 
     return user;
