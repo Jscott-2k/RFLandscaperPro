@@ -56,7 +56,7 @@ export class AuthService {
   logout(): void {
     if (this.hasLocalStorage()) {
       localStorage.removeItem('token');
-      localStorage.removeItem('company');
+      localStorage.removeItem('companyId');
       localStorage.removeItem('companies');
     }
     this.roles.set([]);
@@ -85,7 +85,7 @@ export class AuthService {
 
   setCompany(company: string): void {
     if (this.hasLocalStorage()) {
-      localStorage.setItem('company', company);
+      localStorage.setItem('companyId', company);
     }
     this.company.set(company);
   }
@@ -101,7 +101,7 @@ export class AuthService {
     if (!this.hasLocalStorage()) {
       return null;
     }
-    return localStorage.getItem('company');
+    return localStorage.getItem('companyId');
   }
 
   private getCompaniesFromStorage(): string[] {
