@@ -13,7 +13,7 @@
     "serve:ssr": "node dist/frontend/server/server.mjs",
     "seed": "npm --prefix ../backend run seed",
     "seed:drop": "npm --prefix ../backend run seed:drop",
-    "lint": "eslint ."
+    "lint": "eslint . --fix"
   },
   "prettier": {
     "printWidth": 100,
