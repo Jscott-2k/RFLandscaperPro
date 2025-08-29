@@ -6,13 +6,23 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const token = auth.getToken();
   const company = auth.getCompany();
-  if (token || company) {
-    req = req.clone({
-      setHeaders: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(company ? { 'X-Company-ID': company } : {}),
-      },
-    });
+
+  const isLogin = req.url.includes('/auth/login');
+  const isSwitchCompany = req.url.includes('/auth/switch-company');
+
+  const headers: Record<string, string> = {};
+
+  if (token && !isLogin) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
+
+  if (company && !isLogin && !isSwitchCompany) {
+    headers['X-Company-ID'] = company;
+  }
+
+  if (Object.keys(headers).length) {
+    req = req.clone({ setHeaders: headers });
+  }
+
   return next(req);
 };

@@ -22,11 +22,10 @@ export class AuthService {
       tap((res) => {
         if (this.hasLocalStorage()) {
           localStorage.setItem('token', res.access_token);
-          this.roles.set(this.getRolesFromToken());
+          this.roles.set(this.getRolesFromToken(res.access_token));
           const company = this.getCompanyFromToken(res.access_token);
-          if (company) {
-            this.setCompany(company);
-          }
+          this.setCompany(company ?? null);
+          this.setCompanies([]);
         }
       }),
     );
@@ -45,7 +44,7 @@ export class AuthService {
         tap((res) => {
           if (this.hasLocalStorage()) {
             localStorage.setItem('token', res.access_token);
-            this.roles.set(this.getRolesFromToken());
+            this.roles.set(this.getRolesFromToken(res.access_token));
             this.setCompany(companyId);
           }
         }),
@@ -105,14 +104,10 @@ export class AuthService {
     if (this.hasLocalStorage()) {
       localStorage.setItem('token', res.access_token);
       this.roles.set(this.getRolesFromToken(res.access_token));
-      const company = this.getCompanyFromToken(res.access_token) ?? companyHint;
+      const company = this.getCompanyFromToken(res.access_token) ?? companyHint ?? null;
       const companies = res.companies ?? (company ? [company] : []);
-      if (company) {
-        this.setCompany(company);
-      }
-      if (companies.length) {
-        this.setCompanies(companies);
-      }
+      this.setCompany(company);
+      this.setCompanies(companies);
     }
   }
 
@@ -150,9 +145,13 @@ export class AuthService {
     return this.companies();
   }
 
-  setCompany(company: string): void {
+  setCompany(company: string | null): void {
     if (this.hasLocalStorage()) {
-      localStorage.setItem('companyId', company);
+      if (company) {
+        localStorage.setItem('companyId', company);
+      } else {
+        localStorage.removeItem('companyId');
+      }
     }
     this.company.set(company);
   }
