@@ -132,6 +132,22 @@ export class AuthService {
     user: JwtUserPayload,
     companyId: number,
   ): Promise<{ access_token: string }> {
+    // Allow master users to switch companies without membership lookup
+    if (user.role === UserRole.Master) {
+      const payload = {
+        username: user.username,
+        sub: user.userId,
+        email: user.email,
+        companyId,
+        roles: [UserRole.Master],
+        role: UserRole.Master,
+      };
+
+      return {
+        access_token: await this.jwtService.signAsync(payload),
+      };
+    }
+
     const membership = await this.companyMembershipRepository.findOne({
       where: {
         companyId,

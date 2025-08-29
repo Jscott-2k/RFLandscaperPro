@@ -23,6 +23,7 @@ export enum UserRole {
   Owner = 'owner',
   Worker = 'worker',
   Customer = 'customer',
+  Master = 'master',
 }
 
 @Entity()
