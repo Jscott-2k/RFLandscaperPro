@@ -98,4 +98,43 @@ export class CompaniesController {
       expiresAt: invitation.expiresAt,
     };
   }
+
+  @Roles(UserRole.Owner, UserRole.Admin)
+  @Post(':companyId/invitations/:inviteId/revoke')
+  async revokeInvitation(
+    @Param('companyId', ParseIntPipe) companyId: number,
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @AuthUser() user: User,
+  ): Promise<{ success: true }> {
+    if (user.companyId !== companyId)
+      throw new NotFoundException('Company not found');
+    await this.invitationsService.revokeInvitation(companyId, inviteId);
+    return { success: true };
+  }
+
+  @Roles(UserRole.Owner, UserRole.Admin)
+  @Post(':companyId/invitations/:inviteId/resend')
+  async resendInvitation(
+    @Param('companyId', ParseIntPipe) companyId: number,
+    @Param('inviteId', ParseIntPipe) inviteId: number,
+    @AuthUser() user: User,
+  ): Promise<{
+    id: number;
+    email: string;
+    role: InvitationRole;
+    expiresAt: Date;
+  }> {
+    if (user.companyId !== companyId)
+      throw new NotFoundException('Company not found');
+    const invitation = await this.invitationsService.resendInvitation(
+      companyId,
+      inviteId,
+    );
+    return {
+      id: invitation.id,
+      email: invitation.email,
+      role: invitation.role,
+      expiresAt: invitation.expiresAt,
+    };
+  }
 }
