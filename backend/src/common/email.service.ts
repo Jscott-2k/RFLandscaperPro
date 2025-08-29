@@ -25,22 +25,23 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(EmailService.name);
   private transporter!: nodemailer.Transporter<SMTPTransport.SentMessageInfo>;
   private testAccount?: nodemailer.TestAccount;
+  private driver!: MailDriver;
 
   private readyResolve!: () => void;
   private readonly ready = new Promise<void>(
     (res) => (this.readyResolve = res),
   );
 
-  private get driver(): MailDriver {
-    if (process.env.NODE_ENV === 'production') return 'smtp';
-    return process.env.SMTP_USER && process.env.SMTP_PASS ? 'smtp' : 'ethereal';
-  }
-
   async onModuleInit(): Promise<void> {
-    const driver = this.driver;
-    this.logger.log(`Initializing EmailService with driver: ${driver}`);
+    this.driver =
+      process.env.NODE_ENV === 'production'
+        ? 'smtp'
+        : process.env.SMTP_USER && process.env.SMTP_PASS
+          ? 'smtp'
+          : 'ethereal';
+    this.logger.log(`Initializing EmailService with driver: ${this.driver}`);
 
-    if (driver === 'ethereal') {
+    if (this.driver === 'ethereal') {
       // Fall back to an Ethereal test account when no SMTP credentials are provided
       this.testAccount = await nodemailer.createTestAccount();
       this.transporter = nodemailer.createTransport({
@@ -69,9 +70,26 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
         this.logger.log('SMTP transporter verified.');
       } catch (e) {
         const err = toError(e);
-        this.logger.warn(
-          `SMTP verify failed (will still try to send): ${err.message}`,
-        );
+        if (process.env.NODE_ENV !== 'production') {
+          this.logger.warn(
+            `SMTP verify failed: ${err.message}. Falling back to ethereal.`,
+          );
+          this.testAccount = await nodemailer.createTestAccount();
+          this.transporter = nodemailer.createTransport({
+            host: 'smtp.ethereal.email',
+            port: 587,
+            secure: false,
+            auth: {
+              user: this.testAccount.user,
+              pass: this.testAccount.pass,
+            },
+          });
+          this.driver = 'ethereal';
+        } else {
+          this.logger.warn(
+            `SMTP verify failed (will still try to send): ${err.message}`,
+          );
+        }
       }
     }
 
