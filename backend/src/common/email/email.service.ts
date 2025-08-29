@@ -27,8 +27,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
   );
 
   async onModuleInit(): Promise<void> {
-    const hasMailhog =
-      !!process.env.MAILHOG_HOST || !!process.env.MAILHOG_PORT;
+    const hasMailhog = !!process.env.MAILHOG_HOST || !!process.env.MAILHOG_PORT;
     this.driver =
       process.env.NODE_ENV === 'production'
         ? 'smtp'
