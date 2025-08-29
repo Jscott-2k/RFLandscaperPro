@@ -25,9 +25,10 @@ import { EmailService } from '../common/email.service';
           throw new Error('JWT_SECRET is not defined');
         }
 
+        const expiresIn = config.get<string>('JWT_EXPIRES_IN', '1h');
         return {
           secret,
-          signOptions: { expiresIn: '1h' },
+          signOptions: { expiresIn },
         };
       },
     }),
