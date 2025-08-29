@@ -17,7 +17,9 @@ export class UpdateUserDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @Transform(({ value }) => (value ? new Email(value) : undefined))
+  @Transform(({ value }: { value: string | undefined }) =>
+    value ? new Email(value) : undefined,
+  )
   email?: Email;
 
   @ApiPropertyOptional()
@@ -32,6 +34,8 @@ export class UpdateUserDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @Transform(({ value }) => (value ? new PhoneNumber(value) : undefined))
+  @Transform(({ value }: { value: string | undefined }) =>
+    value ? new PhoneNumber(value) : undefined,
+  )
   phone?: PhoneNumber;
 }

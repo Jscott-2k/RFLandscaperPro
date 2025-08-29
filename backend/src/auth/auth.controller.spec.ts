@@ -5,6 +5,7 @@ import { RegisterDto } from './dto/register.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { LoginDto } from './dto/login.dto';
+import { SignupOwnerDto } from './dto/signup-owner.dto';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -43,7 +44,7 @@ describe('AuthController', () => {
 
   it('logs in without company', async () => {
     const dto: LoginDto = { email: 'user@example.com', password: 'pass' };
-    const user = { id: 1 } as any;
+    const user: { id: number } = { id: 1 };
     const resultPayload = { access_token: 'token' };
     authService.validateUser.mockResolvedValue(user);
     authService.login.mockResolvedValue(resultPayload);
@@ -59,7 +60,7 @@ describe('AuthController', () => {
   });
 
   it('signs up a new owner', async () => {
-    const dto = {
+    const dto: SignupOwnerDto = {
       name: 'Owner',
       email: 'owner@example.com',
       password: 'Password1!',
@@ -68,7 +69,7 @@ describe('AuthController', () => {
     const response = { access_token: 'jwt' };
     authService.signupOwner.mockResolvedValue(response);
 
-    const result = await controller.signupOwner(dto as any);
+    const result = await controller.signupOwner(dto);
 
     expect(authService.signupOwner).toHaveBeenCalledWith(dto);
     expect(result).toEqual(response);

@@ -42,7 +42,9 @@ describe('CustomersService', () => {
   });
 
   it('throws ConflictException when email already exists in same company', async () => {
-    repo.create.mockReturnValue({} as Customer);
+    const createMock = jest
+      .spyOn(repo, 'create')
+      .mockReturnValue({} as Customer);
     repo.save.mockRejectedValue(
       new QueryFailedError('', [], { code: '23505' } as any),
     );
@@ -66,8 +68,7 @@ describe('CustomersService', () => {
       'message',
       'Email already exists',
     );
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(repo.create).toHaveBeenCalledWith(
+    expect(createMock).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'John Doe',
         email: 'john@example.com',
@@ -109,10 +110,9 @@ describe('CustomersService', () => {
   });
 
   it('should apply search filter when finding all customers', async () => {
-    repo.findAll.mockResolvedValue([[], 0]);
+    const findAllMock = jest.spyOn(repo, 'findAll').mockResolvedValue([[], 0]);
     const pagination: PaginationQueryDto = { page: 1, limit: 10 };
     await service.findAll(pagination, 1, undefined, 'Jane');
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    expect(repo.findAll).toHaveBeenCalledWith(pagination, 1, undefined, 'Jane');
+    expect(findAllMock).toHaveBeenCalledWith(pagination, 1, undefined, 'Jane');
   });
 });

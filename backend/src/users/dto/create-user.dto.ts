@@ -20,7 +20,7 @@ export class CreateUserDto {
   username: string;
 
   @ApiProperty()
-  @Transform(({ value }) => new Email(value))
+  @Transform(({ value }: { value: string }) => new Email(value))
   email: Email;
 
   @ApiProperty()
@@ -55,7 +55,9 @@ export class CreateUserDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @Transform(({ value }) => (value ? new PhoneNumber(value) : undefined))
+  @Transform(({ value }: { value: string | undefined }) =>
+    value ? new PhoneNumber(value) : undefined,
+  )
   phone?: PhoneNumber;
 
   @ApiPropertyOptional()

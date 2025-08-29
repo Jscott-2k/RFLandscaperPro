@@ -42,7 +42,7 @@ describe('MembersService', () => {
       user: { id: 2, username: 'u', email: new Email('u@e.com') },
     });
     repo.findOne.mockResolvedValue(membership);
-    repo.save.mockImplementation(async (m) => m as CompanyUser);
+    repo.save.mockImplementation((m) => Promise.resolve(m as CompanyUser));
 
     const dto: UpdateCompanyMemberDto = {
       role: CompanyUserRole.ADMIN,

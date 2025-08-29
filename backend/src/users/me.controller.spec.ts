@@ -12,7 +12,9 @@ describe('MeController', () => {
   let repo: jest.Mocked<Pick<Repository<CompanyUser>, 'find'>>;
 
   beforeEach(() => {
-    repo = { find: jest.fn() } as any;
+    repo = { find: jest.fn() } as unknown as jest.Mocked<
+      Pick<Repository<CompanyUser>, 'find'>
+    >;
     controller = new MeController(repo as unknown as Repository<CompanyUser>);
   });
 

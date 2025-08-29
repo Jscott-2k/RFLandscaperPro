@@ -9,7 +9,7 @@ function parsePort(v: string | undefined, fallback: number): number {
 export class SmtpTransport implements EmailTransport {
   driver: MailDriver = 'smtp';
 
-  async create() {
+  create() {
     const port = parsePort(process.env.SMTP_PORT, 587);
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
@@ -20,6 +20,6 @@ export class SmtpTransport implements EmailTransport {
         pass: process.env.SMTP_PASS,
       },
     });
-    return { transporter };
+    return Promise.resolve({ transporter });
   }
 }

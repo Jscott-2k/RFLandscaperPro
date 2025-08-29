@@ -2,7 +2,7 @@ import { SendMailOptions } from 'nodemailer';
 import { InvitationRole } from '../../../companies/entities/invitation.entity';
 
 function formatRole(role: InvitationRole): string {
-  return role === 'ADMIN' ? 'Admin' : 'Worker';
+  return role === InvitationRole.ADMIN ? 'Admin' : 'Worker';
 }
 
 export function addedToCompanyMail(
