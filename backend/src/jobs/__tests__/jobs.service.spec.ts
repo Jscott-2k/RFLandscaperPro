@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConflictException, NotFoundException } from '@nestjs/common';
-import { JobsService } from './jobs.service';
-import { Job } from './entities/job.entity';
-import { Customer } from '../customers/entities/customer.entity';
-import { User } from '../users/user.entity';
-import { Equipment } from '../equipment/entities/equipment.entity';
-import { Assignment } from './entities/assignment.entity';
-import { CreateJobDto } from './dto/create-job.dto';
-import { ScheduleJobDto } from './dto/schedule-job.dto';
-import { AssignJobDto } from './dto/assign-job.dto';
+import { JobsService } from '../jobs.service';
+import { Job } from '../entities/job.entity';
+import { Customer } from '../../customers/entities/customer.entity';
+import { User } from '../../users/user.entity';
+import { Equipment } from '../../equipment/entities/equipment.entity';
+import { Assignment } from '../entities/assignment.entity';
+import { CreateJobDto } from '../dto/create-job.dto';
+import { ScheduleJobDto } from '../dto/schedule-job.dto';
+import { AssignJobDto } from '../dto/assign-job.dto';
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument */
 describe('JobsService', () => {
@@ -184,5 +184,47 @@ describe('JobsService', () => {
     await expect(service.assign(1, assignJobDto, 1)).rejects.toBeInstanceOf(
       ConflictException,
     );
+  });
+
+  it('should schedule job when no resource conflicts', async () => {
+    const date = new Date();
+    const job = {
+      id: 1,
+      assignments: [
+        {
+          id: 1,
+          user: { id: 1, username: 'worker' },
+          equipment: { id: 2, name: 'mower' },
+          startTime: null,
+          endTime: null,
+          notes: null,
+        },
+      ],
+      customer: { id: 1, name: 'Cust', email: 'c@example.com' },
+      title: 'Job',
+      description: null,
+      completed: false,
+      estimatedHours: null,
+      actualHours: null,
+      notes: null,
+      createdAt: date,
+      updatedAt: date,
+      scheduledDate: null,
+    };
+    jobRepository.findOne.mockResolvedValue(job);
+
+    const qb = {
+      leftJoin: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getOne: jest.fn().mockResolvedValue(null),
+    };
+    assignmentRepository.createQueryBuilder.mockReturnValue(qb);
+    jobRepository.save.mockImplementation(async (j) => j);
+
+    const result = await service.schedule(1, { scheduledDate: date }, 1);
+
+    expect(jobRepository.save).toHaveBeenCalled();
+    expect(result.scheduledDate).toBe(date);
   });
 });
