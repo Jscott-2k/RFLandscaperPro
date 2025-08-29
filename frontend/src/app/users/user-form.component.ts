@@ -71,12 +71,9 @@ export class UserFormComponent {
   private router = inject(Router);
 
   form = this.fb.nonNullable.group({
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    username: ['', Validators.required],
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    email: ['', [Validators.required, Validators.email]],
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    password: ['', Validators.required],
+    username: ['', Validators.required.bind(Validators)],
+    email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
+    password: ['', Validators.required.bind(Validators)],
     firstName: [''],
     lastName: [''],
     phone: [''],

@@ -37,15 +37,10 @@ export class RegisterComponent {
   private fb = inject(FormBuilder);
 
   form = this.fb.nonNullable.group({
-    // Validators methods are static; disable unbound-method warnings for usage.
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    username: ['', Validators.required],
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    email: ['', [Validators.required, Validators.email]],
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    password: ['', Validators.required],
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    role: ['customer', Validators.required],
+    username: ['', Validators.required.bind(Validators)],
+    email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
+    password: ['', Validators.required.bind(Validators)],
+    role: ['customer', Validators.required.bind(Validators)],
     company: this.fb.nonNullable.group({
       name: [''],
       address: [''],

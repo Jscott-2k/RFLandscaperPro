@@ -26,13 +26,9 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
 
   form = this.fb.nonNullable.group({
-    // Validators methods are static and do not rely on `this`.
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    company: ['', Validators.required],
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    email: ['', [Validators.required, Validators.email]],
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    password: ['', Validators.required],
+    company: ['', Validators.required.bind(Validators)],
+    email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
+    password: ['', Validators.required.bind(Validators)],
   });
 
   submit(): void {

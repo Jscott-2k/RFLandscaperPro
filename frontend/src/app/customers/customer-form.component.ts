@@ -37,10 +37,8 @@ export class CustomerFormComponent implements OnInit {
   customerId?: number;
 
   form = this.fb.nonNullable.group({
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    name: ['', Validators.required],
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    email: ['', [Validators.required, Validators.email]],
+    name: ['', Validators.required.bind(Validators)],
+    email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
     phone: [''],
   });
 
