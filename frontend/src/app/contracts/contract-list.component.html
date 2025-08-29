@@ -1,0 +1,10 @@
+<h2>Contracts</h2>
+<ul>
+  <li *ngFor="let contract of contracts">
+    <a [routerLink]="['/contracts', contract.id]">
+      Contract {{ contract.id }} - {{ contract.customer?.name || contract.customerId }}
+    </a>
+    <button type="button" (click)="cancel(contract.id!)">Cancel</button>
+  </li>
+</ul>
+<a routerLink="/contracts/new">Create Contract</a>
