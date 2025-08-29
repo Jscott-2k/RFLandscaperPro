@@ -20,6 +20,7 @@ import { Company } from '../companies/entities/company.entity';
 import {
   CompanyUser,
   CompanyUserRole,
+  CompanyUserStatus,
 } from '../companies/entities/company-user.entity';
 
 @Injectable()
@@ -35,6 +36,8 @@ export class AuthService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly emailService: EmailService,
+    @InjectRepository(CompanyUser)
+    private readonly companyUsersRepository: Repository<CompanyUser>,
   ) {}
 
   async validateUser(
@@ -165,6 +168,47 @@ export class AuthService {
         }
       }
       throw error;
+    }
+  }
+
+  async switchCompany(
+    user: { userId: number; username: string; email: string },
+    companyId: number,
+  ): Promise<{ access_token: string }> {
+    const membership = await this.companyUsersRepository.findOne({
+      where: {
+        companyId,
+        userId: user.userId,
+        status: CompanyUserStatus.ACTIVE,
+      },
+    });
+    if (!membership) {
+      throw new UnauthorizedException('Invalid company');
+    }
+
+    const role = this.mapRole(membership.role);
+    const payload = {
+      username: user.username,
+      sub: user.userId,
+      email: user.email,
+      companyId,
+      roles: [role],
+      role,
+    };
+
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+    };
+  }
+
+  private mapRole(role: CompanyUserRole): UserRole {
+    switch (role) {
+      case CompanyUserRole.OWNER:
+        return UserRole.Owner;
+      case CompanyUserRole.ADMIN:
+        return UserRole.Admin;
+      default:
+        return UserRole.Worker;
     }
   }
 
