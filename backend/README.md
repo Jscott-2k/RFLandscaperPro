@@ -78,9 +78,11 @@ createdb rflandscaperpro
 # Run database migrations (when available)
 npm run migration:run
 
-# Seed initial data (creates admin user and sample customer)
-# This script is intended for local development only and will
-# automatically skip execution when `NODE_ENV=production`.
+# Seed initial data (creates admin and master users and sample customer)
+# Set ADMIN_* and MASTER_* env vars to control credentials. Passwords can
+# be omitted to auto-generate secure values. This script is intended for
+# local development only and will automatically skip execution when
+# `NODE_ENV=production`.
 npm run seed:dev
 
 # Drop and re-seed the database from scratch
