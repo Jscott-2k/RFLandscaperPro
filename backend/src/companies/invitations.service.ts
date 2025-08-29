@@ -16,6 +16,7 @@ import {
   CompanyUserStatus,
   CompanyUserRole,
 } from './entities/company-user.entity';
+import { Company } from './entities/company.entity';
 import { User, UserRole } from '../users/user.entity';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { AcceptInvitationDto } from './dto/accept-invitation.dto';
@@ -41,6 +42,8 @@ export class InvitationsService {
     private readonly companyUsersRepository: Repository<CompanyUser>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Company)
+    private readonly companiesRepository: Repository<Company>,
     private readonly emailService: EmailService,
   ) {}
 
@@ -111,7 +114,16 @@ export class InvitationsService {
 
     const saved = await this.invitationsRepository.save(invitation);
 
-    await this.emailService.sendCompanyInvitationEmail(dto.email, rawToken);
+    const company = await this.companiesRepository.findOne({
+      where: { id: companyId },
+    });
+    await this.emailService.sendCompanyInvitationEmail(
+      dto.email,
+      rawToken,
+      company?.name ?? 'Your company',
+      dto.role,
+      invitation.expiresAt,
+    );
 
     return saved;
   }
@@ -144,6 +156,7 @@ export class InvitationsService {
         acceptedAt: IsNull(),
         revokedAt: IsNull(),
       },
+      relations: ['company'],
     });
     if (!invitation) {
       throw new NotFoundException('Invitation not found');
@@ -157,7 +170,13 @@ export class InvitationsService {
     invitation.tokenHash = tokenHash;
     invitation.expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await this.invitationsRepository.save(invitation);
-    await this.emailService.sendCompanyInvitationEmail(invitation.email, rawToken);
+    await this.emailService.sendCompanyInvitationEmail(
+      invitation.email,
+      rawToken,
+      invitation.company?.name ?? 'Your company',
+      invitation.role,
+      invitation.expiresAt,
+    );
     return invitation;
   }
 
@@ -257,6 +276,15 @@ export class InvitationsService {
     invitation.acceptedAt = new Date();
     await this.invitationsRepository.save(invitation);
 
+    const company = await this.companiesRepository.findOne({
+      where: { id: invitation.companyId },
+    });
+    await this.emailService.sendAddedToCompanyEmail(
+      user.email,
+      company?.name ?? 'Your company',
+      invitation.role,
+    );
+
     this.acceptAttempts.delete(tokenHash);
 
     return user;
@@ -321,6 +349,15 @@ export class InvitationsService {
 
     invitation.acceptedAt = new Date();
     await this.invitationsRepository.save(invitation);
+
+    const company = await this.companiesRepository.findOne({
+      where: { id: invitation.companyId },
+    });
+    await this.emailService.sendAddedToCompanyEmail(
+      savedUser.email,
+      company?.name ?? 'Your company',
+      invitation.role,
+    );
 
     this.acceptAttempts.delete(tokenHash);
 

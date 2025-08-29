@@ -7,6 +7,7 @@ import {
   CompanyUser,
   CompanyUserStatus,
 } from '../entities/company-user.entity';
+import { Company } from '../entities/company.entity';
 import { User } from '../../users/user.entity';
 import { EmailService } from '../../common/email.service';
 
@@ -17,8 +18,12 @@ describe('InvitationsService', () => {
   >;
   let companyUsersRepo: jest.Mocked<Pick<Repository<CompanyUser>, 'findOne'>>;
   let usersRepo: jest.Mocked<Pick<Repository<User>, 'findOne'>>;
+  let companiesRepo: jest.Mocked<Pick<Repository<Company>, 'findOne'>>;
   let emailService: {
-    sendCompanyInvitationEmail: jest.Mock<void, [string, string]>;
+    sendCompanyInvitationEmail: jest.Mock<
+      void,
+      [string, string, string, InvitationRole, Date]
+    >;
   };
 
   beforeEach(() => {
@@ -39,13 +44,22 @@ describe('InvitationsService', () => {
     usersRepo = {
       findOne: jest.fn(),
     } as unknown as jest.Mocked<Pick<Repository<User>, 'findOne'>>;
+    companiesRepo = {
+      findOne: jest.fn(async () => Object.assign(new Company(), { id: 5, name: 'Co' })),
+    } as unknown as jest.Mocked<Pick<Repository<Company>, 'findOne'>>;
     emailService = {
-      sendCompanyInvitationEmail: jest.fn<void, [string, string]>(),
+      sendCompanyInvitationEmail: jest.fn(),
+    } as {
+      sendCompanyInvitationEmail: jest.Mock<
+        void,
+        [string, string, string, InvitationRole, Date]
+      >;
     };
     service = new InvitationsService(
       invitationsRepo as unknown as Repository<Invitation>,
       companyUsersRepo as unknown as Repository<CompanyUser>,
       usersRepo as unknown as Repository<User>,
+      companiesRepo as unknown as Repository<Company>,
       emailService as unknown as EmailService,
     );
   });
@@ -60,11 +74,14 @@ describe('InvitationsService', () => {
 
     const invitation = await service.createInvitation(5, dto, inviter);
 
-    const [[email, rawToken]] =
+    const [[email, rawToken, companyName, role, expiry]] =
       emailService.sendCompanyInvitationEmail.mock.calls;
     const hashed = crypto.createHash('sha256').update(rawToken).digest('hex');
 
     expect(email).toBe('worker@example.com');
+    expect(companyName).toBe('Co');
+    expect(role).toBe(dto.role);
+    expect(expiry).toBeInstanceOf(Date);
     expect(invitation.tokenHash).toBe(hashed);
     expect(invitation.expiresAt).toBeInstanceOf(Date);
   });
