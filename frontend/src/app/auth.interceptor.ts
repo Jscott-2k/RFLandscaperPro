@@ -5,8 +5,15 @@ import { AuthService } from './auth/auth.service';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const token = auth.getToken();
-  if (token) {
-    req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+  const company = auth.getCompany();
+  if (token || company) {
+    req = req.clone({
+      setHeaders: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(company ? { 'X-Company-ID': company } : {}),
+      },
+    });
+
   }
   return next(req);
 };
