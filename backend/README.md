@@ -37,7 +37,11 @@ cp env.example .env.development
 ```
 
 ### 2. Environment Configuration
-Edit `.env.development` with your database credentials:
+Edit `.env.development` with your database credentials. You may also add SMTP settings
+(`SMTP_USER`, `SMTP_PASS`, and optional `SMTP_HOST`/`SMTP_PORT`) to send real emails
+during development.
+
+> **Note:** `.env.development` is git-ignored to keep secrets out of version control.
 
 ```env
 NODE_ENV=development
@@ -57,7 +61,8 @@ LOG_LEVEL=debug
 # REMOTE_LOG_PATH=/
 ```
 
-SMTP settings are only required in production. During development and testing the application uses an Ethereal account automatically and logs preview URLs for any emails sent.
+If no SMTP credentials are defined, the application falls back to an Ethereal test
+account and logs preview URLs for emails.
 
 Remote logging is only enabled when `REMOTE_LOG_HOST` is defined. When omitted, logs are written to the console and `app.log` file only.
 
