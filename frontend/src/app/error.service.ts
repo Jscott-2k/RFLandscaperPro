@@ -1,12 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { NotificationService } from './notification.service';
+import { LoggerService } from './logger.service';
 
 @Injectable({ providedIn: 'root' })
 export class ErrorService {
+  private readonly notifier = inject(NotificationService);
+  private readonly logger = inject(LoggerService);
+
   show(message: string): void {
-    // Display the error to the user; replace alert with snackbar if available
-    console.error(message);
-    if (typeof window !== 'undefined') {
-      window.alert(message);
-    }
+    this.logger.error(message);
+    this.notifier.show(message);
   }
 }

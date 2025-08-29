@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EquipmentService, Equipment } from './equipment.service';
 import { ErrorService } from '../error.service';
+import { NotificationService } from '../notification.service';
 
 @Component({
   selector: 'app-equipment-detail',
@@ -47,6 +48,7 @@ export class EquipmentDetailComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private errorService = inject(ErrorService);
+  private notifications = inject(NotificationService);
   private fb = inject(FormBuilder);
 
   equipmentId?: number;
@@ -78,9 +80,7 @@ export class EquipmentDetailComponent {
     if (this.equipmentId) {
       this.equipmentService.updateEquipment(this.equipmentId, payload).subscribe({
         next: () => {
-          if (typeof window !== 'undefined') {
-            window.alert('Equipment updated successfully');
-          }
+          this.notifications.show('Equipment updated successfully');
           void this.router.navigate(['/equipment']);
         },
         error: () => this.errorService.show('Failed to update equipment'),
@@ -88,9 +88,7 @@ export class EquipmentDetailComponent {
     } else {
       this.equipmentService.createEquipment(payload).subscribe({
         next: () => {
-          if (typeof window !== 'undefined') {
-            window.alert('Equipment created successfully');
-          }
+          this.notifications.show('Equipment created successfully');
           void this.router.navigate(['/equipment']);
         },
         error: () => this.errorService.show('Failed to create equipment'),
@@ -102,9 +100,7 @@ export class EquipmentDetailComponent {
     if (this.equipmentId) {
       this.equipmentService.deleteEquipment(this.equipmentId).subscribe({
         next: () => {
-          if (typeof window !== 'undefined') {
-            window.alert('Equipment deleted successfully');
-          }
+          this.notifications.show('Equipment deleted successfully');
           void this.router.navigate(['/equipment']);
         },
         error: () => this.errorService.show('Failed to delete equipment'),

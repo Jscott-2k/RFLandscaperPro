@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { JobsService } from './jobs.service';
 import { Job } from './job.model';
 import { ErrorService } from '../error.service';
+import { NotificationService } from '../notification.service';
 
 @Component({
   selector: 'app-job-editor',
@@ -17,6 +18,7 @@ export class JobEditorComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private errorService = inject(ErrorService);
+  private notifications = inject(NotificationService);
   private fb = inject(FormBuilder);
   job: Job = { title: '', customerId: 1 };
 
@@ -51,9 +53,7 @@ export class JobEditorComponent implements OnInit {
     if (this.job.id) {
       this.jobsService.update(this.job.id, payload).subscribe({
         next: () => {
-          if (typeof window !== 'undefined') {
-            window.alert('Job updated successfully');
-          }
+          this.notifications.show('Job updated successfully');
           void this.router.navigate(['/jobs']);
         },
         error: () => this.errorService.show('Failed to update job'),
@@ -61,9 +61,7 @@ export class JobEditorComponent implements OnInit {
     } else {
       this.jobsService.create(payload).subscribe({
         next: () => {
-          if (typeof window !== 'undefined') {
-            window.alert('Job created successfully');
-          }
+          this.notifications.show('Job created successfully');
           void this.router.navigate(['/jobs']);
         },
         error: () => this.errorService.show('Failed to create job'),
@@ -78,9 +76,7 @@ export class JobEditorComponent implements OnInit {
         next: (job) => {
           this.job = job;
           this.form.patchValue(job);
-          if (typeof window !== 'undefined') {
-            window.alert('Job scheduled successfully');
-          }
+          this.notifications.show('Job scheduled successfully');
         },
         error: () => this.errorService.show('Failed to schedule job'),
       });
@@ -92,9 +88,7 @@ export class JobEditorComponent implements OnInit {
       this.jobsService.assign(this.job.id, { userId, equipmentId }).subscribe({
         next: (job) => {
           this.job = job;
-          if (typeof window !== 'undefined') {
-            window.alert('Job assigned successfully');
-          }
+          this.notifications.show('Job assigned successfully');
         },
         error: () => this.errorService.show('Failed to assign job'),
       });
