@@ -1,17 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiService } from '../api.service';
-
-export interface Equipment {
-  id: number;
-  name: string;
-  status: string;
-}
+import { EquipmentApiService, Equipment } from '../api/equipment-api.service';
+export type { Equipment } from '../api/equipment-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class EquipmentService {
-  private api = inject(ApiService);
+  private api = inject(EquipmentApiService);
 
   getEquipmentList(search?: string): Observable<Equipment[]> {
     return this.api.getEquipment({ search }).pipe(map((res) => res.items));

@@ -49,6 +49,10 @@ export class UsersService {
     return this.usersRepository.find({ where });
   }
 
+  async markEmailVerified(userId: number): Promise<void> {
+    await this.usersRepository.update(userId, { isVerified: true });
+  }
+
   async create(createUserDto: CreateUserDto): Promise<User> {
     return this.userCreationService.createUser(createUserDto);
   }
