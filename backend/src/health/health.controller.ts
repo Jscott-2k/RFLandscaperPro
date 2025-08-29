@@ -1,8 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
 import {
   HealthCheckService,
-  HealthCheck,
   TypeOrmHealthIndicator,
+  HealthCheckResult,
 } from '@nestjs/terminus';
 import { Public } from '../common/decorators/public.decorator';
 
@@ -15,12 +15,7 @@ export class HealthController {
 
   @Get()
   @Public()
-  @HealthCheck()
-  async check() {
-    const result = await this.health.check([
-      () => this.db.pingCheck('database'),
-    ]);
-    const { status, info } = result;
-    return { status, info };
+  async check(): Promise<HealthCheckResult> {
+    return this.health.check([() => this.db.pingCheck('database')]);
   }
 }
