@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThan, QueryFailedError, Repository } from 'typeorm';
+import { FindOptionsWhere, MoreThan, QueryFailedError, Repository } from 'typeorm';
 import * as crypto from 'crypto';
 
 import { EmailService } from '../common/email.service';
@@ -39,15 +39,21 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { email } });
   }
 
-  findById(id: number): Promise<User | null> {
+  findById(id: number, companyId?: number): Promise<User | null> {
+    const where: FindOptionsWhere<User> = { id };
+    if (companyId !== undefined) {
+      where.companyId = companyId;
+    }
     return this.usersRepository.findOne({
-      where: { id },
+      where,
       relations: ['company'],
     });
   }
 
-  findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+  findAll(companyId?: number): Promise<User[]> {
+    const where: FindOptionsWhere<User> | undefined =
+      companyId !== undefined ? { companyId } : undefined;
+    return this.usersRepository.find({ where });
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -134,8 +140,12 @@ export class UsersService {
     return user;
   }
 
-  async updateProfile(id: number, dto: UpdateUserDto): Promise<User> {
-    const user = await this.findById(id);
+  async updateProfile(
+    id: number,
+    dto: UpdateUserDto,
+    companyId?: number,
+  ): Promise<User> {
+    const user = await this.findById(id, companyId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -168,8 +178,12 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async update(id: number, dto: UpdateUserDto): Promise<User> {
-    return this.updateProfile(id, dto);
+  async update(
+    id: number,
+    dto: UpdateUserDto,
+    companyId?: number,
+  ): Promise<User> {
+    return this.updateProfile(id, dto, companyId);
   }
 
   async remove(id: number): Promise<void> {
