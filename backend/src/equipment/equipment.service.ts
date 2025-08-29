@@ -3,21 +3,25 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Equipment, EquipmentStatus } from './entities/equipment.entity';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentResponseDto } from './dto/equipment-response.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import {
+  EQUIPMENT_REPOSITORY,
+  IEquipmentRepository,
+} from './repositories/equipment.repository';
+import { Inject } from '@nestjs/common';
 import { paginate } from '../common/pagination';
 import { toEquipmentResponseDto } from './equipment.mapper';
+
 
 @Injectable()
 export class EquipmentService {
   constructor(
-    @InjectRepository(Equipment)
-    private readonly equipmentRepository: Repository<Equipment>,
+    @Inject(EQUIPMENT_REPOSITORY)
+    private readonly equipmentRepository: IEquipmentRepository,
   ) {}
 
   async create(
@@ -26,6 +30,9 @@ export class EquipmentService {
   ): Promise<EquipmentResponseDto> {
     const equipment = this.equipmentRepository.create({
       ...createEquipmentDto,
+      lastMaintenanceDate: createEquipmentDto.lastMaintenanceDate
+        ? new Date(createEquipmentDto.lastMaintenanceDate)
+        : undefined,
       companyId,
     });
     const savedEquipment = await this.equipmentRepository.save(equipment);
@@ -39,6 +46,14 @@ export class EquipmentService {
     type?: string,
     search?: string,
   ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
+
+    const [equipments, total] = await this.equipmentRepository.findAll(
+      pagination,
+      companyId,
+      status,
+      type,
+      search,
+
     const { items: equipments, total } = await paginate(
       this.equipmentRepository,
       pagination,
@@ -72,9 +87,7 @@ export class EquipmentService {
   }
 
   async findOne(id: number, companyId: number): Promise<EquipmentResponseDto> {
-    const equipment = await this.equipmentRepository.findOne({
-      where: { id, companyId },
-    });
+    const equipment = await this.equipmentRepository.findById(id, companyId);
     if (!equipment) {
       throw new NotFoundException(`Equipment with ID ${id} not found.`);
     }
@@ -86,9 +99,7 @@ export class EquipmentService {
     updateEquipmentDto: UpdateEquipmentDto,
     companyId: number,
   ): Promise<EquipmentResponseDto> {
-    const equipment = await this.equipmentRepository.findOne({
-      where: { id, companyId },
-    });
+    const equipment = await this.equipmentRepository.findById(id, companyId);
     if (!equipment) {
       throw new NotFoundException(`Equipment with ID ${id} not found.`);
     }
@@ -110,9 +121,7 @@ export class EquipmentService {
   }
 
   async remove(id: number, companyId: number): Promise<void> {
-    const equipment = await this.equipmentRepository.findOne({
-      where: { id, companyId },
-    });
+    const equipment = await this.equipmentRepository.findById(id, companyId);
     if (!equipment) {
       throw new NotFoundException(`Equipment with ID ${id} not found.`);
     }
