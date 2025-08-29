@@ -6,6 +6,10 @@ import { User, UserRole } from './users/user.entity';
 import { Customer } from './customers/entities/customer.entity';
 import { Company } from './companies/entities/company.entity';
 import {
+  CompanyUser,
+  CompanyUserRole,
+} from './companies/entities/company-user.entity';
+import {
   Contract,
   ContractFrequency,
 } from './contracts/entities/contract.entity';
@@ -37,6 +41,7 @@ async function main() {
       const companyRepo = trx.getRepository(Company);
       const contractRepo = trx.getRepository(Contract);
       const jobRepo = trx.getRepository(Job);
+      const companyUserRepo = trx.getRepository(CompanyUser);
 
       // --- Admin user ---
       const adminUsername = process.env.ADMIN_USERNAME ?? 'admin';
@@ -63,6 +68,9 @@ async function main() {
           skipUpdateIfNoValuesChanged: true,
         },
       );
+      const adminUser = await userRepo.findOneOrFail({
+        where: { username: adminUsername },
+      });
 
       if (!process.env.ADMIN_PASSWORD) {
         console.log(
@@ -75,7 +83,7 @@ async function main() {
       // --- Sample company ---
       const companyName = 'Sample Company';
       await companyRepo.upsert(
-        { name: companyName },
+        { name: companyName, ownerId: adminUser.id },
         {
           conflictPaths: ['name'],
           skipUpdateIfNoValuesChanged: true,
@@ -85,6 +93,18 @@ async function main() {
         where: { name: companyName },
       });
       console.log('Sample company ensured.');
+
+      await companyUserRepo.upsert(
+        {
+          companyId: company.id,
+          userId: adminUser.id,
+          role: CompanyUserRole.OWNER,
+        },
+        {
+          conflictPaths: ['companyId', 'userId'],
+          skipUpdateIfNoValuesChanged: true,
+        },
+      );
 
       // --- Sample customer ---
       const customerEmail = 'customer@example.com';

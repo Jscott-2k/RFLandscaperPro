@@ -11,6 +11,8 @@ import { Customer } from '../../customers/entities/customer.entity';
 import { Equipment } from '../../equipment/entities/equipment.entity';
 import { Job } from '../../jobs/entities/job.entity';
 import { Contract } from '../../contracts/entities/contract.entity';
+import { CompanyUser } from './company-user.entity';
+import { Invitation } from './invitation.entity';
 
 @Entity()
 export class Company {
@@ -38,6 +40,12 @@ export class Company {
 
   @OneToMany(() => User, (user) => user.company)
   users: User[];
+
+  @OneToMany(() => CompanyUser, (membership) => membership.company)
+  memberships: CompanyUser[];
+
+  @OneToMany(() => Invitation, (invitation) => invitation.company)
+  invitations: Invitation[];
 
   @OneToMany(() => Customer, (customer) => customer.company)
   customers: Customer[];

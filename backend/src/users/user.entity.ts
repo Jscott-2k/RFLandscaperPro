@@ -8,10 +8,13 @@ import {
   OneToOne,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Customer } from '../customers/entities/customer.entity';
 import { Company } from '../companies/entities/company.entity';
+import { CompanyUser } from '../companies/entities/company-user.entity';
+import { Invitation } from '../companies/entities/invitation.entity';
 
 export enum UserRole {
   Admin = 'admin',
@@ -65,6 +68,21 @@ export class User {
 
   @Column({ nullable: true })
   companyId?: number;
+
+  @OneToMany(
+    () => CompanyUser,
+    (membership) => membership.user,
+  )
+  companyMemberships: CompanyUser[];
+
+  @OneToMany(
+    () => CompanyUser,
+    (membership) => membership.invitedByUser,
+  )
+  invitedMemberships: CompanyUser[];
+
+  @OneToMany(() => Invitation, (invitation) => invitation.invitedByUser)
+  sentInvitations: Invitation[];
 
   @BeforeInsert()
   @BeforeUpdate()
