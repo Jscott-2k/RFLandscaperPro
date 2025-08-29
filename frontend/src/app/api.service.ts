@@ -75,6 +75,21 @@ export interface Company {
 export type CreateCompany = Partial<Omit<Company, 'id'>>;
 export type UpdateCompany = Partial<CreateCompany>;
 
+export interface CompanyMember {
+  userId: number;
+  username: string;
+  email: string;
+  role: string;
+  status: string;
+}
+
+export interface CompanyInvitation {
+  id: number;
+  email: string;
+  role: string;
+  expiresAt: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
@@ -275,6 +290,70 @@ export class ApiService {
     return this.request<Company>('PATCH', `${environment.apiUrl}/companies/${id}`, {
       body: payload,
     });
+  }
+
+  // Company Members
+  getCompanyMembers(companyId: number): Observable<CompanyMember[]> {
+    return this.request<CompanyMember[]>(
+      'GET',
+      `${environment.apiUrl}/companies/${companyId}/members`,
+    );
+  }
+
+  updateCompanyMember(
+    companyId: number,
+    userId: number,
+    payload: Partial<Pick<CompanyMember, 'role' | 'status'>>,
+  ): Observable<CompanyMember> {
+    return this.request<CompanyMember>(
+      'PATCH',
+      `${environment.apiUrl}/companies/${companyId}/members/${userId}`,
+      {
+        body: payload,
+      },
+    );
+  }
+
+  removeCompanyMember(companyId: number, userId: number): Observable<void> {
+    return this.request<void>(
+      'DELETE',
+      `${environment.apiUrl}/companies/${companyId}/members/${userId}`,
+    );
+  }
+
+  // Company Invitations
+  getCompanyInvitations(companyId: number): Observable<CompanyInvitation[]> {
+    return this.request<CompanyInvitation[]>(
+      'GET',
+      `${environment.apiUrl}/companies/${companyId}/invitations`,
+    );
+  }
+
+  createCompanyInvitation(
+    companyId: number,
+    payload: { email: string; role: string },
+  ): Observable<CompanyInvitation> {
+    return this.request<CompanyInvitation>(
+      'POST',
+      `${environment.apiUrl}/companies/${companyId}/invitations`,
+      {
+        body: payload,
+      },
+    );
+  }
+
+  revokeCompanyInvitation(companyId: number, inviteId: number): Observable<void> {
+    return this.request<void>(
+      'POST',
+      `${environment.apiUrl}/companies/${companyId}/invitations/${inviteId}/revoke`,
+    );
+  }
+
+  resendCompanyInvitation(companyId: number, inviteId: number): Observable<CompanyInvitation> {
+    return this.request<CompanyInvitation>(
+      'POST',
+      `${environment.apiUrl}/companies/${companyId}/invitations/${inviteId}/resend`,
+    );
   }
 
   getUpcomingJobs(): Observable<{ items: unknown[]; total: number }> {

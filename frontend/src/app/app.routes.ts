@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './auth/auth.guard';
 import { AdminGuard } from './auth/admin.guard';
 import { RootRedirectGuard } from './auth/root-redirect.guard';
+import { roleGuard } from './auth/role.guard';
 
 export const routes: Routes = [
   {
@@ -21,6 +22,11 @@ export const routes: Routes = [
   {
     path: 'verify',
     loadComponent: () => import('./auth/verify/verify.component').then((m) => m.VerifyComponent),
+  },
+  {
+    path: 'invite/accept',
+    loadComponent: () =>
+      import('./invitations/accept-invitation.component').then((m) => m.AcceptInvitationComponent),
   },
   {
     path: 'customers',
@@ -51,6 +57,12 @@ export const routes: Routes = [
     path: 'company',
     canActivate: [AuthGuard],
     loadChildren: () => import('./companies/companies.routes').then((m) => m.companiesRoutes),
+  },
+  {
+    path: 'team',
+    canActivate: [AuthGuard, roleGuard],
+    data: { roles: ['owner', 'admin'] },
+    loadChildren: () => import('./team/team.routes').then((m) => m.teamRoutes),
   },
   {
     path: 'admin',
