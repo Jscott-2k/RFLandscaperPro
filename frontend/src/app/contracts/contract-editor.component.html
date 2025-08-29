@@ -1,0 +1,29 @@
+<h2>Contract Editor</h2>
+<form (ngSubmit)="save()" #contractForm="ngForm">
+  <label>
+    Customer ID
+    <input type="number" name="customerId" [(ngModel)]="contract.customerId" required />
+  </label>
+  <label>
+    Start Date
+    <input type="date" name="startDate" [(ngModel)]="contract.startDate" required />
+  </label>
+  <label>
+    End Date
+    <input type="date" name="endDate" [(ngModel)]="contract.endDate" />
+  </label>
+  <label>
+    Frequency
+    <select name="frequency" [(ngModel)]="contract.frequency">
+      <option value="WEEKLY">Weekly</option>
+      <option value="BIWEEKLY">Biweekly</option>
+      <option value="MONTHLY">Monthly</option>
+      <option value="BIMONTHLY">Bimonthly</option>
+    </select>
+  </label>
+  <label>
+    Job Title
+    <input type="text" name="jobTitle" [(ngModel)]="contract.jobTemplate!.title" required />
+  </label>
+  <button type="submit" [disabled]="contractForm.invalid">Save</button>
+</form>

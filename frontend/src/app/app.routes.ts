@@ -32,6 +32,11 @@ export const routes: Routes = [
     loadChildren: () => import('./jobs/jobs.routes').then(m => m.jobsRoutes)
   },
   {
+    path: 'contracts',
+    canActivate: [AuthGuard],
+    loadChildren: () => import('./contracts/contracts.routes').then(m => m.contractsRoutes)
+  },
+  {
     path: 'users',
     canActivate: [AuthGuard],
     loadChildren: () => import('./users/users.routes').then(m => m.usersRoutes)
