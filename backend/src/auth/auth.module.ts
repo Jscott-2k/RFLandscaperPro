@@ -10,12 +10,30 @@ import { RefreshToken } from './refresh-token.entity';
 import { VerificationToken } from './verification-token.entity';
 import { EmailService } from '../common/email.service';
 import { CompanyUser } from '../companies/entities/company-user.entity';
+import {
+  REFRESH_TOKEN_REPOSITORY,
+  TypeOrmRefreshTokenRepository,
+} from './repositories/refresh-token.repository';
+import {
+  VERIFICATION_TOKEN_REPOSITORY,
+  TypeOrmVerificationTokenRepository,
+} from './repositories/verification-token.repository';
+import {
+  COMPANY_MEMBERSHIP_REPOSITORY,
+  TypeOrmCompanyMembershipRepository,
+} from './repositories/company-membership.repository';
 
 @Module({
   imports: [
     UsersModule,
     ConfigModule,
-    TypeOrmModule.forFeature([RefreshToken, VerificationToken, CompanyUser]),
+    TypeOrmModule.forFeature([
+      RefreshToken,
+      VerificationToken,
+      User,
+      Company,
+      CompanyUser,
+    ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -33,7 +51,23 @@ import { CompanyUser } from '../companies/entities/company-user.entity';
       },
     }),
   ],
-  providers: [AuthService, JwtStrategy, EmailService],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    EmailService,
+    {
+      provide: REFRESH_TOKEN_REPOSITORY,
+      useClass: TypeOrmRefreshTokenRepository,
+    },
+    {
+      provide: VERIFICATION_TOKEN_REPOSITORY,
+      useClass: TypeOrmVerificationTokenRepository,
+    },
+    {
+      provide: COMPANY_MEMBERSHIP_REPOSITORY,
+      useClass: TypeOrmCompanyMembershipRepository,
+    },
+  ],
   controllers: [AuthController],
   exports: [AuthService],
 })

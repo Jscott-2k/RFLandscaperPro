@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+  Inject,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,14 +15,24 @@ import { UserCreationService } from '../users/user-creation.service';
 import { RegisterDto } from './dto/register.dto';
 import { SignupOwnerDto } from './dto/signup-owner.dto';
 import { validatePasswordStrength } from './password.util';
-import { RefreshToken } from './refresh-token.entity';
-import { VerificationToken } from './verification-token.entity';
 import { EmailService } from '../common/email.service';
 import {
   CompanyUser,
   CompanyUserRole,
   CompanyUserStatus,
 } from '../companies/entities/company-user.entity';
+import {
+  RefreshTokenRepository,
+  REFRESH_TOKEN_REPOSITORY,
+} from './repositories/refresh-token.repository';
+import {
+  VerificationTokenRepository,
+  VERIFICATION_TOKEN_REPOSITORY,
+} from './repositories/verification-token.repository';
+import {
+  CompanyMembershipRepository,
+  COMPANY_MEMBERSHIP_REPOSITORY,
+} from './repositories/company-membership.repository';
 
 @Injectable()
 export class AuthService {
@@ -26,13 +41,16 @@ export class AuthService {
     private readonly userCreationService: UserCreationService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    @InjectRepository(RefreshToken)
-    private readonly refreshTokenRepository: Repository<RefreshToken>,
-    @InjectRepository(VerificationToken)
-    private readonly verificationTokenRepository: Repository<VerificationToken>,
+    @Inject(REFRESH_TOKEN_REPOSITORY)
+    private readonly refreshTokenRepository: RefreshTokenRepository,
+    @Inject(VERIFICATION_TOKEN_REPOSITORY)
+    private readonly verificationTokenRepository: VerificationTokenRepository,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+     
     private readonly emailService: EmailService,
-    @InjectRepository(CompanyUser)
-    private readonly companyUsersRepository: Repository<CompanyUser>,
+    @Inject(COMPANY_MEMBERSHIP_REPOSITORY)
+    private readonly companyMembershipRepository: CompanyMembershipRepository,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<User> {
@@ -114,7 +132,7 @@ export class AuthService {
     user: { userId: number; username: string; email: string },
     companyId: number,
   ): Promise<{ access_token: string }> {
-    const membership = await this.companyUsersRepository.findOne({
+    const membership = await this.companyMembershipRepository.findOne({
       where: {
         companyId,
         userId: user.userId,
