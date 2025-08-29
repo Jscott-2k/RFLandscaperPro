@@ -5,7 +5,11 @@
 <div class="container">
   <nav class="sidebar">
     <a *ngIf="!auth.isAuthenticated()" routerLink="/login" routerLinkActive="active">Login</a>
-    <a *ngIf="!auth.isAuthenticated()" routerLink="/register" routerLinkActive="active">Register</a>
+    <a
+      *ngIf="!auth.isAuthenticated()"
+      routerLink="/signup/company"
+      routerLinkActive="active"
+      >Owner Sign Up</a>
     <button *ngIf="auth.isAuthenticated()" (click)="logout()">Logout</button>
     <a *ngIf="auth.hasRole('admin')" routerLink="/users" routerLinkActive="active">Admin Panel</a>
     <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>

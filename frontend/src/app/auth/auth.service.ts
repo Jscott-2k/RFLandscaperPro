@@ -68,16 +68,6 @@ export class AuthService {
       .pipe(tap((res) => this.handleAuth(res)));
   }
 
-  register(data: {
-    username: string;
-    email: string;
-    password: string;
-    role?: string;
-    company?: { name: string; address?: string; phone?: string; email?: string };
-  }): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/register`, data);
-  }
-
   verifyEmail(token: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/verify-email`, {
       token,

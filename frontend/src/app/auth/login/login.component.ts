@@ -17,7 +17,13 @@ import { ErrorService } from '../../error.service';
       <button type="submit" [disabled]="loading">Login</button>
     </form>
     <p>
-      <small><a routerLink="/register">Create account</a></small>
+      <small>
+        Company owners can
+        <a routerLink="/signup/company">create an account</a>.
+      </small>
+    </p>
+    <p>
+      <small>Customers and workers need an invitation to join.</small>
     </p>
   `,
 })
