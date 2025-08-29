@@ -1,5 +1,8 @@
-import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { Email } from '../value-objects/email.vo';
+import { PhoneNumber } from '../value-objects/phone-number.vo';
 
 export class UpdateUserDto {
   @ApiPropertyOptional()
@@ -14,8 +17,8 @@ export class UpdateUserDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsEmail()
-  email?: string;
+  @Transform(({ value }) => (value ? new Email(value) : undefined))
+  email?: Email;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -29,6 +32,6 @@ export class UpdateUserDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
-  phone?: string;
+  @Transform(({ value }) => (value ? new PhoneNumber(value) : undefined))
+  phone?: PhoneNumber;
 }

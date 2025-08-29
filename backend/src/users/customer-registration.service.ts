@@ -9,7 +9,7 @@ export class CustomerRegistrationService {
     const customerRepository = manager.getRepository(Customer);
     const customer = customerRepository.create({
       name: user.username,
-      email: user.email,
+      email: user.email.value,
       userId: user.id,
     });
     return customerRepository.save(customer);

@@ -11,6 +11,8 @@ import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
 import { User, UserRole } from '../users/user.entity';
+import { Email } from '../users/value-objects/email.vo';
+import { PhoneNumber } from '../users/value-objects/phone-number.vo';
 import { UserCreationService } from '../users/user-creation.service';
 import { RegisterDto } from './dto/register.dto';
 import { SignupOwnerDto } from './dto/signup-owner.dto';
@@ -97,7 +99,7 @@ export class AuthService {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email,
+        email: user.email.value,
         role: user.role,
       },
     };
@@ -107,14 +109,16 @@ export class AuthService {
     // Validate password strength
     validatePasswordStrength(registerDto.password);
 
+    const { email, phone, ...rest } = registerDto;
     const user = await this.usersService.create({
-      ...registerDto,
+      ...rest,
+      email: new Email(email),
+      phone: phone ? new PhoneNumber(phone) : undefined,
       company: registerDto.company,
     });
 
     const token = await this.createVerificationToken(user.id);
     await this.emailService.send(verificationMail(user.email, token));
-
     return { message: 'Verification email sent' };
   }
 
@@ -129,6 +133,33 @@ export class AuthService {
       company: { name: dto.companyName },
       isVerified: true,
     });
+
+    if (existing) {
+      throw new ConflictException('Email already exists');
+    }
+
+    try {
+      const user = await this.usersRepository.manager.transaction(
+        async (manager) => {
+          const userRepo = manager.getRepository(User);
+          const companyRepo = manager.getRepository(Company);
+          const membershipRepo = manager.getRepository(CompanyUser);
+
+          const newUser = userRepo.create({
+            username: dto.name,
+            email: new Email(dto.email),
+            password: dto.password,
+            role: UserRole.Owner,
+            isVerified: true,
+          });
+          const savedUser = await userRepo.save(newUser);
+
+          const company = companyRepo.create({
+            name: dto.companyName,
+            ownerId: savedUser.id,
+          });
+          const savedCompany = await companyRepo.save(company);
+
 
     return this.login(user);
   }

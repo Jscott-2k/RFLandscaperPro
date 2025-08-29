@@ -9,8 +9,10 @@ import {
 } from '../entities/company-user.entity';
 import { Company } from '../entities/company.entity';
 import { User } from '../../users/user.entity';
+import { Email } from '../../users/value-objects/email.vo';
 import { EmailService } from '../../common/email';
 import { SendMailOptions } from 'nodemailer';
+
 
 describe('InvitationsService', () => {
   let service: InvitationsService;
@@ -81,7 +83,7 @@ describe('InvitationsService', () => {
   it('rejects inviting existing active member', async () => {
     const existingUser = Object.assign(new User(), {
       id: 10,
-      email: 'a@b.com',
+      email: new Email('a@b.com'),
     });
     usersRepo.findOne.mockResolvedValue(existingUser);
     companyUsersRepo.findOne.mockResolvedValue(

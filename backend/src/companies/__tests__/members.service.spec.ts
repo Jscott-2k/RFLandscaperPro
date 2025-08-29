@@ -1,5 +1,6 @@
 import { Repository } from 'typeorm';
 import { MembersService } from '../members.service';
+import { Email } from '../../users/value-objects/email.vo';
 import {
   CompanyUser,
   CompanyUserRole,
@@ -38,7 +39,7 @@ describe('MembersService', () => {
       userId: 2,
       role: CompanyUserRole.WORKER,
       status: CompanyUserStatus.ACTIVE,
-      user: { id: 2, username: 'u', email: 'u@e.com' },
+      user: { id: 2, username: 'u', email: new Email('u@e.com') },
     });
     repo.findOne.mockResolvedValue(membership);
     repo.save.mockImplementation(async (m) => m as CompanyUser);
@@ -58,7 +59,7 @@ describe('MembersService', () => {
       userId: 1,
       role: CompanyUserRole.OWNER,
       status: CompanyUserStatus.ACTIVE,
-      user: { id: 1, username: 'o', email: 'o@e.com' },
+      user: { id: 1, username: 'o', email: new Email('o@e.com') },
     });
     repo.findOne.mockResolvedValue(membership);
     repo.count.mockResolvedValue(1);

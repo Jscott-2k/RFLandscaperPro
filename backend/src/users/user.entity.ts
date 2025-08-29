@@ -15,6 +15,8 @@ import { Customer } from '../customers/entities/customer.entity';
 import { Company } from '../companies/entities/company.entity';
 import { CompanyUser } from '../companies/entities/company-user.entity';
 import { Invitation } from '../companies/entities/invitation.entity';
+import { Email } from './value-objects/email.vo';
+import { PhoneNumber } from './value-objects/phone-number.vo';
 
 export enum UserRole {
   Admin = 'admin',
@@ -31,8 +33,14 @@ export class User {
   @Column({ unique: true })
   username: string;
 
-  @Column({ unique: true })
-  email: string;
+  @Column({
+    unique: true,
+    transformer: {
+      to: (value: Email): string => value.value,
+      from: (value: string): Email => new Email(value),
+    },
+  })
+  email: Email;
 
   @Column()
   password: string;
@@ -49,8 +57,17 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   lastName: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
-  phone: string | null;
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    transformer: {
+      to: (value: PhoneNumber | null): string | null =>
+        value ? value.value : null,
+      from: (value: string | null): PhoneNumber | null =>
+        value ? new PhoneNumber(value) : null,
+    },
+  })
+  phone: PhoneNumber | null;
 
   @Index('IDX_user_password_reset_token')
   @Column({ type: 'varchar', length: 64, nullable: true })

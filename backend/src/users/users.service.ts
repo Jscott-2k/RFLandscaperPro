@@ -68,7 +68,8 @@ export class UsersService {
     user.passwordResetToken = hashedToken;
     user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
     await this.usersRepository.save(user);
-    await this.emailService.send(passwordResetMail(user.email, token));
+    await this.emailService.send(passwordResetMail(user.email.value, token));
+
   }
 
   async resetPassword(token: string, password: string): Promise<User> {
