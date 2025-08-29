@@ -17,7 +17,22 @@ import { CompanyOnboardingService } from './company-onboarding.service';
     CustomerRegistrationService,
     CompanyOnboardingService,
   ],
+
+import {
+  USER_REPOSITORY,
+  UserRepository,
+} from './repositories/user.repository';
+
+const userRepositoryProvider = {
+  provide: USER_REPOSITORY,
+  useClass: UserRepository,
+};
+
+@Module({
+  imports: [TypeOrmModule.forFeature([User, Customer, Company])],
+  providers: [UsersService, EmailService, userRepositoryProvider],
+
   controllers: [UsersController],
-  exports: [UsersService],
+  exports: [UsersService, userRepositoryProvider],
 })
 export class UsersModule {}

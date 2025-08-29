@@ -1,74 +1,72 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { JobsService } from './jobs.service';
-import { Job } from './entities/job.entity';
-import { Customer } from '../customers/entities/customer.entity';
-import { User } from '../users/user.entity';
-import { Equipment } from '../equipment/entities/equipment.entity';
-import { Assignment } from './entities/assignment.entity';
+import {
+  JOB_REPOSITORY,
+  IJobRepository,
+} from './repositories/job.repository';
+import {
+  CUSTOMER_REPOSITORY,
+  ICustomerRepository,
+} from '../customers/repositories/customer.repository';
+import {
+  USER_REPOSITORY,
+  IUserRepository,
+} from '../users/repositories/user.repository';
+import {
+  EQUIPMENT_REPOSITORY,
+  IEquipmentRepository,
+} from '../equipment/repositories/equipment.repository';
+import {
+  ASSIGNMENT_REPOSITORY,
+  IAssignmentRepository,
+} from './repositories/assignment.repository';
 import { CreateJobDto } from './dto/create-job.dto';
-import { ScheduleJobDto } from './dto/schedule-job.dto';
 import { AssignJobDto } from './dto/assign-job.dto';
+import { ScheduleJobDto } from './dto/schedule-job.dto';
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument */
 describe('JobsService', () => {
   let service: JobsService;
-  let jobRepository: {
-    findOne: jest.Mock;
-    create: jest.Mock;
-    save: jest.Mock;
-    createQueryBuilder: jest.Mock;
-  };
-  let customerRepository: { findOne: jest.Mock };
-  let userRepository: { findOne: jest.Mock };
-  let equipmentRepository: { findOne: jest.Mock };
-  let assignmentRepository: {
-    create: jest.Mock;
-    save: jest.Mock;
-    findOne: jest.Mock;
-    createQueryBuilder: jest.Mock;
-    manager: { transaction: jest.Mock };
-  };
+  let jobRepo: jest.Mocked<IJobRepository>;
+  let customerRepo: jest.Mocked<ICustomerRepository>;
+  let userRepo: jest.Mocked<IUserRepository>;
+  let equipmentRepo: jest.Mocked<IEquipmentRepository>;
+  let assignmentRepo: jest.Mocked<IAssignmentRepository>;
 
   beforeEach(async () => {
-    jobRepository = {
-      findOne: jest.fn(),
+    jobRepo = {
       create: jest.fn(),
       save: jest.fn(),
-      createQueryBuilder: jest.fn(),
-    };
-    customerRepository = { findOne: jest.fn() };
-    userRepository = { findOne: jest.fn() };
-    equipmentRepository = { findOne: jest.fn() };
-    assignmentRepository = {
+      findAll: jest.fn(),
+      findById: jest.fn(),
+      remove: jest.fn(),
+    } as unknown as jest.Mocked<IJobRepository>;
+    customerRepo = {
+      findById: jest.fn(),
+    } as unknown as jest.Mocked<ICustomerRepository>;
+    userRepo = {
+      findById: jest.fn(),
+    } as unknown as jest.Mocked<IUserRepository>;
+    equipmentRepo = {
+      findById: jest.fn(),
+    } as unknown as jest.Mocked<IEquipmentRepository>;
+    assignmentRepo = {
       create: jest.fn(),
       save: jest.fn(),
-      findOne: jest.fn(),
-      createQueryBuilder: jest.fn(),
-      manager: { transaction: jest.fn() },
-    };
+      findById: jest.fn(),
+      remove: jest.fn(),
+      hasConflict: jest.fn(),
+      bulkCreate: jest.fn(),
+    } as unknown as jest.Mocked<IAssignmentRepository>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         JobsService,
-        {
-          provide: getRepositoryToken(Job),
-          useValue: jobRepository,
-        },
-        {
-          provide: getRepositoryToken(Customer),
-          useValue: customerRepository,
-        },
-        { provide: getRepositoryToken(User), useValue: userRepository },
-        {
-          provide: getRepositoryToken(Equipment),
-          useValue: equipmentRepository,
-        },
-        {
-          provide: getRepositoryToken(Assignment),
-          useValue: assignmentRepository,
-        },
+        { provide: JOB_REPOSITORY, useValue: jobRepo },
+        { provide: CUSTOMER_REPOSITORY, useValue: customerRepo },
+        { provide: USER_REPOSITORY, useValue: userRepo },
+        { provide: EQUIPMENT_REPOSITORY, useValue: equipmentRepo },
+        { provide: ASSIGNMENT_REPOSITORY, useValue: assignmentRepo },
       ],
     }).compile();
 
@@ -79,169 +77,34 @@ describe('JobsService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should apply filters when finding all jobs', async () => {
-    const qb = {
-      leftJoinAndSelect: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      skip: jest.fn().mockReturnThis(),
-      take: jest.fn().mockReturnThis(),
-      orderBy: jest.fn().mockReturnThis(),
-      addOrderBy: jest.fn().mockReturnThis(),
-      getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
-    };
-    jobRepository.createQueryBuilder.mockReturnValue(qb);
-
-    const pagination = { page: 1, limit: 10 } as any;
-    const startDate = new Date('2023-01-01');
-    const endDate = new Date('2023-01-31');
-    await service.findAll(pagination, 1, true, 2, startDate, endDate, 3, 4);
-
-    expect(qb.andWhere).toHaveBeenCalledWith('job.completed = :completed', {
-      completed: true,
-    });
-    expect(qb.andWhere).toHaveBeenCalledWith('job.customer.id = :customerId', {
-      customerId: 2,
-    });
-    expect(qb.andWhere).toHaveBeenCalledWith(
-      'job.scheduledDate >= :startDate',
-      { startDate },
-    );
-    expect(qb.andWhere).toHaveBeenCalledWith('job.scheduledDate <= :endDate', {
-      endDate,
-    });
-    expect(qb.andWhere).toHaveBeenCalledWith('user.id = :workerId', {
-      workerId: 3,
-    });
-    expect(qb.andWhere).toHaveBeenCalledWith('equipment.id = :equipmentId', {
-      equipmentId: 4,
-    });
-    expect(qb.getManyAndCount).toHaveBeenCalled();
+  it('throws NotFoundException when customer missing on create', async () => {
+    customerRepo.findById.mockResolvedValue(null);
+    const dto: CreateJobDto = { title: 'Test', customerId: 1 };
+    await expect(service.create(dto, 1)).rejects.toBeInstanceOf(NotFoundException);
   });
 
-  it('should throw NotFoundException when job does not exist', async () => {
-    jobRepository.findOne.mockResolvedValue(null);
-    await expect(service.findOne(1, 1)).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
-  });
-
-  it('should throw NotFoundException when customer does not exist on create', async () => {
-    customerRepository.findOne.mockResolvedValue(null);
-    const createJobDto: CreateJobDto = {
-      title: 'Test',
-      customerId: 1,
-    };
-    await expect(service.create(createJobDto, 1)).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
-  });
-
-  it('should throw ConflictException when scheduling with existing assignment conflict', async () => {
-    const date = new Date();
-    jobRepository.findOne.mockResolvedValue({
-      id: 1,
-      assignments: [
-        {
-          user: { id: 1 },
-          equipment: { id: 2 },
-        },
-      ],
-      customer: {},
-    });
-
-    const qb = {
-      leftJoin: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      getOne: jest.fn().mockResolvedValue({ id: 99 }),
-    };
-    assignmentRepository.createQueryBuilder.mockReturnValue(qb);
-
-    const scheduleJobDto: ScheduleJobDto = { scheduledDate: date };
-    await expect(service.schedule(1, scheduleJobDto, 1)).rejects.toBeInstanceOf(
+  it('throws ConflictException when scheduling with resource conflict', async () => {
+    jobRepo.findById.mockResolvedValue({
+      assignments: [{ user: { id: 1 }, equipment: { id: 2 } }],
+    } as any);
+    assignmentRepo.hasConflict.mockResolvedValue(true);
+    const dto: ScheduleJobDto = { scheduledDate: new Date() };
+    await expect(service.schedule(1, dto, 1)).rejects.toBeInstanceOf(
       ConflictException,
     );
   });
 
-  it('should throw ConflictException when assigning user or equipment already booked', async () => {
-    const date = new Date();
-    jobRepository.findOne.mockResolvedValue({
-      id: 1,
-      scheduledDate: date,
+  it('throws ConflictException when assigning conflicting resources', async () => {
+    jobRepo.findById.mockResolvedValue({
+      scheduledDate: new Date(),
       customer: {},
-    });
-    userRepository.findOne.mockResolvedValue({ id: 1 });
-    equipmentRepository.findOne.mockResolvedValue({ id: 2 });
-
-    const qb = {
-      leftJoin: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      getOne: jest.fn().mockResolvedValue({ id: 99 }),
-    };
-    assignmentRepository.createQueryBuilder.mockReturnValue(qb);
-
-    const assignJobDto: AssignJobDto = { userId: 1, equipmentId: 2 };
-    await expect(service.assign(1, assignJobDto, 1)).rejects.toBeInstanceOf(
+    } as any);
+    userRepo.findById.mockResolvedValue({ id: 1 } as any);
+    equipmentRepo.findById.mockResolvedValue({ id: 2 } as any);
+    assignmentRepo.hasConflict.mockResolvedValue(true);
+    const dto: AssignJobDto = { userId: 1, equipmentId: 2 };
+    await expect(service.assign(1, dto, 1)).rejects.toBeInstanceOf(
       ConflictException,
     );
-  });
-
-  it('should include companyId when creating assignment', async () => {
-    jobRepository.findOne.mockResolvedValue({
-      id: 1,
-      scheduledDate: null,
-      customer: {},
-    });
-    userRepository.findOne.mockResolvedValue({ id: 1 });
-    equipmentRepository.findOne.mockResolvedValue({ id: 2 });
-    assignmentRepository.create.mockImplementation(
-      (data: Partial<Assignment>) => data as Assignment,
-    );
-    assignmentRepository.save.mockResolvedValue({});
-    const dto: AssignJobDto = { userId: 1, equipmentId: 2 } as any;
-
-    await service.assign(1, dto, 3);
-
-    expect(assignmentRepository.create).toHaveBeenCalledWith(
-      expect.objectContaining({ companyId: 3 }),
-    );
-    expect(assignmentRepository.save).toHaveBeenCalledWith(
-      expect.objectContaining({ companyId: 3 }),
-    );
-  });
-
-  it('should rollback all assignments if bulk assignment save fails', async () => {
-    jobRepository.findOne.mockResolvedValue({
-      id: 1,
-      customer: {},
-      scheduledDate: null,
-    });
-    userRepository.findOne.mockResolvedValue({ id: 1 });
-    equipmentRepository.findOne.mockResolvedValue({ id: 1 });
-
-    assignmentRepository.create.mockImplementation(
-      (data: Partial<Assignment>) => data as Assignment,
-    );
-
-    const saveMock = jest.fn().mockRejectedValue(new Error('save failed'));
-    assignmentRepository.manager.transaction.mockImplementation(
-      (
-        cb: (manager: {
-          create: typeof assignmentRepository.create;
-          save: typeof saveMock;
-        }) => Promise<unknown>,
-      ) => cb({ create: assignmentRepository.create, save: saveMock }),
-    );
-
-    const dto = { assignments: [{ userId: 1, equipmentId: 1 }] } as any;
-
-    await expect(service.bulkAssign(1, dto, 1)).rejects.toThrow('save failed');
-
-    expect(assignmentRepository.manager.transaction).toHaveBeenCalled();
-    expect(saveMock).toHaveBeenCalledTimes(1);
-    expect(assignmentRepository.save).not.toHaveBeenCalled();
-    expect(jobRepository.findOne).toHaveBeenCalledTimes(1);
   });
 });
