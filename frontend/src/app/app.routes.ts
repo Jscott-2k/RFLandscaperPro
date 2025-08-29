@@ -49,6 +49,7 @@ export const routes: Routes = [
   {
     path: '',
     canActivate: [RootRedirectGuard],
+    loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent),
     pathMatch: 'full'
   }
 ];
