@@ -10,6 +10,7 @@ import {
   CompanyUserStatus,
 } from '../companies/entities/company-user.entity';
 import { EmailService } from '../common/email.service';
+import { JwtUserPayload } from './interfaces/jwt-user-payload.interface';
 import { RefreshTokenRepository } from './repositories/refresh-token.repository';
 import { VerificationTokenRepository } from './repositories/verification-token.repository';
 import { CompanyMembershipRepository } from './repositories/company-membership.repository';
@@ -42,9 +43,16 @@ describe('AuthService.switchCompany', () => {
 
   it('throws when membership is missing', async () => {
     repo.findOne.mockResolvedValue(null);
-    await expect(
-      service.switchCompany({ userId: 1, username: 'a', email: 'a@e.com' }, 2),
-    ).rejects.toBeInstanceOf(UnauthorizedException);
+
+    const user: JwtUserPayload = {
+      userId: 1,
+      username: 'a',
+      email: 'a@e.com',
+    };
+    await expect(service.switchCompany(user, 2)).rejects.toBeInstanceOf(
+      UnauthorizedException,
+    );
+
   });
 
   it('returns token for valid membership', async () => {
@@ -58,10 +66,12 @@ describe('AuthService.switchCompany', () => {
     );
     jwt.signAsync.mockResolvedValue('jwt');
 
-    const result = await service.switchCompany(
-      { userId: 1, username: 'a', email: 'a@e.com' },
-      2,
-    );
+    const user: JwtUserPayload = {
+      userId: 1,
+      username: 'a',
+      email: 'a@e.com',
+    };
+    const result = await service.switchCompany(user, 2);
 
     expect(jwt.signAsync).toHaveBeenCalledWith({
       username: 'a',

@@ -21,6 +21,7 @@ import {
   CompanyUserRole,
   CompanyUserStatus,
 } from '../companies/entities/company-user.entity';
+import { JwtUserPayload } from './interfaces/jwt-user-payload.interface';
 import {
   RefreshTokenRepository,
   REFRESH_TOKEN_REPOSITORY,
@@ -129,7 +130,7 @@ export class AuthService {
   }
 
   async switchCompany(
-    user: { userId: number; username: string; email: string },
+    user: JwtUserPayload,
     companyId: number,
   ): Promise<{ access_token: string }> {
     const membership = await this.companyMembershipRepository.findOne({
