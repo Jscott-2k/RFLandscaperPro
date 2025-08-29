@@ -63,6 +63,10 @@ LOG_LEVEL=debug
 # REMOTE_LOG_PATH=/
 ```
 
+To customize the accounts created by the seed script, set
+`COMPANY_ADMIN_*`, `MASTER_*`, and `SAMPLE_CUSTOMER_EMAIL` in your environment
+file.
+
 If no SMTP credentials are defined, the application falls back to an Ethereal test
 account and logs preview URLs for emails.
 
@@ -79,9 +83,10 @@ createdb rflandscaperpro
 npm run migration:run
 
 # Seed initial data (creates company admin and master users and sample customer)
-# Set COMPANY_ADMIN_* and MASTER_* env vars to control credentials. Passwords can
-# be omitted to auto-generate secure values. This script is intended for
-# local development only and will automatically skip execution when
+# Set COMPANY_ADMIN_* and MASTER_* env vars to control credentials,
+# and SAMPLE_CUSTOMER_EMAIL to specify the seeded customer's email.
+# Passwords can be omitted to auto-generate secure values. This script is
+# intended for local development only and will automatically skip execution when
 # `NODE_ENV=production`.
 npm run seed:dev
 

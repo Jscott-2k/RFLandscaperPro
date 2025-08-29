@@ -158,7 +158,8 @@ async function main() {
       );
 
       // --- Sample customer ---
-      const customerEmail = 'customer@example.com';
+      const customerEmail =
+        process.env.SAMPLE_CUSTOMER_EMAIL ?? 'customer@example.com';
       await customerRepo.upsert(
         {
           name: 'John Doe',
