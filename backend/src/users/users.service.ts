@@ -1,11 +1,10 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, MoreThan, QueryFailedError, Repository } from 'typeorm';
+import { FindOptionsWhere, MoreThan, Repository } from 'typeorm';
 import * as crypto from 'crypto';
 
 import { EmailService } from '../common/email.service';
@@ -14,21 +13,15 @@ import { User, UserRole } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { validatePasswordStrength } from '../auth/password.util';
-import { Customer } from '../customers/entities/customer.entity';
-import { Company } from '../companies/entities/company.entity';
-
-const UNIQUE_VIOLATION = '23505';
+import { UserCreationService } from './user-creation.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-    @InjectRepository(Customer)
-    private readonly customerRepository: Repository<Customer>,
-    @InjectRepository(Company)
-    private readonly companyRepository: Repository<Company>,
     private readonly emailService: EmailService,
+    private readonly userCreationService: UserCreationService,
   ) {}
 
   findByUsername(username: string): Promise<User | null> {
@@ -57,55 +50,7 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const { company, ...userData } = createUserDto;
-    const user = this.usersRepository.create(userData);
-
-    try {
-      const savedUser = await this.usersRepository.save(user);
-
-      if (savedUser.role === UserRole.Customer) {
-        const customer = this.customerRepository.create({
-          name: savedUser.username,
-          email: savedUser.email,
-          userId: savedUser.id,
-        });
-        await this.customerRepository.save(customer);
-      } else if (
-        savedUser.role === UserRole.Owner ||
-        savedUser.role === UserRole.Worker
-      ) {
-        if (!company) {
-          throw new BadRequestException(
-            'Company information is required for owner and worker accounts',
-          );
-        }
-
-        let existing = await this.companyRepository.findOne({
-          where: { name: company.name },
-        });
-
-        if (!existing) {
-          existing = this.companyRepository.create({
-            ...company,
-            ownerId: savedUser.role === UserRole.Owner ? savedUser.id : undefined,
-          });
-          existing = await this.companyRepository.save(existing);
-        }
-
-        savedUser.companyId = existing.id;
-        await this.usersRepository.save(savedUser);
-      }
-
-      return savedUser;
-    } catch (error) {
-      if (error instanceof QueryFailedError) {
-        const { code } = error.driverError as { code?: string };
-        if (code === UNIQUE_VIOLATION) {
-          throw new ConflictException('Username or email already exists');
-        }
-      }
-      throw error;
-    }
+    return this.userCreationService.createUser(createUserDto);
   }
 
   async requestPasswordReset(email: string): Promise<void> {
