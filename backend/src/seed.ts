@@ -29,10 +29,13 @@ async function main() {
 
   try {
     if (drop) {
-      console.log('Dropping and re-syncing database schema...');
+      console.log('Dropping and rebuilding database schema through migrations...');
       await ds.dropDatabase();
-      await ds.synchronize();
-      console.log('Database dropped and schema synchronized.');
+      if (!ds.isInitialized) {
+        await ds.initialize();
+      }
+      await ds.runMigrations();
+      console.log('Database dropped and migrations run.');
     }
 
     await ds.transaction(async (trx) => {
