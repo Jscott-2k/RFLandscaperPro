@@ -35,7 +35,7 @@ describe('CustomersService', () => {
     expect(service).toBeDefined();
   });
 
-  it('throws ConflictException when email already exists', async () => {
+  it('throws ConflictException when email already exists in same company', async () => {
     repo.create.mockReturnValue({} as Customer);
     repo.save.mockRejectedValue(
       new QueryFailedError('', [], { code: '23505' } as any),
@@ -54,13 +54,35 @@ describe('CustomersService', () => {
       ],
     };
 
-    await expect(service.create(createCustomerDto, 1)).rejects.toBeInstanceOf(
-      ConflictException,
-    );
-    await expect(service.create(createCustomerDto, 1)).rejects.toHaveProperty(
+    const promise = service.create(createCustomerDto, 1);
+    await expect(promise).rejects.toBeInstanceOf(ConflictException);
+    await expect(promise).rejects.toHaveProperty(
       'message',
       'Email already exists',
     );
+  });
+
+  it('allows duplicate emails across different companies', async () => {
+    repo.create.mockImplementation((dto) => dto as any);
+    repo.save
+      .mockResolvedValueOnce({ id: 1 } as Customer)
+      .mockResolvedValueOnce({ id: 2 } as Customer);
+
+    const createCustomerDto: CreateCustomerDto = {
+      name: 'John Doe',
+      email: 'john@example.com',
+      addresses: [
+        {
+          street: '123 Main St',
+          city: 'Anytown',
+          state: 'CA',
+          zip: '12345',
+        },
+      ],
+    };
+
+    await expect(service.create(createCustomerDto, 1)).resolves.toBeDefined();
+    await expect(service.create(createCustomerDto, 2)).resolves.toBeDefined();
   });
 
   it('should apply search filter when finding all customers', async () => {

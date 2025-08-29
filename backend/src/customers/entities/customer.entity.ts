@@ -15,9 +15,11 @@ import {
   JoinColumn,
   Index,
   ManyToOne,
+  Unique,
 } from 'typeorm';
 
 @Entity()
+@Unique(['email', 'companyId'])
 @Index(['email']) // Add index for email queries
 @Index(['name']) // Add index for name queries
 export class Customer {
@@ -27,7 +29,7 @@ export class Customer {
   @Column()
   name: string;
 
-  @Column({ unique: true })
+  @Column()
   email: string;
 
   @Column({ nullable: true })
