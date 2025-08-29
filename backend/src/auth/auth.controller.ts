@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -10,6 +10,7 @@ import { User } from '../users/user.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { SignupOwnerDto } from './dto/signup-owner.dto';
+import { SwitchCompanyDto } from './dto/switch-company.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -35,6 +36,16 @@ export class AuthController {
       loginDto.company,
     );
     return this.authService.login(user);
+  }
+
+  @Post('switch-company')
+  @ApiOperation({ summary: 'Switch active company for user' })
+  @ApiResponse({ status: 200, description: 'New JWT for selected company' })
+  async switchCompany(
+    @Body() dto: SwitchCompanyDto,
+    @Req() req: { user: { userId: number; username: string; email: string } },
+  ) {
+    return this.authService.switchCompany(req.user, dto.companyId);
   }
 
   @Public()

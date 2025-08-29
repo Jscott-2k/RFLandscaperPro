@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity';
+import { CompanyUser } from '../companies/entities/company-user.entity';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
+import { MeController } from './me.controller';
 import { EmailService } from '../common/email.service';
 import { UserCreationService } from './user-creation.service';
 import { CustomerRegistrationService } from './customer-registration.service';
@@ -18,7 +20,7 @@ const userRepositoryProvider = {
 };
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User, CompanyUser])],
   providers: [
     UsersService,
     EmailService,
@@ -27,7 +29,7 @@ const userRepositoryProvider = {
     CompanyOnboardingService,
     userRepositoryProvider,
   ],
-  controllers: [UsersController],
+  controllers: [UsersController, MeController],
   exports: [UsersService, userRepositoryProvider],
 })
 export class UsersModule {}
