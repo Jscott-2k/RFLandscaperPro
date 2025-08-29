@@ -25,6 +25,15 @@ export default tseslint.config(
     },
   },
   {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      sourceType: 'module',
+      parserOptions: {
+        projectService: { allowDefaultProject: ['scripts/generate-migration.mjs'] },
+      },
+    },
+  },
+  {
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
