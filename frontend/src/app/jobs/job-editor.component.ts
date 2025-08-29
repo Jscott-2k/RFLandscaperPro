@@ -2,7 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
-import { JobsService, Job } from './jobs.service';
+import { JobsService } from './jobs.service';
+import { Job } from './job.model';
 import { ErrorService } from '../error.service';
 
 @Component({

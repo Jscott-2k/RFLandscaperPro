@@ -2,7 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { UserService, User } from './user.service';
+import { UserService } from './user.service';
+import { User } from './user.model';
 import { AuthService } from '../auth/auth.service';
 import { ErrorService } from '../error.service';
 

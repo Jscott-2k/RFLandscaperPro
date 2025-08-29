@@ -1,15 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiService, Job as ApiJob } from '../api.service';
-
-export interface Job extends Omit<ApiJob, 'id' | 'completed'> {
-  id?: number;
-  completed?: boolean;
-  description?: string;
-  scheduledDate?: string;
-  customerId?: number;
-}
+import { ApiService } from '../api.service';
+import { Job, CreateJob, UpdateJob } from './job.model';
 
 @Injectable({ providedIn: 'root' })
 export class JobsService {
@@ -23,14 +16,12 @@ export class JobsService {
     return this.api.getJob(id);
   }
 
-  create(job: Job): Observable<Job> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    return this.api.createJob(job as any);
+  create(job: CreateJob): Observable<Job> {
+    return this.api.createJob(job);
   }
 
-  update(id: number, job: Job): Observable<Job> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    return this.api.updateJob(id, job as any);
+  update(id: number, job: UpdateJob): Observable<Job> {
+    return this.api.updateJob(id, job);
   }
 
   assign(id: number, payload: { userId: number; equipmentId: number }): Observable<Job> {
