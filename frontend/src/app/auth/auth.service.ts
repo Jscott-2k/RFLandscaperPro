@@ -194,55 +194,51 @@ export class AuthService {
     }
   }
 
-  private getRolesFromToken(token?: string): string[] {
+  private decodeTokenPayload(token?: string): Record<string, unknown> | null {
     const t = token ?? this.getToken();
     if (!t) {
-      return [];
+      return null;
     }
     try {
       const payloadStr = atob(t.split('.')[1]);
       const payload: unknown = JSON.parse(payloadStr);
-      if (
-        payload &&
-        typeof payload === 'object' &&
-        'roles' in payload &&
-        Array.isArray((payload as { roles: unknown }).roles)
-      ) {
-        return (payload as { roles: string[] }).roles;
-      }
-      if (
-        payload &&
-        typeof payload === 'object' &&
-        'role' in payload &&
-        typeof (payload as { role: unknown }).role === 'string'
-      ) {
-        return [(payload as { role: string }).role];
-      }
-      return [];
+      return payload && typeof payload === 'object' ? (payload as Record<string, unknown>) : null;
     } catch {
-      return [];
+      return null;
     }
   }
 
+  private getRolesFromToken(token?: string): string[] {
+    const payload: unknown = this.decodeTokenPayload(token);
+    if (
+      payload &&
+      typeof payload === 'object' &&
+      'roles' in payload &&
+      Array.isArray((payload as { roles: unknown }).roles)
+    ) {
+      return (payload as { roles: string[] }).roles;
+    }
+    if (
+      payload &&
+      typeof payload === 'object' &&
+      'role' in payload &&
+      typeof (payload as { role: unknown }).role === 'string'
+    ) {
+      return [(payload as { role: string }).role];
+    }
+    return [];
+  }
+
   private getCompanyFromToken(token?: string): string | null {
-    const t = token ?? this.getToken();
-    if (!t) {
-      return null;
+    const payload: unknown = this.decodeTokenPayload(token);
+    if (
+      payload &&
+      typeof payload === 'object' &&
+      'companyId' in payload &&
+      typeof (payload as { companyId: unknown }).companyId !== 'undefined'
+    ) {
+      return String((payload as { companyId: unknown }).companyId);
     }
-    try {
-      const payloadStr = atob(t.split('.')[1]);
-      const payload: unknown = JSON.parse(payloadStr);
-      if (
-        payload &&
-        typeof payload === 'object' &&
-        'companyId' in payload &&
-        typeof (payload as { companyId: unknown }).companyId !== 'undefined'
-      ) {
-        return String((payload as { companyId: unknown }).companyId);
-      }
-      return null;
-    } catch {
-      return null;
-    }
+    return null;
   }
 }
