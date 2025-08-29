@@ -6,6 +6,11 @@ import { roleGuard } from './auth/role.guard';
 
 export const routes: Routes = [
   {
+    path: 'server-error',
+    loadComponent: () =>
+      import('./server-error/server-error.component').then((m) => m.ServerErrorComponent),
+  },
+  {
     path: 'login',
     loadComponent: () => import('./auth/login/login.component').then((m) => m.LoginComponent),
   },

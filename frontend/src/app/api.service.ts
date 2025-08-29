@@ -63,6 +63,6 @@ export class ApiService {
   }
 
   getHealth(): Observable<{ status: string }> {
-    return this.request<{ status: string }>('GET', `${environment.apiUrl}/health`);
+    return this.http.get<{ status: string }>(`${environment.apiUrl}/health`);
   }
 }
