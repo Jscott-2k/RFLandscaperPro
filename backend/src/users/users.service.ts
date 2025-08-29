@@ -15,6 +15,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { validatePasswordStrength } from '../auth/password.util';
 import { UserCreationService } from './user-creation.service';
+import { Email } from './value-objects/email.vo';
 
 @Injectable()
 export class UsersService {
@@ -30,7 +31,9 @@ export class UsersService {
   }
 
   findByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { email } });
+    return this.usersRepository.findOne({
+      where: { email: new Email(email) },
+    });
   }
 
   findById(id: number, companyId?: number): Promise<User | null> {
