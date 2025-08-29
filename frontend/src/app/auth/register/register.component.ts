@@ -2,7 +2,9 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs';
 import { AuthService } from '../auth.service';
+import { ErrorService } from '../../error.service';
 
 @Component({
   selector: 'app-register',
@@ -27,7 +29,7 @@ import { AuthService } from '../auth.service';
         <input type="text" formControlName="phone" placeholder="Phone" />
         <input type="email" formControlName="email" placeholder="Email" />
       </div>
-      <button type="submit">Register</button>
+      <button type="submit" [disabled]="loading">Register</button>
     </form>
   `,
 })
@@ -35,6 +37,7 @@ export class RegisterComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private errorService = inject(ErrorService);
 
   form = this.fb.nonNullable.group({
     username: ['', Validators.required.bind(Validators)],
@@ -53,8 +56,10 @@ export class RegisterComponent {
     return this.form.controls.role.value === 'owner';
   }
 
+  loading = false;
+
   submit(): void {
-    if (this.form.valid) {
+    if (this.form.valid && !this.loading) {
       const { username, email, password, role, company } = this.form.getRawValue();
       const payload: Parameters<AuthService['register']>[0] = {
         username,
@@ -65,9 +70,16 @@ export class RegisterComponent {
       if (this.isOwner) {
         payload.company = company;
       }
-      this.auth.register(payload).subscribe(() => {
-        void this.router.navigate(['/login']);
-      });
+      this.loading = true;
+      this.auth
+        .register(payload)
+        .pipe(finalize(() => (this.loading = false)))
+        .subscribe({
+          next: () => {
+            void this.router.navigate(['/login']);
+          },
+          error: (err: unknown) => this.errorService.show((err as Error).message),
+        });
     }
   }
 }
