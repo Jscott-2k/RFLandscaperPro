@@ -17,18 +17,16 @@ export class AuthService {
     return this.roles().includes(role);
   }
 
-  login(data: {
-    email: string;
-    password: string;
-    company: string;
-  }): Observable<{ access_token: string }> {
+  login(data: { email: string; password: string }): Observable<{ access_token: string }> {
     return this.http.post<{ access_token: string }>(`${environment.apiUrl}/auth/login`, data).pipe(
       tap((res) => {
         if (this.hasLocalStorage()) {
           localStorage.setItem('token', res.access_token);
           this.roles.set(this.getRolesFromToken());
-          const company = this.getCompanyFromToken(res.access_token) ?? data.company;
-          this.setCompany(company);
+          const company = this.getCompanyFromToken(res.access_token);
+          if (company) {
+            this.setCompany(company);
+          }
         }
       }),
     );

@@ -24,7 +24,6 @@ import { ErrorService } from '../error.service';
         </p>
         <div *ngIf="mode === 'login'">
           <form [formGroup]="loginForm" (ngSubmit)="login()">
-            <input type="text" formControlName="company" placeholder="Company" />
             <input type="email" formControlName="email" placeholder="Email" />
             <input type="password" formControlName="password" placeholder="Password" />
             <button type="submit" [disabled]="loginLoading">Login</button>
@@ -57,7 +56,6 @@ export class AcceptInvitationComponent implements OnInit {
   mode: 'login' | 'create' = 'login';
 
   loginForm = this.fb.nonNullable.group({
-    company: ['', Validators.required.bind(Validators)],
     email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
     password: ['', Validators.required.bind(Validators)],
   });

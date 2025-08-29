@@ -12,7 +12,6 @@ import { ErrorService } from '../../error.service';
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()">
-      <input type="text" formControlName="company" placeholder="Company" />
       <input type="email" formControlName="email" placeholder="Email" />
       <input type="password" formControlName="password" placeholder="Password" />
       <button type="submit" [disabled]="loading">Login</button>
@@ -29,7 +28,6 @@ export class LoginComponent {
   private errorService = inject(ErrorService);
 
   form = this.fb.nonNullable.group({
-    company: ['', Validators.required.bind(Validators)],
     email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
     password: ['', Validators.required.bind(Validators)],
   });
