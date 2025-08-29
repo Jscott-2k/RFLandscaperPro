@@ -14,7 +14,7 @@ export class TeamService {
 
   private getCompanyId(): number {
     const id = this.auth.getCompany();
-    return id ? Number(id) : 0;
+    return id ?? 0;
   }
 
   getMembers(): Observable<CompanyMember[]> {

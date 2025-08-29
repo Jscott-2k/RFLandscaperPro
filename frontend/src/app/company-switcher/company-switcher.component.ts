@@ -9,7 +9,9 @@ import { AuthService } from '../auth/auth.service';
   imports: [CommonModule, FormsModule],
   template: `
     <select [(ngModel)]="selected" (ngModelChange)="onChange($event)">
-      <option *ngFor="let c of auth.getCompanies()" [ngValue]="c">{{ c }}</option>
+      <option *ngFor="let c of auth.getCompanies()" [ngValue]="c.companyId">
+        {{ c.companyName || c.companyId }}
+      </option>
     </select>
   `,
 })
@@ -17,10 +19,10 @@ export class CompanySwitcherComponent {
   protected auth = inject(AuthService);
   selected = this.auth.getCompany();
 
-  onChange(company: string): void {
-    if (company) {
-      this.auth.switchCompany(company).subscribe(() => {
-        this.selected = company;
+  onChange(companyId: number): void {
+    if (companyId) {
+      this.auth.switchCompany(companyId).subscribe(() => {
+        this.selected = companyId;
         if (typeof window !== 'undefined') {
           window.location.reload();
         }

@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { CompanyMembership } from '../auth/auth.service';
 
 export interface InvitationPreview {
   companyName: string;
@@ -21,8 +22,8 @@ export class InvitationsService {
   accept(
     token: string,
     data?: { name: string; password: string },
-  ): Observable<{ access_token: string; companies?: string[] }> {
-    return this.http.post<{ access_token: string; companies?: string[] }>(
+  ): Observable<{ access_token: string; companies?: CompanyMembership[] }> {
+    return this.http.post<{ access_token: string; companies?: CompanyMembership[] }>(
       `${environment.apiUrl}/invitations/${token}/accept`,
       data ?? {},
     );

@@ -16,8 +16,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  if (company && !isLogin && !isSwitchCompany) {
-    headers['X-Company-ID'] = company;
+  if (company !== null && !isLogin && !isSwitchCompany) {
+    headers['X-Company-ID'] = String(company);
   }
 
   if (Object.keys(headers).length) {
