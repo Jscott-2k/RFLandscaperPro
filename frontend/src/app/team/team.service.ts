@@ -1,11 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService, CompanyMember, CompanyInvitation } from '../api.service';
+import {
+  CompaniesApiService,
+  CompanyMember,
+  CompanyInvitation,
+} from '../api/companies-api.service';
 import { AuthService } from '../auth/auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class TeamService {
-  private api = inject(ApiService);
+  private api = inject(CompaniesApiService);
   private auth = inject(AuthService);
 
   private getCompanyId(): number {

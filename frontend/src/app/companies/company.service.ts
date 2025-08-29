@@ -2,11 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Company, CreateCompany, UpdateCompany } from './company.model';
 import { User } from '../users/user.model';
-import { ApiService } from '../api.service';
+import { CompaniesApiService } from '../api/companies-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class CompanyService {
-  private api = inject(ApiService);
+  private api = inject(CompaniesApiService);
 
   getProfile(): Observable<Company> {
     return this.api.getCompanyProfile();

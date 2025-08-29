@@ -17,80 +17,6 @@ export interface PaginationQuery {
   [key: string]: unknown;
 }
 
-export interface Customer {
-  id: number;
-  name: string;
-  email: string;
-  active: boolean;
-}
-
-export type CreateCustomer = Partial<Omit<Customer, 'id'>>;
-export type UpdateCustomer = Partial<CreateCustomer>;
-
-export interface Equipment {
-  id: number;
-  name: string;
-  status: string;
-  type: string;
-}
-
-export type CreateEquipment = Partial<Omit<Equipment, 'id'>>;
-export type UpdateEquipment = Partial<CreateEquipment>;
-
-export interface Job {
-  id: number;
-  title: string;
-  completed: boolean;
-}
-
-export type CreateJob = Partial<Omit<Job, 'id'>>;
-export type UpdateJob = Partial<CreateJob>;
-
-export interface User {
-  id: number;
-  username: string;
-  email: string;
-  role: string;
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
-  company?: {
-    name: string;
-    address?: string;
-    phone?: string;
-  };
-}
-
-export type CreateUser = Partial<Omit<User, 'id'>>;
-export type UpdateUser = Partial<CreateUser>;
-
-export interface Company {
-  id: number;
-  name: string;
-  address?: string;
-  phone?: string;
-  email?: string;
-  ownerId?: number;
-}
-
-export type CreateCompany = Partial<Omit<Company, 'id'>>;
-export type UpdateCompany = Partial<CreateCompany>;
-
-export interface CompanyMember {
-  userId: number;
-  username: string;
-  email: string;
-  role: string;
-  status: string;
-}
-
-export interface CompanyInvitation {
-  id: number;
-  email: string;
-  role: string;
-  expiresAt: string;
-}
-
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
@@ -124,7 +50,7 @@ export class ApiService {
     return httpParams;
   }
 
-  private request<T>(
+  protected request<T>(
     method: string,
     url: string,
     options: { params?: Record<string, unknown>; body?: unknown } = {},
@@ -376,4 +302,5 @@ export class ApiService {
       },
     );
   }
+
 }

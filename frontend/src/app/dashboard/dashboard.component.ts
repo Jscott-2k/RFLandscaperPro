@@ -2,6 +2,10 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiService, Paginated } from '../api.service';
 import { UpcomingJobSummary, EquipmentCount } from '../models/dashboard.models';
+import { JobsApiService } from '../api/jobs-api.service';
+import { EquipmentApiService } from '../api/equipment-api.service';
+import { UsersApiService } from '../api/users-api.service';
+
 
 @Component({
   selector: 'app-dashboard',
@@ -27,7 +31,9 @@ import { UpcomingJobSummary, EquipmentCount } from '../models/dashboard.models';
   styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
-  private readonly api = inject(ApiService);
+  private readonly jobsApi = inject(JobsApiService);
+  private readonly equipmentApi = inject(EquipmentApiService);
+  private readonly usersApi = inject(UsersApiService);
 
   protected readonly upcomingJobs = signal(0);
   protected readonly equipmentAvailable = signal(0);
@@ -35,15 +41,15 @@ export class DashboardComponent implements OnInit {
   protected readonly activeUsers = signal(0);
 
   ngOnInit(): void {
-    this.api
-      .getUpcomingJobs()
-      .subscribe((data: Paginated<UpcomingJobSummary>) => this.upcomingJobs.set(data.total));
-    this.api
+
+    this.jobsApi.getUpcomingJobs().subscribe((data) => this.upcomingJobs.set(data.total));
+    this.equipmentApi
       .getEquipmentCount('available')
-      .subscribe((data: Paginated<EquipmentCount>) => this.equipmentAvailable.set(data.total));
-    this.api
+      .subscribe((data) => this.equipmentAvailable.set(data.total));
+    this.equipmentApi
       .getEquipmentCount('in_use')
-      .subscribe((data: Paginated<EquipmentCount>) => this.equipmentInUse.set(data.total));
-    this.api.getUsers().subscribe((data) => this.activeUsers.set(data.length));
+      .subscribe((data) => this.equipmentInUse.set(data.total));
+    this.usersApi.getUsers().subscribe((data) => this.activeUsers.set(data.length));
+
   }
 }
