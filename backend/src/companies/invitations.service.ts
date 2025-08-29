@@ -5,6 +5,8 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, IsNull, QueryFailedError } from 'typeorm';
@@ -158,6 +160,61 @@ export class InvitationsService {
     } else {
       this.acceptAttempts.set(tokenHash, { count: 1, firstAttempt: now });
     }
+  }
+
+  async acceptExistingUser(
+    token: string,
+    currentUser: { userId: number; email: string },
+  ): Promise<User> {
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    this.checkAcceptRateLimit(tokenHash);
+
+    const invitation = await this.invitationsRepository.findOne({
+      where: { tokenHash },
+    });
+    if (!invitation) {
+      throw new NotFoundException('Invitation not found');
+    }
+    if (
+      invitation.acceptedAt ||
+      invitation.revokedAt ||
+      invitation.expiresAt.getTime() < Date.now()
+    ) {
+      throw new BadRequestException('Invitation token is invalid');
+    }
+
+    if (currentUser.email !== invitation.email) {
+      throw new ForbiddenException('Invitation email mismatch');
+    }
+
+    const user = await this.usersRepository.findOne({
+      where: { id: currentUser.userId },
+    });
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    user.companyId = invitation.companyId;
+    await this.usersRepository.save(user);
+
+    const membership = this.companyUsersRepository.create({
+      companyId: invitation.companyId,
+      userId: user.id,
+      role:
+        invitation.role === InvitationRole.ADMIN
+          ? CompanyUserRole.ADMIN
+          : CompanyUserRole.WORKER,
+      invitedBy: invitation.invitedBy,
+    });
+    await this.companyUsersRepository.save(membership);
+
+    invitation.acceptedAt = new Date();
+    await this.invitationsRepository.save(invitation);
+
+    this.acceptAttempts.delete(tokenHash);
+
+    return user;
   }
 
   async acceptInvitation(
