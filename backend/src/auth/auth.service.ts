@@ -72,8 +72,10 @@ export class AuthService {
     const payload = {
       username: user.username,
       sub: user.id,
-      role: user.role,
+      email: user.email,
       companyId: user.companyId,
+      roles: [user.role],
+      role: user.role,
     };
 
     const refreshToken = await this.jwtService.signAsync(payload, {
@@ -200,7 +202,9 @@ export class AuthService {
       const payload = await this.jwtService.verifyAsync<{
         username: string;
         sub: number;
-        role: UserRole;
+        email: string;
+        roles?: UserRole[];
+        role?: UserRole;
         companyId: number;
       }>(token);
       const hashed = this.hashToken(token);
@@ -216,7 +220,10 @@ export class AuthService {
         {
           username: payload.username,
           sub: payload.sub,
-          role: payload.role,
+          email: payload.email,
+          companyId: payload.companyId,
+          roles: payload.roles ?? (payload.role ? [payload.role] : []),
+          role: payload.role ?? payload.roles?.[0],
         },
         {
           expiresIn: this.configService.get<string>(
@@ -230,8 +237,10 @@ export class AuthService {
         access_token: await this.jwtService.signAsync({
           username: payload.username,
           sub: payload.sub,
-          role: payload.role,
+          email: payload.email,
           companyId: payload.companyId,
+          roles: payload.roles ?? (payload.role ? [payload.role] : []),
+          role: payload.role ?? payload.roles?.[0],
         }),
         refresh_token: newRefresh,
       };
