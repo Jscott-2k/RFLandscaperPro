@@ -2,7 +2,7 @@ import {
   Job as ApiJob,
   CreateJob as ApiCreateJob,
   UpdateJob as ApiUpdateJob,
-} from '../api.service';
+} from '../api/jobs-api.service';
 
 export interface Job extends Omit<ApiJob, 'id' | 'completed'> {
   id?: number;

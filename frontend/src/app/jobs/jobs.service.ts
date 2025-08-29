@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiService } from '../api.service';
+import { JobsApiService } from '../api/jobs-api.service';
 import { Job, CreateJob, UpdateJob } from './job.model';
 
 @Injectable({ providedIn: 'root' })
 export class JobsService {
-  private api = inject(ApiService);
+  private api = inject(JobsApiService);
 
   list(): Observable<Job[]> {
     return this.api.getJobs().pipe(map((res) => res.items as Job[]));

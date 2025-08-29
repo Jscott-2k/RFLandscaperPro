@@ -2,11 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Customer } from './customer.model';
-import { ApiService } from '../api.service';
+import { CustomersApiService } from '../api/customers-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
-  private api = inject(ApiService);
+  private api = inject(CustomersApiService);
 
   getCustomers(): Observable<Customer[]> {
     return this.api.getCustomers().pipe(map((res) => res.items));
