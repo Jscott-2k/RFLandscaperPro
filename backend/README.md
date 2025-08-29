@@ -117,6 +117,23 @@ npm run start:prod
 - Metrics: http://localhost:3000/api/metrics
 - Production Base URL: https://rflandscaperpro.com/api
 
+#### Health Check
+
+The backend exposes a lightweight endpoint for uptime monitoring.
+
+```bash
+curl http://localhost:3000/api/health
+```
+
+Successful requests return a `200 OK` with a JSON body:
+
+```json
+{ "status": "ok" }
+```
+
+Infrastructure tools and load balancers can poll this route to verify that
+the service is running and ready to receive traffic.
+
 ## Project Structure
 ```
 src/
