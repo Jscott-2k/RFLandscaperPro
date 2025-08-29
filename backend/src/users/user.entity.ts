@@ -20,12 +20,10 @@ import { PhoneNumber } from './value-objects/phone-number.vo';
 
 export enum UserRole {
   Master = 'master',
-  Admin = 'admin',
-  Master = 'master',
-  Owner = 'owner',
+  CompanyAdmin = 'company_admin',
+  CompanyOwner = 'company_owner',
   Worker = 'worker',
   Customer = 'customer',
-  Master = 'master',
 }
 
 @Entity()

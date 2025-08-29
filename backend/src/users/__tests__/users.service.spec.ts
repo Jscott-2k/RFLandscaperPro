@@ -188,8 +188,8 @@ describe('UsersService', () => {
   it('updates user role', async () => {
     const user = Object.assign(new User(), { id: 1, role: UserRole.Customer });
     usersRepository.findOne.mockResolvedValue(user);
-    const updated = await service.updateRole(1, UserRole.Admin);
-    expect(updated.role).toBe(UserRole.Admin);
+    const updated = await service.updateRole(1, UserRole.CompanyAdmin);
+    expect(updated.role).toBe(UserRole.CompanyAdmin);
     expect(usersRepository.save).toHaveBeenCalledWith(user);
   });
 });

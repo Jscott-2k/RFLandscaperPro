@@ -41,7 +41,7 @@ import { NotificationService } from '../notification.service';
         Role:
         <select formControlName="role">
           <option value="customer">Customer</option>
-          <option value="owner">Owner</option>
+          <option value="company_owner">Company Owner</option>
           <option value="worker">Worker</option>
         </select>
       </label>
@@ -117,6 +117,6 @@ export class UserFormComponent {
   }
 
   get isOwner(): boolean {
-    return this.form.controls.role.value === 'owner';
+    return this.form.controls.role.value === 'company_owner';
   }
 }

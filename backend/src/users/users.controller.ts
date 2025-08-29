@@ -36,7 +36,7 @@ import { toUserResponseDto } from './users.mapper';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Roles(UserRole.Admin, UserRole.Owner)
+  @Roles(UserRole.CompanyAdmin, UserRole.CompanyOwner)
   @Post()
   @ApiOperation({ summary: 'Create user' })
   @ApiResponse({
@@ -48,7 +48,7 @@ export class UsersController {
     @Req() req: { user: { userId: number; role: UserRole } },
     @Body() createUserDto: CreateUserDto,
   ): Promise<UserResponseDto> {
-    if (req.user.role === UserRole.Owner) {
+    if (req.user.role === UserRole.CompanyOwner) {
       if (createUserDto.role && createUserDto.role !== UserRole.Worker) {
         throw new BadRequestException('Owners can only create workers');
       }
@@ -64,7 +64,7 @@ export class UsersController {
   }
 
   @Get()
-  @Roles(UserRole.Admin)
+  @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'List users' })
   @ApiResponse({
     status: 200,
@@ -77,7 +77,7 @@ export class UsersController {
   }
 
   @Get('workers')
-  @Roles(UserRole.Owner)
+  @Roles(UserRole.CompanyOwner)
   @ApiOperation({ summary: 'List company workers' })
   @ApiResponse({
     status: 200,
@@ -92,7 +92,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  @Roles(UserRole.Admin)
+  @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Get user by id' })
   @ApiResponse({
     status: 200,
@@ -108,7 +108,7 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.Admin)
+  @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Update user' })
   @ApiResponse({
     status: 200,
@@ -124,7 +124,7 @@ export class UsersController {
   }
 
   @Patch('workers/:id')
-  @Roles(UserRole.Owner)
+  @Roles(UserRole.CompanyOwner)
   @ApiOperation({ summary: 'Update company worker' })
   @ApiResponse({
     status: 200,
@@ -150,7 +150,7 @@ export class UsersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles(UserRole.Admin)
+  @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Delete user' })
   @ApiResponse({ status: 204, description: 'User deleted' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
@@ -158,7 +158,7 @@ export class UsersController {
   }
 
   @Patch(':id/role')
-  @Roles(UserRole.Admin)
+  @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Update user role' })
   @ApiResponse({
     status: 200,

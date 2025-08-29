@@ -18,7 +18,7 @@ import { UpdateCompanyMemberDto } from './dto/update-company-member.dto';
 
 @ApiTags('companies')
 @ApiBearerAuth()
-@Roles(UserRole.Owner, UserRole.Admin)
+@Roles(UserRole.CompanyOwner, UserRole.CompanyAdmin)
 @Controller('companies/:companyId/members')
 export class MembersController {
   constructor(private readonly membersService: MembersService) {}

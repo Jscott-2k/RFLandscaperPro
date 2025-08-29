@@ -28,7 +28,7 @@ export class ContractsController {
   constructor(private readonly contractsService: ContractsService) {}
 
   @Post()
-  @Roles(UserRole.Admin)
+  @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Create contract' })
   @ApiResponse({ status: 201, type: ContractResponseDto })
   create(
@@ -39,7 +39,7 @@ export class ContractsController {
   }
 
   @Get()
-  @Roles(UserRole.Admin, UserRole.Worker)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'List contracts' })
   @ApiResponse({ status: 200, type: [ContractResponseDto] })
   findAll(@CompanyId() companyId: number): Promise<ContractResponseDto[]> {
@@ -47,7 +47,7 @@ export class ContractsController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.Admin)
+  @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Update contract' })
   @ApiResponse({ status: 200, type: ContractResponseDto })
   update(
@@ -59,7 +59,7 @@ export class ContractsController {
   }
 
   @Post(':id/cancel')
-  @Roles(UserRole.Admin)
+  @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Cancel contract' })
   @ApiResponse({ status: 200, description: 'Contract cancelled' })
   cancel(

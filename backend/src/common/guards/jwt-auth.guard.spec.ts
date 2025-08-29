@@ -28,7 +28,7 @@ describe('JwtAuthGuard', () => {
     expect(() =>
       guard.handleRequest(
         null,
-        { id: 1, companyId: 1, role: UserRole.Admin },
+        { id: 1, companyId: 1, role: UserRole.CompanyAdmin },
         null,
         context,
       ),

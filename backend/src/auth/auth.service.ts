@@ -122,7 +122,7 @@ export class AuthService {
       username: dto.name,
       email: new Email(dto.email),
       password: dto.password,
-      role: UserRole.Owner,
+      role: UserRole.CompanyOwner,
       company: { name: dto.companyName },
       isVerified: true,
     });
@@ -163,9 +163,9 @@ export class AuthService {
   private mapRole(role: CompanyUserRole): UserRole {
     switch (role) {
       case CompanyUserRole.OWNER:
-        return UserRole.Owner;
+        return UserRole.CompanyOwner;
       case CompanyUserRole.ADMIN:
-        return UserRole.Admin;
+        return UserRole.CompanyAdmin;
       default:
         return UserRole.Worker;
     }

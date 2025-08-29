@@ -88,22 +88,24 @@ async function main() {
         );
       }
 
-      // --- Admin user ---
-      const adminUsername = process.env.ADMIN_USERNAME ?? 'admin';
-      const adminEmail = process.env.ADMIN_EMAIL ?? 'admin@example.com';
+      // --- Company admin user ---
+      const companyAdminUsername =
+        process.env.COMPANY_ADMIN_USERNAME ?? 'admin';
+      const companyAdminEmail =
+        process.env.COMPANY_ADMIN_EMAIL ?? 'admin@example.com';
 
-      const rawAdminPassword =
-        process.env.ADMIN_PASSWORD ??
+      const rawCompanyAdminPassword =
+        process.env.COMPANY_ADMIN_PASSWORD ??
         crypto.randomBytes(16).toString('base64url');
 
-      const hashed = await bcrypt.hash(rawAdminPassword, 12);
+      const hashed = await bcrypt.hash(rawCompanyAdminPassword, 12);
 
       await userRepo.upsert(
         {
-          username: adminUsername,
-          email: new Email(adminEmail),
+          username: companyAdminUsername,
+          email: new Email(companyAdminEmail),
           password: hashed,
-          role: UserRole.Admin,
+          role: UserRole.CompanyAdmin,
           firstName: 'Admin',
           lastName: 'User',
           phone: new PhoneNumber('555-000-0000'),
@@ -114,15 +116,17 @@ async function main() {
         },
       );
       const adminUser = await userRepo.findOneOrFail({
-        where: { username: adminUsername },
+        where: { username: companyAdminUsername },
       });
 
-      if (!process.env.ADMIN_PASSWORD) {
+      if (!process.env.COMPANY_ADMIN_PASSWORD) {
         console.log(
-          `Admin user ensured. Generated password: ${rawAdminPassword}`,
+          `Company admin user ensured. Generated password: ${rawCompanyAdminPassword}`,
         );
       } else {
-        console.log('Admin user ensured (password from environment variable).');
+        console.log(
+          'Company admin user ensured (password from environment variable).',
+        );
       }
 
       // --- Sample company ---

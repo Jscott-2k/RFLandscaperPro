@@ -28,7 +28,7 @@ export class UserCreationService {
         if (savedUser.role === UserRole.Customer) {
           await this.customerRegistrationService.register(savedUser, manager);
         } else if (
-          savedUser.role === UserRole.Owner ||
+          savedUser.role === UserRole.CompanyOwner ||
           savedUser.role === UserRole.Worker
         ) {
           await this.companyOnboardingService.onboard(

@@ -15,10 +15,10 @@ import { AuthService } from '../auth/auth.service';
     <ul>
       <li *ngFor="let w of workers">
         <a [routerLink]="['/users', w.id]">{{ w.username }}</a>
-        <button *ngIf="auth.hasRole('admin')" (click)="delete(w.id)">Delete</button>
+        <button *ngIf="auth.hasRole('company_admin')" (click)="delete(w.id)">Delete</button>
       </li>
     </ul>
-    <button *ngIf="auth.hasRole('admin')" (click)="addWorker()">Add Worker</button>
+    <button *ngIf="auth.hasRole('company_admin')" (click)="addWorker()">Add Worker</button>
   `,
 })
 export class WorkerListComponent implements OnInit {

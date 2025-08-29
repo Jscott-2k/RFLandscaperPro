@@ -20,7 +20,7 @@ describe('Owner user endpoints (e2e)', () => {
       Object.assign(new User(), {
         id: 1,
         username: 'owner1',
-        role: UserRole.Owner,
+        role: UserRole.CompanyOwner,
         companyId: 1,
       }),
       Object.assign(new User(), {
@@ -33,7 +33,7 @@ describe('Owner user endpoints (e2e)', () => {
       Object.assign(new User(), {
         id: 3,
         username: 'owner2',
-        role: UserRole.Owner,
+        role: UserRole.CompanyOwner,
         companyId: 2,
       }),
       Object.assign(new User(), {
@@ -96,7 +96,7 @@ describe('Owner user endpoints (e2e)', () => {
         _res: Response,
         next: NextFunction,
       ) => {
-        req.user = { userId: 1, role: UserRole.Owner, companyId: 1 };
+        req.user = { userId: 1, role: UserRole.CompanyOwner, companyId: 1 };
         next();
       },
     );

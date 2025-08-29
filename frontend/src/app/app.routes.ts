@@ -61,7 +61,7 @@ export const routes: Routes = [
   {
     path: 'team',
     canActivate: [AuthGuard, roleGuard],
-    data: { roles: ['owner', 'admin'] },
+    data: { roles: ['company_owner', 'company_admin'] },
     loadChildren: () => import('./team/team.routes').then((m) => m.teamRoutes),
   },
   {

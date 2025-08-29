@@ -74,7 +74,7 @@ import { NotificationService } from '../notification.service';
         >
           {{ form.controls.phone.errors | json }}
         </div>
-        <div *ngIf="auth.hasRole('admin')">
+        <div *ngIf="auth.hasRole('company_admin')">
           <label>
             Role:
             <input formControlName="role" />

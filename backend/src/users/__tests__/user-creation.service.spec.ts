@@ -103,7 +103,7 @@ describe('UserCreationService', () => {
       username: 'owner',
       email: new Email('owner@example.com'),
       password: 'secret',
-      role: UserRole.Owner,
+      role: UserRole.CompanyOwner,
       company: { name: 'ACME Landscaping' },
     });
 
