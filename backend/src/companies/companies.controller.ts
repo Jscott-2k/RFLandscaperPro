@@ -19,6 +19,9 @@ import { User, UserRole } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
 import { toUserResponseDto } from '../users/users.mapper';
 import { UserResponseDto } from '../users/dto/user-response.dto';
+import { InvitationsService } from './invitations.service';
+import { CreateInvitationDto } from './dto/create-invitation.dto';
+import { InvitationRole } from './entities/invitation.entity';
 
 @ApiTags('companies')
 @ApiBearerAuth()
@@ -27,6 +30,7 @@ export class CompaniesController {
   constructor(
     private readonly companiesService: CompaniesService,
     private readonly usersService: UsersService,
+    private readonly invitationsService: InvitationsService,
   ) {}
 
   @Get('profile')
@@ -66,5 +70,32 @@ export class CompaniesController {
   ): Promise<CompanyResponseDto> {
     if (user.companyId !== id) throw new NotFoundException('Company not found');
     return this.companiesService.update(id, dto);
+  }
+
+  @Roles(UserRole.Owner, UserRole.Admin)
+  @Post(':companyId/invitations')
+  async invite(
+    @Param('companyId', ParseIntPipe) companyId: number,
+    @Body() dto: CreateInvitationDto,
+    @AuthUser() user: User,
+  ): Promise<{
+    id: number;
+    email: string;
+    role: InvitationRole;
+    expiresAt: Date;
+  }> {
+    if (user.companyId !== companyId)
+      throw new NotFoundException('Company not found');
+    const invitation = await this.invitationsService.createInvitation(
+      companyId,
+      dto,
+      user,
+    );
+    return {
+      id: invitation.id,
+      email: invitation.email,
+      role: invitation.role,
+      expiresAt: invitation.expiresAt,
+    };
   }
 }

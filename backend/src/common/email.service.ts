@@ -193,4 +193,17 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
       html: `<p>You have been assigned to job: <strong>${jobTitle}</strong></p>`,
     });
   }
+
+  async sendCompanyInvitationEmail(
+    to: string,
+    token: string,
+  ): Promise<{ messageId: string; previewUrl?: string }> {
+    const link = `https://app.rflandscaperpro.com/invite/accept?token=${token}`;
+    return this.sendMail({
+      to,
+      subject: 'Company Invitation',
+      text: `You have been invited to join a company on RF Landscaper Pro. Click here to accept: ${link}`,
+      html: `<p>You have been invited to join a company on RF Landscaper Pro.</p><p><a href="${link}">Accept Invitation</a></p>`,
+    });
+  }
 }
