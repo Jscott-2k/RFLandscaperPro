@@ -50,6 +50,44 @@ async function main() {
       const jobRepo = trx.getRepository(Job);
       const companyUserRepo = trx.getRepository(CompanyUser);
 
+      // --- Master user ---
+      const masterUsername = process.env.MASTER_USERNAME ?? 'master';
+      const masterEmail = process.env.MASTER_EMAIL ?? 'master@example.com';
+
+      const rawMasterPassword =
+        process.env.MASTER_PASSWORD ??
+        crypto.randomBytes(16).toString('base64url');
+
+      const masterHashed = await bcrypt.hash(rawMasterPassword, 12);
+
+      await userRepo.upsert(
+        {
+          username: masterUsername,
+          email: new Email(masterEmail),
+          password: masterHashed,
+          role: UserRole.Master,
+          firstName: 'Master',
+          lastName: 'User',
+          phone: new PhoneNumber('555-000-0000'),
+        },
+        {
+          conflictPaths: ['username'],
+          skipUpdateIfNoValuesChanged: true,
+        },
+      );
+      await userRepo.findOneOrFail({
+        where: { username: masterUsername },
+      });
+      if (!process.env.MASTER_PASSWORD) {
+        console.log(
+          `Master user ensured. Generated password: ${rawMasterPassword}`,
+        );
+      } else {
+        console.log(
+          'Master user ensured (password from environment variable).',
+        );
+      }
+
       // --- Admin user ---
       const adminUsername = process.env.ADMIN_USERNAME ?? 'admin';
       const adminEmail = process.env.ADMIN_EMAIL ?? 'admin@example.com';

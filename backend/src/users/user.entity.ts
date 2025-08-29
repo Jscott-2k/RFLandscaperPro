@@ -20,6 +20,7 @@ import { PhoneNumber } from './value-objects/phone-number.vo';
 
 export enum UserRole {
   Admin = 'admin',
+  Master = 'master',
   Owner = 'owner',
   Worker = 'worker',
   Customer = 'customer',
