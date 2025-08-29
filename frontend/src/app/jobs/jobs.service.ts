@@ -1,42 +1,43 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { map } from 'rxjs/operators';
+import { ApiService, Job as ApiJob } from '../api.service';
 
-export interface Job {
+export interface Job extends Omit<ApiJob, 'id' | 'completed'> {
   id?: number;
-  title: string;
+  completed?: boolean;
   description?: string;
   scheduledDate?: string;
-  customerId: number;
+  customerId?: number;
 }
 
 @Injectable({ providedIn: 'root' })
 export class JobsService {
-  private http = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/jobs`;
+  private api = inject(ApiService);
 
   list(): Observable<Job[]> {
-    return this.http.get<Job[]>(this.baseUrl);
+    return this.api.getJobs().pipe(map((res) => res.items as Job[]));
   }
 
   get(id: number): Observable<Job> {
-    return this.http.get<Job>(`${this.baseUrl}/${id}`);
+    return this.api.getJob(id);
   }
 
   create(job: Job): Observable<Job> {
-    return this.http.post<Job>(this.baseUrl, job);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    return this.api.createJob(job as any);
   }
 
   update(id: number, job: Job): Observable<Job> {
-    return this.http.patch<Job>(`${this.baseUrl}/${id}`, job);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    return this.api.updateJob(id, job as any);
   }
 
   assign(id: number, payload: { userId: number; equipmentId: number }): Observable<Job> {
-    return this.http.post<Job>(`${this.baseUrl}/${id}/assign`, payload);
+    return this.api.assignJob(id, payload);
   }
 
   schedule(id: number, date: string): Observable<Job> {
-    return this.http.post<Job>(`${this.baseUrl}/${id}/schedule`, { scheduledDate: date });
+    return this.api.scheduleJob(id, date);
   }
 }

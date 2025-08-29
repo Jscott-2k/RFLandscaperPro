@@ -175,6 +175,12 @@ export class ApiService {
     });
   }
 
+  updateEquipmentStatus(id: number, status: string): Observable<Equipment> {
+    return this.request<Equipment>('PATCH', `${environment.apiUrl}/equipment/${id}/status`, {
+      body: { status },
+    });
+  }
+
   deleteEquipment(id: number): Observable<void> {
     return this.request<void>('DELETE', `${environment.apiUrl}/equipment/${id}`);
   }
@@ -205,6 +211,18 @@ export class ApiService {
 
   updateJob(id: number, payload: UpdateJob): Observable<Job> {
     return this.request<Job>('PATCH', `${environment.apiUrl}/jobs/${id}`, { body: payload });
+  }
+
+  assignJob(id: number, payload: { userId: number; equipmentId: number }): Observable<Job> {
+    return this.request<Job>('POST', `${environment.apiUrl}/jobs/${id}/assign`, {
+      body: payload,
+    });
+  }
+
+  scheduleJob(id: number, date: string): Observable<Job> {
+    return this.request<Job>('POST', `${environment.apiUrl}/jobs/${id}/schedule`, {
+      body: { scheduledDate: date },
+    });
   }
 
   deleteJob(id: number): Observable<void> {

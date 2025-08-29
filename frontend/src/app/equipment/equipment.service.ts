@@ -1,8 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ApiService } from '../api.service';
 
 export interface Equipment {
   id: number;
@@ -12,33 +11,29 @@ export interface Equipment {
 
 @Injectable({ providedIn: 'root' })
 export class EquipmentService {
-  private http = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/equipment`;
+  private api = inject(ApiService);
 
   getEquipmentList(search?: string): Observable<Equipment[]> {
-    const options = search ? { params: { search } } : {};
-    return this.http
-      .get<{ items: Equipment[] }>(this.baseUrl, options)
-      .pipe(map((res) => res.items));
+    return this.api.getEquipment({ search }).pipe(map((res) => res.items));
   }
 
   getEquipment(id: number): Observable<Equipment> {
-    return this.http.get<Equipment>(`${this.baseUrl}/${id}`);
+    return this.api.getEquipmentById(id);
   }
 
   createEquipment(equipment: Partial<Equipment>): Observable<Equipment> {
-    return this.http.post<Equipment>(this.baseUrl, equipment);
+    return this.api.createEquipment(equipment);
   }
 
   updateEquipment(id: number, equipment: Partial<Equipment>): Observable<Equipment> {
-    return this.http.patch<Equipment>(`${this.baseUrl}/${id}`, equipment);
+    return this.api.updateEquipment(id, equipment);
   }
 
   deleteEquipment(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.api.deleteEquipment(id);
   }
 
   updateEquipmentStatus(id: number, status: string): Observable<Equipment> {
-    return this.http.patch<Equipment>(`${this.baseUrl}/${id}/status`, { status });
+    return this.api.updateEquipmentStatus(id, status);
   }
 }

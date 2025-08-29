@@ -1,8 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
 import { Company } from '../companies/company.model';
+import { ApiService } from '../api.service';
 
 export interface User {
   id: number;
@@ -17,26 +16,27 @@ export interface User {
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  private readonly http = inject(HttpClient);
-  private readonly base = `${environment.apiUrl}/users`;
+  private readonly api = inject(ApiService);
 
   getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(this.base);
+    return this.api.getUsers();
   }
 
   getUser(id: number): Observable<User> {
-    return this.http.get<User>(`${this.base}/${id}`);
+    return this.api.getUser(id) as Observable<User>;
   }
 
   createUser(user: Partial<User>): Observable<User> {
-    return this.http.post<User>(this.base, user);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    return this.api.createUser(user as any) as Observable<User>;
   }
 
   updateUser(user: User): Observable<User> {
-    return this.http.put<User>(`${this.base}/${user.id}`, user);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    return this.api.updateUser(user.id, user as any) as Observable<User>;
   }
 
   deleteUser(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/${id}`);
+    return this.api.deleteUser(id);
   }
 }
