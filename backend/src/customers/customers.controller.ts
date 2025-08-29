@@ -38,7 +38,7 @@ export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
   @Post()
-  @Roles(UserRole.Admin)
+  @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Create customer' })
   @ApiResponse({
     status: 201,
@@ -53,7 +53,7 @@ export class CustomersController {
   }
 
   @Get()
-  @Roles(UserRole.Admin, UserRole.Worker)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'List customers for the authenticated company' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
@@ -82,7 +82,7 @@ export class CustomersController {
   }
 
   @Get(':id')
-  @Roles(UserRole.Admin, UserRole.Worker)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Get customer by id' })
   @ApiResponse({
     status: 200,
@@ -97,7 +97,7 @@ export class CustomersController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.Admin)
+  @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Update customer' })
   @ApiResponse({
     status: 200,
@@ -113,7 +113,7 @@ export class CustomersController {
   }
 
   @Patch(':id/activate')
-  @Roles(UserRole.Admin)
+  @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Activate customer' })
   @ApiResponse({
     status: 200,
@@ -128,7 +128,7 @@ export class CustomersController {
   }
 
   @Patch(':id/deactivate')
-  @Roles(UserRole.Admin)
+  @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Deactivate customer' })
   @ApiResponse({
     status: 200,
@@ -144,7 +144,7 @@ export class CustomersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles(UserRole.Admin)
+  @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Delete customer' })
   @ApiResponse({ status: 204, description: 'Customer deleted' })
   async remove(

@@ -78,8 +78,8 @@ createdb rflandscaperpro
 # Run database migrations (when available)
 npm run migration:run
 
-# Seed initial data (creates admin and master users and sample customer)
-# Set ADMIN_* and MASTER_* env vars to control credentials. Passwords can
+# Seed initial data (creates company admin and master users and sample customer)
+# Set COMPANY_ADMIN_* and MASTER_* env vars to control credentials. Passwords can
 # be omitted to auto-generate secure values. This script is intended for
 # local development only and will automatically skip execution when
 # `NODE_ENV=production`.
@@ -114,7 +114,7 @@ npm run start:prod
 
 ### 5. Access the API
 - API Base URL: http://localhost:3000/api
-- Swagger Docs: http://localhost:3000/api/docs (admin/admin)
+- Swagger Docs: http://localhost:3000/api/docs (company_admin/company_admin)
 - Health Check: http://localhost:3000/api/health
 - Metrics: http://localhost:3000/api/metrics
 - Production Base URL: https://rflandscaperpro.com/api

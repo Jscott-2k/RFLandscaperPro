@@ -5,19 +5,19 @@ export const usersRoutes: Routes = [
   {
     path: '',
     canActivate: [roleGuard],
-    data: { roles: ['admin'] },
+    data: { roles: ['company_admin'] },
     loadComponent: () => import('./user-list.component').then((m) => m.UserListComponent),
   },
   {
     path: 'new',
     canActivate: [roleGuard],
-    data: { roles: ['admin'] },
+    data: { roles: ['company_admin'] },
     loadComponent: () => import('./user-form.component').then((m) => m.UserFormComponent),
   },
   {
     path: ':id',
     canActivate: [roleGuard],
-    data: { roles: ['admin'] },
+    data: { roles: ['company_admin'] },
     loadComponent: () => import('./user-detail.component').then((m) => m.UserDetailComponent),
   },
 ];

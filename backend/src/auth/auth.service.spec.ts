@@ -81,8 +81,8 @@ describe('AuthService.switchCompany', () => {
       sub: 1,
       email: 'a@e.com',
       companyId: 2,
-      roles: [UserRole.Admin],
-      role: UserRole.Admin,
+      roles: [UserRole.CompanyAdmin],
+      role: UserRole.CompanyAdmin,
     });
     expect(result).toEqual({ access_token: 'jwt' });
   });
@@ -115,8 +115,8 @@ describe('AuthService.signupOwner', () => {
           id: 0,
           username: '',
           email: '',
-          role: UserRole.Owner,
-          roles: [UserRole.Owner],
+          role: UserRole.CompanyOwner,
+          roles: [UserRole.CompanyOwner],
         },
       });
   });
@@ -126,7 +126,7 @@ describe('AuthService.signupOwner', () => {
       id: 1,
       username: 'owner',
       email: 'owner@example.com',
-      role: UserRole.Owner,
+      role: UserRole.CompanyOwner,
     });
     userCreationService.createUser.mockResolvedValue(user);
 
@@ -141,7 +141,7 @@ describe('AuthService.signupOwner', () => {
       username: 'owner',
       email: new Email('owner@example.com'),
       password: 'Password123!',
-      role: UserRole.Owner,
+      role: UserRole.CompanyOwner,
       company: { name: 'ACME' },
       isVerified: true,
     });

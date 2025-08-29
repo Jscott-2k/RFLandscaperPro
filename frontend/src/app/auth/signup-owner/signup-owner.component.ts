@@ -12,7 +12,7 @@ import { ErrorService } from '../../error.service';
   imports: [CommonModule, ReactiveFormsModule],
   template: `
     <p>
-      <small>Company details are required to create an owner account.</small>
+      <small>Company details are required to create a company owner account.</small>
     </p>
     <form [formGroup]="form" (ngSubmit)="submit()">
       <input type="text" formControlName="name" placeholder="Name" />

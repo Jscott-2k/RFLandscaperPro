@@ -42,7 +42,7 @@ export class CompaniesController {
     return company;
   }
 
-  @Roles(UserRole.Owner)
+@Roles(UserRole.CompanyOwner)
   @Get('workers')
   async getWorkers(@AuthUser() user: User | undefined): Promise<UserResponseDto[]> {
     const owner = await this.usersService.findById(user!.id);
@@ -52,7 +52,7 @@ export class CompaniesController {
     return workers.map(toUserResponseDto);
   }
 
-  @Roles(UserRole.Owner, UserRole.Admin)
+  @Roles(UserRole.CompanyOwner, UserRole.CompanyAdmin)
   @Post()
   async create(
     @Body() dto: CreateCompanyDto,
@@ -61,7 +61,7 @@ export class CompaniesController {
     return this.companiesService.create(dto, user!.id);
   }
 
-  @Roles(UserRole.Owner, UserRole.Admin)
+  @Roles(UserRole.CompanyOwner, UserRole.CompanyAdmin)
   @Patch(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -72,7 +72,7 @@ export class CompaniesController {
     return this.companiesService.update(id, dto);
   }
 
-  @Roles(UserRole.Owner, UserRole.Admin)
+  @Roles(UserRole.CompanyOwner, UserRole.CompanyAdmin)
   @Post(':companyId/invitations')
   async invite(
     @Param('companyId', ParseIntPipe) companyId: number,
@@ -99,7 +99,7 @@ export class CompaniesController {
     };
   }
 
-  @Roles(UserRole.Owner, UserRole.Admin)
+  @Roles(UserRole.CompanyOwner, UserRole.CompanyAdmin)
   @Post(':companyId/invitations/:inviteId/revoke')
   async revokeInvitation(
     @Param('companyId', ParseIntPipe) companyId: number,
@@ -112,7 +112,7 @@ export class CompaniesController {
     return { success: true };
   }
 
-  @Roles(UserRole.Owner, UserRole.Admin)
+  @Roles(UserRole.CompanyOwner, UserRole.CompanyAdmin)
   @Post(':companyId/invitations/:inviteId/resend')
   async resendInvitation(
     @Param('companyId', ParseIntPipe) companyId: number,

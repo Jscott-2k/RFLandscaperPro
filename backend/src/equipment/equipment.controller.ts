@@ -37,7 +37,7 @@ export class EquipmentController {
   constructor(private readonly equipmentService: EquipmentService) {}
 
   @Post()
-  @Roles(UserRole.Admin, UserRole.Worker)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Create equipment' })
   @ApiResponse({
     status: 201,
@@ -52,7 +52,7 @@ export class EquipmentController {
   }
 
   @Get()
-  @Roles(UserRole.Admin, UserRole.Worker, UserRole.Customer)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker, UserRole.Customer)
   @ApiOperation({ summary: 'List equipment for the authenticated company' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
@@ -79,7 +79,7 @@ export class EquipmentController {
   }
 
   @Get(':id')
-  @Roles(UserRole.Admin, UserRole.Worker, UserRole.Customer)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker, UserRole.Customer)
   @ApiOperation({ summary: 'Get equipment by id' })
   @ApiResponse({
     status: 200,
@@ -94,7 +94,7 @@ export class EquipmentController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.Admin, UserRole.Worker)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Update equipment' })
   @ApiResponse({
     status: 200,
@@ -110,7 +110,7 @@ export class EquipmentController {
   }
 
   @Patch(':id/status')
-  @Roles(UserRole.Admin, UserRole.Worker)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Update equipment status' })
   @ApiResponse({
     status: 200,
@@ -131,7 +131,7 @@ export class EquipmentController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles(UserRole.Admin, UserRole.Worker)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Delete equipment' })
   @ApiResponse({ status: 204, description: 'Equipment deleted' })
   async remove(

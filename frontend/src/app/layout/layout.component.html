@@ -9,16 +9,16 @@
       *ngIf="!auth.isAuthenticated()"
       routerLink="/signup/company"
       routerLinkActive="active"
-      >Owner Sign Up</a>
+      >Company Owner Sign Up</a>
     <button *ngIf="auth.isAuthenticated()" (click)="logout()">Logout</button>
-    <a *ngIf="auth.hasRole('admin')" routerLink="/users" routerLinkActive="active">Admin Panel</a>
+    <a *ngIf="auth.hasRole('company_admin')" routerLink="/users" routerLinkActive="active">Company Admin Panel</a>
     <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
     <a routerLink="/customers" routerLinkActive="active">Customers</a>
     <a routerLink="/equipment" routerLinkActive="active">Equipment</a>
     <a routerLink="/jobs" routerLinkActive="active">Jobs</a>
     <a routerLink="/company/profile" routerLinkActive="active">Company</a>
     <a
-      *ngIf="auth.hasRole('owner') || auth.hasRole('admin')"
+      *ngIf="auth.hasRole('company_owner') || auth.hasRole('company_admin')"
       routerLink="/team"
       routerLinkActive="active"
       >Team</a>

@@ -39,7 +39,7 @@ export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
 
   @Post()
-  @Roles(UserRole.Admin, UserRole.Worker)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Create job' })
   @ApiResponse({
     status: 201,
@@ -54,7 +54,7 @@ export class JobsController {
   }
 
   @Get()
-  @Roles(UserRole.Admin, UserRole.Worker, UserRole.Customer)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker, UserRole.Customer)
   @ApiOperation({ summary: 'List jobs for the authenticated company' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
@@ -91,7 +91,7 @@ export class JobsController {
   }
 
   @Get(':id')
-  @Roles(UserRole.Admin, UserRole.Worker, UserRole.Customer)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker, UserRole.Customer)
   @ApiOperation({ summary: 'Get job by id' })
   @ApiResponse({
     status: 200,
@@ -106,7 +106,7 @@ export class JobsController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.Admin, UserRole.Worker)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Update job' })
   @ApiResponse({
     status: 200,
@@ -122,7 +122,7 @@ export class JobsController {
   }
 
   @Post(':id/schedule')
-  @Roles(UserRole.Admin, UserRole.Worker)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Schedule job' })
   @ApiResponse({
     status: 200,
@@ -138,7 +138,7 @@ export class JobsController {
   }
 
   @Post(':id/assign')
-  @Roles(UserRole.Admin, UserRole.Worker)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Assign resources to job' })
   @ApiResponse({
     status: 200,
@@ -154,7 +154,7 @@ export class JobsController {
   }
 
   @Post(':id/bulk-assign')
-  @Roles(UserRole.Admin, UserRole.Worker)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Assign multiple resources to job' })
   @ApiResponse({
     status: 200,
@@ -170,7 +170,7 @@ export class JobsController {
   }
 
   @Delete(':id/assignments/:assignmentId')
-  @Roles(UserRole.Admin, UserRole.Worker)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Remove assignment from job' })
   @ApiResponse({
     status: 200,
@@ -187,7 +187,7 @@ export class JobsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles(UserRole.Admin, UserRole.Worker)
+  @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Delete job' })
   @ApiResponse({ status: 204, description: 'Job deleted' })
   async remove(

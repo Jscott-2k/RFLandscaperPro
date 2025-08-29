@@ -13,7 +13,7 @@ export class CompanyOnboardingService {
   ) {
     if (!company) {
       throw new BadRequestException(
-        'Company information is required for owner and worker accounts',
+        'Company information is required for company owner and worker accounts',
       );
     }
     const companyRepository = manager.getRepository(Company);
@@ -23,7 +23,7 @@ export class CompanyOnboardingService {
     if (!existing) {
       existing = companyRepository.create({
         ...company,
-        ownerId: user.role === UserRole.Owner ? user.id : undefined,
+        ownerId: user.role === UserRole.CompanyOwner ? user.id : undefined,
       });
       existing = await companyRepository.save(existing);
     }

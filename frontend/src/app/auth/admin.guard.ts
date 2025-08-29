@@ -4,5 +4,5 @@ import { AuthService } from './auth.service';
 
 export const AdminGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
-  return auth.hasRole('admin');
+  return auth.hasRole('company_admin');
 };
