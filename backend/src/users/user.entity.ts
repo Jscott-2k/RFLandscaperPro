@@ -19,6 +19,7 @@ import { Email } from './value-objects/email.vo';
 import { PhoneNumber } from './value-objects/phone-number.vo';
 
 export enum UserRole {
+  Master = 'master',
   Admin = 'admin',
   Owner = 'owner',
   Worker = 'worker',

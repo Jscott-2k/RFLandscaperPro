@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from './decorators/public.decorator';
 import { tenantStorage } from './tenant/tenant-context';
+import { UserRole } from '../users/user.entity';
 
 @Injectable()
 export class TenantGuard implements CanActivate {
@@ -11,7 +12,7 @@ export class TenantGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<
       Request & {
-        user?: { companyId?: number };
+        user?: { companyId?: number; role?: UserRole };
         headers?: Record<string, string | string[]>;
       }
     >();
@@ -42,7 +43,11 @@ export class TenantGuard implements CanActivate {
     }
     if (companyId !== undefined) {
       tenantStorage.enterWith({ companyId });
+      return true;
     }
-    return Boolean(companyId);
+    if (request.user?.role === UserRole.Master) {
+      return true;
+    }
+    return false;
   }
 }
