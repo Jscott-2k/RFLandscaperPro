@@ -9,6 +9,8 @@ services:
       - .env.development
     environment:
       - NODE_ENV=development
+      - MAILHOG_HOST=mailhog
+      - MAILHOG_PORT=1025
   db:
     image: postgres:14
     container_name: rflandscaperpro_db

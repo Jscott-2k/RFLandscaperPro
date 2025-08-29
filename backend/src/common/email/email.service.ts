@@ -27,12 +27,16 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
   );
 
   async onModuleInit(): Promise<void> {
+    const hasMailhog =
+      !!process.env.MAILHOG_HOST || !!process.env.MAILHOG_PORT;
     this.driver =
       process.env.NODE_ENV === 'production'
         ? 'smtp'
-        : process.env.SMTP_USER && process.env.SMTP_PASS
+        : hasMailhog
           ? 'smtp'
-          : 'ethereal';
+          : process.env.SMTP_USER && process.env.SMTP_PASS
+            ? 'smtp'
+            : 'ethereal';
     this.logger.log(`Initializing EmailService with driver: ${this.driver}`);
 
     if (this.driver === 'smtp') {
