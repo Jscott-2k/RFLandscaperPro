@@ -34,8 +34,8 @@ export class CompaniesController {
   ) {}
 
   @Get('profile')
-  async getProfile(@AuthUser() user: User): Promise<CompanyResponseDto> {
-    const company = await this.companiesService.findByUserId(user.id);
+  async getProfile(@AuthUser() user: User | undefined): Promise<CompanyResponseDto> {
+    const company = await this.companiesService.findByUserId(user!.id);
     if (!company) {
       throw new NotFoundException('Company not found');
     }
@@ -44,8 +44,8 @@ export class CompaniesController {
 
   @Roles(UserRole.Owner)
   @Get('workers')
-  async getWorkers(@AuthUser() user: User): Promise<UserResponseDto[]> {
-    const owner = await this.usersService.findById(user.id);
+  async getWorkers(@AuthUser() user: User | undefined): Promise<UserResponseDto[]> {
+    const owner = await this.usersService.findById(user!.id);
     if (!owner?.companyId)
       throw new NotFoundException('Owner company not found');
     const workers = await this.companiesService.findWorkers(owner.companyId);
@@ -56,9 +56,9 @@ export class CompaniesController {
   @Post()
   async create(
     @Body() dto: CreateCompanyDto,
-    @AuthUser() user: User,
+    @AuthUser() user: User | undefined,
   ): Promise<CompanyResponseDto> {
-    return this.companiesService.create(dto, user.id);
+    return this.companiesService.create(dto, user!.id);
   }
 
   @Roles(UserRole.Owner, UserRole.Admin)
@@ -66,9 +66,9 @@ export class CompaniesController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateCompanyDto,
-    @AuthUser() user: User,
+    @AuthUser() user: User | undefined,
   ): Promise<CompanyResponseDto> {
-    if (user.companyId !== id) throw new NotFoundException('Company not found');
+    if (user!.companyId !== id) throw new NotFoundException('Company not found');
     return this.companiesService.update(id, dto);
   }
 
@@ -77,19 +77,19 @@ export class CompaniesController {
   async invite(
     @Param('companyId', ParseIntPipe) companyId: number,
     @Body() dto: CreateInvitationDto,
-    @AuthUser() user: User,
+    @AuthUser() user: User | undefined,
   ): Promise<{
     id: number;
     email: string;
     role: InvitationRole;
     expiresAt: Date;
   }> {
-    if (user.companyId !== companyId)
+    if (user!.companyId !== companyId)
       throw new NotFoundException('Company not found');
     const invitation = await this.invitationsService.createInvitation(
       companyId,
       dto,
-      user,
+      user!,
     );
     return {
       id: invitation.id,
@@ -104,9 +104,9 @@ export class CompaniesController {
   async revokeInvitation(
     @Param('companyId', ParseIntPipe) companyId: number,
     @Param('inviteId', ParseIntPipe) inviteId: number,
-    @AuthUser() user: User,
+    @AuthUser() user: User | undefined,
   ): Promise<{ success: true }> {
-    if (user.companyId !== companyId)
+    if (user!.companyId !== companyId)
       throw new NotFoundException('Company not found');
     await this.invitationsService.revokeInvitation(companyId, inviteId);
     return { success: true };
@@ -117,14 +117,14 @@ export class CompaniesController {
   async resendInvitation(
     @Param('companyId', ParseIntPipe) companyId: number,
     @Param('inviteId', ParseIntPipe) inviteId: number,
-    @AuthUser() user: User,
+    @AuthUser() user: User | undefined,
   ): Promise<{
     id: number;
     email: string;
     role: InvitationRole;
     expiresAt: Date;
   }> {
-    if (user.companyId !== companyId)
+    if (user!.companyId !== companyId)
       throw new NotFoundException('Company not found');
     const invitation = await this.invitationsService.resendInvitation(
       companyId,
