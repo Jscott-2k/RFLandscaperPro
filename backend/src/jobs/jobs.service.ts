@@ -359,16 +359,17 @@ export class JobsService {
       }
     }
 
-    // Create all assignments
-    const assignments = dto.assignments.map((assignmentData) =>
-      this.assignmentRepository.create({
-        job,
-        user: { id: assignmentData.userId } as User,
-        equipment: { id: assignmentData.equipmentId } as Equipment,
-      }),
-    );
-
-    await this.assignmentRepository.save(assignments);
+    // Create all assignments within a transaction to ensure atomicity
+    await this.assignmentRepository.manager.transaction(async (manager) => {
+      const assignments = dto.assignments.map((assignmentData) =>
+        manager.create(Assignment, {
+          job,
+          user: { id: assignmentData.userId } as User,
+          equipment: { id: assignmentData.equipmentId } as Equipment,
+        }),
+      );
+      await manager.save(assignments);
+    });
 
     const updatedJob = await this.findOne(id, companyId);
     return updatedJob;

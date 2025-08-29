@@ -28,6 +28,7 @@ describe('JobsService', () => {
     save: jest.Mock;
     findOne: jest.Mock;
     createQueryBuilder: jest.Mock;
+    manager: { transaction: jest.Mock };
   };
 
   beforeEach(async () => {
@@ -45,6 +46,7 @@ describe('JobsService', () => {
       save: jest.fn(),
       findOne: jest.fn(),
       createQueryBuilder: jest.fn(),
+      manager: { transaction: jest.fn() },
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -184,5 +186,27 @@ describe('JobsService', () => {
     await expect(service.assign(1, assignJobDto, 1)).rejects.toBeInstanceOf(
       ConflictException,
     );
+  });
+
+  it('should rollback all assignments if bulk assignment save fails', async () => {
+    jobRepository.findOne.mockResolvedValue({ id: 1, customer: {}, scheduledDate: null });
+    userRepository.findOne.mockResolvedValue({ id: 1 });
+    equipmentRepository.findOne.mockResolvedValue({ id: 1 });
+
+    assignmentRepository.create.mockImplementation((data) => data);
+
+    const saveMock = jest.fn().mockRejectedValue(new Error('save failed'));
+    assignmentRepository.manager.transaction.mockImplementation(async (cb) => {
+      return cb({ create: assignmentRepository.create, save: saveMock });
+    });
+
+    const dto = { assignments: [{ userId: 1, equipmentId: 1 }] } as any;
+
+    await expect(service.bulkAssign(1, dto, 1)).rejects.toThrow('save failed');
+
+    expect(assignmentRepository.manager.transaction).toHaveBeenCalled();
+    expect(saveMock).toHaveBeenCalledTimes(1);
+    expect(assignmentRepository.save).not.toHaveBeenCalled();
+    expect(jobRepository.findOne).toHaveBeenCalledTimes(1);
   });
 });
