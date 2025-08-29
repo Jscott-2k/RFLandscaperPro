@@ -30,6 +30,6 @@ const userRepositoryProvider = {
     userRepositoryProvider,
   ],
   controllers: [UsersController, MeController],
-  exports: [UsersService, userRepositoryProvider],
+  exports: [UsersService, userRepositoryProvider, UserCreationService],
 })
 export class UsersModule {}
