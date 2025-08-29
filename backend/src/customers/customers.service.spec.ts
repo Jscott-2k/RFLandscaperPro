@@ -86,9 +86,7 @@ describe('CustomersService', () => {
   });
 
   it('allows duplicate emails across different companies', async () => {
-    repo.create.mockImplementation(
-      (dto: Partial<Customer>) => dto as Customer,
-    );
+    repo.create.mockImplementation((dto: Partial<Customer>) => dto as Customer);
     repo.save
       .mockResolvedValueOnce({ id: 1 } as Customer)
       .mockResolvedValueOnce({ id: 2 } as Customer);
@@ -114,6 +112,7 @@ describe('CustomersService', () => {
     repo.findAll.mockResolvedValue([[], 0]);
     const pagination: PaginationQueryDto = { page: 1, limit: 10 };
     await service.findAll(pagination, 1, undefined, 'Jane');
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(repo.findAll).toHaveBeenCalledWith(pagination, 1, undefined, 'Jane');
   });
 });

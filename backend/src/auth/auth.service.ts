@@ -188,8 +188,11 @@ export class AuthService {
 
   private async saveRefreshToken(userId: number, token: string): Promise<void> {
     const hashed = this.hashToken(token);
-    const decoded = this.jwtService.decode(token) as { exp?: number } | null;
-    const expiresAt = decoded?.exp ? new Date(decoded.exp * 1000) : new Date();
+    const decoded: unknown = this.jwtService.decode(token);
+    const expiresAt =
+      typeof decoded === 'object' && decoded !== null && 'exp' in decoded
+        ? new Date((decoded as { exp: number }).exp * 1000)
+        : new Date();
     const entity = this.refreshTokenRepository.create({
       token: hashed,
       userId,

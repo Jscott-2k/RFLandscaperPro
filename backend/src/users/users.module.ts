@@ -7,17 +7,6 @@ import { EmailService } from '../common/email.service';
 import { UserCreationService } from './user-creation.service';
 import { CustomerRegistrationService } from './customer-registration.service';
 import { CompanyOnboardingService } from './company-onboarding.service';
-
-@Module({
-  imports: [TypeOrmModule.forFeature([User])],
-  providers: [
-    UsersService,
-    EmailService,
-    UserCreationService,
-    CustomerRegistrationService,
-    CompanyOnboardingService,
-  ],
-
 import {
   USER_REPOSITORY,
   UserRepository,
@@ -29,9 +18,15 @@ const userRepositoryProvider = {
 };
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Customer, Company])],
-  providers: [UsersService, EmailService, userRepositoryProvider],
-
+  imports: [TypeOrmModule.forFeature([User])],
+  providers: [
+    UsersService,
+    EmailService,
+    UserCreationService,
+    CustomerRegistrationService,
+    CompanyOnboardingService,
+    userRepositoryProvider,
+  ],
   controllers: [UsersController],
   exports: [UsersService, userRepositoryProvider],
 })

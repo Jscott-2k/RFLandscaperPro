@@ -1,9 +1,11 @@
 import * as bcrypt from 'bcrypt';
-import { QueryFailedError, Repository } from 'typeorm';
+import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import { UserCreationService } from '../user-creation.service';
 import { User, UserRole } from '../user.entity';
 import { CustomerRegistrationService } from '../customer-registration.service';
 import { CompanyOnboardingService } from '../company-onboarding.service';
+import { CreateCompanyDto } from '../../companies/dto/create-company.dto';
+import { Company } from '../../companies/entities/company.entity';
 import { BadRequestException } from '@nestjs/common';
 
 const UNIQUE_VIOLATION = '23505';
@@ -23,7 +25,10 @@ describe('UserCreationService', () => {
     usersRepository = {
       create: jest.fn(
         (dto) =>
-          Object.assign(new User(), { role: UserRole.Customer, ...dto }) as User,
+          Object.assign(new User(), {
+            role: UserRole.Customer,
+            ...dto,
+          }) as User,
       ),
       save: jest.fn(async (user: User) => {
         if (user.password) {
@@ -41,7 +46,10 @@ describe('UserCreationService', () => {
     };
 
     usersRepository.manager = {
-      transaction: jest.fn(async (cb) => cb(manager)),
+      transaction: jest.fn(async (cb) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        return (await cb(manager)) as unknown;
+      }),
     };
 
     customerRegistrationService = {
@@ -66,6 +74,7 @@ describe('UserCreationService', () => {
       email: 'user1@example.com',
       password,
     });
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(usersRepository.create).toHaveBeenCalledWith({
       username: 'user1',
       email: 'user1@example.com',
@@ -79,9 +88,16 @@ describe('UserCreationService', () => {
 
   it('onboards company for owner accounts', async () => {
     companyOnboardingService.onboard.mockImplementation(
-      async (user: User) => {
+      async (
+        user: User,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        _company?: CreateCompanyDto,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        _manager?: EntityManager,
+      ): Promise<Company> => {
         user.companyId = 1;
-        return {} as any;
+        await Promise.resolve();
+        return {} as Company;
       },
     );
     const user = await service.createUser({
@@ -91,6 +107,7 @@ describe('UserCreationService', () => {
       role: UserRole.Owner,
       company: { name: 'ACME Landscaping' },
     });
+
     expect(companyOnboardingService.onboard).toHaveBeenCalled();
     expect(user.companyId).toBe(1);
   });
@@ -107,6 +124,7 @@ describe('UserCreationService', () => {
         role: UserRole.Worker,
       }),
     ).rejects.toMatchObject({ status: 400 });
+
     expect(companyOnboardingService.onboard).toHaveBeenCalled();
   });
 
