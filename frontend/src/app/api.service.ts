@@ -4,6 +4,7 @@ import { environment } from '../environments/environment';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ErrorService } from './error.service';
+import { UpcomingJobSummary, EquipmentCount } from './models/dashboard.models';
 
 export interface Paginated<T> {
   items: T[];
@@ -356,14 +357,18 @@ export class ApiService {
     );
   }
 
-  getUpcomingJobs(): Observable<{ items: unknown[]; total: number }> {
-    return this.request<{ items: unknown[]; total: number }>('GET', `${environment.apiUrl}/jobs`, {
-      params: { completed: false, limit: 5 },
-    });
+  getUpcomingJobs(): Observable<{ items: UpcomingJobSummary[]; total: number }> {
+    return this.request<{ items: UpcomingJobSummary[]; total: number }>(
+      'GET',
+      `${environment.apiUrl}/jobs`,
+      {
+        params: { completed: false, limit: 5 },
+      },
+    );
   }
 
-  getEquipmentCount(status: string): Observable<{ items: unknown[]; total: number }> {
-    return this.request<{ items: unknown[]; total: number }>(
+  getEquipmentCount(status: string): Observable<{ items: EquipmentCount[]; total: number }> {
+    return this.request<{ items: EquipmentCount[]; total: number }>(
       'GET',
       `${environment.apiUrl}/equipment`,
       {
