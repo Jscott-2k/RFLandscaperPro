@@ -3,6 +3,7 @@ import {
   HttpClient,
   HttpErrorResponse,
   HttpParams,
+  HttpHeaders,
 } from '@angular/common/http';
 import { environment } from '../environments/environment';
 import { Observable, throwError } from 'rxjs';
@@ -102,80 +103,88 @@ export class ApiService {
     return httpParams;
   }
 
-  getHealth(): Observable<{ status: string }> {
+  private getCompanyId(): string | null {
+    if (typeof localStorage === 'undefined') {
+      return null;
+    }
+    return localStorage.getItem('companyId');
+  }
+
+  private request<T>(
+    method: string,
+    url: string,
+    options: { params?: Record<string, unknown>; body?: unknown } = {},
+  ): Observable<T> {
+    let headers = new HttpHeaders();
+    const companyId = this.getCompanyId();
+    if (companyId) {
+      headers = headers.set('X-Company-ID', companyId);
+    }
     return this.http
-      .get<{ status: string }>(`${environment.apiUrl}/health`)
+      .request<T>(method, url, {
+        body: options.body,
+        params: this.toHttpParams(options.params),
+        headers,
+      })
       .pipe(catchError(this.handleError));
+  }
+
+  getHealth(): Observable<{ status: string }> {
+    return this.request<{ status: string }>('GET', `${environment.apiUrl}/health`);
   }
 
   // Customers
   getCustomers(query: PaginationQuery & { active?: boolean; search?: string } = {}): Observable<
     Paginated<Customer>
   > {
-    return this.http
-      .get<Paginated<Customer>>(`${environment.apiUrl}/customers`, {
-        params: this.toHttpParams(query),
-      })
-      .pipe(catchError(this.handleError));
+    return this.request<Paginated<Customer>>('GET', `${environment.apiUrl}/customers`, {
+      params: query,
+    });
   }
 
   getCustomer(id: number): Observable<Customer> {
-    return this.http
-      .get<Customer>(`${environment.apiUrl}/customers/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.request<Customer>('GET', `${environment.apiUrl}/customers/${id}`);
   }
 
   createCustomer(payload: CreateCustomer): Observable<Customer> {
-    return this.http
-      .post<Customer>(`${environment.apiUrl}/customers`, payload)
-      .pipe(catchError(this.handleError));
+    return this.request<Customer>('POST', `${environment.apiUrl}/customers`, { body: payload });
   }
 
   updateCustomer(id: number, payload: UpdateCustomer): Observable<Customer> {
-    return this.http
-      .patch<Customer>(`${environment.apiUrl}/customers/${id}`, payload)
-      .pipe(catchError(this.handleError));
+    return this.request<Customer>('PATCH', `${environment.apiUrl}/customers/${id}`, {
+      body: payload,
+    });
   }
 
   deleteCustomer(id: number): Observable<void> {
-    return this.http
-      .delete<void>(`${environment.apiUrl}/customers/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.request<void>('DELETE', `${environment.apiUrl}/customers/${id}`);
   }
 
   // Equipment
-  getEquipment(query: PaginationQuery & { status?: string; type?: string; search?: string } = {}): Observable<
-    Paginated<Equipment>
-  > {
-    return this.http
-      .get<Paginated<Equipment>>(`${environment.apiUrl}/equipment`, {
-        params: this.toHttpParams(query),
-      })
-      .pipe(catchError(this.handleError));
+  getEquipment(
+    query: PaginationQuery & { status?: string; type?: string; search?: string } = {},
+  ): Observable<Paginated<Equipment>> {
+    return this.request<Paginated<Equipment>>('GET', `${environment.apiUrl}/equipment`, {
+      params: query,
+    });
   }
 
   getEquipmentById(id: number): Observable<Equipment> {
-    return this.http
-      .get<Equipment>(`${environment.apiUrl}/equipment/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.request<Equipment>('GET', `${environment.apiUrl}/equipment/${id}`);
   }
 
   createEquipment(payload: CreateEquipment): Observable<Equipment> {
-    return this.http
-      .post<Equipment>(`${environment.apiUrl}/equipment`, payload)
-      .pipe(catchError(this.handleError));
+    return this.request<Equipment>('POST', `${environment.apiUrl}/equipment`, { body: payload });
   }
 
   updateEquipment(id: number, payload: UpdateEquipment): Observable<Equipment> {
-    return this.http
-      .patch<Equipment>(`${environment.apiUrl}/equipment/${id}`, payload)
-      .pipe(catchError(this.handleError));
+    return this.request<Equipment>('PATCH', `${environment.apiUrl}/equipment/${id}`, {
+      body: payload,
+    });
   }
 
   deleteEquipment(id: number): Observable<void> {
-    return this.http
-      .delete<void>(`${environment.apiUrl}/equipment/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.request<void>('DELETE', `${environment.apiUrl}/equipment/${id}`);
   }
 
   // Jobs
@@ -189,115 +198,83 @@ export class ApiService {
       equipmentId?: number;
     } = {},
   ): Observable<Paginated<Job>> {
-    return this.http
-      .get<Paginated<Job>>(`${environment.apiUrl}/jobs`, {
-        params: this.toHttpParams(query),
-      })
-      .pipe(catchError(this.handleError));
+    return this.request<Paginated<Job>>('GET', `${environment.apiUrl}/jobs`, {
+      params: query,
+    });
   }
 
   getJob(id: number): Observable<Job> {
-    return this.http
-      .get<Job>(`${environment.apiUrl}/jobs/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.request<Job>('GET', `${environment.apiUrl}/jobs/${id}`);
   }
 
   createJob(payload: CreateJob): Observable<Job> {
-    return this.http
-      .post<Job>(`${environment.apiUrl}/jobs`, payload)
-      .pipe(catchError(this.handleError));
+    return this.request<Job>('POST', `${environment.apiUrl}/jobs`, { body: payload });
   }
 
   updateJob(id: number, payload: UpdateJob): Observable<Job> {
-    return this.http
-      .patch<Job>(`${environment.apiUrl}/jobs/${id}`, payload)
-      .pipe(catchError(this.handleError));
+    return this.request<Job>('PATCH', `${environment.apiUrl}/jobs/${id}`, { body: payload });
   }
 
   deleteJob(id: number): Observable<void> {
-    return this.http
-      .delete<void>(`${environment.apiUrl}/jobs/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.request<void>('DELETE', `${environment.apiUrl}/jobs/${id}`);
   }
 
   // Users
   getUsers(): Observable<User[]> {
-    return this.http
-      .get<User[]>(`${environment.apiUrl}/users`)
-      .pipe(catchError(this.handleError));
+    return this.request<User[]>('GET', `${environment.apiUrl}/users`);
   }
 
   getUser(id: number): Observable<User> {
-    return this.http
-      .get<User>(`${environment.apiUrl}/users/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.request<User>('GET', `${environment.apiUrl}/users/${id}`);
   }
 
   createUser(payload: CreateUser): Observable<User> {
-    return this.http
-      .post<User>(`${environment.apiUrl}/users`, payload)
-      .pipe(catchError(this.handleError));
+    return this.request<User>('POST', `${environment.apiUrl}/users`, { body: payload });
   }
 
   updateUser(id: number, payload: UpdateUser): Observable<User> {
-    return this.http
-      .patch<User>(`${environment.apiUrl}/users/${id}`, payload)
-      .pipe(catchError(this.handleError));
+    return this.request<User>('PATCH', `${environment.apiUrl}/users/${id}`, { body: payload });
   }
 
   deleteUser(id: number): Observable<void> {
-    return this.http
-      .delete<void>(`${environment.apiUrl}/users/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.request<void>('DELETE', `${environment.apiUrl}/users/${id}`);
   }
 
   getMe(): Observable<User> {
-    return this.http
-      .get<User>(`${environment.apiUrl}/users/me`)
-      .pipe(catchError(this.handleError));
+    return this.request<User>('GET', `${environment.apiUrl}/users/me`);
   }
 
   updateMe(payload: UpdateUser): Observable<User> {
-    return this.http
-      .put<User>(`${environment.apiUrl}/users/me`, payload)
-      .pipe(catchError(this.handleError));
+    return this.request<User>('PUT', `${environment.apiUrl}/users/me`, { body: payload });
   }
 
   // Companies
   getCompanyProfile(): Observable<Company> {
-    return this.http
-      .get<Company>(`${environment.apiUrl}/companies/profile`)
-      .pipe(catchError(this.handleError));
+    return this.request<Company>('GET', `${environment.apiUrl}/companies/profile`);
   }
 
   getCompanyWorkers(): Observable<User[]> {
-    return this.http
-      .get<User[]>(`${environment.apiUrl}/companies/workers`)
-      .pipe(catchError(this.handleError));
+    return this.request<User[]>('GET', `${environment.apiUrl}/companies/workers`);
   }
 
   createCompany(payload: CreateCompany): Observable<Company> {
-    return this.http
-      .post<Company>(`${environment.apiUrl}/companies`, payload)
-      .pipe(catchError(this.handleError));
+    return this.request<Company>('POST', `${environment.apiUrl}/companies`, { body: payload });
   }
 
   updateCompany(id: number, payload: UpdateCompany): Observable<Company> {
-    return this.http
-      .patch<Company>(`${environment.apiUrl}/companies/${id}`, payload)
-      .pipe(catchError(this.handleError));
+    return this.request<Company>('PATCH', `${environment.apiUrl}/companies/${id}`, { body: payload });
   }
 
   getUpcomingJobs(): Observable<{ items: unknown[]; total: number }> {
-    return this.http.get<{ items: unknown[]; total: number }>(
-      `${environment.apiUrl}/jobs?completed=false&limit=5`
-    );
+    return this.request<{ items: unknown[]; total: number }>('GET', `${environment.apiUrl}/jobs`, {
+      params: { completed: false, limit: 5 },
+    });
   }
 
   getEquipmentCount(status: string): Observable<{ items: unknown[]; total: number }> {
-    return this.http.get<{ items: unknown[]; total: number }>(
-      `${environment.apiUrl}/equipment?status=${status}&limit=1`
-    );
+    return this.request<{ items: unknown[]; total: number }>('GET', `${environment.apiUrl}/equipment`, {
+      params: { status, limit: 1 },
+    });
   }
 
 }

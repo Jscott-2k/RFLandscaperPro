@@ -15,6 +15,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Roles } from '../common/decorators/roles.decorator';
+import { Company } from '../common/decorators/company.decorator';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -83,10 +84,8 @@ export class UsersController {
     description: 'List of workers',
     type: [UserResponseDto],
   })
-  async findWorkers(
-    @Req() req: { user: { companyId: number } },
-  ): Promise<UserResponseDto[]> {
-    const users = await this.usersService.findAll(req.user.companyId);
+  async findWorkers(@Company() companyId: number): Promise<UserResponseDto[]> {
+    const users = await this.usersService.findAll(companyId);
     return users
       .filter((u) => u.role === UserRole.Worker)
       .map(toUserResponseDto);
@@ -133,19 +132,15 @@ export class UsersController {
     type: UserResponseDto,
   })
   async updateWorker(
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UserResponseDto> {
-    const worker = await this.usersService.findById(id, req.user.companyId);
+    const worker = await this.usersService.findById(id, companyId);
     if (!worker || worker.role !== UserRole.Worker) {
       throw new NotFoundException('Worker not found');
     }
-    const updated = await this.usersService.update(
-      id,
-      updateUserDto,
-      req.user.companyId,
-    );
+    const updated = await this.usersService.update(id, updateUserDto, companyId);
     return toUserResponseDto(updated);
   }
 
