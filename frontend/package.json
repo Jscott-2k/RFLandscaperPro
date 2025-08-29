@@ -9,7 +9,7 @@
     "build": "ng build",
     "build:ssr": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
+    "test": "ng test --watch=false --browsers=ChromeHeadless",
     "serve:ssr": "node dist/frontend/server/server.mjs",
     "seed": "npm --prefix ../backend run seed",
     "seed:drop": "npm --prefix ../backend run seed:drop"
