@@ -18,6 +18,7 @@ import { BulkAssignJobDto } from './dto/bulk-assign-job.dto';
 import { ScheduleJobDto } from './dto/schedule-job.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { paginate } from '../common/pagination';
+import { toJobResponseDto } from './jobs.mapper';
 
 @Injectable()
 export class JobsService {
@@ -51,7 +52,7 @@ export class JobsService {
       companyId,
     });
     const savedJob = await this.jobRepository.save(job);
-    return this.toJobResponseDto(savedJob);
+    return toJobResponseDto(savedJob);
   }
 
   async findAll(
@@ -107,7 +108,7 @@ export class JobsService {
     );
 
     return {
-      items: jobs.map((job) => this.toJobResponseDto(job)),
+      items: jobs.map((job) => toJobResponseDto(job)),
       total,
     };
   }
@@ -138,7 +139,7 @@ export class JobsService {
     }
     Object.assign(job, updateData);
     const updatedJob = await this.jobRepository.save(job);
-    return this.toJobResponseDto(updatedJob);
+    return toJobResponseDto(updatedJob);
   }
 
   async findOne(id: number, companyId: number): Promise<JobResponseDto> {
@@ -156,7 +157,7 @@ export class JobsService {
       throw new NotFoundException(`Job with ID ${id} not found.`);
     }
 
-    return this.toJobResponseDto(job);
+    return toJobResponseDto(job);
   }
 
   async remove(id: number, companyId: number): Promise<void> {
@@ -165,37 +166,6 @@ export class JobsService {
       throw new NotFoundException(`Job with ID ${id} not found.`);
     }
     await this.jobRepository.remove(job);
-  }
-
-  private toJobResponseDto(job: Job): JobResponseDto {
-    return {
-      id: job.id,
-      title: job.title,
-      description: job.description,
-      scheduledDate: job.scheduledDate,
-      completed: job.completed,
-      estimatedHours: job.estimatedHours,
-      actualHours: job.actualHours,
-      notes: job.notes,
-      customer: {
-        id: job.customer.id,
-        name: job.customer.name,
-        email: job.customer.email,
-      },
-      assignments: job.assignments?.map((assignment) => ({
-        id: assignment.id,
-        user: { id: assignment.user.id, username: assignment.user.username },
-        equipment: {
-          id: assignment.equipment.id,
-          name: assignment.equipment.name,
-        },
-        startTime: assignment.startTime,
-        endTime: assignment.endTime,
-        notes: assignment.notes,
-      })),
-      createdAt: job.createdAt,
-      updatedAt: job.updatedAt,
-    };
   }
 
   private async checkResourceConflicts(
@@ -253,7 +223,7 @@ export class JobsService {
 
     job.scheduledDate = scheduleJobDto.scheduledDate;
     const saved = await this.jobRepository.save(job);
-    return this.toJobResponseDto(saved);
+    return toJobResponseDto(saved);
   }
 
   async assign(

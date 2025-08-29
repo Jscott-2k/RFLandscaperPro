@@ -12,6 +12,8 @@ import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { paginate } from '../common/pagination';
+import { toCustomerResponseDto } from './customers.mapper';
+
 
 @Injectable()
 export class CustomersService {
@@ -34,7 +36,7 @@ export class CustomersService {
         })),
       });
       const savedCustomer = await this.customerRepository.save(customer);
-      return this.toCustomerResponseDto(savedCustomer);
+      return toCustomerResponseDto(savedCustomer);
     } catch (error) {
       if (
         error instanceof QueryFailedError &&
@@ -82,7 +84,7 @@ export class CustomersService {
     );
 
     return {
-      items: customers.map((customer) => this.toCustomerResponseDto(customer)),
+      items: customers.map((customer) => toCustomerResponseDto(customer)),
       total,
     };
   }
@@ -95,7 +97,7 @@ export class CustomersService {
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${id} not found.`);
     }
-    return this.toCustomerResponseDto(customer);
+    return toCustomerResponseDto(customer);
   }
 
   async findByUserId(
@@ -109,7 +111,7 @@ export class CustomersService {
     if (!customer) {
       throw new NotFoundException(`Customer with userId ${userId} not found.`);
     }
-    return this.toCustomerResponseDto(customer);
+    return toCustomerResponseDto(customer);
   }
 
   async update(
@@ -125,7 +127,7 @@ export class CustomersService {
     }
     Object.assign(customer, updateCustomerDto);
     const updatedCustomer = await this.customerRepository.save(customer);
-    return this.toCustomerResponseDto(updatedCustomer);
+    return toCustomerResponseDto(updatedCustomer);
   }
 
   async remove(id: number, companyId: number): Promise<void> {
@@ -149,33 +151,5 @@ export class CustomersService {
   async activate(id: number, companyId: number): Promise<CustomerResponseDto> {
     await this.findOne(id, companyId);
     return this.update(id, { active: true }, companyId);
-  }
-
-  private toCustomerResponseDto(customer: Customer): CustomerResponseDto {
-    return {
-      id: customer.id,
-      name: customer.name,
-      email: customer.email,
-      phone: customer.phone,
-      notes: customer.notes,
-      active: customer.active,
-      createdAt: customer.createdAt,
-      updatedAt: customer.updatedAt,
-      userId: customer.userId,
-      jobs: customer.jobs?.map((job) => ({
-        id: job.id,
-        title: job.title,
-      })),
-      addresses: customer.addresses?.map((addr) => ({
-        id: addr.id,
-        street: addr.street,
-        city: addr.city,
-        state: addr.state,
-        zip: addr.zip,
-        unit: addr.unit,
-        notes: addr.notes,
-        primary: addr.primary,
-      })),
-    };
   }
 }

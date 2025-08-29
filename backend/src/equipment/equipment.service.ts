@@ -11,6 +11,7 @@ import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentResponseDto } from './dto/equipment-response.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { paginate } from '../common/pagination';
+import { toEquipmentResponseDto } from './equipment.mapper';
 
 @Injectable()
 export class EquipmentService {
@@ -28,7 +29,7 @@ export class EquipmentService {
       companyId,
     });
     const savedEquipment = await this.equipmentRepository.save(equipment);
-    return this.toEquipmentResponseDto(savedEquipment);
+    return toEquipmentResponseDto(savedEquipment);
   }
 
   async findAll(
@@ -65,7 +66,7 @@ export class EquipmentService {
     );
 
     return {
-      items: equipments.map((eq) => this.toEquipmentResponseDto(eq)),
+      items: equipments.map((eq) => toEquipmentResponseDto(eq)),
       total,
     };
   }
@@ -77,7 +78,7 @@ export class EquipmentService {
     if (!equipment) {
       throw new NotFoundException(`Equipment with ID ${id} not found.`);
     }
-    return this.toEquipmentResponseDto(equipment);
+    return toEquipmentResponseDto(equipment);
   }
 
   async update(
@@ -105,7 +106,7 @@ export class EquipmentService {
 
     Object.assign(equipment, updateEquipmentDto);
     const updatedEquipment = await this.equipmentRepository.save(equipment);
-    return this.toEquipmentResponseDto(updatedEquipment);
+    return toEquipmentResponseDto(updatedEquipment);
   }
 
   async remove(id: number, companyId: number): Promise<void> {
@@ -164,19 +165,5 @@ export class EquipmentService {
         `Invalid status transition from ${currentStatus} to ${newStatus}`,
       );
     }
-  }
-
-  private toEquipmentResponseDto(equipment: Equipment): EquipmentResponseDto {
-    return {
-      id: equipment.id,
-      name: equipment.name,
-      type: equipment.type,
-      status: equipment.status,
-      location: equipment.location,
-      description: equipment.description,
-      lastMaintenanceDate: equipment.lastMaintenanceDate,
-      createdAt: equipment.createdAt,
-      updatedAt: equipment.updatedAt,
-    };
   }
 }
