@@ -32,7 +32,8 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
   );
 
   private get driver(): MailDriver {
-    return process.env.NODE_ENV === 'production' ? 'smtp' : 'ethereal';
+    if (process.env.NODE_ENV === 'production') return 'smtp';
+    return process.env.SMTP_USER && process.env.SMTP_PASS ? 'smtp' : 'ethereal';
   }
 
   async onModuleInit(): Promise<void> {
@@ -40,6 +41,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
     this.logger.log(`Initializing EmailService with driver: ${driver}`);
 
     if (driver === 'ethereal') {
+      // Fall back to an Ethereal test account when no SMTP credentials are provided
       this.testAccount = await nodemailer.createTestAccount();
       this.transporter = nodemailer.createTransport({
         host: 'smtp.ethereal.email',
