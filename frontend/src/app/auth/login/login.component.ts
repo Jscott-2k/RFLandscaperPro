@@ -15,8 +15,10 @@ import { AuthService } from '../auth.service';
       <input type="password" formControlName="password" placeholder="Password" />
       <button type="submit">Login</button>
     </form>
-    <p><small><a routerLink="/register">Create account</a></small></p>
-  `
+    <p>
+      <small><a routerLink="/register">Create account</a></small>
+    </p>
+  `,
 })
 export class LoginComponent {
   private auth = inject(AuthService);
@@ -24,15 +26,19 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
 
   form = this.fb.nonNullable.group({
+    // Validators methods are static and do not rely on `this`.
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     company: ['', Validators.required],
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required]
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    password: ['', Validators.required],
   });
 
   submit(): void {
     if (this.form.valid) {
       this.auth.login(this.form.getRawValue()).subscribe(() => {
-        this.router.navigate(['/dashboard']);
+        void this.router.navigate(['/dashboard']);
       });
     }
   }

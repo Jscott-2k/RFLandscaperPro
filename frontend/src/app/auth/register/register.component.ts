@@ -29,7 +29,7 @@ import { AuthService } from '../auth.service';
       </div>
       <button type="submit">Register</button>
     </form>
-  `
+  `,
 })
 export class RegisterComponent {
   private auth = inject(AuthService);
@@ -37,9 +37,14 @@ export class RegisterComponent {
   private fb = inject(FormBuilder);
 
   form = this.fb.nonNullable.group({
+    // Validators methods are static; disable unbound-method warnings for usage.
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     username: ['', Validators.required],
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     email: ['', [Validators.required, Validators.email]],
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     password: ['', Validators.required],
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     role: ['customer', Validators.required],
     company: this.fb.nonNullable.group({
       name: [''],
@@ -56,12 +61,17 @@ export class RegisterComponent {
   submit(): void {
     if (this.form.valid) {
       const { username, email, password, role, company } = this.form.getRawValue();
-      const payload: any = { username, email, password, role };
+      const payload: Parameters<AuthService['register']>[0] = {
+        username,
+        email,
+        password,
+        role,
+      };
       if (this.isOwner) {
         payload.company = company;
       }
       this.auth.register(payload).subscribe(() => {
-        this.router.navigate(['/login']);
+        void this.router.navigate(['/login']);
       });
     }
   }

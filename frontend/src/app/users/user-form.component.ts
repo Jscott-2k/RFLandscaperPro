@@ -63,7 +63,7 @@ import { UserService } from './user.service';
       </div>
       <button type="submit" [disabled]="form.invalid">Save</button>
     </form>
-  `
+  `,
 })
 export class UserFormComponent {
   private fb = inject(FormBuilder);
@@ -71,8 +71,11 @@ export class UserFormComponent {
   private router = inject(Router);
 
   form = this.fb.nonNullable.group({
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     username: ['', Validators.required],
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     email: ['', [Validators.required, Validators.email]],
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     password: ['', Validators.required],
     firstName: [''],
     lastName: [''],
@@ -88,27 +91,21 @@ export class UserFormComponent {
 
   onSubmit(): void {
     if (this.form.valid) {
-      const {
+      const { username, email, password, firstName, lastName, phone, role, company } =
+        this.form.getRawValue();
+      const payload: Parameters<UserService['createUser']>[0] & { password: string } = {
         username,
         email,
         password,
-        firstName,
-        lastName,
-        phone,
-        role,
-        company,
-      } = this.form.getRawValue();
-      const payload: any = { username, email, password };
+      };
       if (firstName) payload.firstName = firstName;
       if (lastName) payload.lastName = lastName;
       if (phone) payload.phone = phone;
       if (role) payload.role = role;
       if (this.isOwner) payload.company = company;
-      this.userService
-        .createUser(payload)
-        .subscribe(() => {
-          this.router.navigate(['/users']);
-        });
+      this.userService.createUser(payload).subscribe(() => {
+        void this.router.navigate(['/users']);
+      });
     }
   }
 
@@ -116,4 +113,3 @@ export class UserFormComponent {
     return this.form.controls.role.value === 'owner';
   }
 }
-

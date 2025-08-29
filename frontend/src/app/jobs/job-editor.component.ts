@@ -8,7 +8,7 @@ import { JobsService, Job } from './jobs.service';
   selector: 'app-job-editor',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './job-editor.component.html'
+  templateUrl: './job-editor.component.html',
 })
 export class JobEditorComponent implements OnInit {
   private jobsService = inject(JobsService);
@@ -22,28 +22,36 @@ export class JobEditorComponent implements OnInit {
     if (id) {
       const jobId = Number(id);
       if (!isNaN(jobId)) {
-        this.jobsService.get(jobId).subscribe(job => (this.job = job));
+        this.jobsService.get(jobId).subscribe((job) => (this.job = job));
       }
     }
   }
 
   save(): void {
     if (this.job.id) {
-      this.jobsService.update(this.job.id, this.job).subscribe(() => this.router.navigate(['/jobs']));
+      this.jobsService.update(this.job.id, this.job).subscribe(() => {
+        void this.router.navigate(['/jobs']);
+      });
     } else {
-      this.jobsService.create(this.job).subscribe(() => this.router.navigate(['/jobs']));
+      this.jobsService.create(this.job).subscribe(() => {
+        void this.router.navigate(['/jobs']);
+      });
     }
   }
 
   schedule(): void {
     if (this.job.id && this.job.scheduledDate) {
-      this.jobsService.schedule(this.job.id, this.job.scheduledDate).subscribe(job => (this.job = job));
+      this.jobsService
+        .schedule(this.job.id, this.job.scheduledDate)
+        .subscribe((job) => (this.job = job));
     }
   }
 
   assign(userId: number, equipmentId: number): void {
     if (this.job.id) {
-      this.jobsService.assign(this.job.id, { userId, equipmentId }).subscribe(job => (this.job = job));
+      this.jobsService
+        .assign(this.job.id, { userId, equipmentId })
+        .subscribe((job) => (this.job = job));
     }
   }
 }

@@ -41,21 +41,21 @@ export class EquipmentDetailComponent {
 
   save(): void {
     if (this.equipment.id) {
-      this.equipmentService
-        .updateEquipment(this.equipment.id, this.equipment)
-        .subscribe(() => this.router.navigate(['/equipment']));
+      this.equipmentService.updateEquipment(this.equipment.id, this.equipment).subscribe(() => {
+        void this.router.navigate(['/equipment']);
+      });
     } else {
-      this.equipmentService
-        .createEquipment(this.equipment)
-        .subscribe(() => this.router.navigate(['/equipment']));
+      this.equipmentService.createEquipment(this.equipment).subscribe(() => {
+        void this.router.navigate(['/equipment']);
+      });
     }
   }
 
   remove(): void {
     if (this.equipment.id) {
-      this.equipmentService
-        .deleteEquipment(this.equipment.id)
-        .subscribe(() => this.router.navigate(['/equipment']));
+      this.equipmentService.deleteEquipment(this.equipment.id).subscribe(() => {
+        void this.router.navigate(['/equipment']);
+      });
     }
   }
 }

@@ -17,9 +17,16 @@ export class AuthService {
     return this.roles().includes(role);
   }
 
-  login(data: { email: string; password: string; company: string }): Observable<{ access_token: string; companies?: string[] }> {
+  login(data: {
+    email: string;
+    password: string;
+    company: string;
+  }): Observable<{ access_token: string; companies?: string[] }> {
     return this.http
-      .post<{ access_token: string; companies?: string[] }>(`${environment.apiUrl}/auth/login`, data)
+      .post<{
+        access_token: string;
+        companies?: string[];
+      }>(`${environment.apiUrl}/auth/login`, data)
       .pipe(
         tap((res) => {
           if (this.hasLocalStorage()) {
@@ -40,17 +47,13 @@ export class AuthService {
     role?: string;
     company?: { name: string; address?: string; phone?: string; email?: string };
   }): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
-      `${environment.apiUrl}/auth/register`,
-      data,
-    );
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/register`, data);
   }
 
   verifyEmail(token: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
-      `${environment.apiUrl}/auth/verify-email`,
-      { token },
-    );
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/verify-email`, {
+      token,
+    });
   }
 
   requestPasswordReset(email: string): Observable<{ message: string }> {
@@ -61,15 +64,17 @@ export class AuthService {
   }
 
   resetPassword(token: string, password: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
-      `${environment.apiUrl}/auth/reset-password`,
-      { token, password },
-    );
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/reset-password`, {
+      token,
+      password,
+    });
   }
 
   refreshToken(): Observable<{ access_token: string }> {
     return this.http
-      .post<{ access_token: string }>(`${environment.apiUrl}/auth/refresh`, { token: this.getToken() })
+      .post<{
+        access_token: string;
+      }>(`${environment.apiUrl}/auth/refresh`, { token: this.getToken() })
       .pipe(
         tap((res) => {
           if (this.hasLocalStorage()) {
@@ -153,12 +158,23 @@ export class AuthService {
       return [];
     }
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      if (Array.isArray(payload.roles)) {
-        return payload.roles;
+      const payloadStr = atob(token.split('.')[1]);
+      const payload: unknown = JSON.parse(payloadStr);
+      if (
+        payload &&
+        typeof payload === 'object' &&
+        'roles' in payload &&
+        Array.isArray((payload as { roles: unknown }).roles)
+      ) {
+        return (payload as { roles: string[] }).roles;
       }
-      if (payload.role) {
-        return [payload.role];
+      if (
+        payload &&
+        typeof payload === 'object' &&
+        'role' in payload &&
+        typeof (payload as { role: unknown }).role === 'string'
+      ) {
+        return [(payload as { role: string }).role];
       }
       return [];
     } catch {
