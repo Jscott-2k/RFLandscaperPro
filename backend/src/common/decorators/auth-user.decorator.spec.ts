@@ -8,7 +8,7 @@ describe('AuthUser Decorator', () => {
   it('should return the user from the request', () => {
     class TestController {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      test(@AuthUser() _user: User) {}
+      test(@AuthUser() _user: User | undefined) {}
     }
     const metadata = Reflect.getMetadata(
       ROUTE_ARGS_METADATA,

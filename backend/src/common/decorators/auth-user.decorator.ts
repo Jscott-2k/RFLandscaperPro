@@ -9,11 +9,11 @@ interface RequestUser {
 }
 
 export const AuthUser = createParamDecorator(
-  (_data: unknown, ctx: ExecutionContext): User => {
+  (_data: unknown, ctx: ExecutionContext): User | undefined => {
     const request = ctx.switchToHttp().getRequest<{ user?: RequestUser }>();
     const { user } = request;
     if (!user) {
-      return undefined as unknown as User;
+      return undefined;
     }
     return Object.assign(new User(), {
       id: user.userId,

@@ -26,9 +26,9 @@ export class MembersController {
   @Get()
   async list(
     @Param('companyId', ParseIntPipe) companyId: number,
-    @AuthUser() user: User,
+    @AuthUser() user: User | undefined,
   ): Promise<CompanyMemberResponseDto[]> {
-    if (user.companyId !== companyId)
+    if (user!.companyId !== companyId)
       throw new NotFoundException('Company not found');
     return this.membersService.findMembers(companyId);
   }
@@ -38,9 +38,9 @@ export class MembersController {
     @Param('companyId', ParseIntPipe) companyId: number,
     @Param('userId', ParseIntPipe) userId: number,
     @Body() dto: UpdateCompanyMemberDto,
-    @AuthUser() user: User,
+    @AuthUser() user: User | undefined,
   ): Promise<CompanyMemberResponseDto> {
-    if (user.companyId !== companyId)
+    if (user!.companyId !== companyId)
       throw new NotFoundException('Company not found');
     return this.membersService.updateMember(companyId, userId, dto);
   }
@@ -49,9 +49,9 @@ export class MembersController {
   async remove(
     @Param('companyId', ParseIntPipe) companyId: number,
     @Param('userId', ParseIntPipe) userId: number,
-    @AuthUser() user: User,
+    @AuthUser() user: User | undefined,
   ): Promise<void> {
-    if (user.companyId !== companyId)
+    if (user!.companyId !== companyId)
       throw new NotFoundException('Company not found');
     await this.membersService.removeMember(companyId, userId);
   }

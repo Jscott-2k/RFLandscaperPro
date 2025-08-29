@@ -21,10 +21,10 @@ export class MeController {
 
   @Get('companies')
   async listCompanies(
-    @AuthUser() user: User,
+    @AuthUser() user: User | undefined,
   ): Promise<CompanyMembershipResponseDto[]> {
     const memberships = await this.companyUsersRepository.find({
-      where: { userId: user.id, status: CompanyUserStatus.ACTIVE },
+      where: { userId: user!.id, status: CompanyUserStatus.ACTIVE },
       relations: ['company'],
     });
     return memberships.map((m) => ({
