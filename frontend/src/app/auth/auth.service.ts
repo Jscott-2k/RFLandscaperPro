@@ -32,17 +32,18 @@ export class AuthService {
     password: string;
     role?: string;
     company?: { name: string; address?: string; phone?: string; email?: string };
-  }): Observable<{ access_token: string }> {
-    return this.http
-      .post<{ access_token: string }>(`${environment.apiUrl}/auth/register`, data)
-      .pipe(
-        tap((res) => {
-          if (this.hasLocalStorage()) {
-            localStorage.setItem('token', res.access_token);
-            this.roles.set(this.getRolesFromToken());
-          }
-        }),
-      );
+  }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.apiUrl}/auth/register`,
+      data,
+    );
+  }
+
+  verifyEmail(token: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.apiUrl}/auth/verify-email`,
+      { token },
+    );
   }
 
   logout(): void {

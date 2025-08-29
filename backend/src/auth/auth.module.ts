@@ -7,12 +7,15 @@ import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './jwt.strategy';
 import { RefreshToken } from './refresh-token.entity';
+import { VerificationToken } from './verification-token.entity';
+import { User } from '../users/user.entity';
+import { EmailService } from '../common/email.service';
 
 @Module({
   imports: [
     UsersModule,
     ConfigModule,
-    TypeOrmModule.forFeature([RefreshToken]),
+    TypeOrmModule.forFeature([RefreshToken, VerificationToken, User]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -29,7 +32,7 @@ import { RefreshToken } from './refresh-token.entity';
       },
     }),
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, EmailService],
   controllers: [AuthController],
   exports: [AuthService],
 })
