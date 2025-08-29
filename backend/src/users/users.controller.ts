@@ -52,11 +52,11 @@ export class UsersController {
         throw new BadRequestException('Owners can only create workers');
       }
       const owner = await this.usersService.findById(req.user.userId);
-      if (!owner?.companyId) {
+      if (!owner?.company) {
         throw new NotFoundException('Owner company not found');
       }
       createUserDto.role = UserRole.Worker;
-      createUserDto.companyId = owner.companyId;
+      createUserDto.company = { name: owner.company.name };
     }
     const user = await this.usersService.create(createUserDto);
     return toUserResponseDto(user);
