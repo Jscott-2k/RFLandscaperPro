@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { UserService, User } from './user.service';
 import { AuthService } from '../auth/auth.service';
+import { ErrorService } from '../error.service';
 
 @Component({
   selector: 'app-user-detail',
@@ -48,12 +49,16 @@ export class UserDetailComponent implements OnInit {
   private readonly userService = inject(UserService);
   private readonly route = inject(ActivatedRoute);
   protected readonly auth = inject(AuthService);
+  private readonly errorService = inject(ErrorService);
   user?: User;
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.userService.getUser(id).subscribe((u) => {
-      this.user = u;
+    this.userService.getUser(id).subscribe({
+      next: (u) => {
+        this.user = u;
+      },
+      error: () => this.errorService.show('Failed to load user'),
     });
   }
 
@@ -61,6 +66,13 @@ export class UserDetailComponent implements OnInit {
     if (!this.user) {
       return;
     }
-    this.userService.updateUser(this.user).subscribe();
+    this.userService.updateUser(this.user).subscribe({
+      next: () => {
+        if (typeof window !== 'undefined') {
+          window.alert('User updated successfully');
+        }
+      },
+      error: () => this.errorService.show('Failed to save user'),
+    });
   }
 }

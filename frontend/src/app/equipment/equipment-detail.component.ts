@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EquipmentService, Equipment } from './equipment.service';
+import { ErrorService } from '../error.service';
 
 @Component({
   selector: 'app-equipment-detail',
@@ -31,30 +32,52 @@ export class EquipmentDetailComponent {
   private equipmentService = inject(EquipmentService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private errorService = inject(ErrorService);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id && id !== 'new') {
-      this.equipmentService.getEquipment(+id).subscribe((data) => (this.equipment = data));
+      this.equipmentService.getEquipment(+id).subscribe({
+        next: (data) => (this.equipment = data),
+        error: () => this.errorService.show('Failed to load equipment'),
+      });
     }
   }
 
   save(): void {
     if (this.equipment.id) {
-      this.equipmentService.updateEquipment(this.equipment.id, this.equipment).subscribe(() => {
-        void this.router.navigate(['/equipment']);
+      this.equipmentService.updateEquipment(this.equipment.id, this.equipment).subscribe({
+        next: () => {
+          if (typeof window !== 'undefined') {
+            window.alert('Equipment updated successfully');
+          }
+          void this.router.navigate(['/equipment']);
+        },
+        error: () => this.errorService.show('Failed to update equipment'),
       });
     } else {
-      this.equipmentService.createEquipment(this.equipment).subscribe(() => {
-        void this.router.navigate(['/equipment']);
+      this.equipmentService.createEquipment(this.equipment).subscribe({
+        next: () => {
+          if (typeof window !== 'undefined') {
+            window.alert('Equipment created successfully');
+          }
+          void this.router.navigate(['/equipment']);
+        },
+        error: () => this.errorService.show('Failed to create equipment'),
       });
     }
   }
 
   remove(): void {
     if (this.equipment.id) {
-      this.equipmentService.deleteEquipment(this.equipment.id).subscribe(() => {
-        void this.router.navigate(['/equipment']);
+      this.equipmentService.deleteEquipment(this.equipment.id).subscribe({
+        next: () => {
+          if (typeof window !== 'undefined') {
+            window.alert('Equipment deleted successfully');
+          }
+          void this.router.navigate(['/equipment']);
+        },
+        error: () => this.errorService.show('Failed to delete equipment'),
       });
     }
   }

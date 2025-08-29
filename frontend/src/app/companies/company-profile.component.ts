@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CompanyService } from './company.service';
 import { Company } from './company.model';
+import { ErrorService } from '../error.service';
 
 @Component({
   selector: 'app-company-profile',
@@ -35,16 +36,27 @@ import { Company } from './company.model';
 })
 export class CompanyProfileComponent implements OnInit {
   private readonly companyService = inject(CompanyService);
+  private readonly errorService = inject(ErrorService);
   company?: Company;
 
   ngOnInit(): void {
-    this.companyService.getProfile().subscribe((c) => (this.company = c));
+    this.companyService.getProfile().subscribe({
+      next: (c) => (this.company = c),
+      error: () => this.errorService.show('Failed to load company profile'),
+    });
   }
 
   save(): void {
     if (!this.company || !this.company.id) {
       return;
     }
-    this.companyService.updateCompany(this.company.id, this.company).subscribe();
+    this.companyService.updateCompany(this.company.id, this.company).subscribe({
+      next: () => {
+        if (typeof window !== 'undefined') {
+          window.alert('Company updated successfully');
+        }
+      },
+      error: () => this.errorService.show('Failed to save company'),
+    });
   }
 }

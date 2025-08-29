@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from './user.service';
+import { ErrorService } from '../error.service';
 
 @Component({
   selector: 'app-user-form',
@@ -69,6 +70,7 @@ export class UserFormComponent {
   private fb = inject(FormBuilder);
   private userService = inject(UserService);
   private router = inject(Router);
+  private errorService = inject(ErrorService);
 
   form = this.fb.nonNullable.group({
     username: ['', Validators.required.bind(Validators)],
@@ -100,8 +102,14 @@ export class UserFormComponent {
       if (phone) payload.phone = phone;
       if (role) payload.role = role;
       if (this.isOwner) payload.company = company;
-      this.userService.createUser(payload).subscribe(() => {
-        void this.router.navigate(['/users']);
+      this.userService.createUser(payload).subscribe({
+        next: () => {
+          if (typeof window !== 'undefined') {
+            window.alert('User created successfully');
+          }
+          void this.router.navigate(['/users']);
+        },
+        error: () => this.errorService.show('Failed to create user'),
       });
     }
   }
