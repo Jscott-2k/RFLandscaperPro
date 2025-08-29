@@ -7,6 +7,7 @@ import { Job } from '../jobs/entities/job.entity';
 import { CreateContractDto } from './dto/create-contract.dto';
 import { UpdateContractDto } from './dto/update-contract.dto';
 import { ContractResponseDto } from './dto/contract-response.dto';
+import { toContractResponseDto } from './contracts.mapper';
 
 @Injectable()
 export class ContractsService {
@@ -42,7 +43,7 @@ export class ContractsService {
     });
     const saved = await this.contractRepository.save(contract);
     await this.generateJobsForContract(saved);
-    return this.toResponseDto(saved);
+    return toContractResponseDto(saved);
   }
 
   async findAll(companyId: number): Promise<ContractResponseDto[]> {
@@ -50,7 +51,7 @@ export class ContractsService {
       where: { companyId },
       relations: ['customer'],
     });
-    return contracts.map((c) => this.toResponseDto(c));
+    return contracts.map((c) => toContractResponseDto(c));
   }
 
   async update(
@@ -85,7 +86,7 @@ export class ContractsService {
     });
     const saved = await this.contractRepository.save(contract);
     await this.generateJobsForContract(saved);
-    return this.toResponseDto(saved);
+    return toContractResponseDto(saved);
   }
 
   async cancel(id: number, companyId: number): Promise<void> {
@@ -156,24 +157,5 @@ export class ContractsService {
         break;
     }
     return result;
-  }
-
-  private toResponseDto(contract: Contract): ContractResponseDto {
-    return {
-      id: contract.id,
-      startDate: contract.startDate,
-      endDate: contract.endDate,
-      frequency: contract.frequency,
-      totalOccurrences: contract.totalOccurrences,
-      occurrencesGenerated: contract.occurrencesGenerated,
-      jobTemplate: contract.jobTemplate,
-      lastGeneratedDate: contract.lastGeneratedDate,
-      active: contract.active,
-      customer: {
-        id: contract.customer.id,
-        name: contract.customer.name,
-        email: contract.customer.email,
-      },
-    };
   }
 }
