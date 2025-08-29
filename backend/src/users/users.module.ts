@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { CompanyUser } from '../companies/entities/company-user.entity';
+import { Company } from '../companies/entities/company.entity';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { MeController } from './me.controller';
@@ -20,7 +21,7 @@ const userRepositoryProvider = {
 };
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, CompanyUser])],
+  imports: [TypeOrmModule.forFeature([User, CompanyUser, Company])],
   providers: [
     UsersService,
     EmailService,
