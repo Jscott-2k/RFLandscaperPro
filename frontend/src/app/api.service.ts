@@ -7,6 +7,7 @@ import {
 import { environment } from '../environments/environment';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { ErrorService } from './error.service';
 
 export interface Paginated<T> {
   items: T[];
@@ -81,12 +82,13 @@ export type UpdateCompany = Partial<CreateCompany>;
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
+  private errorService = inject(ErrorService);
 
-  private handleError(error: HttpErrorResponse) {
-    // Centralized error handling to keep components clean
-    console.error('API error', error);
-    return throwError(() => error);
-  }
+  private handleError = (error: HttpErrorResponse) => {
+    const message = error.error?.message || 'An unexpected error occurred. Please try again later.';
+    this.errorService.show(message);
+    return throwError(() => new Error(message));
+  };
 
   private toHttpParams(params?: Record<string, unknown>): HttpParams {
     let httpParams = new HttpParams();
