@@ -3,24 +3,38 @@ import { Repository } from 'typeorm';
 import { InvitationsService } from '../invitations.service';
 import { Invitation, InvitationRole } from '../entities/invitation.entity';
 import { CompanyUser } from '../entities/company-user.entity';
+import { Company } from '../entities/company.entity';
 import { User } from '../../users/user.entity';
 import { EmailService } from '../../common/email.service';
 
 describe('InvitationsService revoke and resend', () => {
   let invitationsRepo: jest.Mocked<Pick<Repository<Invitation>, 'findOne' | 'save'>>;
   let service: InvitationsService;
-  let emailService: { sendCompanyInvitationEmail: jest.Mock<void, [string, string]> };
+  let emailService: {
+    sendCompanyInvitationEmail: jest.Mock<
+      void,
+      [string, string, string, InvitationRole, Date]
+    >;
+  };
 
   beforeEach(() => {
     invitationsRepo = {
       findOne: jest.fn(),
       save: jest.fn(async (inv) => inv),
     } as unknown as jest.Mocked<Pick<Repository<Invitation>, 'findOne' | 'save'>>;
-    emailService = { sendCompanyInvitationEmail: jest.fn() };
+    emailService = {
+      sendCompanyInvitationEmail: jest.fn(),
+    } as {
+      sendCompanyInvitationEmail: jest.Mock<
+        void,
+        [string, string, string, InvitationRole, Date]
+      >;
+    };
     service = new InvitationsService(
       invitationsRepo as unknown as Repository<Invitation>,
       {} as unknown as Repository<CompanyUser>,
       {} as unknown as Repository<User>,
+      {} as unknown as Repository<Company>,
       emailService as unknown as EmailService,
     );
   });
@@ -70,8 +84,12 @@ describe('InvitationsService revoke and resend', () => {
     });
 
     await service.resendInvitation(4, 3);
-    const [[email, newToken]] = emailService.sendCompanyInvitationEmail.mock.calls;
+    const [[email, newToken, companyName, role, expiry]] =
+      emailService.sendCompanyInvitationEmail.mock.calls;
     expect(email).toBe('resend@ex.com');
+    expect(companyName).toBe('Co');
+    expect(role).toBe(InvitationRole.ADMIN);
+    expect(expiry).toBeInstanceOf(Date);
     const newHash = crypto.createHash('sha256').update(newToken).digest('hex');
     expect(invitation.tokenHash).toBe(newHash);
     expect(invitation.expiresAt.getTime()).toBeGreaterThan(Date.now());

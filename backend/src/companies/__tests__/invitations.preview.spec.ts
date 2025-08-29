@@ -21,6 +21,7 @@ describe('InvitationsService previewInvitation', () => {
       invitationsRepo as unknown as Repository<Invitation>,
       {} as unknown as Repository<CompanyUser>,
       {} as unknown as Repository<User>,
+      {} as unknown as Repository<Company>,
       {} as unknown as EmailService,
     );
   });

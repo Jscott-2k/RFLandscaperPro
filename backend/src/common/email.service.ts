@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
+import { InvitationRole } from '../companies/entities/invitation.entity';
 
 type MailDriver = 'smtp' | 'ethereal';
 
@@ -113,7 +114,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
     await this.ready;
 
     const from =
-      process.env.SMTP_FROM ??
+      process.env.EMAIL_FROM ??
       (this.testAccount?.user
         ? `RF Landscaper Pro <${this.testAccount.user}>`
         : 'RF Landscaper Pro <no-reply@rflandscaperpro.com>');
@@ -194,16 +195,41 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
+  private formatRole(role: InvitationRole): string {
+    return role === 'ADMIN' ? 'Admin' : 'Worker';
+  }
+
   async sendCompanyInvitationEmail(
     to: string,
     token: string,
+    companyName: string,
+    role: InvitationRole,
+    expiresAt: Date,
   ): Promise<{ messageId: string; previewUrl?: string }> {
-    const link = `https://app.rflandscaperpro.com/invite/accept?token=${token}`;
+    const baseUrl =
+      process.env.APP_BASE_URL ?? 'https://app.rflandscaperpro.com';
+    const link = `${baseUrl}/invite/accept?token=${token}`;
+    const roleName = this.formatRole(role);
+    const expiry = expiresAt.toDateString();
     return this.sendMail({
       to,
       subject: 'Company Invitation',
-      text: `You have been invited to join a company on RF Landscaper Pro. Click here to accept: ${link}`,
-      html: `<p>You have been invited to join a company on RF Landscaper Pro.</p><p><a href="${link}">Accept Invitation</a></p>`,
+      text: `You have been invited to join ${companyName} as ${roleName}. This invitation expires on ${expiry}. Accept here: ${link}`,
+      html: `<p>You have been invited to join <strong>${companyName}</strong> as <strong>${roleName}</strong>.</p><p>This invitation expires on <strong>${expiry}</strong>.</p><p><a href="${link}">Accept Invitation</a></p>`,
+    });
+  }
+
+  async sendAddedToCompanyEmail(
+    to: string,
+    companyName: string,
+    role: InvitationRole,
+  ): Promise<{ messageId: string; previewUrl?: string }> {
+    const roleName = this.formatRole(role);
+    return this.sendMail({
+      to,
+      subject: 'You were added to a company',
+      text: `You have been added to ${companyName} as ${roleName}.`,
+      html: `<p>You have been added to <strong>${companyName}</strong> as <strong>${roleName}</strong>.</p>`,
     });
   }
 }
