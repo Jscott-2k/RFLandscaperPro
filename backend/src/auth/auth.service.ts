@@ -70,12 +70,13 @@ export class AuthService {
   }
 
   async login(user: User) {
+    const roles = [user.role];
     const payload = {
       username: user.username,
       sub: user.id,
       email: user.email,
       companyId: null as number | null,
-      roles: [user.role],
+      roles,
       role: user.role,
     };
 
@@ -92,6 +93,7 @@ export class AuthService {
         username: user.username,
         email: user.email.value,
         role: user.role,
+        roles,
       },
     };
   }

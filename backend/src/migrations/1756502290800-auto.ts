@@ -101,7 +101,7 @@ export class Auto1756502290800 implements MigrationInterface {
       `CREATE INDEX "IDX_fdb2f3ad8115da4c7718109a6e" ON "customer" ("email") `,
     );
     await queryRunner.query(
-      `CREATE TYPE "public"."user_role_enum" AS ENUM('admin', 'owner', 'worker', 'customer')`,
+      `CREATE TYPE "public"."user_role_enum" AS ENUM('admin', 'master', 'owner', 'worker', 'customer')`,
     );
     await queryRunner.query(
       `CREATE TABLE "user" ("id" SERIAL NOT NULL, "username" character varying NOT NULL, "email" character varying NOT NULL, "password" character varying NOT NULL, "role" "public"."user_role_enum" NOT NULL DEFAULT 'customer', "isVerified" boolean NOT NULL DEFAULT false, "firstName" character varying, "lastName" character varying, "phone" character varying, "passwordResetToken" character varying(64), "passwordResetExpires" TIMESTAMP WITH TIME ZONE, "companyId" integer, CONSTRAINT "UQ_78a916df40e02a9deb1c4b75edb" UNIQUE ("username"), CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email"), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`,
