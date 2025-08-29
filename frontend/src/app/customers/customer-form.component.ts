@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CustomerService } from './customer.service';
 import { Customer } from './customer.model';
+import { ErrorService } from '../error.service';
 
 @Component({
   selector: 'app-customer-form',
@@ -33,6 +34,7 @@ export class CustomerFormComponent implements OnInit {
   private customerService = inject(CustomerService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private errorService = inject(ErrorService);
 
   customerId?: number;
 
@@ -46,9 +48,10 @@ export class CustomerFormComponent implements OnInit {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       this.customerId = Number(idParam);
-      this.customerService
-        .getCustomer(this.customerId)
-        .subscribe((customer) => this.form.patchValue(customer));
+      this.customerService.getCustomer(this.customerId).subscribe({
+        next: (customer) => this.form.patchValue(customer),
+        error: () => this.errorService.show('Failed to load customer'),
+      });
     }
   }
 
@@ -61,8 +64,14 @@ export class CustomerFormComponent implements OnInit {
       ? this.customerService.updateCustomer(this.customerId, this.form.value as Customer)
       : this.customerService.createCustomer(this.form.value as Customer);
 
-    action$.subscribe(() => {
-      void this.router.navigate(['/customers']);
+    action$.subscribe({
+      next: () => {
+        if (typeof window !== 'undefined') {
+          window.alert('Customer saved successfully');
+        }
+        void this.router.navigate(['/customers']);
+      },
+      error: () => this.errorService.show('Failed to save customer'),
     });
   }
 }
