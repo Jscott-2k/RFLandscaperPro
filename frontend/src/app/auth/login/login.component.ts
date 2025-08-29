@@ -2,7 +2,9 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { AuthService } from '../auth.service';
+import { ErrorService } from '../../error.service';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +15,7 @@ import { AuthService } from '../auth.service';
       <input type="text" formControlName="company" placeholder="Company" />
       <input type="email" formControlName="email" placeholder="Email" />
       <input type="password" formControlName="password" placeholder="Password" />
-      <button type="submit">Login</button>
+      <button type="submit" [disabled]="loading">Login</button>
     </form>
     <p>
       <small><a routerLink="/register">Create account</a></small>
@@ -24,6 +26,7 @@ export class LoginComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private errorService = inject(ErrorService);
 
   form = this.fb.nonNullable.group({
     company: ['', Validators.required.bind(Validators)],
@@ -31,11 +34,20 @@ export class LoginComponent {
     password: ['', Validators.required.bind(Validators)],
   });
 
+  loading = false;
+
   submit(): void {
-    if (this.form.valid) {
-      this.auth.login(this.form.getRawValue()).subscribe(() => {
-        void this.router.navigate(['/dashboard']);
-      });
+    if (this.form.valid && !this.loading) {
+      this.loading = true;
+      this.auth
+        .login(this.form.getRawValue())
+        .pipe(finalize(() => (this.loading = false)))
+        .subscribe({
+          next: () => {
+            void this.router.navigate(['/dashboard']);
+          },
+          error: (err: unknown) => this.errorService.show((err as Error).message),
+        });
     }
   }
 }
