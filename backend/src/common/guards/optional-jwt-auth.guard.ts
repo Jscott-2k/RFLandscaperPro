@@ -13,12 +13,12 @@ export class OptionalJwtAuthGuard extends JwtAuthGuard {
     user: TUser,
     info: unknown,
     context: ExecutionContext,
-  ): TUser | null {
+  ): TUser {
     try {
       return super.handleRequest(err, user, info, context);
     } catch (e) {
       if (e instanceof UnauthorizedException) {
-        return null;
+        return null as unknown as TUser;
       }
       throw e;
     }
