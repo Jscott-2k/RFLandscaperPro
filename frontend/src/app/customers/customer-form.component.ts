@@ -37,8 +37,8 @@ export class CustomerFormComponent implements OnInit {
   customerId?: number;
 
   form = this.fb.nonNullable.group({
-    name: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
+    name: ['', Validators.required.bind(Validators)],
+    email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
     phone: [''],
   });
 
@@ -62,7 +62,7 @@ export class CustomerFormComponent implements OnInit {
       : this.customerService.createCustomer(this.form.value as Customer);
 
     action$.subscribe(() => {
-      this.router.navigate(['/customers']);
+      void this.router.navigate(['/customers']);
     });
   }
 }

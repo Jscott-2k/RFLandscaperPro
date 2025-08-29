@@ -2,7 +2,6 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CustomerService } from './customer.service';
-import { Customer } from './customer.model';
 
 @Component({
   selector: 'app-customer-list',

@@ -26,15 +26,15 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
 
   form = this.fb.nonNullable.group({
-    company: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
+    company: ['', Validators.required.bind(Validators)],
+    email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
+    password: ['', Validators.required.bind(Validators)],
   });
 
   submit(): void {
     if (this.form.valid) {
       this.auth.login(this.form.getRawValue()).subscribe(() => {
-        this.router.navigate(['/dashboard']);
+        void this.router.navigate(['/dashboard']);
       });
     }
   }

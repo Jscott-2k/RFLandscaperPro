@@ -158,12 +158,23 @@ export class AuthService {
       return [];
     }
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      if (Array.isArray(payload.roles)) {
-        return payload.roles;
+      const payloadStr = atob(token.split('.')[1]);
+      const payload: unknown = JSON.parse(payloadStr);
+      if (
+        payload &&
+        typeof payload === 'object' &&
+        'roles' in payload &&
+        Array.isArray((payload as { roles: unknown }).roles)
+      ) {
+        return (payload as { roles: string[] }).roles;
       }
-      if (payload.role) {
-        return [payload.role];
+      if (
+        payload &&
+        typeof payload === 'object' &&
+        'role' in payload &&
+        typeof (payload as { role: unknown }).role === 'string'
+      ) {
+        return [(payload as { role: string }).role];
       }
       return [];
     } catch {

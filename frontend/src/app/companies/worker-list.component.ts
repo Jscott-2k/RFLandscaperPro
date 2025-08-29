@@ -38,6 +38,6 @@ export class WorkerListComponent implements OnInit {
   }
 
   addWorker(): void {
-    this.router.navigate(['/users/new']);
+    void this.router.navigate(['/users/new']);
   }
 }

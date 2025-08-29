@@ -71,9 +71,9 @@ export class UserFormComponent {
   private router = inject(Router);
 
   form = this.fb.nonNullable.group({
-    username: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
+    username: ['', Validators.required.bind(Validators)],
+    email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
+    password: ['', Validators.required.bind(Validators)],
     firstName: [''],
     lastName: [''],
     phone: [''],
@@ -90,14 +90,18 @@ export class UserFormComponent {
     if (this.form.valid) {
       const { username, email, password, firstName, lastName, phone, role, company } =
         this.form.getRawValue();
-      const payload: any = { username, email, password };
+      const payload: Parameters<UserService['createUser']>[0] & { password: string } = {
+        username,
+        email,
+        password,
+      };
       if (firstName) payload.firstName = firstName;
       if (lastName) payload.lastName = lastName;
       if (phone) payload.phone = phone;
       if (role) payload.role = role;
       if (this.isOwner) payload.company = company;
       this.userService.createUser(payload).subscribe(() => {
-        this.router.navigate(['/users']);
+        void this.router.navigate(['/users']);
       });
     }
   }

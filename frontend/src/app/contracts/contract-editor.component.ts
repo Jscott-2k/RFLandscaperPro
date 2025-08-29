@@ -34,13 +34,13 @@ export class ContractEditorComponent implements OnInit {
 
   save(): void {
     if (this.contract.id) {
-      this.contractsService
-        .update(this.contract.id, this.contract)
-        .subscribe(() => this.router.navigate(['/contracts']));
+      this.contractsService.update(this.contract.id, this.contract).subscribe(() => {
+        void this.router.navigate(['/contracts']);
+      });
     } else {
-      this.contractsService
-        .create(this.contract)
-        .subscribe(() => this.router.navigate(['/contracts']));
+      this.contractsService.create(this.contract).subscribe(() => {
+        void this.router.navigate(['/contracts']);
+      });
     }
   }
 }

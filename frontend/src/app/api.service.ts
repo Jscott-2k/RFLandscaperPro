@@ -81,7 +81,13 @@ export class ApiService {
   private errorService = inject(ErrorService);
 
   private handleError = (error: HttpErrorResponse) => {
-    const message = error.error?.message || 'An unexpected error occurred. Please try again later.';
+    const message =
+      error.error &&
+      typeof error.error === 'object' &&
+      'message' in error.error &&
+      typeof (error.error as { message?: unknown }).message === 'string'
+        ? (error.error as { message: string }).message
+        : 'An unexpected error occurred. Please try again later.';
     this.errorService.show(message);
     return throwError(() => new Error(message));
   };
@@ -91,7 +97,11 @@ export class ApiService {
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          httpParams = httpParams.set(key, String(value));
+          const stringValue =
+            typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+              ? String(value)
+              : JSON.stringify(value);
+          httpParams = httpParams.set(key, stringValue);
         }
       });
     }

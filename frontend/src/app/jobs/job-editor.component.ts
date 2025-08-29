@@ -29,11 +29,13 @@ export class JobEditorComponent implements OnInit {
 
   save(): void {
     if (this.job.id) {
-      this.jobsService
-        .update(this.job.id, this.job)
-        .subscribe(() => this.router.navigate(['/jobs']));
+      this.jobsService.update(this.job.id, this.job).subscribe(() => {
+        void this.router.navigate(['/jobs']);
+      });
     } else {
-      this.jobsService.create(this.job).subscribe(() => this.router.navigate(['/jobs']));
+      this.jobsService.create(this.job).subscribe(() => {
+        void this.router.navigate(['/jobs']);
+      });
     }
   }
 

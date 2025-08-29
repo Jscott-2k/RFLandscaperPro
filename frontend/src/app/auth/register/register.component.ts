@@ -37,10 +37,10 @@ export class RegisterComponent {
   private fb = inject(FormBuilder);
 
   form = this.fb.nonNullable.group({
-    username: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
-    role: ['customer', Validators.required],
+    username: ['', Validators.required.bind(Validators)],
+    email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
+    password: ['', Validators.required.bind(Validators)],
+    role: ['customer', Validators.required.bind(Validators)],
     company: this.fb.nonNullable.group({
       name: [''],
       address: [''],
@@ -56,12 +56,17 @@ export class RegisterComponent {
   submit(): void {
     if (this.form.valid) {
       const { username, email, password, role, company } = this.form.getRawValue();
-      const payload: any = { username, email, password, role };
+      const payload: Parameters<AuthService['register']>[0] = {
+        username,
+        email,
+        password,
+        role,
+      };
       if (this.isOwner) {
         payload.company = company;
       }
       this.auth.register(payload).subscribe(() => {
-        this.router.navigate(['/login']);
+        void this.router.navigate(['/login']);
       });
     }
   }

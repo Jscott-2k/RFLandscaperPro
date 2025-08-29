@@ -2,7 +2,6 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CustomerService } from './customer.service';
-import { Customer } from './customer.model';
 import { switchMap } from 'rxjs';
 
 @Component({
