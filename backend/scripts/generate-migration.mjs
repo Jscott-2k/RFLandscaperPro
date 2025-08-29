@@ -9,7 +9,10 @@ if (!MIGRATION_NAME_REGEX.test(name)) {
   process.exit(1);
 }
 
-const outPath = `src/migrations/${name}`;
+const migrationsDir = 'src/migrations';
+const timestamp = Date.now();
+const outPath = `${migrationsDir}/${name}`;
+const generatedFile = `${migrationsDir}/${timestamp}-${name}.ts`;
 
 const result = spawnSync(
   'ts-node',
@@ -17,9 +20,11 @@ const result = spawnSync(
     '--transpile-only',
     './node_modules/typeorm/cli.js',
     'migration:generate',
+    outPath,
     '-d',
     'data-source.ts',
-    outPath,
+    '--timestamp',
+    timestamp.toString(),
   ],
   { stdio: 'inherit' },
 );
@@ -28,7 +33,7 @@ if (result.status !== 0) {
   process.exit(result.status ?? 1);
 }
 
-spawnSync('npx', ['prettier', outPath + '.ts', '--write'], {
+spawnSync('npx', ['prettier', generatedFile, '--write'], {
   stdio: 'inherit',
 });
 process.exit(result.status ?? 0);
