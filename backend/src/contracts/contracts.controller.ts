@@ -5,7 +5,6 @@ import {
   Patch,
   Body,
   Param,
-  Req,
   ParseIntPipe,
 } from '@nestjs/common';
 import { ContractsService } from './contracts.service';
@@ -14,6 +13,7 @@ import { UpdateContractDto } from './dto/update-contract.dto';
 import { ContractResponseDto } from './dto/contract-response.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
+import { Company } from '../common/decorators/company.decorator';
 import {
   ApiBearerAuth,
   ApiTags,
@@ -33,19 +33,17 @@ export class ContractsController {
   @ApiResponse({ status: 201, type: ContractResponseDto })
   create(
     @Body() dto: CreateContractDto,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
   ): Promise<ContractResponseDto> {
-    return this.contractsService.create(dto, req.user.companyId);
+    return this.contractsService.create(dto, companyId);
   }
 
   @Get()
   @Roles(UserRole.Admin, UserRole.Worker)
   @ApiOperation({ summary: 'List contracts' })
   @ApiResponse({ status: 200, type: [ContractResponseDto] })
-  findAll(
-    @Req() req: { user: { companyId: number } },
-  ): Promise<ContractResponseDto[]> {
-    return this.contractsService.findAll(req.user.companyId);
+  findAll(@Company() companyId: number): Promise<ContractResponseDto[]> {
+    return this.contractsService.findAll(companyId);
   }
 
   @Patch(':id')
@@ -55,9 +53,9 @@ export class ContractsController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateContractDto,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
   ): Promise<ContractResponseDto> {
-    return this.contractsService.update(id, dto, req.user.companyId);
+    return this.contractsService.update(id, dto, companyId);
   }
 
   @Post(':id/cancel')
@@ -66,8 +64,8 @@ export class ContractsController {
   @ApiResponse({ status: 200, description: 'Contract cancelled' })
   cancel(
     @Param('id', ParseIntPipe) id: number,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
   ): Promise<void> {
-    return this.contractsService.cancel(id, req.user.companyId);
+    return this.contractsService.cancel(id, companyId);
   }
 }

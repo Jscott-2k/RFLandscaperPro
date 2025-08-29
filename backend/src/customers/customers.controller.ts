@@ -11,7 +11,6 @@ import {
   Query,
   HttpCode,
   HttpStatus,
-  Req,
 } from '@nestjs/common';
 
 import { CustomersService } from './customers.service';
@@ -21,6 +20,9 @@ import { CustomerResponseDto } from './dto/customer-response.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { Company } from '../common/decorators/company.decorator';
+import { AuthUser } from '../common/decorators/auth-user.decorator';
+import { User } from '../users/user.entity';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -45,9 +47,9 @@ export class CustomersController {
   })
   async create(
     @Body() createCustomerDto: CreateCustomerDto,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
   ): Promise<CustomerResponseDto> {
-    return this.customersService.create(createCustomerDto, req.user.companyId);
+    return this.customersService.create(createCustomerDto, companyId);
   }
 
   @Get()
@@ -60,16 +62,11 @@ export class CustomersController {
   @ApiResponse({ status: 200, description: 'List of customers' })
   async findAll(
     @Query() pagination: PaginationQueryDto,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
     @Query('active', new ParseBoolPipe({ optional: true })) active?: boolean,
     @Query('search') search?: string,
   ): Promise<{ items: CustomerResponseDto[]; total: number }> {
-    return this.customersService.findAll(
-      pagination,
-      req.user.companyId,
-      active,
-      search,
-    );
+    return this.customersService.findAll(pagination, companyId, active, search);
   }
 
   @Get('profile')
@@ -80,13 +77,8 @@ export class CustomersController {
     description: 'Customer profile',
     type: CustomerResponseDto,
   })
-  async getProfile(
-    @Req() req: { user: { userId: number; companyId: number } },
-  ): Promise<CustomerResponseDto> {
-    return this.customersService.findByUserId(
-      req.user.userId,
-      req.user.companyId,
-    );
+  async getProfile(@AuthUser() user: User): Promise<CustomerResponseDto> {
+    return this.customersService.findByUserId(user.id, user.companyId!);
   }
 
   @Get(':id')
@@ -99,9 +91,9 @@ export class CustomersController {
   })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
   ): Promise<CustomerResponseDto> {
-    return this.customersService.findOne(id, req.user.companyId);
+    return this.customersService.findOne(id, companyId);
   }
 
   @Patch(':id')
@@ -115,13 +107,9 @@ export class CustomersController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
   ): Promise<CustomerResponseDto> {
-    return this.customersService.update(
-      id,
-      updateCustomerDto,
-      req.user.companyId,
-    );
+    return this.customersService.update(id, updateCustomerDto, companyId);
   }
 
   @Patch(':id/activate')
@@ -134,9 +122,9 @@ export class CustomersController {
   })
   async activate(
     @Param('id', ParseIntPipe) id: number,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
   ): Promise<CustomerResponseDto> {
-    return this.customersService.activate(id, req.user.companyId);
+    return this.customersService.activate(id, companyId);
   }
 
   @Patch(':id/deactivate')
@@ -149,9 +137,9 @@ export class CustomersController {
   })
   async deactivate(
     @Param('id', ParseIntPipe) id: number,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
   ): Promise<CustomerResponseDto> {
-    return this.customersService.deactivate(id, req.user.companyId);
+    return this.customersService.deactivate(id, companyId);
   }
 
   @Delete(':id')
@@ -161,8 +149,8 @@ export class CustomersController {
   @ApiResponse({ status: 204, description: 'Customer deleted' })
   async remove(
     @Param('id', ParseIntPipe) id: number,
-    @Req() req: { user: { companyId: number } },
+    @Company() companyId: number,
   ): Promise<void> {
-    await this.customersService.remove(id, req.user.companyId);
+    await this.customersService.remove(id, companyId);
   }
 }

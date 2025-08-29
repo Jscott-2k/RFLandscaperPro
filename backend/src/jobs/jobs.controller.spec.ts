@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JobsController } from './jobs.controller';
 import { JobsService } from './jobs.service';
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument */
 
 describe('JobsController', () => {
   let controller: JobsController;
@@ -35,7 +35,7 @@ describe('JobsController', () => {
     const pagination = { page: 1, limit: 10 } as any;
     const result = await controller.findAll(
       pagination,
-      { user: { companyId: 1 } },
+      1,
       true,
       2,
       '2023-01-01',
@@ -61,20 +61,20 @@ describe('JobsController', () => {
       const pagination = { page: 1, limit: 10 } as any;
       const completed = true;
       const customerId = 2;
-      const req = { user: { companyId: 1 } } as any;
+      const companyId = 1;
       const result = { items: [], total: 0 };
       jobsService.findAll.mockResolvedValue(result);
 
       const response = await controller.findAll(
         pagination,
-        req,
+        companyId,
         completed,
         customerId,
       );
 
       expect(jobsService.findAll).toHaveBeenCalledWith(
         pagination,
-        req.user.companyId,
+        companyId,
         completed,
         customerId,
         undefined,
