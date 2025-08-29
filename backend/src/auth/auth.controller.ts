@@ -23,6 +23,7 @@ export class AuthController {
     const user: User = await this.authService.validateUser(
       loginDto.email,
       loginDto.password,
+      loginDto.company,
     );
     return this.authService.login(user);
   }
