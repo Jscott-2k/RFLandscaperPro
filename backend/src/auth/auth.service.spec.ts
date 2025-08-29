@@ -1,22 +1,22 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { Repository } from 'typeorm';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { RefreshToken } from './refresh-token.entity';
-import { VerificationToken } from './verification-token.entity';
-import { User, UserRole } from '../users/user.entity';
+import { UserRole } from '../users/user.entity';
 import {
   CompanyUser,
   CompanyUserRole,
   CompanyUserStatus,
 } from '../companies/entities/company-user.entity';
 import { EmailService } from '../common/email.service';
+import { RefreshTokenRepository } from './repositories/refresh-token.repository';
+import { VerificationTokenRepository } from './repositories/verification-token.repository';
+import { CompanyMembershipRepository } from './repositories/company-membership.repository';
 
 describe('AuthService.switchCompany', () => {
   let service: AuthService;
-  let repo: jest.Mocked<Pick<Repository<CompanyUser>, 'findOne'>>;
+  let repo: jest.Mocked<CompanyMembershipRepository>;
   let jwt: { signAsync: jest.Mock };
 
   beforeEach(() => {
@@ -26,21 +26,18 @@ describe('AuthService.switchCompany', () => {
       {} as unknown as UsersService,
       jwt as unknown as JwtService,
       {} as ConfigService,
-      {} as unknown as Repository<RefreshToken>,
-      {} as unknown as Repository<VerificationToken>,
-      {} as unknown as Repository<User>,
+      {} as RefreshTokenRepository,
+      {} as VerificationTokenRepository,
+      {} as unknown as any, // Repository<User>
       {} as EmailService,
-      repo as unknown as Repository<CompanyUser>,
+      repo as CompanyMembershipRepository,
     );
   });
 
   it('throws when membership is missing', async () => {
     repo.findOne.mockResolvedValue(null);
     await expect(
-      service.switchCompany(
-        { userId: 1, username: 'a', email: 'a@e.com' },
-        2,
-      ),
+      service.switchCompany({ userId: 1, username: 'a', email: 'a@e.com' }, 2),
     ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 
