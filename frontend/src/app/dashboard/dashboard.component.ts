@@ -1,11 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ApiService, Paginated } from '../api.service';
-import { UpcomingJobSummary, EquipmentCount } from '../models/dashboard.models';
 import { JobsApiService } from '../api/jobs-api.service';
 import { EquipmentApiService } from '../api/equipment-api.service';
 import { UsersApiService } from '../api/users-api.service';
-
 
 @Component({
   selector: 'app-dashboard',
@@ -41,7 +38,6 @@ export class DashboardComponent implements OnInit {
   protected readonly activeUsers = signal(0);
 
   ngOnInit(): void {
-
     this.jobsApi.getUpcomingJobs().subscribe((data) => this.upcomingJobs.set(data.total));
     this.equipmentApi
       .getEquipmentCount('available')
@@ -50,6 +46,5 @@ export class DashboardComponent implements OnInit {
       .getEquipmentCount('in_use')
       .subscribe((data) => this.equipmentInUse.set(data.total));
     this.usersApi.getUsers().subscribe((data) => this.activeUsers.set(data.length));
-
   }
 }

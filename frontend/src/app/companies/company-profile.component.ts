@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CompanyService } from './company.service';
 import { Company } from './company.model';
 import { ErrorService } from '../error.service';
+import { NotificationService } from '../notification.service';
 
 @Component({
   selector: 'app-company-profile',
@@ -66,6 +67,7 @@ import { ErrorService } from '../error.service';
 export class CompanyProfileComponent implements OnInit {
   private readonly companyService = inject(CompanyService);
   private readonly errorService = inject(ErrorService);
+  private readonly notifications = inject(NotificationService);
   private fb = inject(FormBuilder);
   company?: Company;
 
@@ -103,9 +105,7 @@ export class CompanyProfileComponent implements OnInit {
       .updateCompany(this.company.id, { ...this.company, ...this.form.getRawValue() })
       .subscribe({
         next: () => {
-          if (typeof window !== 'undefined') {
-            window.alert('Company updated successfully');
-          }
+          this.notifications.show('Company updated successfully');
         },
         error: () => this.errorService.show('Failed to save company'),
       });

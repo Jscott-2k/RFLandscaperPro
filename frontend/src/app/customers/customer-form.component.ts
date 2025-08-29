@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CustomerService } from './customer.service';
 import { Customer } from './customer.model';
 import { ErrorService } from '../error.service';
+import { NotificationService } from '../notification.service';
 
 @Component({
   selector: 'app-customer-form',
@@ -35,6 +36,7 @@ export class CustomerFormComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private errorService = inject(ErrorService);
+  private notifications = inject(NotificationService);
 
   customerId?: number;
 
@@ -66,9 +68,7 @@ export class CustomerFormComponent implements OnInit {
 
     action$.subscribe({
       next: () => {
-        if (typeof window !== 'undefined') {
-          window.alert('Customer saved successfully');
-        }
+        this.notifications.show('Customer saved successfully');
         void this.router.navigate(['/customers']);
       },
       error: () => this.errorService.show('Failed to save customer'),

@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from './user.service';
 import { ErrorService } from '../error.service';
+import { NotificationService } from '../notification.service';
 
 @Component({
   selector: 'app-user-form',
@@ -71,6 +72,7 @@ export class UserFormComponent {
   private userService = inject(UserService);
   private router = inject(Router);
   private errorService = inject(ErrorService);
+  private notifications = inject(NotificationService);
 
   /* eslint-disable @typescript-eslint/unbound-method */
   form = this.fb.nonNullable.group({
@@ -106,9 +108,7 @@ export class UserFormComponent {
       if (this.isOwner) payload.company = company;
       this.userService.createUser(payload).subscribe({
         next: () => {
-          if (typeof window !== 'undefined') {
-            window.alert('User created successfully');
-          }
+          this.notifications.show('User created successfully');
           void this.router.navigate(['/users']);
         },
         error: () => this.errorService.show('Failed to create user'),

@@ -1,1 +1,23 @@
 /* You can add global styles to this file, and also import other style files */
+.app-snackbar {
+  visibility: hidden;
+  min-width: 200px;
+  background-color: #323232;
+  color: #fff;
+  text-align: center;
+  border-radius: 2px;
+  padding: 16px;
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  z-index: 1000;
+  opacity: 0;
+  transition: visibility 0s linear 0.3s, opacity 0.3s;
+}
+
+.app-snackbar.show {
+  visibility: visible;
+  opacity: 1;
+  transition-delay: 0s;
+}

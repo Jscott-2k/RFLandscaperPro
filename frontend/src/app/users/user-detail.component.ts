@@ -6,6 +6,7 @@ import { UserService } from './user.service';
 import { User } from './user.model';
 import { AuthService } from '../auth/auth.service';
 import { ErrorService } from '../error.service';
+import { NotificationService } from '../notification.service';
 
 @Component({
   selector: 'app-user-detail',
@@ -96,6 +97,7 @@ export class UserDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   protected readonly auth = inject(AuthService);
   private readonly errorService = inject(ErrorService);
+  private readonly notifications = inject(NotificationService);
   private fb = inject(FormBuilder);
   user?: User;
 
@@ -132,9 +134,7 @@ export class UserDetailComponent implements OnInit {
     const payload: User = { ...this.user, ...this.form.getRawValue() } as User;
     this.userService.updateUser(payload).subscribe({
       next: () => {
-        if (typeof window !== 'undefined') {
-          window.alert('User updated successfully');
-        }
+        this.notifications.show('User updated successfully');
       },
       error: () => this.errorService.show('Failed to save user'),
     });
