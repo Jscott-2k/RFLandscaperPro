@@ -8,6 +8,8 @@ import { User, UserRole } from '../users/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { validatePasswordStrength } from './password.util';
 import { RefreshToken } from './refresh-token.entity';
+import { VerificationToken } from './verification-token.entity';
+import { EmailService } from '../common/email.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +18,11 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepository: Repository<RefreshToken>,
+    @InjectRepository(VerificationToken)
+    private readonly verificationTokenRepository: Repository<VerificationToken>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+    private readonly emailService: EmailService,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<User> {
@@ -27,6 +34,10 @@ export class AuthService {
     const isValidPassword = await user.validatePassword(pass);
     if (!isValidPassword) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (!user.isVerified) {
+      throw new UnauthorizedException('Email not verified');
     }
 
     return user;
@@ -65,7 +76,23 @@ export class AuthService {
       ...registerDto,
       company: registerDto.company,
     });
-    return this.login(user);
+
+    const token = await this.createVerificationToken(user.id);
+    await this.emailService.sendVerificationEmail(user.email, token);
+
+    return { message: 'Verification email sent' };
+  }
+
+  async verifyEmail(token: string): Promise<void> {
+    const hashed = this.hashToken(token);
+    const record = await this.verificationTokenRepository.findOne({
+      where: { token: hashed },
+    });
+    if (!record || record.expiresAt < new Date()) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+    await this.usersRepository.update(record.userId, { isVerified: true });
+    await this.verificationTokenRepository.delete({ userId: record.userId });
   }
 
   async requestPasswordReset(email: string): Promise<void> {
@@ -133,6 +160,19 @@ export class AuthService {
         isRevoked: true,
       },
     );
+  }
+
+  private async createVerificationToken(userId: number): Promise<string> {
+    const token = crypto.randomBytes(32).toString('hex');
+    const hashed = this.hashToken(token);
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const entity = this.verificationTokenRepository.create({
+      token: hashed,
+      userId,
+      expiresAt,
+    });
+    await this.verificationTokenRepository.save(entity);
+    return token;
   }
 
   private hashToken(token: string): string {

@@ -138,6 +138,18 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
+  async sendVerificationEmail(
+    to: string,
+    token: string,
+  ): Promise<{ messageId: string; previewUrl?: string }> {
+    return this.sendMail({
+      to,
+      subject: 'Verify your email',
+      text: `Your verification token is: ${token}`,
+      html: `<p>Your verification token is: <strong>${token}</strong></p>`,
+    });
+  }
+
   async sendWelcomeEmail(
     to: string,
     username: string,

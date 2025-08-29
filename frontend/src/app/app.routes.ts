@@ -13,6 +13,10 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent)
   },
   {
+    path: 'verify',
+    loadComponent: () => import('./auth/verify/verify.component').then(m => m.VerifyComponent)
+  },
+  {
     path: 'customers',
     canActivate: [AuthGuard],
     loadChildren: () => import('./customers/customers.routes').then(m => m.customersRoutes)

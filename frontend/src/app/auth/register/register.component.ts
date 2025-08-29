@@ -61,7 +61,7 @@ export class RegisterComponent {
         payload.company = company;
       }
       this.auth.register(payload).subscribe(() => {
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/login']);
       });
     }
   }

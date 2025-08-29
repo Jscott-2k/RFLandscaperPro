@@ -12,6 +12,7 @@ describe('AuthController', () => {
     validateUser: jest.Mock;
     login: jest.Mock;
     register: jest.Mock;
+    verifyEmail: jest.Mock;
     requestPasswordReset: jest.Mock;
     resetPassword: jest.Mock;
     refresh: jest.Mock;
@@ -23,6 +24,7 @@ describe('AuthController', () => {
       validateUser: jest.fn(),
       login: jest.fn(),
       register: jest.fn(),
+      verifyEmail: jest.fn(),
       requestPasswordReset: jest.fn(),
       resetPassword: jest.fn(),
       refresh: jest.fn(),
@@ -37,28 +39,24 @@ describe('AuthController', () => {
     controller = module.get<AuthController>(AuthController);
   });
 
-  it('registers a new user and returns auth tokens', async () => {
+  it('registers a new user and sends verification email', async () => {
     const dto: RegisterDto = {
       username: 'user',
       email: 'user@example.com',
       password: 'pass',
     };
-    const response = {
-      access_token: 'access',
-      refresh_token: 'refresh',
-      user: {
-        id: 1,
-        username: 'user',
-        email: 'user@example.com',
-        role: UserRole.Customer,
-      },
-    };
+    const response = { message: 'Verification email sent' };
     authService.register.mockResolvedValue(response);
 
     const result = await controller.register(dto);
 
     expect(authService.register).toHaveBeenCalledWith(dto);
     expect(result).toEqual(response);
+  });
+
+  it('verifies email', async () => {
+    await controller.verifyEmail({ token: 'abc' });
+    expect(authService.verifyEmail).toHaveBeenCalledWith('abc');
   });
 
   it('requests password reset', async () => {
