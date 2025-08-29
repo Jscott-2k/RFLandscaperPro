@@ -6,7 +6,7 @@ export const companyInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const company = auth.getCompany();
   if (company) {
-    req = req.clone({ setHeaders: { 'X-Company': company } });
+    req = req.clone({ setHeaders: { 'X-Company-ID': company } });
   }
   return next(req);
 };
