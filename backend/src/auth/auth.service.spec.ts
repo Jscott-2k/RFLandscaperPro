@@ -12,7 +12,7 @@ import {
   CompanyUserRole,
   CompanyUserStatus,
 } from '../companies/entities/company-user.entity';
-import { EmailService } from '../common/email.service';
+import { EmailService } from '../common/email';
 
 describe('AuthService.switchCompany', () => {
   let service: AuthService;
