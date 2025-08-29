@@ -13,7 +13,11 @@
     <a routerLink="/equipment" routerLinkActive="active">Equipment</a>
     <a routerLink="/jobs" routerLinkActive="active">Jobs</a>
     <a routerLink="/company/profile" routerLinkActive="active">Company</a>
-    <a routerLink="/company/workers" routerLinkActive="active">Workers</a>
+    <a
+      *ngIf="auth.hasRole('owner') || auth.hasRole('admin')"
+      routerLink="/team"
+      routerLinkActive="active"
+      >Team</a>
   </nav>
   <main class="content">
     <router-outlet></router-outlet>
