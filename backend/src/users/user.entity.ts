@@ -34,6 +34,7 @@ export class User {
   username: string;
 
   @Column({
+    type: 'varchar',
     unique: true,
     transformer: {
       to: (value: Email): string => value.value,
