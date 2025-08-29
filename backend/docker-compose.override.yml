@@ -9,6 +9,8 @@ services:
       - .env.development
     environment:
       - NODE_ENV=development
+      - MAILHOG_HOST=mailhog
+      - MAILHOG_PORT=1025
   db:
     image: postgres:14
     container_name: rflandscaperpro_db
@@ -28,6 +30,13 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
       - "9090:9090"
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: rflandscaperpro_mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
 
 volumes:
   postgres_data:
