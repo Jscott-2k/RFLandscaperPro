@@ -23,6 +23,11 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/verify/verify.component').then((m) => m.VerifyComponent),
   },
   {
+    path: 'invite/accept',
+    loadComponent: () =>
+      import('./invitations/accept-invitation.component').then((m) => m.AcceptInvitationComponent),
+  },
+  {
     path: 'customers',
     canActivate: [AuthGuard],
     loadChildren: () => import('./customers/customers.routes').then((m) => m.customersRoutes),
