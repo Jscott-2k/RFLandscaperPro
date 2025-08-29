@@ -32,9 +32,33 @@ export class AuthService {
           if (this.hasLocalStorage()) {
             localStorage.setItem('token', res.access_token);
             this.roles.set(this.getRolesFromToken());
-            const companies = res.companies ?? [data.company];
-            this.setCompany(data.company);
+            const company = this.getCompanyFromToken(res.access_token) ?? data.company;
+            const companies = res.companies ?? [company];
+            this.setCompany(company);
             this.setCompanies(companies);
+          }
+        }),
+      );
+  }
+
+  signupOwner(data: {
+    name: string;
+    email: string;
+    password: string;
+    companyName: string;
+  }): Observable<{ access_token: string }> {
+    return this.http
+      .post<{ access_token: string }>(`${environment.apiUrl}/auth/signup-owner`, data)
+      .pipe(
+        tap((res) => {
+          if (this.hasLocalStorage()) {
+            localStorage.setItem('token', res.access_token);
+            this.roles.set(this.getRolesFromToken());
+            const company = this.getCompanyFromToken(res.access_token);
+            if (company) {
+              this.setCompany(company);
+              this.setCompanies([company]);
+            }
           }
         }),
       );
@@ -80,6 +104,10 @@ export class AuthService {
           if (this.hasLocalStorage()) {
             localStorage.setItem('token', res.access_token);
             this.roles.set(this.getRolesFromToken());
+            const company = this.getCompanyFromToken(res.access_token);
+            if (company) {
+              this.setCompany(company);
+            }
           }
         }),
       );
@@ -137,7 +165,19 @@ export class AuthService {
     if (!this.hasLocalStorage()) {
       return null;
     }
-    return localStorage.getItem('companyId');
+    const stored = localStorage.getItem('companyId');
+    if (stored) {
+      return stored;
+    }
+    const token = localStorage.getItem('token');
+    if (token) {
+      const company = this.getCompanyFromToken(token);
+      if (company) {
+        localStorage.setItem('companyId', company);
+        return company;
+      }
+    }
+    return null;
   }
 
   private getCompaniesFromStorage(): string[] {
@@ -152,13 +192,13 @@ export class AuthService {
     }
   }
 
-  private getRolesFromToken(): string[] {
-    const token = this.getToken();
-    if (!token) {
+  private getRolesFromToken(token?: string): string[] {
+    const t = token ?? this.getToken();
+    if (!t) {
       return [];
     }
     try {
-      const payloadStr = atob(token.split('.')[1]);
+      const payloadStr = atob(t.split('.')[1]);
       const payload: unknown = JSON.parse(payloadStr);
       if (
         payload &&
@@ -179,6 +219,28 @@ export class AuthService {
       return [];
     } catch {
       return [];
+    }
+  }
+
+  private getCompanyFromToken(token?: string): string | null {
+    const t = token ?? this.getToken();
+    if (!t) {
+      return null;
+    }
+    try {
+      const payloadStr = atob(t.split('.')[1]);
+      const payload: unknown = JSON.parse(payloadStr);
+      if (
+        payload &&
+        typeof payload === 'object' &&
+        'companyId' in payload &&
+        typeof (payload as { companyId: unknown }).companyId !== 'undefined'
+      ) {
+        return String((payload as { companyId: unknown }).companyId);
+      }
+      return null;
+    } catch {
+      return null;
     }
   }
 }
