@@ -109,8 +109,19 @@ async function bootstrap() {
         transports: [new winston.transports.Console()],
       });
 
-    errorLogger.error('Bootstrap error:', error);
-    logger.error('Failed to start application:', error);
+    if (error instanceof Error) {
+      errorLogger.error(`Bootstrap error: ${error.message}`, {
+        stack: error.stack,
+      });
+      logger.error(
+        `Failed to start application: ${error.message}`,
+        error.stack,
+      );
+    } else {
+      const serialized = JSON.stringify(error);
+      errorLogger.error(`Bootstrap error: ${serialized}`);
+      logger.error(`Failed to start application: ${serialized}`);
+    }
     process.exit(1);
   }
 }
