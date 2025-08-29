@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, switchMap } from 'rxjs';
 import { AuthService } from '../auth.service';
 import { ErrorService } from '../../error.service';
 
@@ -41,7 +41,10 @@ export class LoginComponent {
       this.loading = true;
       this.auth
         .login(this.form.getRawValue())
-        .pipe(finalize(() => (this.loading = false)))
+        .pipe(
+          switchMap(() => this.auth.loadCompanies()),
+          finalize(() => (this.loading = false)),
+        )
         .subscribe({
           next: () => {
             void this.router.navigate(['/dashboard']);

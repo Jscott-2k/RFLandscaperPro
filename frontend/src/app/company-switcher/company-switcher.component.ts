@@ -19,7 +19,12 @@ export class CompanySwitcherComponent {
 
   onChange(company: string): void {
     if (company) {
-      this.auth.setCompany(company);
+      this.auth.switchCompany(company).subscribe(() => {
+        this.selected = company;
+        if (typeof window !== 'undefined') {
+          window.location.reload();
+        }
+      });
     }
   }
 }
