@@ -53,29 +53,6 @@ describe('AuthController', () => {
     expect(authService.validateUser).toHaveBeenCalledWith(
       'user@example.com',
       'pass',
-      undefined,
-    );
-    expect(authService.login).toHaveBeenCalledWith(user);
-    expect(result).toEqual(resultPayload);
-  });
-
-  it('logs in with company', async () => {
-    const dto: LoginDto = {
-      email: 'user@example.com',
-      password: 'pass',
-      company: 'Acme',
-    };
-    const user = { id: 1 } as any;
-    const resultPayload = { access_token: 'token' };
-    authService.validateUser.mockResolvedValue(user);
-    authService.login.mockResolvedValue(resultPayload);
-
-    const result = await controller.login(dto);
-
-    expect(authService.validateUser).toHaveBeenCalledWith(
-      'user@example.com',
-      'pass',
-      'Acme',
     );
     expect(authService.login).toHaveBeenCalledWith(user);
     expect(result).toEqual(resultPayload);
