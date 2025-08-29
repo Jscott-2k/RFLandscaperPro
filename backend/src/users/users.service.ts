@@ -123,6 +123,7 @@ export class UsersService {
     if (!user) {
       throw new BadRequestException('Invalid or expired token');
     }
+    validatePasswordStrength(password);
     user.password = password;
     user.passwordResetToken = null;
     user.passwordResetExpires = null;

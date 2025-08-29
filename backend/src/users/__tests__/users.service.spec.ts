@@ -191,13 +191,33 @@ describe('UsersService', () => {
     });
     usersRepository.findOne.mockResolvedValueOnce(user);
 
-    await service.resetPassword(rawToken, 'newpass');
+    await service.resetPassword(rawToken, 'Newpass1!');
 
     expect(user.passwordResetToken).toBeNull();
     expect(user.passwordResetExpires).toBeNull();
     expect(usersRepository.save).toHaveBeenCalledWith(user);
-    const isMatch = await bcrypt.compare('newpass', user.password);
+    const isMatch = await bcrypt.compare('Newpass1!', user.password);
     expect(isMatch).toBe(true);
+  });
+
+  it('rejects weak passwords when resetting password', async () => {
+    const rawToken = 'token456';
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
+    const user = Object.assign(new User(), {
+      username: 'user5',
+      passwordResetToken: hashedToken,
+      passwordResetExpires: new Date(Date.now() + 1000 * 60),
+    });
+    usersRepository.findOne.mockResolvedValueOnce(user);
+
+    await expect(service.resetPassword(rawToken, 'weak')).rejects.toMatchObject({
+      message: 'Password must be at least 8 characters long',
+      status: 400,
+    });
+    expect(usersRepository.save).not.toHaveBeenCalled();
   });
 
   it('updates profile and hashes new password', async () => {
