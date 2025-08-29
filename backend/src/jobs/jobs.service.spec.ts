@@ -188,17 +188,52 @@ describe('JobsService', () => {
     );
   });
 
+  it('should include companyId when creating assignment', async () => {
+    jobRepository.findOne.mockResolvedValue({
+      id: 1,
+      scheduledDate: null,
+      customer: {},
+    });
+    userRepository.findOne.mockResolvedValue({ id: 1 });
+    equipmentRepository.findOne.mockResolvedValue({ id: 2 });
+    assignmentRepository.create.mockImplementation(
+      (data: Partial<Assignment>) => data as Assignment,
+    );
+    assignmentRepository.save.mockResolvedValue({});
+    const dto: AssignJobDto = { userId: 1, equipmentId: 2 } as any;
+
+    await service.assign(1, dto, 3);
+
+    expect(assignmentRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ companyId: 3 }),
+    );
+    expect(assignmentRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({ companyId: 3 }),
+    );
+  });
+
   it('should rollback all assignments if bulk assignment save fails', async () => {
-    jobRepository.findOne.mockResolvedValue({ id: 1, customer: {}, scheduledDate: null });
+    jobRepository.findOne.mockResolvedValue({
+      id: 1,
+      customer: {},
+      scheduledDate: null,
+    });
     userRepository.findOne.mockResolvedValue({ id: 1 });
     equipmentRepository.findOne.mockResolvedValue({ id: 1 });
 
-    assignmentRepository.create.mockImplementation((data) => data);
+    assignmentRepository.create.mockImplementation(
+      (data: Partial<Assignment>) => data as Assignment,
+    );
 
     const saveMock = jest.fn().mockRejectedValue(new Error('save failed'));
-    assignmentRepository.manager.transaction.mockImplementation(async (cb) => {
-      return cb({ create: assignmentRepository.create, save: saveMock });
-    });
+    assignmentRepository.manager.transaction.mockImplementation(
+      (
+        cb: (manager: {
+          create: typeof assignmentRepository.create;
+          save: typeof saveMock;
+        }) => Promise<unknown>,
+      ) => cb({ create: assignmentRepository.create, save: saveMock }),
+    );
 
     const dto = { assignments: [{ userId: 1, equipmentId: 1 }] } as any;
 

@@ -60,10 +60,29 @@ describe('CustomersService', () => {
       'message',
       'Email already exists',
     );
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(repo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'John Doe',
+        email: 'john@example.com',
+        companyId: 1,
+        addresses: [
+          expect.objectContaining({
+            street: '123 Main St',
+            city: 'Anytown',
+            state: 'CA',
+            zip: '12345',
+            companyId: 1,
+          }),
+        ],
+      }),
+    );
   });
 
   it('allows duplicate emails across different companies', async () => {
-    repo.create.mockImplementation((dto) => dto as any);
+    repo.create.mockImplementation(
+      (dto: Partial<Customer>) => dto as Customer,
+    );
     repo.save
       .mockResolvedValueOnce({ id: 1 } as Customer)
       .mockResolvedValueOnce({ id: 2 } as Customer);
