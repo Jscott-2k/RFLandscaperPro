@@ -99,14 +99,16 @@ export class UserDetailComponent implements OnInit {
   private fb = inject(FormBuilder);
   user?: User;
 
+  /* eslint-disable @typescript-eslint/unbound-method */
   form = this.fb.nonNullable.group({
-    username: ['', Validators.required.bind(Validators)],
-    email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
-    firstName: ['', Validators.required.bind(Validators)],
-    lastName: ['', Validators.required.bind(Validators)],
-    phone: ['', [Validators.required.bind(Validators), Validators.pattern(/^\d{10}$/)]],
+    username: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    firstName: ['', Validators.required],
+    lastName: ['', Validators.required],
+    phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
     role: [''],
   });
+  /* eslint-enable @typescript-eslint/unbound-method */
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));

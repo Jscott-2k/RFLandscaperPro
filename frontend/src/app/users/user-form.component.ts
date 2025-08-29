@@ -72,10 +72,11 @@ export class UserFormComponent {
   private router = inject(Router);
   private errorService = inject(ErrorService);
 
+  /* eslint-disable @typescript-eslint/unbound-method */
   form = this.fb.nonNullable.group({
-    username: ['', Validators.required.bind(Validators)],
-    email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
-    password: ['', Validators.required.bind(Validators)],
+    username: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', Validators.required],
     firstName: [''],
     lastName: [''],
     phone: [''],
@@ -87,6 +88,7 @@ export class UserFormComponent {
       email: [''],
     }),
   });
+  /* eslint-enable @typescript-eslint/unbound-method */
 
   onSubmit(): void {
     if (this.form.valid) {
