@@ -6,11 +6,13 @@ import { Invitation } from './entities/invitation.entity';
 import { CompaniesService } from './companies.service';
 import { CompaniesController } from './companies.controller';
 import { InvitationsController } from './invitations.controller';
+import { MembersController } from './members.controller';
 import { User } from '../users/user.entity';
 import { UsersModule } from '../users/users.module';
 import { InvitationsService } from './invitations.service';
 import { EmailService } from '../common/email.service';
 import { AuthModule } from '../auth/auth.module';
+import { MembersService } from './members.service';
 
 @Module({
   imports: [
@@ -18,8 +20,13 @@ import { AuthModule } from '../auth/auth.module';
     UsersModule,
     AuthModule,
   ],
-  providers: [CompaniesService, InvitationsService, EmailService],
-  controllers: [CompaniesController, InvitationsController],
-  exports: [CompaniesService, InvitationsService],
+  providers: [
+    CompaniesService,
+    InvitationsService,
+    MembersService,
+    EmailService,
+  ],
+  controllers: [CompaniesController, InvitationsController, MembersController],
+  exports: [CompaniesService, InvitationsService, MembersService],
 })
 export class CompaniesModule {}
