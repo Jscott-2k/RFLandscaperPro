@@ -15,7 +15,7 @@ export class LayoutComponent {
   protected readonly auth = inject(AuthService);
 
   logout(): void {
-    this.auth.logout();
+    this.auth.logout().subscribe();
   }
 }
 

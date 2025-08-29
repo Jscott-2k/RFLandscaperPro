@@ -13,6 +13,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         ...(company ? { 'X-Company-ID': company } : {}),
       },
     });
+
   }
   return next(req);
 };
