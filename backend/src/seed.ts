@@ -14,6 +14,8 @@ import {
   ContractFrequency,
 } from './contracts/entities/contract.entity';
 import { Job } from './jobs/entities/job.entity';
+import { Email } from './users/value-objects/email.vo';
+import { PhoneNumber } from './users/value-objects/phone-number.vo';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
 
@@ -29,7 +31,9 @@ async function main() {
 
   try {
     if (drop) {
-      console.log('Dropping and rebuilding database schema through migrations...');
+      console.log(
+        'Dropping and rebuilding database schema through migrations...',
+      );
       await ds.dropDatabase();
       if (!ds.isInitialized) {
         await ds.initialize();
@@ -59,12 +63,12 @@ async function main() {
       await userRepo.upsert(
         {
           username: adminUsername,
-          email: adminEmail,
+          email: new Email(adminEmail),
           password: hashed,
           role: UserRole.Admin,
           firstName: 'Admin',
           lastName: 'User',
-          phone: '555-0000',
+          phone: new PhoneNumber('555-000-0000'),
         },
         {
           conflictPaths: ['username'],
@@ -128,12 +132,12 @@ async function main() {
           ],
         },
         {
-          conflictPaths: ['email'],
+          conflictPaths: ['email', 'companyId'],
           skipUpdateIfNoValuesChanged: true,
         },
       );
       const customer = await customerRepo.findOneOrFail({
-        where: { email: customerEmail },
+        where: { email: customerEmail, companyId: company.id },
       });
       console.log('Sample customer ensured.');
 
