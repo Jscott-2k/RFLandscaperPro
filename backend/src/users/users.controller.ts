@@ -75,6 +75,23 @@ export class UsersController {
     return users.map(toUserResponseDto);
   }
 
+  @Get('workers')
+  @Roles(UserRole.Owner)
+  @ApiOperation({ summary: 'List company workers' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of workers',
+    type: [UserResponseDto],
+  })
+  async findWorkers(
+    @Req() req: { user: { companyId: number } },
+  ): Promise<UserResponseDto[]> {
+    const users = await this.usersService.findAll(req.user.companyId);
+    return users
+      .filter((u) => u.role === UserRole.Worker)
+      .map(toUserResponseDto);
+  }
+
   @Get(':id')
   @Roles(UserRole.Admin)
   @ApiOperation({ summary: 'Get user by id' })
@@ -105,6 +122,31 @@ export class UsersController {
   ): Promise<UserResponseDto> {
     const user = await this.usersService.update(id, updateUserDto);
     return toUserResponseDto(user);
+  }
+
+  @Patch('workers/:id')
+  @Roles(UserRole.Owner)
+  @ApiOperation({ summary: 'Update company worker' })
+  @ApiResponse({
+    status: 200,
+    description: 'Worker updated',
+    type: UserResponseDto,
+  })
+  async updateWorker(
+    @Req() req: { user: { companyId: number } },
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseDto> {
+    const worker = await this.usersService.findById(id, req.user.companyId);
+    if (!worker || worker.role !== UserRole.Worker) {
+      throw new NotFoundException('Worker not found');
+    }
+    const updated = await this.usersService.update(
+      id,
+      updateUserDto,
+      req.user.companyId,
+    );
+    return toUserResponseDto(updated);
   }
 
   @Delete(':id')
