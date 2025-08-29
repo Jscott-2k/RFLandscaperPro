@@ -10,6 +10,7 @@ import { AuthService } from '../auth.service';
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()">
+      <input type="text" formControlName="company" placeholder="Company" />
       <input type="email" formControlName="email" placeholder="Email" />
       <input type="password" formControlName="password" placeholder="Password" />
       <button type="submit">Login</button>
@@ -23,6 +24,7 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
 
   form = this.fb.nonNullable.group({
+    company: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required]
   });

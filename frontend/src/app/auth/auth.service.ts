@@ -10,20 +10,27 @@ export class AuthService {
     return typeof localStorage !== 'undefined';
   }
   private readonly roles = signal<string[]>(this.getRolesFromToken());
+  private readonly company = signal<string | null>(this.getCompanyFromStorage());
+  private readonly companies = signal<string[]>(this.getCompaniesFromStorage());
 
   hasRole(role: string): boolean {
     return this.roles().includes(role);
   }
 
-  login(data: { email: string; password: string }): Observable<{ access_token: string }> {
-    return this.http.post<{ access_token: string }>(`${environment.apiUrl}/auth/login`, data).pipe(
-      tap((res) => {
-        if (this.hasLocalStorage()) {
-          localStorage.setItem('token', res.access_token);
-          this.roles.set(this.getRolesFromToken());
-        }
-      }),
-    );
+  login(data: { email: string; password: string; company: string }): Observable<{ access_token: string; companies?: string[] }> {
+    return this.http
+      .post<{ access_token: string; companies?: string[] }>(`${environment.apiUrl}/auth/login`, data)
+      .pipe(
+        tap((res) => {
+          if (this.hasLocalStorage()) {
+            localStorage.setItem('token', res.access_token);
+            this.roles.set(this.getRolesFromToken());
+            const companies = res.companies ?? [data.company];
+            this.setCompany(data.company);
+            this.setCompanies(companies);
+          }
+        }),
+      );
   }
 
   register(data: {
@@ -49,8 +56,12 @@ export class AuthService {
   logout(): void {
     if (this.hasLocalStorage()) {
       localStorage.removeItem('token');
+      localStorage.removeItem('company');
+      localStorage.removeItem('companies');
     }
     this.roles.set([]);
+    this.company.set(null);
+    this.companies.set([]);
   }
 
   getToken(): string | null {
@@ -62,6 +73,47 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return !!this.getToken();
+  }
+
+  getCompany(): string | null {
+    return this.company();
+  }
+
+  getCompanies(): string[] {
+    return this.companies();
+  }
+
+  setCompany(company: string): void {
+    if (this.hasLocalStorage()) {
+      localStorage.setItem('company', company);
+    }
+    this.company.set(company);
+  }
+
+  private setCompanies(companies: string[]): void {
+    if (this.hasLocalStorage()) {
+      localStorage.setItem('companies', JSON.stringify(companies));
+    }
+    this.companies.set(companies);
+  }
+
+  private getCompanyFromStorage(): string | null {
+    if (!this.hasLocalStorage()) {
+      return null;
+    }
+    return localStorage.getItem('company');
+  }
+
+  private getCompaniesFromStorage(): string[] {
+    if (!this.hasLocalStorage()) {
+      return [];
+    }
+    const raw = localStorage.getItem('companies');
+    try {
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      return [];
+    }
   }
 
   private getRolesFromToken(): string[] {

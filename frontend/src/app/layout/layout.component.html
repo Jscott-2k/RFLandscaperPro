@@ -1,5 +1,6 @@
 <header class="header">
   <h1>RF Landscaper Pro</h1>
+  <app-company-switcher *ngIf="auth.getCompanies().length > 1"></app-company-switcher>
 </header>
 <div class="container">
   <nav class="sidebar">
