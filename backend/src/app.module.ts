@@ -26,12 +26,14 @@ import { LoggerModule } from './logger/logger.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { MetricsModule } from './metrics/metrics.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
     PrometheusModule.register(),
     LoggerModule,
     MetricsModule,
+    HealthModule,
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
