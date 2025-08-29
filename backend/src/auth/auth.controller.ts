@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req } from '@nestjs/common';
+import { Controller, Post, Body, Req, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -27,13 +27,21 @@ export class AuthController {
 
   @Public()
   @Post('login')
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+      errorHttpStatusCode: 400,
+    }),
+  )
   @ApiOperation({ summary: 'Authenticate user and return JWT' })
   @ApiResponse({ status: 200, description: 'JWT token payload' })
   async login(@Body() loginDto: LoginDto) {
     const user: User = await this.authService.validateUser(
       loginDto.email,
       loginDto.password,
-      loginDto.company,
     );
     return this.authService.login(user);
   }

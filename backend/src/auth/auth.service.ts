@@ -40,15 +40,8 @@ export class AuthService {
     private readonly companyUsersRepository: Repository<CompanyUser>,
   ) {}
 
-  async validateUser(
-    email: string,
-    pass: string,
-    company?: string,
-  ): Promise<User> {
-    const user = await this.usersRepository.findOne({
-      where: { email },
-      relations: ['company'],
-    });
+  async validateUser(email: string, pass: string): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { email } });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -62,12 +55,6 @@ export class AuthService {
       throw new UnauthorizedException('Email not verified');
     }
 
-    if (company !== undefined) {
-      if (!user.company || user.company.name !== company) {
-        throw new UnauthorizedException('Invalid company');
-      }
-    }
-
     return user;
   }
 
@@ -76,7 +63,7 @@ export class AuthService {
       username: user.username,
       sub: user.id,
       email: user.email,
-      companyId: user.companyId,
+      companyId: null as number | null,
       roles: [user.role],
       role: user.role,
     };
@@ -249,7 +236,7 @@ export class AuthService {
         email: string;
         roles?: UserRole[];
         role?: UserRole;
-        companyId: number;
+        companyId: number | null;
       }>(token);
       const hashed = this.hashToken(token);
       const tokenEntity = await this.refreshTokenRepository.findOne({

@@ -10,7 +10,7 @@ interface JwtPayload {
   email: string;
   roles: UserRole[];
   role?: UserRole;
-  companyId: number;
+  companyId: number | null;
 }
 
 @Injectable()
