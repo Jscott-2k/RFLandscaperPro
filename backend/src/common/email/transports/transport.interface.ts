@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import * as nodemailer from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 export type MailDriver = 'smtp' | 'ethereal';

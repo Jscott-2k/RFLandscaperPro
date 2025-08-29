@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import * as nodemailer from 'nodemailer';
 import { EmailTransport, MailDriver } from './transport.interface';
 
 export class EtherealTransport implements EmailTransport {
