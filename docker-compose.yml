@@ -1,0 +1,95 @@
+services:
+  db:
+    container_name: db
+    image: postgres:14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: rflandscaperpro
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rflandscaperpro
+
+  logging:
+    container_name: logserver
+    image: fluent/fluentd:v1.16-debian
+    volumes:
+      - ./logging/fluentd.conf:/fluentd/etc/fluent.conf:ro
+    ports:
+      - "9880:9880"
+    networks:
+      - rflandscaperpro
+
+  mailhog:
+    container_name: mailhog
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - rflandscaperpro
+
+  backend:
+    container_name: backend
+    image: rflandscaperpro/backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    env_file:
+      - ./backend/.env.development
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+    networks:
+      - rflandscaperpro
+
+  frontend:
+    container_name: frontend
+    image: rflandscaperpro/frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "4200:4200"
+    environment:
+      - NODE_ENV=development
+    networks:
+      - rflandscaperpro
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - rflandscaperpro
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+    ports:
+      - "3001:3000"
+    networks:
+      - rflandscaperpro
+
+volumes:
+  postgres_data:
+  grafana_data:
+
+networks:
+  rflandscaperpro:
