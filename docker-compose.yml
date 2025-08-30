@@ -6,32 +6,5 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./backend/env.example
-    environment:
-      DB_HOST: db
     ports:
       - "3000:3000"
-    depends_on:
-      - db
-  frontend:
-    container_name: rflandscaperpro_frontend
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "4000:4000"
-    depends_on:
-      - backend
-  db:
-    image: postgres:14
-    container_name: rflandscaperpro_db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: rflandscaperpro
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
