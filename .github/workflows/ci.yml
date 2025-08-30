@@ -29,9 +29,33 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        ports:
+          - "5432:5432"
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: rflandscaperpro
+        options: >-
+          --health-cmd "pg_isready"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     strategy:
+      fail-fast: false
       matrix:
-        project: [backend, frontend]
+        include:
+          - project: backend
+            test: unit
+            command: npm test
+          - project: backend
+            test: e2e
+            command: npm run test:e2e
+          - project: frontend
+            test: unit
+            command: npm test
     defaults:
       run:
         working-directory: ${{ matrix.project }}
@@ -43,9 +67,15 @@ jobs:
           cache: npm
           cache-dependency-path: ${{ matrix.project }}/package-lock.json
       - run: npm ci
-      - run: npm test --if-present
+      - run: ${{ matrix.command }}
         env:
           CI: true
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: rflandscaperpro
+          JWT_SECRET: testsecret
 
   build:
     runs-on: ubuntu-latest
