@@ -1,9 +1,10 @@
 services:
   frontend:
     build:
-      dockerfile: Dockerfile.dev
+      dockerfile: frontend/Dockerfile.dev
     volumes:
       - .:/app
+      - ../shared:/shared
       - /app/node_modules
     ports:
       - "4200:4200"

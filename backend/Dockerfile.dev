@@ -12,11 +12,12 @@ WORKDIR /app
 ENV NODE_ENV=development
 
 # ---- Install dependencies ----
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm install
 
 # ---- Copy application code ----
-COPY . .
+COPY backend ./
+COPY shared /shared
 
 # ---- Expose application port ----
 EXPOSE 3000

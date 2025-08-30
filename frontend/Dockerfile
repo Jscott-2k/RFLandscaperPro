@@ -8,11 +8,12 @@ FROM node:${NODE_VERSION}-slim AS build
 WORKDIR /app
 
 # Install dependencies
-COPY package*.json ./
+COPY frontend/package*.json ./
 RUN npm ci
 
 # Copy source code
-COPY . .
+COPY frontend ./
+COPY shared /shared
 
 # Build the Angular app
 RUN npm run build
