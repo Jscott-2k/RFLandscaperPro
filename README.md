@@ -34,3 +34,15 @@ RFLandscaperPro/
 ├── LICENSE                 # MIT License
 └── README.md               # Project documentation
 ```
+
+## Development
+
+To launch the full stack for local work, use the helper scripts in the repository root.
+
+- **macOS/Linux**: `./development.sh`
+- **Windows PowerShell**: `pwsh -File .\development.ps1`
+
+These scripts ensure the `rflandscaperpro` Docker network exists and start the database, backend, frontend, and supporting tools using `docker compose`.
+
+> **PowerShell note:** Windows may block script execution. Temporarily bypass the policy with `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`. Run the script from the repository root, using Windows path separators (for example, `.\development.ps1`).
+
