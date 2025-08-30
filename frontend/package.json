@@ -1,18 +1,25 @@
 {
   "name": "frontend",
   "version": "0.0.0",
+  "private": true,
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+
     "dev:ssr": "ng serve --host 0.0.0.0",
     "dev:compose": "docker compose -f docker-compose.yml -f docker-compose.override.yml up --build",
-    "build": "ng build",
-    "build:ssr": "ng build",
+
+    "build:browser": "ng build --configuration=production",
+    "build:ssr:ci": "ng build --configuration=production --prerender=false",
+
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false --browsers=ChromeHeadless",
+
     "serve:ssr": "node dist/frontend/server/server.mjs",
+
     "seed": "npm --prefix ../backend run seed",
     "seed:drop": "npm --prefix ../backend run seed:drop",
+
     "lint": "eslint . --fix"
   },
   "prettier": {
@@ -27,7 +34,6 @@
       }
     ]
   },
-  "private": true,
   "dependencies": {
     "@angular/common": "^20.2.0",
     "@angular/compiler": "^20.2.0",
@@ -38,9 +44,9 @@
     "@angular/router": "^20.2.0",
     "@angular/ssr": "^20.2.1",
     "express": "^5.1.0",
-    "winston": "^3.17.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "winston": "^3.17.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
@@ -51,6 +57,7 @@
     "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.17.19",
+    "@types/winston": "^2.4.4",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
