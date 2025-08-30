@@ -1,0 +1,14 @@
+services:
+  logserver:
+    container_name: logserver
+    image: fluent/fluentd:v1.16-debian
+    volumes:
+      - ./fluentd.conf:/fluentd/etc/fluent.conf:ro
+    ports:
+      - "9880:9880"
+    networks:
+      - rflandscaperpro
+
+networks:
+  rflandscaperpro:
+    external: true

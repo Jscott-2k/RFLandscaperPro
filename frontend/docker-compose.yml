@@ -1,9 +1,15 @@
 services:
   frontend:
+    container_name: frontend
     image: rflandscaperpro/frontend
-    container_name: rflandscaperpro_frontend
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "4000:4000"
+    networks:
+      - rflandscaperpro
+
+networks:
+  rflandscaperpro:
+    external: true
