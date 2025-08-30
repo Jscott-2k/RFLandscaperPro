@@ -11,12 +11,8 @@ import {
 } from 'typeorm';
 import { Company } from './company.entity';
 import { User } from '../../users/user.entity';
-
-export enum CompanyUserRole {
-  OWNER = 'OWNER',
-  ADMIN = 'ADMIN',
-  WORKER = 'WORKER',
-}
+import { CompanyUserRole } from '@rflp/shared';
+export { CompanyUserRole } from '@rflp/shared';
 
 export enum CompanyUserStatus {
   ACTIVE = 'ACTIVE',

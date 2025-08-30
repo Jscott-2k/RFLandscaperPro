@@ -2,12 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
-
-export interface CompanyMembership {
-  companyId: number;
-  companyName: string;
-  role: string;
-}
+import { CompanyMembership, CompanyUserRole } from '@rflp/shared';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -105,7 +100,10 @@ export class AuthService {
       this.roles.set(this.getRolesFromToken(res.access_token));
       const company = this.getCompanyFromToken(res.access_token) ?? companyHint ?? null;
       const companies =
-        res.companies ?? (company ? [{ companyId: company, companyName: '', role: '' }] : []);
+        res.companies ??
+        (company
+          ? [{ companyId: company, companyName: '', role: CompanyUserRole.WORKER }]
+          : []);
       this.setCompany(company);
       this.setCompanies(companies);
     }

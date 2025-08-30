@@ -36,10 +36,11 @@ services:
     container_name: backend
     image: rflandscaperpro/backend
     build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: backend/Dockerfile.dev
     volumes:
       - ./backend:/app
+      - ./shared:/shared
       - /app/node_modules
     env_file:
       - ./backend/.env.development
@@ -54,10 +55,11 @@ services:
     container_name: frontend
     image: rflandscaperpro/frontend
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: frontend/Dockerfile.dev
     volumes:
       - ./frontend:/app
+      - ./shared:/shared
       - /app/node_modules
     ports:
       - "4200:4200"

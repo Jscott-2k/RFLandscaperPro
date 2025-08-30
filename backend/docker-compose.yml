@@ -3,8 +3,8 @@ services:
     container_name: backend
     image: rflandscaperpro/backend
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: backend/Dockerfile
     ports:
       - "3000:3000"
     networks:

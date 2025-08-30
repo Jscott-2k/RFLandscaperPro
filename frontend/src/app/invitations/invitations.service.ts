@@ -2,12 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { CompanyMembership } from '../auth/auth.service';
+import { CompanyMembership, CompanyUserRole } from '@rflp/shared';
 
 export interface InvitationPreview {
   companyName: string;
   email: string;
-  role: string;
+  role: CompanyUserRole;
   status: 'valid' | 'expired' | 'revoked' | 'accepted';
 }
 

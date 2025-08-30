@@ -24,11 +24,12 @@ RUN apt-get update -qq && \
     python-is-python3
 
 # Install dependencies
-COPY package*.json ./
+COPY backend/package*.json ./
 RUN npm ci --include=dev
 
 # Copy source code
-COPY . .
+COPY backend ./
+COPY shared /shared
 
 # Build the app
 RUN npm run build
