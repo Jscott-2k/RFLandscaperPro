@@ -101,9 +101,7 @@ export class AuthService {
       const company = this.getCompanyFromToken(res.access_token) ?? companyHint ?? null;
       const companies =
         res.companies ??
-        (company
-          ? [{ companyId: company, companyName: '', role: CompanyUserRole.WORKER }]
-          : []);
+        (company ? [{ companyId: company, companyName: '', role: CompanyUserRole.WORKER }] : []);
       this.setCompany(company);
       this.setCompanies(companies);
     }
