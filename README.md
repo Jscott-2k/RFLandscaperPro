@@ -10,14 +10,14 @@ RF Landscaper Pro is an enterprise-grade application that streamlines landscapin
 
 ## Containers
 
-The root `docker-compose.yml` runs the backend, frontend, database, Prometheus, Grafana, MailHog and a Fluentd log server in separate containers, keeping dependencies isolated and simplifying scaling.
+The base `docker-compose.yml` defines the backend, frontend and database. Development uses `docker-compose.override.yml` to add Prometheus, Grafana, MailHog and a Fluentd log server, keeping dependencies isolated and simplifying scaling.
 
 ## Project Structure
 
 ```
 RFLandscaperPro/
-├── docker-compose.yml       # Multi-service stack
-├── docker-compose.override.yml  # Development overrides
+├── docker-compose.yml          # Core services
+├── docker-compose.override.yml # Development extras and overrides
 ├── backend/                 # NestJS API server
 │   ├── src/
 │   │   ├── auth/           # Authentication and authorization
