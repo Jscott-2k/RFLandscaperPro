@@ -19,7 +19,6 @@ RUN npm ci --include=dev
 # ---- Copy application code ----
 # Copy the backend source directly into the workdir rather than nesting it
 COPY backend/ ./
-COPY shared /shared
 
 # ---- Expose application port ----
 EXPOSE 3000

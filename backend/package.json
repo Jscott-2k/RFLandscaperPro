@@ -9,11 +9,8 @@
     "build": "npx tsc -p tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
 
-    "dev:build": "tsc -p tsconfig.dev.json && tsc -p tsconfig.dev.json --watch",
-    "dev:run": "wait-on dist/main.js dist/src/main.js dist/app/src/main.js && node -e \"const fs=require('fs'); const c=require('child_process'); const cand=['dist/main.js','dist/src/main.js','dist/app/src/main.js']; const f=cand.find(fs.existsSync); if(!f){console.error('No emitted main.js'); process.exit(1)} console.log('Running', f); const r=c.spawn('nodemon',[f],{stdio:'inherit'}); r.on('exit', code=>process.exit(code));\"",
-
     "start": "node dist/main.js",
-    "start:dev": "concurrently -n build,run -c yellow,green \"npm:dev:build\" \"npm:dev:run\"",
+    "start:dev": "cross-env NODE_ENV=development ts-node -r tsconfig-paths/register -P tsconfig.dev.json src/main.ts",
     "start:debug": "cross-env NODE_ENV=development nest start --debug --watch -p tsconfig.dev.json",
     "start:prod": "cross-env NODE_ENV=production node dist/main.js",
 

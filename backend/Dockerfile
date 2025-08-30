@@ -30,7 +30,6 @@ RUN npm ci --include=dev
 # Copy source code
 # Copy backend sources directly into /app
 COPY backend/ ./
-COPY shared /shared
 
 # Build the app
 RUN npm run build
