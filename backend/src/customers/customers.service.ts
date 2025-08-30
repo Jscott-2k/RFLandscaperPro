@@ -9,7 +9,7 @@ import { Address } from './entities/address.entity';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { Paginated, PaginationParams } from '../common/pagination';
 import {
   ICustomerRepository,
   CUSTOMER_REPOSITORY,
@@ -55,12 +55,12 @@ export class CustomersService {
   }
 
   async findAll(
-    pagination: PaginationQueryDto,
+    pagination: PaginationParams,
     companyId: number,
     active?: boolean,
     search?: string,
-  ): Promise<{ items: CustomerResponseDto[]; total: number }> {
-    const [customers, total] = await this.customerRepository.findAll(
+  ): Promise<Paginated<CustomerResponseDto>> {
+    const { items, nextCursor } = await this.customerRepository.findAll(
       pagination,
       companyId,
       active,
@@ -68,8 +68,8 @@ export class CustomersService {
     );
 
     return {
-      items: customers.map((customer) => toCustomerResponseDto(customer)),
-      total,
+      items: items.map((customer) => toCustomerResponseDto(customer)),
+      nextCursor,
     };
   }
 

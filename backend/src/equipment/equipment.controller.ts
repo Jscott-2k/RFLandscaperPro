@@ -20,7 +20,7 @@ import { UpdateEquipmentStatusDto } from './dto/update-equipment-status.dto';
 import { EquipmentStatus, EquipmentType } from './entities/equipment.entity';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { PaginationParams, Paginated } from '../common/pagination';
 import { CompanyId } from '../common/decorators/company-id.decorator';
 import {
   ApiBearerAuth,
@@ -28,6 +28,8 @@ import {
   ApiQuery,
   ApiResponse,
   ApiTags,
+  ApiBadRequestResponse,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 @ApiTags('equipment')
@@ -44,6 +46,8 @@ export class EquipmentController {
     description: 'Equipment created',
     type: EquipmentResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async create(
     @Body() createEquipmentDto: CreateEquipmentDto,
     @CompanyId() companyId: number,
@@ -54,21 +58,23 @@ export class EquipmentController {
   @Get()
   @Roles(UserRole.CompanyAdmin, UserRole.Worker, UserRole.Customer)
   @ApiOperation({ summary: 'List equipment for the authenticated company' })
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'cursor', required: false, type: Number })
   @ApiQuery({ name: 'status', required: false, enum: EquipmentStatus })
   @ApiQuery({ name: 'type', required: false, enum: EquipmentType })
   @ApiQuery({ name: 'search', required: false })
   @ApiResponse({ status: 200, description: 'List of equipment' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async findAll(
-    @Query() pagination: PaginationQueryDto,
+    @Query() pagination: PaginationParams,
     @CompanyId() companyId: number,
     @Query('status', new ParseEnumPipe(EquipmentStatus, { optional: true }))
     status?: EquipmentStatus,
     @Query('type', new ParseEnumPipe(EquipmentType, { optional: true }))
     type?: EquipmentType,
     @Query('search') search?: string,
-  ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
+  ): Promise<Paginated<EquipmentResponseDto>> {
     return this.equipmentService.findAll(
       pagination,
       companyId,
@@ -86,6 +92,8 @@ export class EquipmentController {
     description: 'Equipment retrieved',
     type: EquipmentResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
     @CompanyId() companyId: number,
@@ -101,6 +109,8 @@ export class EquipmentController {
     description: 'Equipment updated',
     type: EquipmentResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEquipmentDto: UpdateEquipmentDto,
@@ -117,6 +127,8 @@ export class EquipmentController {
     description: 'Equipment status updated',
     type: EquipmentResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async updateStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateEquipmentStatusDto: UpdateEquipmentStatusDto,
@@ -134,6 +146,8 @@ export class EquipmentController {
   @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Delete equipment' })
   @ApiResponse({ status: 204, description: 'Equipment deleted' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async remove(
     @Param('id', ParseIntPipe) id: number,
     @CompanyId() companyId: number,

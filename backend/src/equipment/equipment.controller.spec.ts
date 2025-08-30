@@ -52,7 +52,7 @@ describe('EquipmentController', () => {
       const status = EquipmentStatus.AVAILABLE;
       const type = EquipmentType.MOWER;
       const search = 'mower';
-      const expectedResult = { items: [], total: 0 };
+      const expectedResult = { items: [], nextCursor: null };
       const findAllMock = jest
         .spyOn(service, 'findAll')
         .mockResolvedValue(expectedResult);

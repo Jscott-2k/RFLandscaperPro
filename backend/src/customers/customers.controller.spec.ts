@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CustomersController } from './customers.controller';
 import { CustomersService } from './customers.service';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { PaginationParams } from '../common/pagination';
 
 describe('CustomersController', () => {
   let controller: CustomersController;
@@ -30,11 +30,10 @@ describe('CustomersController', () => {
 
   describe('findAll', () => {
     it('should call service with companyId, active flag, and search term', async () => {
-      const pagination = new PaginationQueryDto();
-      pagination.page = 1;
+      const pagination = new PaginationParams();
       pagination.limit = 10;
       const companyId = 1;
-      const result = { items: [], total: 0 };
+      const result = { items: [], nextCursor: null };
       const findAllSpy = jest
         .spyOn(service, 'findAll')
         .mockResolvedValue(result);

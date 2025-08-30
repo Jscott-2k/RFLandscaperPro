@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Equipment, EquipmentStatus } from '../entities/equipment.entity';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { Paginated, PaginationParams, paginate } from '../../common/pagination';
 
 export const EQUIPMENT_REPOSITORY = Symbol('EQUIPMENT_REPOSITORY');
 
@@ -10,12 +10,12 @@ export interface IEquipmentRepository {
   create(data: Partial<Equipment>): Equipment;
   save(equipment: Equipment): Promise<Equipment>;
   findAll(
-    pagination: PaginationQueryDto,
+    pagination: PaginationParams,
     companyId: number,
     status?: EquipmentStatus,
     type?: string,
     search?: string,
-  ): Promise<[Equipment[], number]>;
+  ): Promise<Paginated<Equipment>>;
   findById(id: number, companyId: number): Promise<Equipment | null>;
   remove(equipment: Equipment): Promise<void>;
 }
@@ -36,37 +36,32 @@ export class EquipmentRepository implements IEquipmentRepository {
   }
 
   async findAll(
-    pagination: PaginationQueryDto,
+    pagination: PaginationParams,
     companyId: number,
     status?: EquipmentStatus,
     type?: string,
     search?: string,
-  ): Promise<[Equipment[], number]> {
-    const { page = 1, limit = 10 } = pagination;
-    const cappedLimit = Math.min(limit, 100);
-    const queryBuilder = this.repo
-      .createQueryBuilder('equipment')
-      .where('equipment.companyId = :companyId', { companyId });
+  ): Promise<Paginated<Equipment>> {
+    return paginate(this.repo, pagination, 'equipment', (qb) => {
+      qb.where('equipment.companyId = :companyId', { companyId });
 
-    if (status) {
-      queryBuilder.andWhere('equipment.status = :status', { status });
-    }
+      if (status) {
+        qb.andWhere('equipment.status = :status', { status });
+      }
 
-    if (type) {
-      queryBuilder.andWhere('equipment.type = :type', { type });
-    }
+      if (type) {
+        qb.andWhere('equipment.type = :type', { type });
+      }
 
-    if (search) {
-      queryBuilder.andWhere(
-        '(equipment.name ILIKE :search OR equipment.type ILIKE :search OR equipment.description ILIKE :search)',
-        { search: `%${search}%` },
-      );
-    }
+      if (search) {
+        qb.andWhere(
+          '(equipment.name ILIKE :search OR equipment.type ILIKE :search OR equipment.description ILIKE :search)',
+          { search: `%${search}%` },
+        );
+      }
 
-    return queryBuilder
-      .skip((page - 1) * cappedLimit)
-      .take(cappedLimit)
-      .getManyAndCount();
+      return qb;
+    });
   }
 
   findById(id: number, companyId: number): Promise<Equipment | null> {

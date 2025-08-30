@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Customer } from '../entities/customer.entity';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { Paginated, PaginationParams, paginate } from '../../common/pagination';
 
 export const CUSTOMER_REPOSITORY = Symbol('CUSTOMER_REPOSITORY');
 
@@ -10,11 +10,11 @@ export interface ICustomerRepository {
   create(data: Partial<Customer>): Customer;
   save(customer: Customer): Promise<Customer>;
   findAll(
-    pagination: PaginationQueryDto,
+    pagination: PaginationParams,
     companyId: number,
     active?: boolean,
     search?: string,
-  ): Promise<[Customer[], number]>;
+  ): Promise<Paginated<Customer>>;
   findById(id: number, companyId: number): Promise<Customer | null>;
   findByUserId(userId: number, companyId: number): Promise<Customer | null>;
   remove(customer: Customer): Promise<void>;
@@ -36,35 +36,29 @@ export class CustomerRepository implements ICustomerRepository {
   }
 
   async findAll(
-    pagination: PaginationQueryDto,
+    pagination: PaginationParams,
     companyId: number,
     active?: boolean,
     search?: string,
-  ): Promise<[Customer[], number]> {
-    const { page = 1, limit = 10 } = pagination;
-    const cappedLimit = Math.min(limit, 100);
-    const queryBuilder = this.repo
-      .createQueryBuilder('customer')
-      .leftJoinAndSelect('customer.jobs', 'jobs')
-      .leftJoinAndSelect('customer.addresses', 'addresses')
-      .where('customer.companyId = :companyId', { companyId });
+  ): Promise<Paginated<Customer>> {
+    return paginate(this.repo, pagination, 'customer', (qb) => {
+      qb.leftJoinAndSelect('customer.jobs', 'jobs')
+        .leftJoinAndSelect('customer.addresses', 'addresses')
+        .where('customer.companyId = :companyId', { companyId });
 
-    if (active !== undefined) {
-      queryBuilder.andWhere('customer.active = :active', { active });
-    }
+      if (active !== undefined) {
+        qb.andWhere('customer.active = :active', { active });
+      }
 
-    if (search) {
-      queryBuilder.andWhere(
-        '(customer.name ILIKE :search OR customer.email ILIKE :search OR customer.phone ILIKE :search)',
-        { search: `%${search}%` },
-      );
-    }
+      if (search) {
+        qb.andWhere(
+          '(customer.name ILIKE :search OR customer.email ILIKE :search OR customer.phone ILIKE :search)',
+          { search: `%${search}%` },
+        );
+      }
 
-    return queryBuilder
-      .skip((page - 1) * cappedLimit)
-      .take(cappedLimit)
-      .orderBy('customer.name', 'ASC')
-      .getManyAndCount();
+      return qb;
+    });
   }
 
   findById(id: number, companyId: number): Promise<Customer | null> {

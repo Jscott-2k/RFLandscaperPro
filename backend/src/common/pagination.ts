@@ -1,21 +1,45 @@
 import { Repository, SelectQueryBuilder, ObjectLiteral } from 'typeorm';
-import { PaginationQueryDto } from './dto/pagination-query.dto';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsInt, IsOptional, Min, Max } from 'class-validator';
+
+export class PaginationParams {
+  @ApiPropertyOptional({ default: 10, maximum: 100 })
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @ApiPropertyOptional({ description: 'Cursor for pagination' })
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  cursor?: number;
+}
+
+export interface Paginated<T> {
+  items: T[];
+  nextCursor: number | null;
+}
 
 export type QueryBuilderCustomizer<T extends ObjectLiteral> = (
   qb: SelectQueryBuilder<T>,
 ) => SelectQueryBuilder<T>;
 
 /**
- * Applies pagination to a repository with optional query customizations.
- * Caps the limit at 100 items to prevent excessive queries.
+ * Applies cursor-based pagination to a repository with optional query customizations.
+ * Results are ordered deterministically by the entity's primary key.
  */
-export async function paginate<T extends ObjectLiteral>(
+export async function paginate<T extends ObjectLiteral & { id: number }>(
   repository: Repository<T>,
-  pagination: PaginationQueryDto,
+  pagination: PaginationParams,
   alias: string,
   customizeQuery?: QueryBuilderCustomizer<T>,
-): Promise<{ items: T[]; total: number }> {
-  const { page = 1, limit = 10 } = pagination;
+): Promise<Paginated<T>> {
+  const { limit = 10, cursor } = pagination;
   const cappedLimit = Math.min(limit, 100);
 
   let qb = repository.createQueryBuilder(alias);
@@ -23,10 +47,18 @@ export async function paginate<T extends ObjectLiteral>(
     qb = customizeQuery(qb);
   }
 
-  const [items, total] = await qb
-    .skip((page - 1) * cappedLimit)
-    .take(cappedLimit)
-    .getManyAndCount();
+  if (cursor !== undefined) {
+    qb = qb.andWhere(`${alias}.id > :cursor`, { cursor });
+  }
 
-  return { items, total };
+  const items = await qb
+    .orderBy(`${alias}.id`, 'ASC')
+    .take(cappedLimit + 1)
+    .getMany();
+
+  const hasNext = items.length > cappedLimit;
+  const trimmed = hasNext ? items.slice(0, cappedLimit) : items;
+  const nextCursor = hasNext ? trimmed[trimmed.length - 1].id : null;
+
+  return { items: trimmed, nextCursor };
 }
