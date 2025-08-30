@@ -76,3 +76,13 @@ Pass `--prune` to either script to remove the `rflandscaperpro` Docker network a
 
 > **PowerShell note:** Windows may block script execution. Temporarily bypass the policy with `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`. Run the script from the repository root, using Windows path separators (for example, `.\development.ps1`).
 
+## Git workflow
+
+The repository uses a lightweight branching strategy suitable for solo development:
+
+- The `main` branch is protected and should always remain release ready.
+- Create a short‑lived branch from `main` for each feature, fix, refactor or documentation change. Common prefixes include `feature/`, `fix/`, `docs/`, `refactor/`, `chore/`, `test/`, and `perf/`.
+- Push the branch and open a pull request back into `main` once the change is complete and tests pass.
+- Delete the branch after it is merged to keep history clean.
+- Open issues for work that benefits from tracking or discussion; trivial updates can be committed directly.
+
