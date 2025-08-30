@@ -7,6 +7,7 @@ import {
   BadRequestException,
   UnauthorizedException,
   ForbiddenException,
+  Optional,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan, IsNull, QueryFailedError } from 'typeorm';
@@ -25,6 +26,7 @@ import * as crypto from 'crypto';
 import { EmailService } from '../common/email';
 import { invitationMail, addedToCompanyMail } from '../common/email/templates';
 import { validatePasswordStrength } from '../auth/password.util';
+import { MetricsService } from '../metrics/metrics.service';
 
 @Injectable()
 export class InvitationsService {
@@ -47,6 +49,7 @@ export class InvitationsService {
     @InjectRepository(Company)
     private readonly companiesRepository: Repository<Company>,
     private readonly emailService: EmailService,
+    @Optional() private readonly metrics?: MetricsService,
   ) {}
 
   async createInvitation(
@@ -128,7 +131,11 @@ export class InvitationsService {
         invitation.expiresAt,
       ),
     );
-
+    this.metrics?.incrementCounter('invitations_sent_total', {
+      route: 'invitations.create',
+      companyId,
+      status: 'sent',
+    });
     return saved;
   }
 
@@ -292,7 +299,11 @@ export class InvitationsService {
     );
 
     this.acceptAttempts.delete(tokenHash);
-
+    this.metrics?.incrementCounter('invitations_accepted_total', {
+      route: 'invitations.accept',
+      companyId: invitation.companyId,
+      status: 'accepted',
+    });
     return user;
   }
 
@@ -369,7 +380,11 @@ export class InvitationsService {
     );
 
     this.acceptAttempts.delete(tokenHash);
-
+    this.metrics?.incrementCounter('invitations_accepted_total', {
+      route: 'invitations.accept',
+      companyId: invitation.companyId,
+      status: 'accepted',
+    });
     return savedUser;
   }
 }

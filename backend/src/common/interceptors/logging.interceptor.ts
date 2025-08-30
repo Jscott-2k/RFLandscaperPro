@@ -12,7 +12,6 @@ import { Histogram } from 'prom-client';
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { Request, Response } from 'express';
-import { getRequestId } from '../middleware/request-id.middleware';
 
 interface RequestWithRoute extends Request {
   route: { path?: string };
@@ -39,10 +38,7 @@ export class LoggingInterceptor implements NestInterceptor {
         const response = ctx.getResponse<Response>();
         const { statusCode } = response;
         const duration = Date.now() - start;
-        const requestId = getRequestId();
-        this.logger.log(
-          `HTTP ${method} ${url} ${statusCode} ${duration}ms - ${requestId}`,
-        );
+        this.logger.log(`HTTP ${method} ${url} ${statusCode} ${duration}ms`);
         this.histogram
           .labels(method, routePath, statusCode.toString())
           .observe(duration / 1000);

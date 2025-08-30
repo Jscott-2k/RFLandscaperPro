@@ -3,6 +3,9 @@ import { WinstonModule, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import * as winston from 'winston';
 import { makeCounterProvider, InjectMetric } from '@willsoto/nestjs-prometheus';
 import { Counter } from 'prom-client';
+import { getRequestId } from '../common/middleware/request-id.middleware';
+import { getCurrentCompanyId } from '../common/tenant/tenant-context';
+import { getCurrentUserId } from '../common/user/user-context';
 
 const transports: winston.transport[] = [
   new winston.transports.Console(),
@@ -73,6 +76,17 @@ class PrometheusLogger implements LoggerService {
   imports: [
     WinstonModule.forRoot({
       level: process.env.LOG_LEVEL || 'info',
+      format: winston.format.combine(
+        winston.format((info) => {
+          return Object.assign(info, {
+            requestId: getRequestId() ?? null,
+            userId: getCurrentUserId() ?? null,
+            companyId: getCurrentCompanyId() ?? null,
+          });
+        })(),
+        winston.format.timestamp(),
+        winston.format.json(),
+      ),
       transports,
     }),
   ],

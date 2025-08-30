@@ -18,6 +18,13 @@ import { Email } from './users/value-objects/email.vo';
 import { PhoneNumber } from './users/value-objects/phone-number.vo';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
+import winston from 'winston';
+
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports: [new winston.transports.Console()],
+});
 
 async function main() {
   if (process.env.NODE_ENV === 'production') {
@@ -27,11 +34,11 @@ async function main() {
   const drop = process.argv.includes('--drop');
 
   const ds: DataSource = await dataSource.initialize();
-  console.log('Database connection established');
+  logger.info('Database connection established');
 
   try {
     if (drop) {
-      console.log(
+      logger.info(
         'Dropping and rebuilding database schema through migrations...',
       );
       await ds.dropDatabase();
@@ -39,7 +46,7 @@ async function main() {
         await ds.initialize();
       }
       await ds.runMigrations();
-      console.log('Database dropped and migrations run.');
+      logger.info('Database dropped and migrations run.');
     }
 
     await ds.transaction(async (trx) => {
@@ -80,11 +87,11 @@ async function main() {
         where: { username: masterUsername },
       });
       if (!process.env.MASTER_PASSWORD) {
-        console.log(
-          `Master user ensured. Generated password: ${rawMasterPassword}`,
-        );
+        logger.info('Master user ensured. Generated password.', {
+          password: rawMasterPassword,
+        });
       } else {
-        console.log(
+        logger.info(
           'Master user ensured (password from environment variable).',
         );
       }
@@ -122,11 +129,11 @@ async function main() {
       });
 
       if (!process.env.COMPANY_ADMIN_PASSWORD) {
-        console.log(
-          `Company admin user ensured. Generated password: ${rawCompanyAdminPassword}`,
-        );
+        logger.info('Company admin user ensured. Generated password.', {
+          password: rawCompanyAdminPassword,
+        });
       } else {
-        console.log(
+        logger.info(
           'Company admin user ensured (password from environment variable).',
         );
       }
@@ -143,7 +150,7 @@ async function main() {
       const company = await companyRepo.findOneOrFail({
         where: { name: companyName },
       });
-      console.log('Sample company ensured.');
+      logger.info('Sample company ensured.');
 
       await companyUserRepo.upsert(
         {
@@ -184,7 +191,7 @@ async function main() {
       const customer = await customerRepo.findOneOrFail({
         where: { email: customerEmail, companyId: company.id },
       });
-      console.log('Sample customer ensured.');
+      logger.info('Sample customer ensured.');
 
       // --- Sample contract ---
       const contractStart = new Date('2024-01-01');
@@ -212,7 +219,7 @@ async function main() {
         });
         contract = await contractRepo.save(contract);
       }
-      console.log('Sample contract ensured.');
+      logger.info('Sample contract ensured.');
 
       // --- Sample job ---
       const existingJob = await jobRepo.findOne({
@@ -231,19 +238,22 @@ async function main() {
           contract,
         });
       }
-      console.log('Sample job ensured.');
+      logger.info('Sample job ensured.');
     });
 
-    console.log('Database seeding completed successfully');
+    logger.info('Database seeding completed successfully');
   } finally {
     await ds.destroy();
-    console.log('Database connection closed');
+    logger.info('Database connection closed');
   }
 }
 
 main()
   .then(() => process.exit(0))
   .catch((err) => {
-    console.error('Seeding failed:', err);
+    logger.error('Seeding failed', {
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+    });
     process.exit(1);
   });

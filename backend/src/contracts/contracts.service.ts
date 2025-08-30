@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Contract, ContractFrequency } from './entities/contract.entity';
@@ -8,6 +8,7 @@ import { CreateContractDto } from './dto/create-contract.dto';
 import { UpdateContractDto } from './dto/update-contract.dto';
 import { ContractResponseDto } from './dto/contract-response.dto';
 import { toContractResponseDto } from './contracts.mapper';
+import { MetricsService } from '../metrics/metrics.service';
 
 @Injectable()
 export class ContractsService {
@@ -18,6 +19,7 @@ export class ContractsService {
     private readonly customerRepository: Repository<Customer>,
     @InjectRepository(Job)
     private readonly jobRepository: Repository<Job>,
+    @Optional() private readonly metrics?: MetricsService,
   ) {}
 
   async create(
@@ -43,6 +45,11 @@ export class ContractsService {
     });
     const saved = await this.contractRepository.save(contract);
     await this.generateJobsForContract(saved);
+    this.metrics?.incrementCounter('contracts_active_total', {
+      route: 'contracts.create',
+      companyId,
+      status: 'active',
+    });
     return toContractResponseDto(saved);
   }
 
@@ -98,6 +105,11 @@ export class ContractsService {
     }
     contract.active = false;
     await this.contractRepository.save(contract);
+    this.metrics?.incrementCounter('contracts_expired_total', {
+      route: 'contracts.cancel',
+      companyId,
+      status: 'expired',
+    });
   }
 
   async generateJobsForContract(contract: Contract): Promise<void> {

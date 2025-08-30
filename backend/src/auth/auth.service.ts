@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  Inject,
+  Optional,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -31,6 +36,7 @@ import {
   CompanyMembershipRepository,
   COMPANY_MEMBERSHIP_REPOSITORY,
 } from './repositories/company-membership.repository';
+import { MetricsService } from '../metrics/metrics.service';
 
 @Injectable()
 export class AuthService {
@@ -49,20 +55,35 @@ export class AuthService {
     private readonly emailService: EmailService,
     @Inject(COMPANY_MEMBERSHIP_REPOSITORY)
     private readonly companyMembershipRepository: CompanyMembershipRepository,
+    @Optional() private readonly metrics?: MetricsService,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<User> {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
+      this.metrics?.incrementCounter('login_failures_total', {
+        route: 'auth.login',
+        status: 'user_not_found',
+      });
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const isValidPassword = await user.validatePassword(pass);
     if (!isValidPassword) {
+      this.metrics?.incrementCounter('login_failures_total', {
+        route: 'auth.login',
+        companyId: user.companyId ?? undefined,
+        status: 'invalid_password',
+      });
       throw new UnauthorizedException('Invalid credentials');
     }
 
     if (!user.isVerified) {
+      this.metrics?.incrementCounter('login_failures_total', {
+        route: 'auth.login',
+        companyId: user.companyId ?? undefined,
+        status: 'email_not_verified',
+      });
       throw new UnauthorizedException('Email not verified');
     }
 

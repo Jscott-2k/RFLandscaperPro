@@ -38,6 +38,7 @@
     "@angular/router": "^20.2.0",
     "@angular/ssr": "^20.2.1",
     "express": "^5.1.0",
+    "winston": "^3.17.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
