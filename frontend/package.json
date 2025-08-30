@@ -38,9 +38,9 @@
     "@angular/router": "^20.2.0",
     "@angular/ssr": "^20.2.1",
     "express": "^5.1.0",
-    "winston": "^3.17.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "winston": "^3.17.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
@@ -51,6 +51,7 @@
     "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.17.19",
+    "@types/winston": "^2.4.4",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
