@@ -167,7 +167,49 @@ Successful requests return a `200 OK` with a JSON body:
 Infrastructure tools and load balancers can poll this route to verify that
 the service is running and ready to receive traffic.
 
-### 6. Grafana Dashboard
+### Email Testing
+
+During development you can preview outgoing emails without delivering real
+messages.
+
+#### Ethereal preview URLs
+
+1. Ensure `SMTP_USER` and `SMTP_PASS` are **not** set in `.env.development` so
+   the `EmailService` uses a temporary Ethereal account.
+2. Start the backend (for example, `npm run dev:compose`).
+3. Send a test email:
+
+   ```bash
+   curl -X POST http://localhost:3000/api/auth/request-password-reset \
+     -H 'Content-Type: application/json' \
+     -d '{"email":"user@example.com"}'
+   ```
+
+4. Check the backend logs for a line beginning with `Preview URL:` and open the
+   printed link in a browser to view the message.
+
+#### MailHog web UI
+
+MailHog captures emails and exposes them at <http://localhost:8025>.
+
+1. Start MailHog:
+
+   ```bash
+   docker run --rm -d -p 1025:1025 -p 8025:8025 --name mailhog mailhog/mailhog
+   ```
+
+2. Point the backend at MailHog by setting these variables in `.env.development`:
+
+   ```env
+   SMTP_HOST=mailhog
+   SMTP_PORT=1025
+   ```
+
+3. Start the backend.
+4. Send the same test request as above.
+5. Open [http://localhost:8025](http://localhost:8025) to view the email in the
+   MailHog interface.
+6. Grafana Dashboard
 - Dashboard: http://localhost:3001
 - Default login: `admin` / `admin` (prompt to change on first login)
 - Prometheus metrics are preconfigured as the default data source.
