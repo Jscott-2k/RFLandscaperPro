@@ -1,6 +1,6 @@
 // seed.ts
 import 'dotenv/config';
-import dataSource from '../data-source';
+import dataSource from './data-source';
 import { DataSource } from 'typeorm';
 import { User, UserRole } from './users/user.entity';
 import { Customer } from './customers/entities/customer.entity';

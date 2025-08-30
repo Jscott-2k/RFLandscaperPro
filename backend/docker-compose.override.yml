@@ -10,3 +10,4 @@ services:
       - .env.development
     environment:
       - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
