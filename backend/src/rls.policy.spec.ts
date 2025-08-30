@@ -4,7 +4,7 @@ process.env.DB_USERNAME = 'appuser';
 process.env.DB_PASSWORD = 'test';
 process.env.DB_NAME = 'rflandscaperpro_test';
 
-import dataSource from '../data-source';
+import dataSource from './data-source';
 import { Company } from './companies/entities/company.entity';
 import { Customer } from './customers/entities/customer.entity';
 import { runWithCompanyId } from './common/tenant/tenant-context';

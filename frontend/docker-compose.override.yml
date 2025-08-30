@@ -10,3 +10,4 @@ services:
       - "4200:4200"
     environment:
       - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true

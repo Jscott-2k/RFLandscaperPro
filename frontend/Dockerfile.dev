@@ -9,6 +9,7 @@ WORKDIR /app
 
 # ---- Set default environment ----
 ENV NODE_ENV=development
+ENV CHOKIDAR_USEPOLLING=true
 
 # ---- Install dependencies ----
 COPY frontend/package*.json ./

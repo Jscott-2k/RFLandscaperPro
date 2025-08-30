@@ -22,7 +22,7 @@ const result = spawnSync(
     'migration:generate',
     outPath,
     '-d',
-    'data-source.ts',
+    'src/data-source.ts',
     '--timestamp',
     timestamp.toString(),
   ],

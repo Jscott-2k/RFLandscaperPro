@@ -12,4 +12,4 @@ services:
 
 networks:
   rflandscaperpro:
-    external: true
+    driver: bridge
