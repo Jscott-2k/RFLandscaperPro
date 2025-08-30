@@ -10,6 +10,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Customer } from '../src/customers/entities/customer.entity';
 import { Company } from '../src/companies/entities/company.entity';
 import { EmailService } from '../src/common/email';
+import { UserCreationService } from '../src/users/user-creation.service';
+import { Email } from '../src/users/value-objects/email.vo';
 
 describe('Owner user endpoints (e2e)', () => {
   let app: INestApplication<App>;
@@ -20,12 +22,14 @@ describe('Owner user endpoints (e2e)', () => {
       Object.assign(new User(), {
         id: 1,
         username: 'owner1',
+        email: new Email('owner1@example.com'),
         role: UserRole.CompanyOwner,
         companyId: 1,
       }),
       Object.assign(new User(), {
         id: 2,
         username: 'worker1',
+        email: new Email('worker1@example.com'),
         role: UserRole.Worker,
         companyId: 1,
         firstName: 'W1',
@@ -33,12 +37,14 @@ describe('Owner user endpoints (e2e)', () => {
       Object.assign(new User(), {
         id: 3,
         username: 'owner2',
+        email: new Email('owner2@example.com'),
         role: UserRole.CompanyOwner,
         companyId: 2,
       }),
       Object.assign(new User(), {
         id: 4,
         username: 'worker2',
+        email: new Email('worker2@example.com'),
         role: UserRole.Worker,
         companyId: 2,
         firstName: 'W2',
@@ -47,8 +53,9 @@ describe('Owner user endpoints (e2e)', () => {
 
     const usersRepository = {
       find: jest.fn((options: { where?: { companyId?: number } }) => {
-        if (options.where?.companyId !== undefined) {
-          return users.filter((u) => u.companyId === options.where.companyId);
+        const companyId = options.where?.companyId;
+        if (companyId !== undefined) {
+          return users.filter((u) => u.companyId === companyId);
         }
         return users;
       }),
@@ -79,6 +86,7 @@ describe('Owner user endpoints (e2e)', () => {
         { provide: getRepositoryToken(User), useValue: usersRepository },
         { provide: getRepositoryToken(Customer), useValue: {} },
         { provide: getRepositoryToken(Company), useValue: {} },
+        { provide: UserCreationService, useValue: {} },
         {
           provide: EmailService,
           useValue: { send: jest.fn() },
