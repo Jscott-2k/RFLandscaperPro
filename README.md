@@ -44,5 +44,12 @@ To launch the full stack for local work, use the helper scripts in the repositor
 
 These scripts ensure the `rflandscaperpro` Docker network exists and start the database, backend, frontend, and supporting tools using `docker compose`.
 
+When you are finished with the stack, shut everything down with the teardown scripts:
+
+- **macOS/Linux**: `./down.sh`
+- **Windows PowerShell**: `pwsh -File .\down.ps1`
+
+Pass `--prune` to either script to remove the `rflandscaperpro` Docker network after the containers stop.
+
 > **PowerShell note:** Windows may block script execution. Temporarily bypass the policy with `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`. Run the script from the repository root, using Windows path separators (for example, `.\development.ps1`).
 
