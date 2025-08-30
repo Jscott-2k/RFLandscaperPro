@@ -313,6 +313,29 @@ npm run seed:drop:dev
 - Request and response logging and tracking
 - Performance profiling and optimization
 
+## Monitoring & Logging
+
+### Local Metrics
+- Start Prometheus together with the app using `npm run dev:compose`  
+  (or `docker compose -f docker-compose.yml -f docker-compose.override.yml up`) to bring up
+  the `prometheus` service.
+- Prometheus UI is available at `http://localhost:9090` and the application's metric endpoint
+  is exposed at `http://localhost:3000/metrics`.
+- For dashboarding, launch Grafana locally with  
+  `docker run -d --name grafana -p 3001:3000 grafana/grafana` and add Prometheus as a data source.
+
+### Remote Logging
+- Configure remote log forwarding by setting:
+  - `LOG_LEVEL` – logging verbosity (`debug`, `info`, `warn`, `error`).
+  - `REMOTE_LOG_HOST` – hostname of the remote log collector.
+  - `REMOTE_LOG_PORT` – port of the collector.
+  - `REMOTE_LOG_PATH` – optional HTTP path (defaults to `/`).
+- When `REMOTE_LOG_HOST` is unset, logs stay local only.
+
+### Production Services
+- For hosted metrics and logs consider [Grafana Cloud](https://grafana.com/products/cloud/),
+  [Datadog](https://www.datadoghq.com/), or [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/).
+
 ## Testing Strategy
 
 ### Test Coverage
