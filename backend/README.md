@@ -16,7 +16,7 @@ A robust and scalable NestJS backend API for landscaping business management. It
 ### Technical Features
 - Performance: Optimized database queries with strategic indexing.
 - Security: Enhanced password validation, input sanitization, error handling.
-- Monitoring: Prometheus metrics, structured logging, request tracking. Includes per-log-level log counters.
+- Monitoring: Prometheus metrics, Grafana dashboards, structured logging, request tracking. Includes per-log-level log counters.
 - Testing: Comprehensive test coverage with Jest.
 - Documentation: Interactive Swagger API documentation.
 
@@ -59,8 +59,8 @@ JWT_REFRESH_EXPIRES_IN=7d
 LOG_LEVEL=debug
 # Remote log forwarding (optional)
 # REMOTE_LOG_HOST=logs.example.com
-# REMOTE_LOG_PORT=1234
-# REMOTE_LOG_PATH=/
+# REMOTE_LOG_PORT=9880
+# REMOTE_LOG_PATH=/logs
 ```
 
 To customize the accounts created by the seed script, set
@@ -71,6 +71,22 @@ If no SMTP credentials are defined, the application falls back to an Ethereal te
 account and logs preview URLs for emails.
 
 Remote logging is only enabled when `REMOTE_LOG_HOST` is defined. When omitted, logs are written to the console and `app.log` file only.
+
+### Development Log Server
+
+A lightweight `logserver` service is included in `docker-compose.override.yml` for local testing. It listens on the port
+specified by `REMOTE_LOG_PORT` and prints any HTTP `POST` bodies it receives on `REMOTE_LOG_PATH`.
+
+```bash
+npm run dev:compose
+curl -X POST http://localhost:${REMOTE_LOG_PORT}${REMOTE_LOG_PATH} -d 'hello world'
+```
+
+Sample output from the `logserver` container:
+
+```
+{"message":"hello world"}
+```
 
 To automatically apply database changes on startup (such as in production), set `RUN_MIGRATIONS=true`. In development, omit this variable and run migrations manually with `npm run migration:run`.
 
@@ -150,6 +166,11 @@ Successful requests return a `200 OK` with a JSON body:
 
 Infrastructure tools and load balancers can poll this route to verify that
 the service is running and ready to receive traffic.
+
+### 6. Grafana Dashboard
+- Dashboard: http://localhost:3001
+- Default login: `admin` / `admin` (prompt to change on first login)
+- Prometheus metrics are preconfigured as the default data source.
 
 ## Project Structure
 ```
@@ -322,6 +343,25 @@ npm run seed:drop:dev
 - Prometheus metrics for performance monitoring
 - Request and response logging and tracking
 - Performance profiling and optimization
+
+## Monitoring & Logging
+
+### Local Metrics
+- Start Prometheus and Grafana together with the app using `npm run dev:compose`
+  (or `docker compose -f docker-compose.yml -f docker-compose.override.yml up`), which brings up
+  the `prometheus` and `grafana` services.
+- Prometheus UI is available at `http://localhost:9090`, Grafana dashboards at `http://localhost:3001`,
+  and the application's metric endpoint is exposed at `http://localhost:3000/metrics`.
+
+### Remote Logging
+- Configure remote log forwarding by setting:
+  - `LOG_LEVEL` – logging verbosity (`debug`, `info`, `warn`, `error`).
+  - `REMOTE_LOG_HOST` – hostname of the remote log collector.
+  - `REMOTE_LOG_PORT` – port of the collector.
+  - `REMOTE_LOG_PATH` – optional HTTP path (defaults to `/`).
+- When `REMOTE_LOG_HOST` is unset, logs stay local only.
+
+For hosted metrics and logs consider [Grafana Cloud](https://grafana.com/products/cloud/), [Datadog](https://www.datadoghq.com/), or [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/).
 
 ## Testing Strategy
 
