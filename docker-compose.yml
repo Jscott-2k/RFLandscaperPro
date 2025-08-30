@@ -1,0 +1,10 @@
+services:
+  backend:
+    container_name: rflandscaperpro_backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/env.example
+    ports:
+      - "3000:3000"
