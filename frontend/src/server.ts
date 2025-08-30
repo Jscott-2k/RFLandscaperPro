@@ -6,7 +6,7 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
-import winston from 'winston';
+import * as winston from 'winston';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
@@ -59,7 +59,10 @@ if (isMainModule(import.meta.url)) {
   const port = process.env['PORT'] || 4000;
   app.listen(port, (error?: unknown) => {
     if (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+      const err =
+        error instanceof Error
+          ? error
+          : new Error(typeof error === 'string' ? error : JSON.stringify(error));
       logger.error('Server startup error', { message: err.message, stack: err.stack });
       throw err;
     }
