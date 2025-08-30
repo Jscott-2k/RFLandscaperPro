@@ -57,10 +57,11 @@ app.use((req, res, next) => {
  */
 if (isMainModule(import.meta.url)) {
   const port = process.env['PORT'] || 4000;
-  app.listen(port, (error) => {
+  app.listen(port, (error?: unknown) => {
     if (error) {
-      logger.error('Server startup error', { message: error.message, stack: error.stack });
-      throw error;
+      const err = error instanceof Error ? error : new Error(String(error));
+      logger.error('Server startup error', { message: err.message, stack: err.stack });
+      throw err;
     }
     logger.info(`Node Express server listening on http://localhost:${port}`, {
       port,
