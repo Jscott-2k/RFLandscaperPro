@@ -16,7 +16,9 @@ export class EnableRlsPolicies1756502290802 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     for (const table of this.tables) {
-      await queryRunner.query(`ALTER TABLE "${table}" ENABLE ROW LEVEL SECURITY`);
+      await queryRunner.query(
+        `ALTER TABLE "${table}" ENABLE ROW LEVEL SECURITY`,
+      );
       await queryRunner.query(`
         CREATE POLICY ${table}_tenant_isolation ON "${table}"
           USING ("companyId" = current_setting('app.current_company_id', true)::int)
@@ -27,8 +29,12 @@ export class EnableRlsPolicies1756502290802 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     for (const table of this.tables) {
-      await queryRunner.query(`DROP POLICY IF EXISTS ${table}_tenant_isolation ON "${table}"`);
-      await queryRunner.query(`ALTER TABLE "${table}" DISABLE ROW LEVEL SECURITY`);
+      await queryRunner.query(
+        `DROP POLICY IF EXISTS ${table}_tenant_isolation ON "${table}"`,
+      );
+      await queryRunner.query(
+        `ALTER TABLE "${table}" DISABLE ROW LEVEL SECURITY`,
+      );
     }
   }
 }

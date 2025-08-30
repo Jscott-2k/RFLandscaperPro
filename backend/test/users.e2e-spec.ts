@@ -36,10 +36,16 @@ describe('UsersController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
-    app.use((req: Request & { user?: unknown }, _res: Response, next: NextFunction) => {
-      req.user = { roles: [UserRole.Customer] };
-      next();
-    });
+    app.use(
+      (
+        req: Request & { user?: unknown },
+        _res: Response,
+        next: NextFunction,
+      ) => {
+        req.user = { roles: [UserRole.Customer] };
+        next();
+      },
+    );
     await app.init();
   });
 
