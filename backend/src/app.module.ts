@@ -30,7 +30,7 @@ import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
-    PrometheusModule.register(),
+    PrometheusModule.register({ global: true }),
     LoggerModule,
     MetricsModule,
     HealthModule,
