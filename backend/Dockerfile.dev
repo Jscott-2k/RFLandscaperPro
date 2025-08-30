@@ -14,7 +14,7 @@ ENV CHOKIDAR_USEPOLLING=true
 
 # ---- Install dependencies ----
 COPY backend/package*.json ./
-RUN npm install
+RUN npm ci --include=dev
 
 # ---- Copy application code ----
 # Copy the backend source directly into the workdir rather than nesting it

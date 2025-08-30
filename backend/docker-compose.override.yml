@@ -2,6 +2,7 @@ services:
   backend:
     build:
       dockerfile: backend/Dockerfile.dev
+    working_dir: /app
     volumes:
       - .:/app
       - ../shared:/shared

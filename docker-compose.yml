@@ -38,6 +38,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile.dev
+    working_dir: /app
     volumes:
       - ./backend:/app
       - ./shared:/shared
