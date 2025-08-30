@@ -1,18 +1,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "noEmit": false,
     "outDir": "./dist",
-    "rootDir": "src",
-    "declaration": true,
-    "sourceMap": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "incremental": true,
+    "rootDir": "./src",
     "paths": {
       "@rflp/shared": ["../shared/dist"],
       "@rflp/shared/*": ["../shared/dist/*"]
     }
   },
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "test", "dist", "**/*.spec.ts"]
 }
