@@ -1,8 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  INestApplication,
-  ValidationPipe,
-} from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { App } from 'supertest/types';
 import * as bcrypt from 'bcrypt';
@@ -14,15 +11,9 @@ import { Email } from '../src/users/value-objects/email.vo';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserCreationService } from '../src/users/user-creation.service';
-import {
-  REFRESH_TOKEN_REPOSITORY,
-} from '../src/auth/repositories/refresh-token.repository';
-import {
-  VERIFICATION_TOKEN_REPOSITORY,
-} from '../src/auth/repositories/verification-token.repository';
-import {
-  COMPANY_MEMBERSHIP_REPOSITORY,
-} from '../src/auth/repositories/company-membership.repository';
+import { REFRESH_TOKEN_REPOSITORY } from '../src/auth/repositories/refresh-token.repository';
+import { VERIFICATION_TOKEN_REPOSITORY } from '../src/auth/repositories/verification-token.repository';
+import { COMPANY_MEMBERSHIP_REPOSITORY } from '../src/auth/repositories/company-membership.repository';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { EmailService } from '../src/common/email';
 
@@ -102,4 +93,3 @@ describe('Auth login endpoint (e2e)', () => {
       });
   });
 });
-

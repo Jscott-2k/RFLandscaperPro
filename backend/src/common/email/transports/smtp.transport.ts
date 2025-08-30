@@ -10,15 +10,24 @@ export class SmtpTransport implements EmailTransport {
   driver: MailDriver = 'smtp';
 
   create() {
-    const port = parsePort(process.env.SMTP_PORT, 587);
+    const host = process.env.MAILHOG_HOST ?? process.env.SMTP_HOST;
+    const isMailhog = !!process.env.MAILHOG_HOST;
+    const port = parsePort(
+      isMailhog ? process.env.MAILHOG_PORT : process.env.SMTP_PORT,
+      isMailhog ? 1025 : 587,
+    );
+    const auth =
+      isMailhog || !process.env.SMTP_USER || !process.env.SMTP_PASS
+        ? undefined
+        : {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          };
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
+      host,
       port,
       secure: port === 465,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
+      ...(auth ? { auth } : {}),
     });
     return Promise.resolve({ transporter });
   }

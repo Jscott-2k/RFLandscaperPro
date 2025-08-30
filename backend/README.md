@@ -16,7 +16,7 @@ A robust and scalable NestJS backend API for landscaping business management. It
 ### Technical Features
 - Performance: Optimized database queries with strategic indexing.
 - Security: Enhanced password validation, input sanitization, error handling.
-- Monitoring: Prometheus metrics, structured logging, request tracking.
+- Monitoring: Prometheus metrics, Grafana dashboards, structured logging, request tracking. Includes per-log-level log counters.
 - Testing: Comprehensive test coverage with Jest.
 - Documentation: Interactive Swagger API documentation.
 
@@ -59,14 +59,34 @@ JWT_REFRESH_EXPIRES_IN=7d
 LOG_LEVEL=debug
 # Remote log forwarding (optional)
 # REMOTE_LOG_HOST=logs.example.com
-# REMOTE_LOG_PORT=1234
-# REMOTE_LOG_PATH=/
+# REMOTE_LOG_PORT=9880
+# REMOTE_LOG_PATH=/logs
 ```
+
+To customize the accounts created by the seed script, set
+`COMPANY_ADMIN_*`, `MASTER_*`, and `SAMPLE_CUSTOMER_EMAIL` in your environment
+file.
 
 If no SMTP credentials are defined, the application falls back to an Ethereal test
 account and logs preview URLs for emails.
 
 Remote logging is only enabled when `REMOTE_LOG_HOST` is defined. When omitted, logs are written to the console and `app.log` file only.
+
+### Development Log Server
+
+A lightweight `logserver` service is included in `docker-compose.override.yml` for local testing. It listens on the port
+specified by `REMOTE_LOG_PORT` and prints any HTTP `POST` bodies it receives on `REMOTE_LOG_PATH`.
+
+```bash
+npm run dev:compose
+curl -X POST http://localhost:${REMOTE_LOG_PORT}${REMOTE_LOG_PATH} -d 'hello world'
+```
+
+Sample output from the `logserver` container:
+
+```
+{"message":"hello world"}
+```
 
 To automatically apply database changes on startup (such as in production), set `RUN_MIGRATIONS=true`. In development, omit this variable and run migrations manually with `npm run migration:run`.
 
@@ -79,9 +99,10 @@ createdb rflandscaperpro
 npm run migration:run
 
 # Seed initial data (creates company admin and master users and sample customer)
-# Set COMPANY_ADMIN_* and MASTER_* env vars to control credentials. Passwords can
-# be omitted to auto-generate secure values. This script is intended for
-# local development only and will automatically skip execution when
+# Set COMPANY_ADMIN_* and MASTER_* env vars to control credentials,
+# and SAMPLE_CUSTOMER_EMAIL to specify the seeded customer's email.
+# Passwords can be omitted to auto-generate secure values. This script is
+# intended for local development only and will automatically skip execution when
 # `NODE_ENV=production`.
 npm run seed:dev
 
@@ -118,6 +139,16 @@ npm run start:prod
 - Health Check: http://localhost:3000/api/health
 - Metrics: http://localhost:3000/api/metrics
 - Production Base URL: https://rflandscaperpro.com/api
+
+#### Log Metrics
+
+Counters track how many log messages are emitted at each level and are exposed on the metrics endpoint:
+
+- `log_error_total`
+- `log_warn_total`
+- `log_info_total`
+- `log_debug_total`
+- `log_verbose_total`
 
 #### Health Check
 
@@ -178,6 +209,10 @@ MailHog captures emails and exposes them at <http://localhost:8025>.
 4. Send the same test request as above.
 5. Open [http://localhost:8025](http://localhost:8025) to view the email in the
    MailHog interface.
+6. Grafana Dashboard
+- Dashboard: http://localhost:3001
+- Default login: `admin` / `admin` (prompt to change on first login)
+- Prometheus metrics are preconfigured as the default data source.
 
 ## Project Structure
 ```
@@ -350,6 +385,25 @@ npm run seed:drop:dev
 - Prometheus metrics for performance monitoring
 - Request and response logging and tracking
 - Performance profiling and optimization
+
+## Monitoring & Logging
+
+### Local Metrics
+- Start Prometheus and Grafana together with the app using `npm run dev:compose`
+  (or `docker compose -f docker-compose.yml -f docker-compose.override.yml up`), which brings up
+  the `prometheus` and `grafana` services.
+- Prometheus UI is available at `http://localhost:9090`, Grafana dashboards at `http://localhost:3001`,
+  and the application's metric endpoint is exposed at `http://localhost:3000/metrics`.
+
+### Remote Logging
+- Configure remote log forwarding by setting:
+  - `LOG_LEVEL` – logging verbosity (`debug`, `info`, `warn`, `error`).
+  - `REMOTE_LOG_HOST` – hostname of the remote log collector.
+  - `REMOTE_LOG_PORT` – port of the collector.
+  - `REMOTE_LOG_PATH` – optional HTTP path (defaults to `/`).
+- When `REMOTE_LOG_HOST` is unset, logs stay local only.
+
+For hosted metrics and logs consider [Grafana Cloud](https://grafana.com/products/cloud/), [Datadog](https://www.datadoghq.com/), or [Amazon CloudWatch](https://aws.amazon.com/cloudwatch/).
 
 ## Testing Strategy
 
