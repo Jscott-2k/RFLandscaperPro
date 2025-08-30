@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
-export class NotificationService {
+export class ToasterService {
   show(message: string, duration = 3000): void {
     if (typeof document === 'undefined') {
       return;

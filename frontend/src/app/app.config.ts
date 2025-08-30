@@ -8,6 +8,7 @@ import { provideRouter, Router } from '@angular/router';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './auth.interceptor';
+import { httpErrorInterceptor } from './http-error.interceptor';
 import { routes } from './app.routes';
 import { ApiService } from './api.service';
 import { firstValueFrom } from 'rxjs';
@@ -28,7 +29,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, httpErrorInterceptor])),
     {
       provide: APP_INITIALIZER,
       useFactory: backendHealthInitializer,
