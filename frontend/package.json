@@ -10,8 +10,7 @@
     "dev:compose": "docker compose -f docker-compose.yml -f docker-compose.override.yml up --build",
 
     "build:browser": "ng build --configuration=production",
-    "build:server:ci": "ng run frontend:server:production",
-    "build:ssr:ci": "npm run build:browser && npm run build:server:ci",
+    "build:ssr:ci": "ng build --configuration=production --prerender=false",
 
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false --browsers=ChromeHeadless",
