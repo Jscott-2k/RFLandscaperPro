@@ -1,0 +1,3 @@
+services:
+  mailhog:
+    # Development-specific overrides can be added here
