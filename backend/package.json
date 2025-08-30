@@ -6,7 +6,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": "npx tsc -p ../shared/tsconfig.json && npx tsc -p tsconfig.build.json",
+    "build": "npx tsc -p tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "node dist/main.js",
     "start:dev": "cross-env NODE_ENV=development nest start --watch",

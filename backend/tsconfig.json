@@ -6,7 +6,7 @@
     // --- Dev/IDE only: do NOT emit, and allow multiple roots
     "noEmit": true,
     "rootDirs": ["src", "../shared/src"],
-
+    "outDir": "./dist",
     // Paths point to source for great IntelliSense
     "baseUrl": "./",
     "paths": {
