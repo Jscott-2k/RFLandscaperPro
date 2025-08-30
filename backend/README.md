@@ -16,7 +16,7 @@ A robust and scalable NestJS backend API for landscaping business management. It
 ### Technical Features
 - Performance: Optimized database queries with strategic indexing.
 - Security: Enhanced password validation, input sanitization, error handling.
-- Monitoring: Prometheus metrics, structured logging, request tracking.
+- Monitoring: Prometheus metrics, Grafana dashboards, structured logging, request tracking.
 - Testing: Comprehensive test coverage with Jest.
 - Documentation: Interactive Swagger API documentation.
 
@@ -156,6 +156,11 @@ Successful requests return a `200 OK` with a JSON body:
 
 Infrastructure tools and load balancers can poll this route to verify that
 the service is running and ready to receive traffic.
+
+### 6. Grafana Dashboard
+- Dashboard: http://localhost:3001
+- Default login: `admin` / `admin` (prompt to change on first login)
+- Prometheus metrics are preconfigured as the default data source.
 
 ## Project Structure
 ```
