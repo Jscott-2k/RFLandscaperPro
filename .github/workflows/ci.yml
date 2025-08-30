@@ -86,7 +86,7 @@ jobs:
           - project: backend
             build_cmd: npm run build
           - project: frontend
-            build_cmd: npm run build:ssr
+            build_cmd: npm run build:ssr:ci
     defaults:
       run:
         working-directory: ${{ matrix.project }}

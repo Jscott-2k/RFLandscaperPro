@@ -13,6 +13,7 @@
     "build:browser": "ng build --configuration=production",
     "build:server": "ng run frontend:server:production",
     "build:ssr": "npm run build:browser && npm run build:server",
+    "build:ssr:ci": "ng build --configuration=production --server --prerender=false",
 
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false --browsers=ChromeHeadless",
