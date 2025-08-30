@@ -10,7 +10,10 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = Convert-Path (Get-Location)
 $RepoName = Split-Path $RepoRoot -Leaf
 $TempCopy = Join-Path $env:TEMP "${RepoName}_copy"
-$ZipPath  = Join-Path $env:TEMP "${RepoName}.zip"
+
+# Timestamped zip name (avoids collisions)
+$Timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+$ZipPath   = Join-Path $env:TEMP "${RepoName}_${Timestamp}.zip"
 
 Write-Host "Preparing to zip repo: $RepoName"
 Write-Host "Temp copy: $TempCopy"
@@ -34,85 +37,59 @@ function Test-IsPreExcluded($FullPath) {
   return $false
 }
 
-# --- GIT-Aware ignore (gold standard)
+# --- GIT-Aware ignore
 function Get-GitIgnoredSet($Files) {
   $set = New-Object 'System.Collections.Generic.HashSet[string]'
   $git = Get-Command git -ErrorAction SilentlyContinue
-  if (-not $git) { return $null }  # caller handles fallback
+  if (-not $git) { return $null }
 
-  # Ensure we're actually in a git repo
   $isRepo = & $git.Source -C $RepoRoot rev-parse --is-inside-work-tree 2>$null
   if ($LASTEXITCODE -ne 0 -or -not $isRepo) { return $null }
 
   $relPaths = foreach ($f in $Files) { Rel-FromRoot $f.FullName }
   try {
-    # check-ignore returns 1 if none ignored; that's fine.
     $output = $relPaths | & $git.Source -C $RepoRoot check-ignore --stdin 2>$null
     foreach ($line in $output) { $set.Add((Normalize-PathUnix $line)) | Out-Null }
-  } catch { return $set }  # if git errors, we just return what we have (possibly empty)
-
+  } catch { return $set }
   return $set
 }
 
-# --- Fallback .gitignore matcher (multi-file, directory-aware)
+# --- Fallback .gitignore matcher
 function New-GitignoreMatcher-Recursive {
-  # Collect all .gitignore files recursively (including root if present)
   $giFiles = Get-ChildItem -Path $RepoRoot -Recurse -Force -File -Filter ".gitignore" -ErrorAction SilentlyContinue
-
   if (-not $giFiles -or $giFiles.Count -eq 0) {
-    # No .gitignore files; return function that never ignores
     return { param($relPath) return $false }
   }
-
-  # Each rule: BaseDir (relative), Negate, IsDir, Anchored, Wildcard, AnyWhere
   $rules = New-Object System.Collections.Generic.List[object]
-
   foreach ($gi in $giFiles) {
     $baseDirFull = Split-Path $gi.FullName -Parent
     $baseRel     = Rel-FromRoot $baseDirFull
     if ($baseRel -eq "") { $baseRel = "" } else { $baseRel += "/" }
-
     $lines = Get-Content -LiteralPath $gi.FullName -ErrorAction SilentlyContinue
     foreach ($raw in $lines) {
       $line = $raw.Trim()
       if ($line -eq "" -or $line.StartsWith("#")) { continue }
-
       $negate = $false
-      if ($line.StartsWith("!")) {
-        $negate = $true
-        $line = $line.Substring(1)
-      }
-
+      if ($line.StartsWith("!")) { $negate = $true; $line = $line.Substring(1) }
       $pattern = $line.Replace("\", "/")
-      $pattern = $pattern.Replace("**","*") # simplified double-star
-
+      $pattern = $pattern.Replace("**","*")
       $isDir   = $pattern.EndsWith("/")
       if ($isDir) { $pattern = $pattern.TrimEnd("/") }
-
       $anchored = $pattern.StartsWith("/")
       if ($anchored) { $pattern = $pattern.TrimStart("/") }
-
-      # Full wildcard relative to repo root
       $wildRel = $baseRel + $pattern
-
-      # Convert for -like (PowerShell wildcard)
       $wc = $wildRel
       $wcAnywhere = $null
-      if ($wc -notlike "*/*") {
-        # no slash -> match anywhere by basename
-        $wcAnywhere = "*/*$wc"
-      }
-
+      if ($wc -notlike "*/*") { $wcAnywhere = "*/*$wc" }
       $rules.Add([pscustomobject]@{
         Negate   = $negate
         IsDir    = $isDir
-        Anchored = $anchored  # effectively handled by baseRel + pattern
+        Anchored = $anchored
         Wildcard = $wc
         AnyWhere = $wcAnywhere
       })
     }
   }
-
   return {
     param($relPath)
     $rel = Normalize-PathUnix $relPath
@@ -126,7 +103,7 @@ function New-GitignoreMatcher-Recursive {
       }
       if ($match) { $include = if ($r.Negate) { $true } else { $false } }
     }
-    return (-not $include) # true if ignored
+    return (-not $include)
   }
 }
 
@@ -138,22 +115,15 @@ Write-Host "Scanning files..."
 $allFiles = Get-ChildItem -Path $RepoRoot -Recurse -Force -File
 $allFiles = $allFiles | Where-Object { -not (Test-IsPreExcluded $_.FullName) }
 
-# Try Git-based ignore first (handles nested .gitignore perfectly)
 $gitIgnoredSet = Get-GitIgnoredSet -Files $allFiles
-
-# If git isn't available or not a repo, build a recursive matcher
 $fallbackIgnore = { param($rel) return $false }
-if ($null -eq $gitIgnoredSet) {
-  $fallbackIgnore = New-GitignoreMatcher-Recursive
-}
+if ($null -eq $gitIgnoredSet) { $fallbackIgnore = New-GitignoreMatcher-Recursive }
 
-# Filter with ignore logic
 $filtered = @()
 foreach ($f in $allFiles) {
   $rel = Rel-FromRoot $f.FullName
   $ignoredByGit = ($gitIgnoredSet -and $gitIgnoredSet.Contains($rel))
   $ignoredByFallback = (& $fallbackIgnore $rel)
-
   if (-not ($ignoredByGit -or $ignoredByFallback)) { $filtered += $f }
 }
 
@@ -172,16 +142,11 @@ $filesCopied = 0
 foreach ($src in $filtered) {
   $relPath = (Resolve-Path $src.FullName).Path.Substring($RepoRoot.Length).TrimStart('\')
   $dest    = Join-Path $TempCopy $relPath
-
   $destDir = Split-Path $dest -Parent
-  if (-not (Test-Path $destDir)) {
-    New-Item -ItemType Directory -Path $destDir | Out-Null
-  }
-
+  if (-not (Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir | Out-Null }
   Copy-Item -LiteralPath $src.FullName -Destination $dest -Force
   $bytesCopied += $src.Length
   $filesCopied++
-
   $pct = [int]([double]$bytesCopied / [double]$totalBytes * 100)
   $status = "{0}/{1} files  ({2:P1})" -f $filesCopied, $filtered.Count, ($bytesCopied / $totalBytes)
   Write-Progress -Id 1 -Activity "Copying repo (respecting .gitignore)" -Status $status -PercentComplete $pct
@@ -190,11 +155,11 @@ Write-Progress -Id 1 -Activity "Copying repo (respecting .gitignore)" -Completed
 
 # --- PHASE 2: Zip with progress
 Write-Host "Zipping with progress..."
+Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 $bytesZipped = 0L
 $filesZipped = 0
-
 $zipDir = Split-Path $ZipPath -Parent
 if (-not (Test-Path $zipDir)) { New-Item -ItemType Directory -Path $zipDir | Out-Null }
 
@@ -205,11 +170,9 @@ if (-not $totalZipBytes) { $totalZipBytes = 1 }
 $zipStream = [System.IO.File]::Open($ZipPath, [System.IO.FileMode]::Create)
 try {
   $zip = New-Object System.IO.Compression.ZipArchive($zipStream, [System.IO.Compression.ZipArchiveMode]::Create, $false)
-
   foreach ($f in $tempFiles) {
     $entryPath = ($f.FullName.Substring($TempCopy.Length)).TrimStart('\')
     $entry = $zip.CreateEntry($entryPath, [System.IO.Compression.CompressionLevel]::Optimal)
-
     $inStream  = [System.IO.File]::OpenRead($f.FullName)
     try {
       $outStream = $entry.Open()
@@ -224,7 +187,6 @@ try {
         }
       } finally { $outStream.Dispose() }
     } finally { $inStream.Dispose() }
-
     $filesZipped++
   }
 } finally {
