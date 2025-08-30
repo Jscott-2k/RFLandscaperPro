@@ -17,7 +17,8 @@ COPY backend/package*.json ./
 RUN npm install
 
 # ---- Copy application code ----
-COPY backend ./
+# Copy the backend source directly into the workdir rather than nesting it
+COPY backend/ ./
 COPY shared /shared
 
 # ---- Expose application port ----
