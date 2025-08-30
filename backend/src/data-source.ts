@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
 config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
-import { DataSource } from 'typeorm';
+import { DataSource, QueryRunner } from 'typeorm';
 import { join } from 'path';
 import { getCurrentCompanyId } from './common/tenant/tenant-context';
 
@@ -20,26 +20,43 @@ const dataSource = new DataSource({
   ssl: isProduction ? { rejectUnauthorized: false } : false,
 });
 
-const originalCreateQueryRunner = dataSource.createQueryRunner.bind(dataSource);
+type CreateQR = DataSource['createQueryRunner'];
 
-dataSource.createQueryRunner = (...args) => {
+const originalCreateQueryRunner: CreateQR = (
+  ...args: Parameters<CreateQR>
+): ReturnType<CreateQR> => dataSource.createQueryRunner(...args);
+
+dataSource.createQueryRunner = (
+  ...args: Parameters<CreateQR>
+): ReturnType<CreateQR> => {
   const queryRunner = originalCreateQueryRunner(...args);
-  const originalQuery = queryRunner.query.bind(queryRunner);
+  const originalQuery = queryRunner.query.bind(queryRunner) as (
+    query: string,
+    parameters?: unknown[],
+  ) => Promise<unknown>;
 
-  queryRunner.query = async (query: any, parameters?: any[]) => {
+  queryRunner.query = (async (
+    query: string,
+    parameters?: unknown[],
+  ): Promise<unknown> => {
     const companyId = getCurrentCompanyId();
+    const runnerData = (queryRunner.data ?? {}) as {
+      companyId?: number;
+      [key: string]: unknown;
+    };
     if (
       companyId !== undefined &&
       typeof query === 'string' &&
       !query.startsWith('SET app.current_company_id') &&
-      queryRunner.data?.companyId !== companyId
+      runnerData.companyId !== companyId
     ) {
       await originalQuery(`SET app.current_company_id = ${companyId}`);
       queryRunner.data = { ...(queryRunner.data || {}), companyId };
+      queryRunner.data = { ...runnerData, companyId };
     }
 
     return originalQuery(query, parameters);
-  };
+  }) as QueryRunner['query'];
 
   return queryRunner;
 };
