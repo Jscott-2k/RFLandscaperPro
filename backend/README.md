@@ -16,7 +16,7 @@ A robust and scalable NestJS backend API for landscaping business management. It
 ### Technical Features
 - Performance: Optimized database queries with strategic indexing.
 - Security: Enhanced password validation, input sanitization, error handling.
-- Monitoring: Prometheus metrics, structured logging, request tracking.
+- Monitoring: Prometheus metrics, structured logging, request tracking. Includes per-log-level log counters.
 - Testing: Comprehensive test coverage with Jest.
 - Documentation: Interactive Swagger API documentation.
 
@@ -123,6 +123,16 @@ npm run start:prod
 - Health Check: http://localhost:3000/api/health
 - Metrics: http://localhost:3000/api/metrics
 - Production Base URL: https://rflandscaperpro.com/api
+
+#### Log Metrics
+
+Counters track how many log messages are emitted at each level and are exposed on the metrics endpoint:
+
+- `log_error_total`
+- `log_warn_total`
+- `log_info_total`
+- `log_debug_total`
+- `log_verbose_total`
 
 #### Health Check
 
