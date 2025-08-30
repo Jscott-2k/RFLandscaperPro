@@ -90,7 +90,7 @@ describe('Auth login endpoint (e2e)', () => {
     return request(app.getHttpServer())
       .post('/api/auth/login')
       .send({ email: 'verified@example.com', password: 'Password1!' })
-      .expect(200)
+      .expect(201)
       .expect((res: request.Response) => {
         const body = res.body as { access_token: string };
         expect(body.access_token).toBeDefined();
