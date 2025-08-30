@@ -2,8 +2,7 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     tags:
       - v*
   pull_request:
@@ -48,13 +47,13 @@ jobs:
       matrix:
         include:
           - project: backend
-            test: unit
+            name: unit
             command: npm test
           - project: backend
-            test: e2e
+            name: e2e
             command: npm run test:e2e
           - project: frontend
-            test: unit
+            name: unit
             command: npm test
     defaults:
       run:
@@ -67,7 +66,8 @@ jobs:
           cache: npm
           cache-dependency-path: ${{ matrix.project }}/package-lock.json
       - run: npm ci
-      - run: ${{ matrix.command }}
+      - name: Run tests
+        run: ${{ matrix.command }}
         env:
           CI: true
           DB_HOST: localhost
@@ -82,7 +82,11 @@ jobs:
     needs: [lint, test]
     strategy:
       matrix:
-        project: [backend, frontend]
+        include:
+          - project: backend
+            build_cmd: npm run build
+          - project: frontend
+            build_cmd: npm run build:ssr
     defaults:
       run:
         working-directory: ${{ matrix.project }}
@@ -94,7 +98,12 @@ jobs:
           cache: npm
           cache-dependency-path: ${{ matrix.project }}/package-lock.json
       - run: npm ci
-      - run: npm run build
-      - name: Build production image
+      - name: Increase Node memory
+        run: echo "NODE_OPTIONS=--max_old_space_size=4096" >> $GITHUB_ENV
+      - name: Build (${{ matrix.project }})
+        run: ${{ matrix.build_cmd }}
+        env:
+          CI: true
+      - name: Build production image (backend only on main/tags)
         if: matrix.project == 'backend' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         run: docker build .

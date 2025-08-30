@@ -1,18 +1,27 @@
 {
   "name": "frontend",
   "version": "0.0.0",
+  "private": true,
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+
     "dev:ssr": "ng serve --host 0.0.0.0",
     "dev:compose": "docker compose -f docker-compose.yml -f docker-compose.override.yml up --build",
-    "build": "ng build",
-    "build:ssr": "ng build",
+
+    "build": "npm run build:browser",
+    "build:browser": "ng build --configuration=production",
+    "build:server": "ng run frontend:server:production",
+    "build:ssr": "npm run build:browser && npm run build:server",
+
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false --browsers=ChromeHeadless",
+
     "serve:ssr": "node dist/frontend/server/server.mjs",
+
     "seed": "npm --prefix ../backend run seed",
     "seed:drop": "npm --prefix ../backend run seed:drop",
+
     "lint": "eslint . --fix"
   },
   "prettier": {
@@ -27,7 +36,6 @@
       }
     ]
   },
-  "private": true,
   "dependencies": {
     "@angular/common": "^20.2.0",
     "@angular/compiler": "^20.2.0",
