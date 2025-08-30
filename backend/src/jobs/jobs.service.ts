@@ -2,6 +2,8 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  Inject,
+  Optional,
 } from '@nestjs/common';
 import { JobResponseDto } from './dto/job-response.dto';
 import { CreateJobDto } from './dto/create-job.dto';
@@ -11,7 +13,6 @@ import { BulkAssignJobDto } from './dto/bulk-assign-job.dto';
 import { ScheduleJobDto } from './dto/schedule-job.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
-import { Inject } from '@nestjs/common';
 import { JOB_REPOSITORY, IJobRepository } from './repositories/job.repository';
 import {
   CUSTOMER_REPOSITORY,
@@ -31,6 +32,7 @@ import {
 } from './repositories/assignment.repository';
 
 import { toJobResponseDto } from './jobs.mapper';
+import { MetricsService } from '../metrics/metrics.service';
 
 @Injectable()
 export class JobsService {
@@ -45,6 +47,7 @@ export class JobsService {
     private readonly equipmentRepository: IEquipmentRepository,
     @Inject(ASSIGNMENT_REPOSITORY)
     private readonly assignmentRepository: IAssignmentRepository,
+    @Optional() private readonly metrics?: MetricsService,
   ) {}
 
   async create(
@@ -65,6 +68,11 @@ export class JobsService {
       companyId,
     });
     const savedJob = await this.jobRepository.save(job);
+    this.metrics?.incrementCounter('jobs_created_total', {
+      route: 'jobs.create',
+      companyId,
+      status: 'success',
+    });
     return toJobResponseDto(savedJob);
   }
 

@@ -9,6 +9,7 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { RequestUser } from '../../auth/interfaces/request-user.interface';
+import { userStorage } from '../user/user-context';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -45,6 +46,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       }
       throw new UnauthorizedException();
     }
+    userStorage.enterWith({ userId: user.id });
     const req = context.switchToHttp().getRequest<Request>();
     const header = req.headers['x-company-id'];
     if (header) {

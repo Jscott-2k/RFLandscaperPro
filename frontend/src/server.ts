@@ -6,11 +6,17 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import winston from 'winston';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports: [new winston.transports.Console()],
+});
 
 /**
  * Example Express Rest API endpoints can be defined here.
@@ -53,10 +59,12 @@ if (isMainModule(import.meta.url)) {
   const port = process.env['PORT'] || 4000;
   app.listen(port, (error) => {
     if (error) {
+      logger.error('Server startup error', { message: error.message, stack: error.stack });
       throw error;
     }
-
-    console.log(`Node Express server listening on http://localhost:${port}`);
+    logger.info(`Node Express server listening on http://localhost:${port}`, {
+      port,
+    });
   });
 }
 
