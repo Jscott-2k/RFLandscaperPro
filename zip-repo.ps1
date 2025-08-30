@@ -1,9 +1,8 @@
 # Ensure we’re running from the repo root
 $RepoRoot = Get-Location
 $RepoName = Split-Path $RepoRoot -Leaf
-$ParentDir = Split-Path $RepoRoot -Parent
-$TempCopy = Join-Path $ParentDir "${RepoName}_copy"
-$ZipPath  = Join-Path $ParentDir "${RepoName}.zip"
+$TempCopy = Join-Path $env:TEMP "${RepoName}_copy"
+$ZipPath  = Join-Path $env:TEMP "${RepoName}.zip"
 
 Write-Host "Preparing to zip repo: $RepoName"
 Write-Host "Output will be: $ZipPath"
@@ -20,7 +19,7 @@ if (Test-Path $ZipPath) {
 Copy-Item $RepoRoot $TempCopy -Recurse
 
 # 3. Remove unwanted folders/files from the copy
-$ExcludePaths = @("node_modules", "dist", "build", ".env", ".DS_Store")
+$ExcludePaths = @("node_modules", "dist", "build", ".env", ".DS_Store", ".git")
 foreach ($path in $ExcludePaths) {
     $Target = Join-Path $TempCopy $path
     if (Test-Path $Target) {
@@ -30,9 +29,14 @@ foreach ($path in $ExcludePaths) {
 }
 
 # 4. Create the zip
-Compress-Archive -Path $TempCopy\* -DestinationPath $ZipPath
+Compress-Archive -Path "$TempCopy\*" -DestinationPath $ZipPath
 
-# 5. Clean up the temp copy
-Remove-Item $TempCopy -Recurse -Force
+# 5. Clean up the temp copy (always remove after zipping)
+if (Test-Path $TempCopy) {
+    Remove-Item $TempCopy -Recurse -Force
+}
 
 Write-Host "Repo zipped successfully: $ZipPath"
+
+# 6. Open File Explorer to the zip
+Start-Process explorer.exe "/select,`"$ZipPath`""
