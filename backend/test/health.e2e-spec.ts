@@ -8,9 +8,11 @@ import { HealthCheckService, TypeOrmHealthIndicator } from '@nestjs/terminus';
 
 describe('HealthCheck (e2e)', () => {
   let app: INestApplication<App>;
+  let check: jest.Mock;
+  let pingCheck: jest.Mock;
 
   beforeEach(async () => {
-    const check = jest.fn(async (fns: (() => Promise<unknown>)[]) => {
+    check = jest.fn(async (fns: (() => Promise<unknown>)[]) => {
       try {
         await fns[0]();
         return { status: 'ok' };
@@ -18,7 +20,7 @@ describe('HealthCheck (e2e)', () => {
         throw new ServiceUnavailableException();
       }
     });
-    const pingCheck = jest.fn().mockResolvedValue(undefined);
+    pingCheck = jest.fn().mockResolvedValue(undefined);
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [HealthController],
       providers: [
@@ -30,10 +32,6 @@ describe('HealthCheck (e2e)', () => {
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
     await app.init();
-
-    // expose mocks for tests
-    (app as any).check = check;
-    (app as any).pingCheck = pingCheck;
   });
 
   afterEach(async () => {
@@ -41,8 +39,6 @@ describe('HealthCheck (e2e)', () => {
   });
 
   it('GET /health returns status ok when dependencies are up', () => {
-    const check = (app as any).check as jest.Mock;
-    const pingCheck = (app as any).pingCheck as jest.Mock;
     check.mockClear();
     pingCheck.mockResolvedValue(undefined);
     return request(app.getHttpServer())
@@ -54,8 +50,6 @@ describe('HealthCheck (e2e)', () => {
   });
 
   it('GET /health fails gracefully when a dependency is down', async () => {
-    const check = (app as any).check as jest.Mock;
-    const pingCheck = (app as any).pingCheck as jest.Mock;
     pingCheck.mockRejectedValue(new Error('db down'));
     await request(app.getHttpServer()).get('/api/health').expect(503);
   });
