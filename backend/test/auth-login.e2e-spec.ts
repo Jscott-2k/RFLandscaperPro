@@ -16,6 +16,7 @@ import { VERIFICATION_TOKEN_REPOSITORY } from '../src/auth/repositories/verifica
 import { COMPANY_MEMBERSHIP_REPOSITORY } from '../src/auth/repositories/company-membership.repository';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { EmailService } from '../src/common/email';
+import { RefreshToken } from '../src/auth/refresh-token.entity';
 
 describe('Auth login endpoint (e2e)', () => {
   let app: INestApplication<App>;
@@ -51,7 +52,12 @@ describe('Auth login endpoint (e2e)', () => {
         {
           provide: REFRESH_TOKEN_REPOSITORY,
           useValue: {
-            create: jest.fn().mockImplementation((data) => data),
+            create: jest
+              .fn()
+              .mockImplementation(
+                (data: Partial<RefreshToken>): RefreshToken =>
+                  data as RefreshToken,
+              ),
             save: jest.fn(),
           },
         },
