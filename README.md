@@ -8,6 +8,29 @@ RF Landscaper Pro is an enterprise-grade application that streamlines landscapin
 - PostgreSQL 14 or later
 - Docker and Docker Compose (optional)
 
+## Windows Setup
+
+### Required tools
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) with the WSL2 backend
+- [PowerShell](https://learn.microsoft.com/powershell/) (pwsh) 7 or later
+- [Git for Windows](https://gitforwindows.org/)
+
+### Enable WSL integration
+
+1. Install a Linux distribution with `wsl --install` and ensure WSL 2 is the default: `wsl --set-default-version 2`.
+2. In Docker Desktop, open **Settings ➜ General** and check **Use the WSL 2 based engine**.
+3. Under **Settings ➜ Resources ➜ WSL Integration**, enable your distribution so Docker shares its daemon with WSL.
+
+### Path mapping
+
+Inside WSL, Windows paths like `C:\Users\you\project` appear as `/mnt/c/Users/you/project`. Use these Linux-style paths in shells, `docker compose` commands, and volume mounts.
+
+### Troubleshooting
+
+- **Line endings:** avoid CRLF issues by configuring Git with `git config core.autocrlf input` and convert problem files using `dos2unix`.
+- **File permissions:** if scripts lose execute bits, restore them with `chmod +x` inside WSL and consider `git config core.filemode false`.
+
 ## Containers
 
 The base `docker-compose.yml` builds only the backend service. Development uses `docker-compose.override.yml` to spin up a local PostgreSQL database, the frontend, and tooling like Prometheus, Grafana, MailHog and a Fluentd log server, keeping dependencies isolated and simplifying scaling. The frontend can also be started independently using its own compose file under `frontend/`.
