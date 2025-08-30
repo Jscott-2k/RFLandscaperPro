@@ -59,8 +59,12 @@ export class JobsApiService extends ApiService {
   }
 
   getUpcomingJobs(): Observable<{ items: UpcomingJobSummary[]; total: number }> {
-    return this.request<{ items: UpcomingJobSummary[]; total: number }>('GET', `${environment.apiUrl}/jobs`, {
-      params: { completed: false, limit: 5 },
-    });
+    return this.request<{ items: UpcomingJobSummary[]; total: number }>(
+      'GET',
+      `${environment.apiUrl}/jobs`,
+      {
+        params: { completed: false, limit: 5 },
+      },
+    );
   }
 }
