@@ -61,11 +61,11 @@ class PrometheusLogger implements LoggerService {
   }
   debug(message: any, ...optionalParams: any[]) {
     this.counters.debug.inc();
-    this.logger.debug(message, ...optionalParams);
+    this.logger.debug?.(message, ...optionalParams);
   }
   verbose(message: any, ...optionalParams: any[]) {
     this.counters.verbose.inc();
-    this.logger.verbose(message, ...optionalParams);
+    this.logger.verbose?.(message, ...optionalParams);
   }
 }
 
