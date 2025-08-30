@@ -5,8 +5,8 @@ $ParentDir = Split-Path $RepoRoot -Parent
 $TempCopy = Join-Path $ParentDir "${RepoName}_copy"
 $ZipPath  = Join-Path $ParentDir "${RepoName}.zip"
 
-Write-Host "📦 Preparing to zip repo: $RepoName"
-Write-Host "➡️  Output: $ZipPath"
+Write-Host "Preparing to zip repo: $RepoName"
+Write-Host "Output will be: $ZipPath"
 
 # 1. Remove old artifacts if they exist
 if (Test-Path $TempCopy) {
@@ -24,7 +24,7 @@ $ExcludePaths = @("node_modules", "dist", "build", ".env", ".DS_Store")
 foreach ($path in $ExcludePaths) {
     $Target = Join-Path $TempCopy $path
     if (Test-Path $Target) {
-        Write-Host "🧹 Removing $path"
+        Write-Host "Removing $path"
         Remove-Item $Target -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
@@ -35,4 +35,4 @@ Compress-Archive -Path $TempCopy\* -DestinationPath $ZipPath
 # 5. Clean up the temp copy
 Remove-Item $TempCopy -Recurse -Force
 
-Write-Host "✅ Repo zipped successfully: $ZipPath"
+Write-Host "Repo zipped successfully: $ZipPath"
