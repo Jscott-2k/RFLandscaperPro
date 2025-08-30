@@ -6,7 +6,7 @@ import { UserService } from './user.service';
 import { User } from './user.model';
 import { AuthService } from '../auth/auth.service';
 import { ErrorService } from '../error.service';
-import { NotificationService } from '../notification.service';
+import { ToasterService } from '../toaster.service';
 
 @Component({
   selector: 'app-user-detail',
@@ -97,7 +97,7 @@ export class UserDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   protected readonly auth = inject(AuthService);
   private readonly errorService = inject(ErrorService);
-  private readonly notifications = inject(NotificationService);
+  private readonly notifications = inject(ToasterService);
   private fb = inject(FormBuilder);
   user?: User;
 

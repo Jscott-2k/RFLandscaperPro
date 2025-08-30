@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CustomerService } from './customer.service';
 import { Customer } from './customer.model';
 import { ErrorService } from '../error.service';
-import { NotificationService } from '../notification.service';
+import { ToasterService } from '../toaster.service';
 
 @Component({
   selector: 'app-customer-form',
@@ -36,7 +36,7 @@ export class CustomerFormComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private errorService = inject(ErrorService);
-  private notifications = inject(NotificationService);
+  private notifications = inject(ToasterService);
 
   customerId?: number;
 

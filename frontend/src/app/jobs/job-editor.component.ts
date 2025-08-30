@@ -5,7 +5,7 @@ import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { JobsService } from './jobs.service';
 import { Job } from './job.model';
 import { ErrorService } from '../error.service';
-import { NotificationService } from '../notification.service';
+import { ToasterService } from '../toaster.service';
 
 @Component({
   selector: 'app-job-editor',
@@ -18,7 +18,7 @@ export class JobEditorComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private errorService = inject(ErrorService);
-  private notifications = inject(NotificationService);
+  private notifications = inject(ToasterService);
   private fb = inject(FormBuilder);
   job: Job = { title: '', customerId: 1 };
 

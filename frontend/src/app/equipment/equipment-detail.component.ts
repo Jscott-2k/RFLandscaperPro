@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EquipmentService, Equipment } from './equipment.service';
 import { ErrorService } from '../error.service';
-import { NotificationService } from '../notification.service';
+import { ToasterService } from '../toaster.service';
 
 @Component({
   selector: 'app-equipment-detail',
@@ -48,7 +48,7 @@ export class EquipmentDetailComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private errorService = inject(ErrorService);
-  private notifications = inject(NotificationService);
+  private notifications = inject(ToasterService);
   private fb = inject(FormBuilder);
 
   equipmentId?: number;

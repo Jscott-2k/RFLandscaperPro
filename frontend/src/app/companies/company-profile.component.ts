@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CompanyService } from './company.service';
 import { Company } from './company.model';
 import { ErrorService } from '../error.service';
-import { NotificationService } from '../notification.service';
+import { ToasterService } from '../toaster.service';
 
 @Component({
   selector: 'app-company-profile',
@@ -67,7 +67,7 @@ import { NotificationService } from '../notification.service';
 export class CompanyProfileComponent implements OnInit {
   private readonly companyService = inject(CompanyService);
   private readonly errorService = inject(ErrorService);
-  private readonly notifications = inject(NotificationService);
+  private readonly notifications = inject(ToasterService);
   private fb = inject(FormBuilder);
   company?: Company;
 
