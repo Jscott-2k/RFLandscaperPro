@@ -59,8 +59,8 @@ JWT_REFRESH_EXPIRES_IN=7d
 LOG_LEVEL=debug
 # Remote log forwarding (optional)
 # REMOTE_LOG_HOST=logs.example.com
-# REMOTE_LOG_PORT=1234
-# REMOTE_LOG_PATH=/
+# REMOTE_LOG_PORT=9880
+# REMOTE_LOG_PATH=/logs
 ```
 
 To customize the accounts created by the seed script, set
@@ -75,11 +75,11 @@ Remote logging is only enabled when `REMOTE_LOG_HOST` is defined. When omitted, 
 ### Development Log Server
 
 A lightweight `logserver` service is included in `docker-compose.override.yml` for local testing. It listens on the port
-specified by `REMOTE_LOG_PORT` and prints any HTTP `POST` bodies it receives.
+specified by `REMOTE_LOG_PORT` and prints any HTTP `POST` bodies it receives on `REMOTE_LOG_PATH`.
 
 ```bash
 npm run dev:compose
-curl -X POST http://localhost:${REMOTE_LOG_PORT}/logs -d 'hello world'
+curl -X POST http://localhost:${REMOTE_LOG_PORT}${REMOTE_LOG_PATH} -d 'hello world'
 ```
 
 Sample output from the `logserver` container:

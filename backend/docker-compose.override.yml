@@ -43,6 +43,8 @@ services:
     container_name: rflandscaperpro_logserver
     volumes:
       - ./fluentd.conf:/fluentd/etc/fluent.conf:ro
+    env_file:
+      - .env.development
     ports:
       - "${REMOTE_LOG_PORT:-9880}:${REMOTE_LOG_PORT:-9880}"
 
