@@ -72,6 +72,22 @@ account and logs preview URLs for emails.
 
 Remote logging is only enabled when `REMOTE_LOG_HOST` is defined. When omitted, logs are written to the console and `app.log` file only.
 
+### Development Log Server
+
+A lightweight `logserver` service is included in `docker-compose.override.yml` for local testing. It listens on the port
+specified by `REMOTE_LOG_PORT` and prints any HTTP `POST` bodies it receives.
+
+```bash
+npm run dev:compose
+curl -X POST http://localhost:${REMOTE_LOG_PORT}/logs -d 'hello world'
+```
+
+Sample output from the `logserver` container:
+
+```
+{"message":"hello world"}
+```
+
 To automatically apply database changes on startup (such as in production), set `RUN_MIGRATIONS=true`. In development, omit this variable and run migrations manually with `npm run migration:run`.
 
 ### 3. Database Setup
