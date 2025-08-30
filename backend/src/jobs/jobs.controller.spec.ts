@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JobsController } from './jobs.controller';
 import { JobsService } from './jobs.service';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { PaginationParams } from '../common/pagination';
 
 describe('JobsController', () => {
   let controller: JobsController;
@@ -30,8 +30,8 @@ describe('JobsController', () => {
   });
 
   it('should forward filters to service.findAll', async () => {
-    jobsService.findAll.mockResolvedValue({ items: [], total: 0 });
-    const pagination: PaginationQueryDto = { page: 1, limit: 10 };
+    jobsService.findAll.mockResolvedValue({ items: [], nextCursor: null });
+    const pagination: PaginationParams = { limit: 10 };
     const result = await controller.findAll(
       pagination,
       1,
@@ -52,16 +52,16 @@ describe('JobsController', () => {
       3,
       4,
     );
-    expect(result).toEqual({ items: [], total: 0 });
+    expect(result).toEqual({ items: [], nextCursor: null });
   });
 
   describe('findAll', () => {
     it('should call jobsService.findAll with companyId', async () => {
-      const pagination: PaginationQueryDto = { page: 1, limit: 10 };
+      const pagination: PaginationParams = { limit: 10 };
       const completed = true;
       const customerId = 2;
       const companyId = 1;
-      const result = { items: [], total: 0 };
+      const result = { items: [], nextCursor: null };
       jobsService.findAll.mockResolvedValue(result);
 
       const response = await controller.findAll(

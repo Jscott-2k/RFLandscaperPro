@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Job } from '../entities/job.entity';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { Paginated, PaginationParams, paginate } from '../../common/pagination';
 
 export const JOB_REPOSITORY = Symbol('JOB_REPOSITORY');
 
@@ -10,7 +10,7 @@ export interface IJobRepository {
   create(data: Partial<Job>): Job;
   save(job: Job): Promise<Job>;
   findAll(
-    pagination: PaginationQueryDto,
+    pagination: PaginationParams,
     companyId: number,
     filters: {
       completed?: boolean;
@@ -20,7 +20,7 @@ export interface IJobRepository {
       workerId?: number;
       equipmentId?: number;
     },
-  ): Promise<[Job[], number]>;
+  ): Promise<Paginated<Job>>;
   findById(
     id: number,
     companyId: number,
@@ -45,7 +45,7 @@ export class JobRepository implements IJobRepository {
   }
 
   async findAll(
-    pagination: PaginationQueryDto,
+    pagination: PaginationParams,
     companyId: number,
     filters: {
       completed?: boolean;
@@ -55,50 +55,48 @@ export class JobRepository implements IJobRepository {
       workerId?: number;
       equipmentId?: number;
     },
-  ): Promise<[Job[], number]> {
-    const { page = 1, limit = 10 } = pagination;
-    const cappedLimit = Math.min(limit, 100);
-    const queryBuilder = this.repo
-      .createQueryBuilder('job')
-      .leftJoinAndSelect('job.customer', 'customer')
-      .leftJoinAndSelect('job.assignments', 'assignments')
-      .leftJoinAndSelect('assignments.user', 'user')
-      .leftJoinAndSelect('assignments.equipment', 'equipment')
-      .where('job.companyId = :companyId', { companyId });
-
+  ): Promise<Paginated<Job>> {
     const { completed, customerId, startDate, endDate, workerId, equipmentId } =
       filters;
 
-    if (completed !== undefined) {
-      queryBuilder.andWhere('job.completed = :completed', { completed });
-    }
+    return paginate(this.repo, pagination, 'job', (qb) => {
+      qb.leftJoinAndSelect('job.customer', 'customer')
+        .leftJoinAndSelect('job.assignments', 'assignments')
+        .leftJoinAndSelect('assignments.user', 'user')
+        .leftJoinAndSelect('assignments.equipment', 'equipment')
+        .where('job.companyId = :companyId', { companyId });
 
-    if (customerId) {
-      queryBuilder.andWhere('job.customer.id = :customerId', { customerId });
-    }
+      if (completed !== undefined) {
+        qb.andWhere('job.completed = :completed', { completed });
+      }
 
-    if (startDate) {
-      queryBuilder.andWhere('job.scheduledDate >= :startDate', { startDate });
-    }
+      if (customerId) {
+        qb.andWhere('job.customer.id = :customerId', { customerId });
+      }
 
-    if (endDate) {
-      queryBuilder.andWhere('job.scheduledDate <= :endDate', { endDate });
-    }
+      if (startDate) {
+        qb.andWhere('job.scheduledDate >= :startDate', { startDate });
+      }
 
-    if (workerId) {
-      queryBuilder.andWhere('user.id = :workerId', { workerId });
-    }
+      if (endDate) {
+        qb.andWhere('job.scheduledDate <= :endDate', { endDate });
+      }
 
-    if (equipmentId) {
-      queryBuilder.andWhere('equipment.id = :equipmentId', { equipmentId });
-    }
+      if (workerId) {
+        qb.andWhere('user.id = :workerId', { workerId });
+      }
 
-    return queryBuilder
-      .skip((page - 1) * cappedLimit)
-      .take(cappedLimit)
-      .orderBy('job.scheduledDate', 'ASC')
-      .addOrderBy('job.createdAt', 'DESC')
-      .getManyAndCount();
+      if (equipmentId) {
+        qb.andWhere('equipment.id = :equipmentId', { equipmentId });
+      }
+
+      qb.orderBy('job.scheduledDate', 'ASC').addOrderBy(
+        'job.createdAt',
+        'DESC',
+      );
+
+      return qb;
+    });
   }
 
   findById(

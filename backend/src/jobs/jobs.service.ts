@@ -11,7 +11,7 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { AssignJobDto } from './dto/assign-job.dto';
 import { BulkAssignJobDto } from './dto/bulk-assign-job.dto';
 import { ScheduleJobDto } from './dto/schedule-job.dto';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { Paginated, PaginationParams } from '../common/pagination';
 
 import { JOB_REPOSITORY, IJobRepository } from './repositories/job.repository';
 import {
@@ -77,7 +77,7 @@ export class JobsService {
   }
 
   async findAll(
-    pagination: PaginationQueryDto,
+    pagination: PaginationParams,
     companyId: number,
     completed?: boolean,
     customerId?: number,
@@ -85,8 +85,8 @@ export class JobsService {
     endDate?: Date,
     workerId?: number,
     equipmentId?: number,
-  ): Promise<{ items: JobResponseDto[]; total: number }> {
-    const [jobs, total] = await this.jobRepository.findAll(
+  ): Promise<Paginated<JobResponseDto>> {
+    const { items, nextCursor } = await this.jobRepository.findAll(
       pagination,
       companyId,
       {
@@ -100,8 +100,8 @@ export class JobsService {
     );
 
     return {
-      items: jobs.map((job) => toJobResponseDto(job)),
-      total,
+      items: items.map((job) => toJobResponseDto(job)),
+      nextCursor,
     };
   }
 

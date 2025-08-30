@@ -19,7 +19,7 @@ import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { PaginationParams, Paginated } from '../common/pagination';
 import { CompanyId } from '../common/decorators/company-id.decorator';
 import { AuthUser } from '../common/decorators/auth-user.decorator';
 import { User } from '../users/user.entity';
@@ -29,6 +29,8 @@ import {
   ApiQuery,
   ApiResponse,
   ApiTags,
+  ApiBadRequestResponse,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 @ApiTags('customers')
@@ -45,6 +47,8 @@ export class CustomersController {
     description: 'Customer created',
     type: CustomerResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async create(
     @Body() createCustomerDto: CreateCustomerDto,
     @CompanyId() companyId: number,
@@ -55,17 +59,19 @@ export class CustomersController {
   @Get()
   @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'List customers for the authenticated company' })
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'cursor', required: false, type: Number })
   @ApiQuery({ name: 'active', required: false, type: Boolean })
   @ApiQuery({ name: 'search', required: false })
   @ApiResponse({ status: 200, description: 'List of customers' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async findAll(
-    @Query() pagination: PaginationQueryDto,
+    @Query() pagination: PaginationParams,
     @CompanyId() companyId: number,
     @Query('active', new ParseBoolPipe({ optional: true })) active?: boolean,
     @Query('search') search?: string,
-  ): Promise<{ items: CustomerResponseDto[]; total: number }> {
+  ): Promise<Paginated<CustomerResponseDto>> {
     return this.customersService.findAll(pagination, companyId, active, search);
   }
 
@@ -77,6 +83,8 @@ export class CustomersController {
     description: 'Customer profile',
     type: CustomerResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async getProfile(
     @AuthUser() user: User | undefined,
   ): Promise<CustomerResponseDto> {
@@ -91,6 +99,8 @@ export class CustomersController {
     description: 'Customer retrieved',
     type: CustomerResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
     @CompanyId() companyId: number,
@@ -106,6 +116,8 @@ export class CustomersController {
     description: 'Customer updated',
     type: CustomerResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
@@ -122,6 +134,8 @@ export class CustomersController {
     description: 'Customer activated',
     type: CustomerResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async activate(
     @Param('id', ParseIntPipe) id: number,
     @CompanyId() companyId: number,
@@ -137,6 +151,8 @@ export class CustomersController {
     description: 'Customer deactivated',
     type: CustomerResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async deactivate(
     @Param('id', ParseIntPipe) id: number,
     @CompanyId() companyId: number,
@@ -149,6 +165,8 @@ export class CustomersController {
   @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Delete customer' })
   @ApiResponse({ status: 204, description: 'Customer deleted' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async remove(
     @Param('id', ParseIntPipe) id: number,
     @CompanyId() companyId: number,

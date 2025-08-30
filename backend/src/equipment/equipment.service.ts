@@ -7,7 +7,7 @@ import { EquipmentStatus } from './entities/equipment.entity';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentResponseDto } from './dto/equipment-response.dto';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { Paginated, PaginationParams } from '../common/pagination';
 import {
   EQUIPMENT_REPOSITORY,
   IEquipmentRepository,
@@ -38,13 +38,13 @@ export class EquipmentService {
   }
 
   async findAll(
-    pagination: PaginationQueryDto,
+    pagination: PaginationParams,
     companyId: number,
     status?: EquipmentStatus,
     type?: string,
     search?: string,
-  ): Promise<{ items: EquipmentResponseDto[]; total: number }> {
-    const [equipments, total] = await this.equipmentRepository.findAll(
+  ): Promise<Paginated<EquipmentResponseDto>> {
+    const { items, nextCursor } = await this.equipmentRepository.findAll(
       pagination,
       companyId,
       status,
@@ -53,8 +53,8 @@ export class EquipmentService {
     );
 
     return {
-      items: equipments.map((eq) => toEquipmentResponseDto(eq)),
-      total,
+      items: items.map((eq) => toEquipmentResponseDto(eq)),
+      nextCursor,
     };
   }
 

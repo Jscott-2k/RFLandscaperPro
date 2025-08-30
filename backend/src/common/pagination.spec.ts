@@ -8,13 +8,9 @@ describe('paginate', () => {
   beforeEach(() => {
     qb = {
       andWhere: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      leftJoinAndSelect: jest.fn().mockReturnThis(),
-      skip: jest.fn().mockReturnThis(),
-      take: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
-      addOrderBy: jest.fn().mockReturnThis(),
-      getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      take: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([]),
     };
 
     repo = {
@@ -25,15 +21,15 @@ describe('paginate', () => {
   });
 
   it('caps limit at 100', async () => {
-    await paginate(repo, { page: 1, limit: 1000 }, 'entity');
-    expect(qb.take).toHaveBeenCalledWith(100);
+    await paginate(repo, { limit: 1000 }, 'entity');
+    expect(qb.take).toHaveBeenCalledWith(101);
   });
 
   it('applies provided filters', async () => {
     const filter = (qb: SelectQueryBuilder<any>) =>
       qb.andWhere('entity.active = :active', { active: true });
 
-    await paginate(repo, { page: 1, limit: 10 }, 'entity', filter);
+    await paginate(repo, { limit: 10 }, 'entity', filter);
     expect(qb.andWhere).toHaveBeenCalledWith('entity.active = :active', {
       active: true,
     });

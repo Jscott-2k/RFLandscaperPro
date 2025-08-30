@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EquipmentService } from './equipment.service';
 import { EquipmentStatus } from './entities/equipment.entity';
 import { EquipmentResponseDto } from './dto/equipment-response.dto';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { PaginationParams } from '../common/pagination';
 import {
   EQUIPMENT_REPOSITORY,
   IEquipmentRepository,
@@ -55,8 +55,10 @@ describe('EquipmentService', () => {
   });
 
   it('should apply search filter when finding all equipment', async () => {
-    const findAllMock = jest.spyOn(repo, 'findAll').mockResolvedValue([[], 0]);
-    const pagination: PaginationQueryDto = { page: 1, limit: 10 };
+    const findAllMock = jest
+      .spyOn(repo, 'findAll')
+      .mockResolvedValue({ items: [], nextCursor: null });
+    const pagination: PaginationParams = { limit: 10 };
     await service.findAll(pagination, 1, undefined, undefined, 'truck');
     expect(findAllMock).toHaveBeenCalledWith(
       pagination,

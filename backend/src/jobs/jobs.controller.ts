@@ -22,7 +22,7 @@ import { UserRole } from '../users/user.entity';
 import { ScheduleJobDto } from './dto/schedule-job.dto';
 import { AssignJobDto } from './dto/assign-job.dto';
 import { BulkAssignJobDto } from './dto/bulk-assign-job.dto';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { PaginationParams, Paginated } from '../common/pagination';
 import { CompanyId } from '../common/decorators/company-id.decorator';
 import {
   ApiBearerAuth,
@@ -30,6 +30,8 @@ import {
   ApiQuery,
   ApiResponse,
   ApiTags,
+  ApiBadRequestResponse,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 @ApiTags('jobs')
@@ -46,6 +48,8 @@ export class JobsController {
     description: 'Job created',
     type: JobResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   create(
     @Body() createJobDto: CreateJobDto,
     @CompanyId() companyId: number,
@@ -56,8 +60,8 @@ export class JobsController {
   @Get()
   @Roles(UserRole.CompanyAdmin, UserRole.Worker, UserRole.Customer)
   @ApiOperation({ summary: 'List jobs for the authenticated company' })
-  @ApiQuery({ name: 'page', required: false })
-  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'cursor', required: false, type: Number })
   @ApiQuery({ name: 'completed', required: false, type: Boolean })
   @ApiQuery({ name: 'customerId', required: false, type: Number })
   @ApiQuery({ name: 'startDate', required: false, type: String })
@@ -65,8 +69,10 @@ export class JobsController {
   @ApiQuery({ name: 'workerId', required: false, type: Number })
   @ApiQuery({ name: 'equipmentId', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'List of jobs' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   findAll(
-    @Query() pagination: PaginationQueryDto,
+    @Query() pagination: PaginationParams,
     @CompanyId() companyId: number,
     @Query('completed', new ParseBoolPipe({ optional: true }))
     completed?: boolean,
@@ -77,7 +83,7 @@ export class JobsController {
     @Query('workerId', new ParseIntPipe({ optional: true })) workerId?: number,
     @Query('equipmentId', new ParseIntPipe({ optional: true }))
     equipmentId?: number,
-  ): Promise<{ items: JobResponseDto[]; total: number }> {
+  ): Promise<Paginated<JobResponseDto>> {
     return this.jobsService.findAll(
       pagination,
       companyId,
@@ -98,6 +104,8 @@ export class JobsController {
     description: 'Job retrieved',
     type: JobResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   findOne(
     @Param('id', ParseIntPipe) id: number,
     @CompanyId() companyId: number,
@@ -113,6 +121,8 @@ export class JobsController {
     description: 'Job updated',
     type: JobResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateJobDto: UpdateJobDto,
@@ -129,6 +139,8 @@ export class JobsController {
     description: 'Job scheduled',
     type: JobResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   schedule(
     @Param('id', ParseIntPipe) id: number,
     @Body() scheduleJobDto: ScheduleJobDto,
@@ -145,6 +157,8 @@ export class JobsController {
     description: 'Job assignment added',
     type: JobResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   assign(
     @Param('id', ParseIntPipe) id: number,
     @Body() assignJobDto: AssignJobDto,
@@ -161,6 +175,8 @@ export class JobsController {
     description: 'Multiple job assignments added',
     type: JobResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   bulkAssign(
     @Param('id', ParseIntPipe) id: number,
     @Body() bulkAssignJobDto: BulkAssignJobDto,
@@ -177,6 +193,8 @@ export class JobsController {
     description: 'Assignment removed',
     type: JobResponseDto,
   })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   removeAssignment(
     @Param('id', ParseIntPipe) jobId: number,
     @Param('assignmentId', ParseIntPipe) assignmentId: number,
@@ -190,6 +208,8 @@ export class JobsController {
   @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Delete job' })
   @ApiResponse({ status: 204, description: 'Job deleted' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async remove(
     @Param('id', ParseIntPipe) id: number,
     @CompanyId() companyId: number,

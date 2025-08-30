@@ -4,7 +4,7 @@ import { Customer } from './entities/customer.entity';
 import { QueryFailedError } from 'typeorm';
 import { ConflictException } from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { PaginationParams } from '../common/pagination';
 import {
   CUSTOMER_REPOSITORY,
   ICustomerRepository,
@@ -110,8 +110,10 @@ describe('CustomersService', () => {
   });
 
   it('should apply search filter when finding all customers', async () => {
-    const findAllMock = jest.spyOn(repo, 'findAll').mockResolvedValue([[], 0]);
-    const pagination: PaginationQueryDto = { page: 1, limit: 10 };
+    const findAllMock = jest
+      .spyOn(repo, 'findAll')
+      .mockResolvedValue({ items: [], nextCursor: null });
+    const pagination: PaginationParams = { limit: 10 };
     await service.findAll(pagination, 1, undefined, 'Jane');
     expect(findAllMock).toHaveBeenCalledWith(pagination, 1, undefined, 'Jane');
   });
