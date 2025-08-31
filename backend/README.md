@@ -51,8 +51,6 @@ DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=your_password
 DB_NAME=rflandscaperpro
-# Auto-run migrations on startup (set to true in production if desired)
-# RUN_MIGRATIONS=false
 JWT_SECRET=your_secure_jwt_secret
 JWT_EXPIRES_IN=1d
 JWT_REFRESH_EXPIRES_IN=7d
@@ -87,8 +85,7 @@ Sample output from the `logserver` container:
 ```
 {"message":"hello world"}
 ```
-
-To automatically apply database changes on startup (such as in production), set `RUN_MIGRATIONS=true`. In development, omit this variable and run migrations manually with `npm run migration:run`.
+Migrations are not executed automatically at application startup. Run them explicitly with `npm run migration:run` before launching the server (for example, in your CI/CD pipeline).
 
 ### 3. Database Setup
 ```bash
