@@ -1,4 +1,10 @@
-import { Module, Injectable, Inject, LoggerService } from '@nestjs/common';
+import {
+  Module,
+  Injectable,
+  Inject,
+  LoggerService,
+  Global,
+} from '@nestjs/common';
 import { WinstonModule, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import * as winston from 'winston';
 import { makeCounterProvider, InjectMetric } from '@willsoto/nestjs-prometheus';
@@ -72,6 +78,7 @@ class PrometheusLogger implements LoggerService {
   }
 }
 
+@Global()
 @Module({
   imports: [
     WinstonModule.forRoot({
