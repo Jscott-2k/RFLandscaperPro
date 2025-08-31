@@ -16,20 +16,21 @@ import { HttpExceptionFilter } from './common/filters/http-exception/http-except
 // helpful in dev
 process.on('beforeExit', (c) => console.log('[lifecycle] beforeExit', c));
 process.on('exit', (c) => console.log('[lifecycle] exit', c));
-process.on('unhandledRejection', (e) => console.error('[unhandledRejection]', e));
+process.on('unhandledRejection', (e) =>
+  console.error('[unhandledRejection]', e),
+);
 process.on('uncaughtException', (e) => console.error('[uncaughtException]', e));
 
 async function createAppWithWatchdog(): Promise<NestExpressApplication> {
   console.log('[boot] A: NestFactory.create() starting');
 
-  process.env.NEST_DEBUG = 'true';
   const keepalive = setInterval(() => {}, 1 << 30);
   const timeoutMs = Number(process.env.BOOT_CREATE_TIMEOUT_MS ?? 15000);
 
   try {
     const app = await Promise.race([
       NestFactory.create<NestExpressApplication>(AppModule, {
-        bufferLogs: true,
+        bufferLogs: false,
         logger:
           process.env.NEST_LOG_LEVEL === 'debug'
             ? ['error', 'warn', 'log', 'debug', 'verbose']
@@ -68,14 +69,18 @@ export async function bootstrap(): Promise<void> {
       const modules = (moduleRef as any)?.container?.getModules?.();
       modules?.forEach((module, moduleName) => {
         module.providers.forEach((_provider, token) =>
-          console.debug(`[provider:init] ${String(token)} in ${String(moduleName)}`),
+          console.debug(
+            `[provider:init] ${String(token)} in ${String(moduleName)}`,
+          ),
         );
       });
     } catch {}
 
     const winstonLogger =
       app.get(WINSTON_MODULE_NEST_PROVIDER, { strict: false }) ??
-      WinstonModule.createLogger({ transports: [new winston.transports.Console()] });
+      WinstonModule.createLogger({
+        transports: [new winston.transports.Console()],
+      });
     app.useLogger(winstonLogger);
 
     // Core setup
@@ -97,14 +102,17 @@ export async function bootstrap(): Promise<void> {
       }),
     );
 
-    app.useGlobalFilters(new HttpExceptionFilter(winstonLogger as any));
+    app.useGlobalFilters(new HttpExceptionFilter(winstonLogger));
 
     const isProd = process.env.NODE_ENV === 'production';
     const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? '')
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
-    app.enableCors({ origin: isProd ? allowedOrigins : true, credentials: true });
+    app.enableCors({
+      origin: isProd ? allowedOrigins : true,
+      credentials: true,
+    });
 
     if (!isProd) {
       app.use(
@@ -112,7 +120,8 @@ export async function bootstrap(): Promise<void> {
         basicAuth({
           challenge: true,
           users: {
-            [process.env.SWAGGER_USER || 'admin']: process.env.SWAGGER_PASSWORD || 'admin',
+            [process.env.SWAGGER_USER || 'admin']:
+              process.env.SWAGGER_PASSWORD || 'admin',
           },
         }),
       );
@@ -139,10 +148,9 @@ export async function bootstrap(): Promise<void> {
     console.log(`[boot] D: listening on http://${host}:${port}`);
   } catch (err: any) {
     try {
-      app?.get(WINSTON_MODULE_NEST_PROVIDER, { strict: false })?.error?.(
-        'Bootstrap error',
-        err?.stack || err,
-      );
+      app
+        ?.get(WINSTON_MODULE_NEST_PROVIDER, { strict: false })
+        ?.error?.('Bootstrap error', err?.stack || err);
     } catch {}
     console.error('[boot] FATAL:', err?.message || err, err?.stack);
     process.exit(1);

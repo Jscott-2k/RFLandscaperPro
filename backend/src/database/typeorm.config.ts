@@ -8,12 +8,14 @@ import { config as dotenvLoad } from 'dotenv';
 /* ---------- helpers ---------- */
 
 function coalesce<T>(...vals: (T | undefined | null | '')[]): T | undefined {
-  for (const v of vals) if (v !== undefined && v !== null && v !== ('' as any)) return v as T;
+  for (const v of vals)
+    if (v !== undefined && v !== null && v !== ('' as any)) return v as T;
   return undefined;
 }
 function toBool(v: unknown, fallback = false): boolean {
   if (typeof v === 'boolean') return v;
-  if (typeof v === 'string') return ['1', 'true', 'yes', 'on'].includes(v.toLowerCase());
+  if (typeof v === 'string')
+    return ['1', 'true', 'yes', 'on'].includes(v.toLowerCase());
   return fallback;
 }
 
@@ -100,14 +102,30 @@ export function buildTypeOrmOptions(cfg: ConfigService): DataSourceOptions {
   const nodeEnv = cfg.get<string>('NODE_ENV', 'development').toLowerCase();
   const host = cfg.get<string>('DB_HOST', 'localhost');
   const port = Number(cfg.get<number>('DB_PORT', 5432));
-  const username = coalesce(cfg.get<string>('DB_USERNAME'), cfg.get<string>('DB_USER'))!;
+  const username = coalesce(
+    cfg.get<string>('DB_USERNAME'),
+    cfg.get<string>('DB_USER'),
+  )!;
   const password = cfg.get<string>('DB_PASSWORD')!;
   const database = cfg.get<string>('DB_NAME')!;
   const ssl = toBool(cfg.get('DB_SSL'), nodeEnv === 'production');
 
   const logging = parseLogging(cfg.get<string>('TYPEORM_LOGGING'));
+  if (!host || !username || !password || !database) {
+    throw new Error(
+      ' Missing DB env vars (DB_HOST/DB_USERNAME|DB_USER/DB_PASSWORD/DB_NAME',
+    );
+  }
 
-  return commonOptions({ host, port, username, password, database, ssl, logging });
+  return commonOptions({
+    host,
+    port,
+    username,
+    password,
+    database,
+    ssl,
+    logging,
+  });
 }
 
 /* ---------- For CLI/scripts (load .env manually) ---------- */
@@ -119,13 +137,13 @@ export function buildTypeOrmOptionsFromEnv(): DataSourceOptions {
   const candidates = [
     resolve(process.cwd(), envFile),
     resolve(__dirname, '..', '..', envFile), // dist/src -> backend/.env.*
-    resolve(__dirname, '..', envFile),       // src -> backend/.env.*
+    resolve(__dirname, '..', envFile), // src -> backend/.env.*
     resolve(process.cwd(), '.env'),
   ];
   const envPath = candidates.find((p) => existsSync(p));
   if (envPath) {
     dotenvLoad({ path: envPath });
-    // eslint-disable-next-line no-console
+
     console.log(`[typeorm.config] Loaded env file: ${envPath}`);
   }
 
@@ -144,7 +162,15 @@ export function buildTypeOrmOptionsFromEnv(): DataSourceOptions {
 
   const logging = parseLogging(process.env.TYPEORM_LOGGING);
 
-  return commonOptions({ host, port, username, password, database, ssl, logging });
+  return commonOptions({
+    host,
+    port,
+    username,
+    password,
+    database,
+    ssl,
+    logging,
+  });
 }
 
 export default buildTypeOrmOptions;

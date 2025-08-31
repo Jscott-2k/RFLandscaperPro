@@ -125,11 +125,19 @@ if (envFilePath) {
       },
       dataSourceFactory: async (options) => {
         try {
+          if (!options) {
+            throw new Error(
+              'TypeORM dataSourceFactory received undefined options.',
+            );
+          }
           return await new DataSource(options).initialize();
         } catch (err) {
           const logger = new Logger('TYPEORM_FACTORY');
           const msg = err instanceof Error ? err.message : String(err);
-          logger.error(`Database connection failed: ${msg}`, err instanceof Error ? err.stack : undefined);
+          logger.error(
+            `Database connection failed: ${msg}`,
+            err instanceof Error ? err.stack : undefined,
+          );
           throw err;
         }
       },
