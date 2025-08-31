@@ -5,11 +5,19 @@ param(
   [string[]]$Services,   # -Services backend,frontend
   [switch]$Clean,        # down -v --remove-orphans
   [switch]$Logs,         # logs -f
-  [switch]$Pull          # pull
+  [switch]$Pull,         # pull
+  [switch]$Local         # run backend and frontend without Docker
 )
 
 $ErrorActionPreference = "Stop"
 Set-Location -Path (Resolve-Path "$PSScriptRoot")
+
+if ($Local) {
+  $backend = Start-Process npm -ArgumentList '--prefix','backend','run','start:dev' -PassThru
+  $frontend = Start-Process npm -ArgumentList '--prefix','frontend','start' -PassThru
+  Wait-Process -Id $backend.Id, $frontend.Id
+  return
+}
 
 function Compose {
   param([Parameter(ValueFromRemainingArguments = $true)]
