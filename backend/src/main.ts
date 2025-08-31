@@ -1,7 +1,7 @@
 // src/main.ts
 import 'reflect-metadata';
 import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, ModuleRef } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import basicAuth from 'express-basic-auth';
@@ -22,6 +22,7 @@ process.on('uncaughtException', (e) => console.error('[uncaughtException]', e));
 async function createAppWithWatchdog(): Promise<NestExpressApplication> {
   console.log('[boot] A: NestFactory.create() starting');
 
+  process.env.NEST_DEBUG = 'true';
   const keepalive = setInterval(() => {}, 1 << 30);
   const timeoutMs = Number(process.env.BOOT_CREATE_TIMEOUT_MS ?? 15000);
 
@@ -58,7 +59,19 @@ export async function bootstrap(): Promise<void> {
   let app: NestExpressApplication | undefined;
 
   try {
+    console.time('createAppWithWatchdog');
     app = await createAppWithWatchdog();
+    console.timeEnd('createAppWithWatchdog');
+
+    const moduleRef = app.get(ModuleRef, { strict: false });
+    try {
+      const modules = (moduleRef as any)?.container?.getModules?.();
+      modules?.forEach((module, moduleName) => {
+        module.providers.forEach((_provider, token) =>
+          console.debug(`[provider:init] ${String(token)} in ${String(moduleName)}`),
+        );
+      });
+    } catch {}
 
     const winstonLogger =
       app.get(WINSTON_MODULE_NEST_PROVIDER, { strict: false }) ??
