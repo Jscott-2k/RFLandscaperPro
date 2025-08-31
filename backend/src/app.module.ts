@@ -33,6 +33,7 @@ import { MetricsModule } from './metrics/metrics.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './health/health.module';
 import { EmailModule } from './common/email';
+import { LoggerModule } from './logger/logger.module';
 
 // --- Env file resolution ---
 const nodeEnv = (process.env.NODE_ENV || 'development').toLowerCase();
@@ -62,6 +63,7 @@ if (envFilePath) {
     MetricsModule,
     HealthModule,
     EmailModule,
+    LoggerModule,
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
