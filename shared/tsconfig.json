@@ -4,8 +4,11 @@
     "emitDeclarationOnly": false,
     "module": "commonjs",
     "target": "ES2022",
+    "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "rootDir": "src",
     "outDir": "dist"
   },

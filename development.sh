@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-if [[ "$1" == "--local" ]]; then
+if [[ "${1:-}" == "--local" ]]; then
   (cd backend && npm run start:dev) &
   (cd frontend && npm start) &
   wait
