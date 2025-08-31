@@ -1,5 +1,6 @@
 // src/database/typeorm.config.ts
 import { join } from 'path';
+import { existsSync } from 'fs';
 import type { DataSourceOptions } from 'typeorm';
 import type { ConfigService } from '@nestjs/config';
 import { config as dotenvLoad } from 'dotenv';
@@ -45,7 +46,18 @@ export function buildTypeOrmOptions(cfg: ConfigService): DataSourceOptions {
  */
 export function buildTypeOrmOptionsFromEnv(): DataSourceOptions {
   const nodeEnv = process.env.NODE_ENV || 'development';
-  dotenvLoad({ path: `.env.${nodeEnv}` });
+  const envFile = `.env.${nodeEnv}`;
+  const envPath = join(__dirname, '..', '..', envFile);
+  if (existsSync(envPath)) {
+    dotenvLoad({ path: envPath });
+  } else if (
+    !process.env.DB_HOST ||
+    !process.env.DB_USERNAME ||
+    !process.env.DB_PASSWORD ||
+    !process.env.DB_NAME
+  ) {
+    throw new Error(`Missing required environment file: ${envFile}`);
+  }
 
   const e = env(nodeEnv);
   const isProd = e.NODE_ENV === 'production';
