@@ -18,6 +18,6 @@ const customerRepositoryProvider = {
   imports: [TypeOrmModule.forFeature([Customer, Address])],
   controllers: [CustomersController],
   providers: [CustomersService, customerRepositoryProvider],
-  exports: [CustomersService, customerRepositoryProvider],
+  exports: [CustomersService, CUSTOMER_REPOSITORY],
 })
 export class CustomersModule {}
