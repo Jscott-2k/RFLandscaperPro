@@ -58,7 +58,7 @@ services:
     environment:
       NODE_ENV: development
       CHOKIDAR_USEPOLLING: "true"
-      HOST: 0.0.0.0     # ensure Nest binds to all interfaces
+      HOST: 0.0.0.0
       DB_HOST: db
       # FLUENTD_URL: http://logserver:9880   # uncomment if you ship logs to fluentd
     ports:
@@ -89,7 +89,7 @@ services:
       NODE_ENV: development
       CHOKIDAR_USEPOLLING: "true"
       CHOKIDAR_INTERVAL: "200"
-      NG_HOST: 0.0.0.0   # run Angular dev server on all interfaces
+      NG_HOST: 0.0.0.0
     ports:
       - "4200:4200"
     networks:
@@ -122,9 +122,6 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
-      # If you’re provisioning dashboards:
-      # - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
-      # - ./grafana/provisioning/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
     ports:
       - "3001:3000"
     environment:

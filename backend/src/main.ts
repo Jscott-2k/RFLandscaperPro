@@ -1,158 +1,142 @@
+// src/main.ts
+import 'reflect-metadata';
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import {
-  ExceptionFilter,
-  ValidationPipe,
-  Logger,
-  INestApplication,
-} from '@nestjs/common';
-import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
-import { WINSTON_MODULE_NEST_PROVIDER, WinstonModule } from 'nest-winston';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import basicAuth from 'express-basic-auth';
 import * as winston from 'winston';
+import { WinstonModule, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+
+import { AppModule } from './app.module';
 import { requestIdMiddleware } from './common/middleware/request-id.middleware';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import * as basicAuth from 'express-basic-auth';
+import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
 
+// helpful in dev
 process.on('beforeExit', (c) => console.log('[lifecycle] beforeExit', c));
 process.on('exit', (c) => console.log('[lifecycle] exit', c));
+process.on('unhandledRejection', (e) => console.error('[unhandledRejection]', e));
+process.on('uncaughtException', (e) => console.error('[uncaughtException]', e));
 
-async function bootstrap() {
-  let app: INestApplication | undefined;
-  const logger = new Logger('Bootstrap');
+async function createAppWithWatchdog(): Promise<NestExpressApplication> {
+  console.log('[boot] A: NestFactory.create() starting');
+
+  const keepalive = setInterval(() => {}, 1 << 30);
+  const timeoutMs = Number(process.env.BOOT_CREATE_TIMEOUT_MS ?? 15000);
 
   try {
-    logger.log('[boot] A: create() starting');
-    app = await NestFactory.create(AppModule, { bufferLogs: true });
-    logger.log('[boot] B: after create()');
-    logger.log('[boot] C: pre-listen setup starting');
-    // Prefix all routes with /api
-    app.setGlobalPrefix('api');
+    const app = await Promise.race([
+      NestFactory.create<NestExpressApplication>(AppModule, {
+        bufferLogs: true,
+        logger:
+          process.env.NEST_LOG_LEVEL === 'debug'
+            ? ['error', 'warn', 'log', 'debug', 'verbose']
+            : undefined,
+      }),
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                `NestFactory.create timed out after ${timeoutMs}ms. Likely a hanging provider in AppModule (e.g., DB connect in a useFactory/constructor).`,
+              ),
+            ),
+          timeoutMs,
+        ),
+      ),
+    ]);
 
-    // Apply middleware
+    console.log('[boot] B: after create()');
+    return app;
+  } finally {
+    clearInterval(keepalive);
+  }
+}
+
+export async function bootstrap(): Promise<void> {
+  let app: NestExpressApplication | undefined;
+
+  try {
+    app = await createAppWithWatchdog();
+
+    const winstonLogger =
+      app.get(WINSTON_MODULE_NEST_PROVIDER, { strict: false }) ??
+      WinstonModule.createLogger({ transports: [new winston.transports.Console()] });
+    app.useLogger(winstonLogger);
+
+    // Core setup
+    app.setGlobalPrefix('api');
+    app.set('trust proxy', true); // typed & valid for Express
     app.use(requestIdMiddleware);
 
-    // Setup logging
-    app.useLogger(app.get<Logger>(WINSTON_MODULE_NEST_PROVIDER));
-    const winstonLogger = app.get<Logger>(WINSTON_MODULE_NEST_PROVIDER);
+    // If LoggingInterceptor is provided in DI, this resolves it
+    app.useGlobalInterceptors(app.get(LoggingInterceptor));
 
-    // Apply interceptors
-    app.useGlobalInterceptors(app.get<LoggingInterceptor>(LoggingInterceptor));
-
-    logger.log(
-      `Starting backend in ${process.env.NODE_ENV || 'development'} mode`,
-    );
-
-    // Enable CORS
-    app.enableCors({
-      origin:
-        process.env.NODE_ENV === 'production'
-          ? process.env.ALLOWED_ORIGINS?.split(',') || []
-          : true,
-      credentials: true,
-    });
-
-    // Global validation pipe
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,
-        transformOptions: {
-          enableImplicitConversion: true,
-        },
+        transformOptions: { enableImplicitConversion: true },
         errorHttpStatusCode: 422,
+        stopAtFirstError: true,
       }),
     );
 
-    // Global exception filter
-    app.useGlobalFilters(
-      new HttpExceptionFilter(winstonLogger) satisfies ExceptionFilter,
-    );
+    app.useGlobalFilters(new HttpExceptionFilter(winstonLogger as any));
 
-    // Swagger documentation with basic auth
-    if (process.env.NODE_ENV !== 'production') {
+    const isProd = process.env.NODE_ENV === 'production';
+    const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    app.enableCors({ origin: isProd ? allowedOrigins : true, credentials: true });
+
+    if (!isProd) {
       app.use(
         ['/docs', '/docs-json'],
         basicAuth({
           challenge: true,
           users: {
-            [process.env.SWAGGER_USER || 'admin']:
-              process.env.SWAGGER_PASSWORD || 'admin',
+            [process.env.SWAGGER_USER || 'admin']: process.env.SWAGGER_PASSWORD || 'admin',
           },
         }),
       );
 
-      const config = new DocumentBuilder()
+      const swaggerConfig = new DocumentBuilder()
         .setTitle('RF Landscaper Pro API')
         .setDescription('Professional landscaping business management API')
         .setVersion('1.0.0')
-        .addTag('auth', 'Authentication endpoints')
-        .addTag('users', 'User management')
-        .addTag('customers', 'Customer management')
-        .addTag('jobs', 'Job management')
-        .addTag('equipment', 'Equipment management')
         .addBearerAuth()
         .build();
 
-      const document = SwaggerModule.createDocument(app, config);
-      SwaggerModule.setup('docs', app, document);
-
-      logger.log('Swagger documentation available at /docs');
+      const swaggerDoc = SwaggerModule.createDocument(app, swaggerConfig);
+      SwaggerModule.setup('docs', app, swaggerDoc);
+      console.log('[boot] Swagger available at /docs');
     }
 
-    // Start the application
-    const port = process.env.PORT || 3000;
     const host = process.env.HOST || '0.0.0.0';
-    logger.log(`About to listen on ${host}:${port}...`);
-    await app.listen(port, host);
-    logger.log(`Application is running on: http://${host}:${port}`);
-  } catch (error) {
-    const errorLogger =
-      app?.get<Logger>(WINSTON_MODULE_NEST_PROVIDER) ||
-      WinstonModule.createLogger({
-        transports: [new winston.transports.Console()],
-      });
+    const port = Number(process.env.PORT ?? 3000);
+    await app.init();
+    console.log('[boot] C: after app.init()');
 
-    if (error instanceof Error) {
-      errorLogger.error(`Bootstrap error: ${error.message}`, {
-        stack: error.stack,
-      });
-      logger.error(
-        `Failed to start application: ${error.message}`,
-        error.stack,
+    app.enableShutdownHooks();
+    await app.listen(port, host);
+    console.log(`[boot] D: listening on http://${host}:${port}`);
+  } catch (err: any) {
+    try {
+      app?.get(WINSTON_MODULE_NEST_PROVIDER, { strict: false })?.error?.(
+        'Bootstrap error',
+        err?.stack || err,
       );
-    } else {
-      const serialized = JSON.stringify(error);
-      errorLogger.error(`Bootstrap error: ${serialized}`);
-      logger.error(`Failed to start application: ${serialized}`);
-    }
+    } catch {}
+    console.error('[boot] FATAL:', err?.message || err, err?.stack);
     process.exit(1);
   }
 }
 
-process.on('exit', (code) => {
-  const logger = new Logger('Process');
-  logger.log(`Process exiting with code ${code}`);
-});
-process.on('unhandledRejection', (reason) => {
-  const logger = new Logger('Process');
-  logger.error(`Unhandled rejection: ${JSON.stringify(reason)}`);
-});
-process.on('uncaughtException', (err) => {
-  const logger = new Logger('Process');
-  logger.error(`Uncaught exception: ${err.message}`, err.stack);
-});
-
-void (async () => {
-  try {
-    await bootstrap();
-  } catch (err) {
-    const logger = new Logger('Bootstrap');
-    logger.error(
-      err instanceof Error ? err.message : String(err),
-      err instanceof Error ? err.stack : undefined,
-    );
-    process.exit(1);
-  }
-})();
+// run when executed directly
+if (require.main === module) {
+  bootstrap();
+}

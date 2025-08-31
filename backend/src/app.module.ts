@@ -6,8 +6,8 @@ import {
   makeHistogramProvider,
 } from '@willsoto/nestjs-prometheus';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { existsSync } from 'fs';
-import { join } from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { buildTypeOrmOptions } from './database/typeorm.config';
@@ -30,6 +30,30 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './health/health.module';
 import { EmailModule } from './common/email';
 
+// --- Env file resolution ---
+const nodeEnv = (process.env.NODE_ENV || 'development').toLowerCase();
+const envFile = `.env.${nodeEnv}`;
+const candidates = [
+  path.resolve(process.cwd(), envFile),
+  path.resolve(__dirname, '..', '..', envFile), // dist/src -> backend/.env.*
+  path.resolve(__dirname, '..', envFile),       // src -> backend/.env.*
+  path.resolve(process.cwd(), '.env'),
+];
+
+const envFilePath = candidates.find((p) => fs.existsSync(p));
+
+if (envFilePath) {
+  // eslint-disable-next-line no-console
+  console.log(`[config] Loaded env file: ${envFilePath}`);
+} else {
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[config] No env file found (${envFile}). Tried:\n - ${candidates.join(
+      '\n - ',
+    )}\nContinuing with process.env only.`,
+  );
+}
+
 @Module({
   imports: [
     PrometheusModule.register({ global: true }),
@@ -39,33 +63,28 @@ import { EmailModule } from './common/email';
     EmailModule,
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
-      envFilePath: (() => {
-        const nodeEnv = process.env.NODE_ENV || 'development';
-        const envFile = `.env.${nodeEnv}`;
-        const envPath = join(__dirname, '..', envFile);
-        if (!existsSync(envPath)) {
-          throw new Error(`Missing required environment file: ${envFile}`);
-        }
-        return envPath;
-      })(),
       isGlobal: true,
+      envFilePath: envFilePath ? [envFilePath] : [],
+      ignoreEnvFile: !envFilePath,
       validationSchema: Joi.object({
         NODE_ENV: Joi.string()
           .valid('development', 'production', 'test')
           .default('development'),
         PORT: Joi.number().default(3000),
+
         DB_HOST: Joi.string().required(),
         DB_PORT: Joi.number().default(5432),
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
+
         JWT_SECRET: Joi.string().required(),
         LOG_LEVEL: Joi.string().default('debug'),
         CACHE_TTL: Joi.number().default(60_000),
         CACHE_MAX: Joi.number().default(100),
         THROTTLE_TTL: Joi.number().default(60),
         THROTTLE_LIMIT: Joi.number().default(20),
-      }),
+      }).unknown(true),
     }),
     CacheModule.registerAsync({
       isGlobal: true,
@@ -94,7 +113,9 @@ import { EmailModule } from './common/email';
         const isProduction = process.env.NODE_ENV === 'production';
         const logger: Logger = new Logger('TYPEORM_FACTORY');
         logger.log(
-          `[TYPEORM_FACTORY] Connecting to DB in ${isProduction ? 'production' : 'development'} mode`,
+          `[TYPEORM_FACTORY] Connecting to DB in ${
+            isProduction ? 'production' : 'development'
+          } mode`,
         );
         return buildTypeOrmOptions(config);
       },
