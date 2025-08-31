@@ -4,6 +4,9 @@ dist/
 *.d.ts
 *.js.map
 
+# TypeScript incremental build info
+*.tsbuildinfo
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
