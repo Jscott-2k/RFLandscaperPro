@@ -1,5 +1,9 @@
 import { Module, Logger } from '@nestjs/common';
-import { CacheModule, CacheInterceptor } from '@nestjs/cache-manager';
+import {
+  CacheModule,
+  CacheInterceptor,
+  CACHE_MANAGER,
+} from '@nestjs/cache-manager';
 import { ThrottlerModule } from '@nestjs/throttler';
 import {
   PrometheusModule,
@@ -18,7 +22,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { CompaniesModule } from './companies/companies.module';
 import { ContractsModule } from './contracts/contracts.module';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR, Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { MetricsThrottlerGuard } from './common/guards/metrics-throttler.guard';
@@ -29,14 +33,7 @@ import { MetricsModule } from './metrics/metrics.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './health/health.module';
 import { EmailModule } from './common/email';
-import { DataSourceOptions, DataSource } from 'typeorm';
 
-function sleep(ms: number) {
-  return new Promise((r) => setTimeout(r, ms));
-}
-const DS_INIT_TIMEOUT_MS = Number(process.env.DS_INIT_TIMEOUT_MS ?? 20_000);
-const DS_RETRY_ATTEMPTS = Number(process.env.DS_RETRY_ATTEMPTS ?? 3);
-const DS_RETRY_DELAY_MS = Number(process.env.DS_RETRY_DELAY_MS ?? 2000);
 // --- Env file resolution ---
 const nodeEnv = (process.env.NODE_ENV || 'development').toLowerCase();
 const envFile = `.env.${nodeEnv}`;
@@ -119,57 +116,7 @@ if (envFilePath) {
         new Logger('TYPEORM_FACTORY').log(
           `[TYPEORM_FACTORY] Connecting to DB in ${isProd ? 'production' : 'development'} mode`,
         );
-        // Return plain DataSourceOptions only; no connect here
         return buildTypeOrmOptions(config);
-      },
-
-      // Custom connection factory with retry + timeout
-      dataSourceFactory: async (options: DataSourceOptions) => {
-        let lastErr: unknown;
-
-        for (let attempt = 1; attempt <= DS_RETRY_ATTEMPTS; attempt++) {
-          const ds = new DataSource(options);
-          const started = Date.now();
-          console.log(
-            `[typeorm] initialize attempt ${attempt}/${DS_RETRY_ATTEMPTS}…`,
-          );
-
-          try {
-            await Promise.race([
-              ds.initialize(),
-              new Promise<never>((_, reject) =>
-                setTimeout(
-                  () =>
-                    reject(
-                      new Error(
-                        `DataSource.initialize() exceeded ${DS_INIT_TIMEOUT_MS}ms (host=${(options as any).host}, db=${(options as any).database})`,
-                      ),
-                    ),
-                  DS_INIT_TIMEOUT_MS,
-                ),
-              ),
-            ]);
-
-            console.log(
-              `[typeorm] initialized in ${Date.now() - started}ms (attempt ${attempt})`,
-            );
-            return ds;
-          } catch (e) {
-            lastErr = e;
-            console.error(
-              `[typeorm] init failed (attempt ${attempt}/${DS_RETRY_ATTEMPTS}):`,
-              (e as Error)?.message || e,
-            );
-            try {
-              await ds.destroy();
-            } catch {}
-            if (attempt < DS_RETRY_ATTEMPTS) {
-              await sleep(DS_RETRY_DELAY_MS);
-            }
-          }
-        }
-
-        throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
       },
     }),
 
@@ -191,7 +138,9 @@ if (envFilePath) {
     LoggingInterceptor,
     {
       provide: APP_INTERCEPTOR,
-      useClass: CacheInterceptor,
+      useFactory: (cache: Cache, reflector: Reflector) =>
+        new CacheInterceptor(cache, reflector),
+      inject: [CACHE_MANAGER, Reflector],
     },
     {
       provide: APP_GUARD,
