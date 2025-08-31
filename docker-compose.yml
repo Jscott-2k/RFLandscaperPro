@@ -1,10 +1,12 @@
+version: "3.9"
+
 services:
   db:
-    container_name: db
     image: postgres:14
+    container_name: db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: rflandscaperpro
     ports:
       - "5432:5432"
@@ -12,29 +14,37 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - rflandscaperpro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
 
   logging:
-    container_name: logserver
     image: fluent/fluentd:v1.16-debian
+    container_name: logserver
     volumes:
       - ./logging/fluentd.conf:/fluentd/etc/fluent.conf:ro
     ports:
       - "9880:9880"
     networks:
       - rflandscaperpro
+    restart: unless-stopped
 
   mailhog:
-    container_name: mailhog
     image: mailhog/mailhog
+    container_name: mailhog
     ports:
       - "1025:1025"
       - "8025:8025"
     networks:
       - rflandscaperpro
+    restart: unless-stopped
 
   backend:
-    container_name: backend
     image: rflandscaperpro/backend
+    container_name: backend
     build:
       context: .
       dockerfile: backend/Dockerfile.dev
@@ -46,17 +56,28 @@ services:
     env_file:
       - ./backend/.env.development
     environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
-      - DB_HOST=db
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+      HOST: 0.0.0.0     # ensure Nest binds to all interfaces
+      DB_HOST: db
+      # FLUENTD_URL: http://logserver:9880   # uncomment if you ship logs to fluentd
     ports:
       - "3000:3000"
     networks:
       - rflandscaperpro
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
 
   frontend:
-    container_name: frontend
     image: rflandscaperpro/frontend
+    container_name: frontend
     build:
       context: .
       dockerfile: frontend/Dockerfile.dev
@@ -64,38 +85,59 @@ services:
       - ./frontend:/app
       - ./shared:/shared
       - /app/node_modules
+    environment:
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "200"
+      NG_HOST: 0.0.0.0   # run Angular dev server on all interfaces
     ports:
       - "4200:4200"
-    environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
     networks:
       - rflandscaperpro
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:4200 || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
 
   prometheus:
-    container_name: prometheus
     image: prom/prometheus
+    container_name: prometheus
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
       - "9090:9090"
     networks:
       - rflandscaperpro
+    depends_on:
+      - backend
+    restart: unless-stopped
 
   grafana:
-    container_name: grafana
     image: grafana/grafana
+    container_name: grafana
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+      # If you’re provisioning dashboards:
+      # - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      # - ./grafana/provisioning/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
     ports:
       - "3001:3000"
+    environment:
+      GF_LOG_LEVEL: warn
     networks:
       - rflandscaperpro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
 
 volumes:
   postgres_data:
   grafana_data:
 
 networks:
-  rflandscaperpro:
+  rflandscaperpro: {}
