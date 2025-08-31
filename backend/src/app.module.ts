@@ -28,6 +28,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { MetricsModule } from './metrics/metrics.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './health/health.module';
+import { EmailModule } from './common/email';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { HealthModule } from './health/health.module';
     LoggerModule,
     MetricsModule,
     HealthModule,
+    EmailModule,
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: (() => {
