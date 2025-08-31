@@ -62,10 +62,11 @@ RFLandscaperPro/
 
 To launch the full stack for local work, use the helper scripts in the repository root.
 
-- **macOS/Linux**: `./development.sh`
-- **Windows PowerShell**: `pwsh -File .\development.ps1`
+  - **macOS/Linux (Docker)**: `./development.sh`
+  - **Windows PowerShell (Docker)**: `pwsh -File .\development.ps1`
+  - **Run without Docker**: add `--local` on macOS/Linux or `-Local` in PowerShell to start the backend and frontend directly.
 
-These scripts ensure the `rflandscaperpro` Docker network exists and start the database, backend, frontend, and supporting tools using `docker compose`.
+  These scripts ensure the `rflandscaperpro` Docker network exists and start the database, backend, frontend, and supporting tools using `docker compose` when not using the local option.
 
 When you are finished with the stack, shut everything down with the teardown scripts:
 
