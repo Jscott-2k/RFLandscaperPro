@@ -16,7 +16,9 @@ const typeOrmConfig: DataSourceOptions = {
   database: process.env.DB_NAME,
   entities: [join(__dirname, '..', '**/*.entity{.ts,.js}')],
   migrations: [join(__dirname, '..', 'migrations/*{.ts,.js}')],
-  migrationsRun: process.env.RUN_MIGRATIONS === 'true',
+  // Migrations are executed separately via CLI (npm run migration:run)
+  // to avoid unexpected latency and exit behavior at application startup.
+  migrationsRun: false,
   synchronize: false,
   ssl: isProduction ? { rejectUnauthorized: false } : false,
 };
