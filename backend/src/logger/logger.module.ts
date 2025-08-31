@@ -5,7 +5,11 @@ import {
   LoggerService,
   Global,
 } from '@nestjs/common';
-import { WinstonModule, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import {
+  WinstonModule,
+  WINSTON_MODULE_NEST_PROVIDER,
+  WINSTON_MODULE_PROVIDER,
+} from 'nest-winston';
 import * as winston from 'winston';
 import { makeCounterProvider, InjectMetric } from '@willsoto/nestjs-prometheus';
 import { Counter } from 'prom-client';
@@ -40,7 +44,8 @@ class PrometheusLogger implements LoggerService {
   >;
 
   constructor(
-    @Inject('BASE_LOGGER') private readonly logger: LoggerService,
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: winston.Logger,
     @InjectMetric('log_error_total') errorCounter: Counter<string>,
     @InjectMetric('log_warn_total') warnCounter: Counter<string>,
     @InjectMetric('log_info_total') infoCounter: Counter<string>,
@@ -58,15 +63,15 @@ class PrometheusLogger implements LoggerService {
 
   log(message: any, ...optionalParams: any[]) {
     this.counters.info.inc();
-    this.logger.log(message, ...optionalParams);
+    this.logger.info?.(message, ...optionalParams);
   }
   error(message: any, ...optionalParams: any[]) {
     this.counters.error.inc();
-    this.logger.error(message, ...optionalParams);
+    this.logger.error?.(message, ...optionalParams);
   }
   warn(message: any, ...optionalParams: any[]) {
     this.counters.warn.inc();
-    this.logger.warn(message, ...optionalParams);
+    this.logger.warn?.(message, ...optionalParams);
   }
   debug(message: any, ...optionalParams: any[]) {
     this.counters.debug.inc();
@@ -104,7 +109,6 @@ class PrometheusLogger implements LoggerService {
         help: `Total number of ${level} logs`,
       }),
     ),
-    { provide: 'BASE_LOGGER', useExisting: WINSTON_MODULE_NEST_PROVIDER },
     PrometheusLogger,
     { provide: WINSTON_MODULE_NEST_PROVIDER, useExisting: PrometheusLogger },
   ],
