@@ -27,6 +27,15 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
   );
 
   async onModuleInit(): Promise<void> {
+    const emailEnabled =
+      process.env.EMAIL_ENABLED !== 'false' &&
+      process.env.EMAIL_ENABLED !== '0';
+    if (!emailEnabled) {
+      this.logger.log('EmailService disabled via EMAIL_ENABLED');
+      this.readyResolve();
+      return;
+    }
+
     const hasMailhog = !!process.env.MAILHOG_HOST || !!process.env.MAILHOG_PORT;
     this.driver =
       process.env.NODE_ENV === 'production'
@@ -70,7 +79,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleDestroy(): void {
-    this.transporter.close?.();
+    this.transporter?.close?.();
   }
 
   private formatRecipients(to: nodemailer.SendMailOptions['to']): string {
