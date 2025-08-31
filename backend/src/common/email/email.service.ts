@@ -42,13 +42,18 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
       const { transporter } = await new SmtpTransport().create();
       this.transporter = transporter;
       try {
-        await this.transporter.verify();
+        await Promise.race([
+          this.transporter.verify(),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('SMTP verify timeout')), 5000),
+          ),
+        ]);
         this.logger.log('SMTP transporter verified.');
       } catch (e) {
         const err = toError(e);
         if (process.env.NODE_ENV !== 'production') {
           this.logger.warn(
-            `SMTP verify failed: ${err.message}. Falling back to ethereal.`,
+            `SMTP verify failed or timed out: ${err.message}. Falling back to ethereal.`,
           );
           const ethereal = await new EtherealTransport().create();
           this.transporter = ethereal.transporter;
@@ -56,7 +61,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
           this.driver = 'ethereal';
         } else {
           this.logger.warn(
-            `SMTP verify failed (will still try to send): ${err.message}`,
+            `SMTP verify failed or timed out (will still try to send): ${err.message}`,
           );
         }
       }
