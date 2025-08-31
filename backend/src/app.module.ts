@@ -6,6 +6,7 @@ import {
   makeHistogramProvider,
 } from '@willsoto/nestjs-prometheus';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { existsSync } from 'fs';
 import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { buildTypeOrmOptions } from './database/typeorm.config';
@@ -35,7 +36,11 @@ import { HealthModule } from './health/health.module';
     HealthModule,
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
+      envFilePath: (() => {
+        const nodeEnv = process.env.NODE_ENV || 'development';
+        const primary = `.env.${nodeEnv}`;
+        return existsSync(primary) ? primary : 'env.example';
+      })(),
       isGlobal: true,
       validationSchema: Joi.object({
         NODE_ENV: Joi.string()
