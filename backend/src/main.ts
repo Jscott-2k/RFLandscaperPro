@@ -14,6 +14,9 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as basicAuth from 'express-basic-auth';
 
+process.on('beforeExit', (c) => console.log('[lifecycle] beforeExit', c));
+process.on('exit', (c) => console.log('[lifecycle] exit', c));
+
 async function bootstrap() {
   let app: INestApplication | undefined;
   const logger = new Logger('Bootstrap');
@@ -99,7 +102,7 @@ async function bootstrap() {
     // Start the application
     const port = process.env.PORT || 3000;
     const host = process.env.HOST || '0.0.0.0';
-
+    logger.log(`About to listen on ${host}:${port}...`);
     await app.listen(port, host);
     logger.log(`Application is running on: http://${host}:${port}`);
   } catch (error) {
@@ -126,4 +129,28 @@ async function bootstrap() {
   }
 }
 
-void bootstrap();
+process.on('exit', (code) => {
+  const logger = new Logger('Process');
+  logger.log(`Process exiting with code ${code}`);
+});
+process.on('unhandledRejection', (reason) => {
+  const logger = new Logger('Process');
+  logger.error(`Unhandled rejection: ${JSON.stringify(reason)}`);
+});
+process.on('uncaughtException', (err) => {
+  const logger = new Logger('Process');
+  logger.error(`Uncaught exception: ${err.message}`, err.stack);
+});
+
+void (async () => {
+  try {
+    await bootstrap();
+  } catch (err) {
+    const logger = new Logger('Bootstrap');
+    logger.error(
+      err instanceof Error ? err.message : String(err),
+      err instanceof Error ? err.stack : undefined,
+    );
+    process.exit(1);
+  }
+})();
