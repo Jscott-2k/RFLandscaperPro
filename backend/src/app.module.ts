@@ -29,24 +29,29 @@ import { MetricsModule } from './metrics/metrics.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './health/health.module';
 import { EmailModule } from './common/email';
+import { DataSourceOptions, DataSource } from 'typeorm';
 
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+const DS_INIT_TIMEOUT_MS = Number(process.env.DS_INIT_TIMEOUT_MS ?? 20_000);
+const DS_RETRY_ATTEMPTS = Number(process.env.DS_RETRY_ATTEMPTS ?? 3);
+const DS_RETRY_DELAY_MS = Number(process.env.DS_RETRY_DELAY_MS ?? 2000);
 // --- Env file resolution ---
 const nodeEnv = (process.env.NODE_ENV || 'development').toLowerCase();
 const envFile = `.env.${nodeEnv}`;
 const candidates = [
   path.resolve(process.cwd(), envFile),
   path.resolve(__dirname, '..', '..', envFile), // dist/src -> backend/.env.*
-  path.resolve(__dirname, '..', envFile),       // src -> backend/.env.*
+  path.resolve(__dirname, '..', envFile), // src -> backend/.env.*
   path.resolve(process.cwd(), '.env'),
 ];
 
 const envFilePath = candidates.find((p) => fs.existsSync(p));
 
 if (envFilePath) {
-  // eslint-disable-next-line no-console
   console.log(`[config] Loaded env file: ${envFilePath}`);
 } else {
-  // eslint-disable-next-line no-console
   console.warn(
     `[config] No env file found (${envFile}). Tried:\n - ${candidates.join(
       '\n - ',
@@ -110,14 +115,61 @@ if (envFilePath) {
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        const isProduction = process.env.NODE_ENV === 'production';
-        const logger: Logger = new Logger('TYPEORM_FACTORY');
-        logger.log(
-          `[TYPEORM_FACTORY] Connecting to DB in ${
-            isProduction ? 'production' : 'development'
-          } mode`,
+        const isProd = process.env.NODE_ENV === 'production';
+        new Logger('TYPEORM_FACTORY').log(
+          `[TYPEORM_FACTORY] Connecting to DB in ${isProd ? 'production' : 'development'} mode`,
         );
+        // Return plain DataSourceOptions only; no connect here
         return buildTypeOrmOptions(config);
+      },
+
+      // Custom connection factory with retry + timeout
+      dataSourceFactory: async (options: DataSourceOptions) => {
+        let lastErr: unknown;
+
+        for (let attempt = 1; attempt <= DS_RETRY_ATTEMPTS; attempt++) {
+          const ds = new DataSource(options);
+          const started = Date.now();
+          console.log(
+            `[typeorm] initialize attempt ${attempt}/${DS_RETRY_ATTEMPTS}…`,
+          );
+
+          try {
+            await Promise.race([
+              ds.initialize(),
+              new Promise<never>((_, reject) =>
+                setTimeout(
+                  () =>
+                    reject(
+                      new Error(
+                        `DataSource.initialize() exceeded ${DS_INIT_TIMEOUT_MS}ms (host=${(options as any).host}, db=${(options as any).database})`,
+                      ),
+                    ),
+                  DS_INIT_TIMEOUT_MS,
+                ),
+              ),
+            ]);
+
+            console.log(
+              `[typeorm] initialized in ${Date.now() - started}ms (attempt ${attempt})`,
+            );
+            return ds;
+          } catch (e) {
+            lastErr = e;
+            console.error(
+              `[typeorm] init failed (attempt ${attempt}/${DS_RETRY_ATTEMPTS}):`,
+              (e as Error)?.message || e,
+            );
+            try {
+              await ds.destroy();
+            } catch {}
+            if (attempt < DS_RETRY_ATTEMPTS) {
+              await sleep(DS_RETRY_DELAY_MS);
+            }
+          }
+        }
+
+        throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
       },
     }),
 

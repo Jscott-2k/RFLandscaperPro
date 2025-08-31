@@ -1,89 +1,149 @@
 // src/database/typeorm.config.ts
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { existsSync } from 'fs';
 import type { DataSourceOptions } from 'typeorm';
 import type { ConfigService } from '@nestjs/config';
 import { config as dotenvLoad } from 'dotenv';
 
-function env(nodeEnv = process.env.NODE_ENV || 'development') {
-  return {
-    NODE_ENV: nodeEnv,
-    DB_HOST: process.env.DB_HOST,
-    DB_PORT: Number(process.env.DB_PORT ?? 5432),
-    DB_USERNAME: process.env.DB_USERNAME,
-    DB_PASSWORD: process.env.DB_PASSWORD,
-    DB_NAME: process.env.DB_NAME,
-  };
+/* ---------- helpers ---------- */
+
+function coalesce<T>(...vals: (T | undefined | null | '')[]): T | undefined {
+  for (const v of vals) if (v !== undefined && v !== null && v !== ('' as any)) return v as T;
+  return undefined;
+}
+function toBool(v: unknown, fallback = false): boolean {
+  if (typeof v === 'boolean') return v;
+  if (typeof v === 'string') return ['1', 'true', 'yes', 'on'].includes(v.toLowerCase());
+  return fallback;
 }
 
-/**
- * For Nest runtime: prefer ConfigService (validated by ConfigModule).
- * Do NOT read .env files here — ConfigModule already did that.
- */
-export function buildTypeOrmOptions(cfg: ConfigService): DataSourceOptions {
-  const nodeEnv = cfg.get<string>('NODE_ENV', 'development');
-  const isProd = nodeEnv === 'production';
+type OrmLogLevel = 'query' | 'error' | 'warn' | 'schema' | 'log' | 'migration';
+
+function parseLogging(envVal?: string): DataSourceOptions['logging'] {
+  const v = (envVal || '').toLowerCase();
+
+  if (v === 'all') return true;
+  if (v === 'false' || v === 'off' || v === 'none') return false;
+  if (v === 'true') return true;
+
+  // Presets
+  if (v === 'query') return ['query', 'error', 'warn'] as OrmLogLevel[];
+  if (v === 'minimal') return ['error', 'warn'] as OrmLogLevel[];
+
+  // Single channels
+  if (['query', 'schema', 'error', 'warn', 'log', 'migration'].includes(v)) {
+    return [v as OrmLogLevel];
+  }
+
+  // Default
+  return ['error', 'warn'] as OrmLogLevel[];
+}
+
+function commonOptions({
+  host,
+  port,
+  username,
+  password,
+  database,
+  ssl,
+  logging,
+}: {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  database: string;
+  ssl: boolean;
+  logging: DataSourceOptions['logging'];
+}): DataSourceOptions {
+  const entities = [join(__dirname, '..', '**', '*.entity.{ts,js}')];
+  const migrations = [
+    join(__dirname, 'migrations', '*.{ts,js}'),
+    join(__dirname, '..', 'database', 'migrations', '*.{ts,js}'),
+  ];
 
   return {
     type: 'postgres',
-    host: cfg.get<string>('DB_HOST')!,
-    port: cfg.get<number>('DB_PORT', 5432),
-    username: cfg.get<string>('DB_USERNAME')!,
-    password: cfg.get<string>('DB_PASSWORD')!,
-    database: cfg.get<string>('DB_NAME')!,
-    logging: true,
+    host,
+    port,
+    username,
+    password,
+    database,
+
+    entities,
+    migrations,
+
+    // Never block boot:
     synchronize: false,
     migrationsRun: false,
-    migrations: [join(__dirname, 'migrations/*{.js}')],
-    entities: [join(__dirname, '..', '**/*.entity{.ts,.js}')],
-    ssl: isProd ? { rejectUnauthorized: false } : false,
+
+    logging,
+    maxQueryExecutionTime: 10_000,
+
+    // pg driver extras
+    extra: {
+      connectionTimeoutMillis: 5_000,
+      statement_timeout: 15_000,
+      query_timeout: 15_000,
+      idle_in_transaction_session_timeout: 15_000,
+    },
+
+    // proper top-level SSL flag/object for TypeORM
+    ssl: ssl ? { rejectUnauthorized: false } : false,
   };
 }
 
-/**
- * For CLI / scripts: load .env.<NODE_ENV> and build options from raw env.
- * This version includes TS+JS globs so you can generate/run in dev.
- */
+/* ---------- For Nest runtime (ConfigModule already loaded env) ---------- */
+
+export function buildTypeOrmOptions(cfg: ConfigService): DataSourceOptions {
+  const nodeEnv = cfg.get<string>('NODE_ENV', 'development').toLowerCase();
+  const host = cfg.get<string>('DB_HOST', 'localhost');
+  const port = Number(cfg.get<number>('DB_PORT', 5432));
+  const username = coalesce(cfg.get<string>('DB_USERNAME'), cfg.get<string>('DB_USER'))!;
+  const password = cfg.get<string>('DB_PASSWORD')!;
+  const database = cfg.get<string>('DB_NAME')!;
+  const ssl = toBool(cfg.get('DB_SSL'), nodeEnv === 'production');
+
+  const logging = parseLogging(cfg.get<string>('TYPEORM_LOGGING'));
+
+  return commonOptions({ host, port, username, password, database, ssl, logging });
+}
+
+/* ---------- For CLI/scripts (load .env manually) ---------- */
+
 export function buildTypeOrmOptionsFromEnv(): DataSourceOptions {
-  const nodeEnv = process.env.NODE_ENV || 'development';
+  const nodeEnv = (process.env.NODE_ENV || 'development').toLowerCase();
   const envFile = `.env.${nodeEnv}`;
-  const envPath = join(__dirname, '..', '..', envFile);
-  if (existsSync(envPath)) {
+
+  const candidates = [
+    resolve(process.cwd(), envFile),
+    resolve(__dirname, '..', '..', envFile), // dist/src -> backend/.env.*
+    resolve(__dirname, '..', envFile),       // src -> backend/.env.*
+    resolve(process.cwd(), '.env'),
+  ];
+  const envPath = candidates.find((p) => existsSync(p));
+  if (envPath) {
     dotenvLoad({ path: envPath });
-  } else if (
-    !process.env.DB_HOST ||
-    !process.env.DB_USERNAME ||
-    !process.env.DB_PASSWORD ||
-    !process.env.DB_NAME
-  ) {
-    throw new Error(`Missing required environment file: ${envFile}`);
+    // eslint-disable-next-line no-console
+    console.log(`[typeorm.config] Loaded env file: ${envPath}`);
   }
 
-  const e = env(nodeEnv);
-  const isProd = e.NODE_ENV === 'production';
+  const host = process.env.DB_HOST || 'localhost';
+  const port = Number(process.env.DB_PORT ?? 5432);
+  const username = coalesce(process.env.DB_USERNAME, process.env.DB_USER);
+  const password = process.env.DB_PASSWORD;
+  const database = process.env.DB_NAME;
+  const ssl = toBool(process.env.DB_SSL, nodeEnv === 'production');
 
-  if (!e.DB_HOST || !e.DB_USERNAME || !e.DB_PASSWORD || !e.DB_NAME) {
+  if (!host || !username || !password || !database) {
     throw new Error(
-      `Missing DB env vars (DB_HOST/DB_USERNAME/DB_PASSWORD/DB_NAME); NODE_ENV=${e.NODE_ENV}`,
+      `Missing DB env vars (DB_HOST/DB_USERNAME|DB_USER/DB_PASSWORD/DB_NAME); NODE_ENV=${nodeEnv}`,
     );
   }
 
-  return {
-    type: 'postgres',
-    host: e.DB_HOST,
-    port: e.DB_PORT,
-    username: e.DB_USERNAME,
-    password: e.DB_PASSWORD,
-    database: e.DB_NAME,
-    synchronize: false,
-    migrationsRun: false,
-    migrations: [
-      join(__dirname, 'migrations/*{.ts,.js}'),
-      join(__dirname, '..', 'database', 'migrations/*{.ts,.js}'),
-    ],
-    entities: [join(__dirname, '..', '**/*.entity{.ts,.js}')],
-    ssl: isProd ? { rejectUnauthorized: false } : false,
-  };
+  const logging = parseLogging(process.env.TYPEORM_LOGGING);
+
+  return commonOptions({ host, port, username, password, database, ssl, logging });
 }
 
 export default buildTypeOrmOptions;
