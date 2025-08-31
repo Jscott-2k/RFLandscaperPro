@@ -2,12 +2,10 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "ES2023",
-
-    // --- Dev/IDE only: do NOT emit, and allow multiple roots
-    "noEmit": true,
+    "moduleResolution": "node",
+    "noEmit": false,
     "rootDirs": ["src", "../shared/src"],
     "outDir": "./dist",
-    // Paths point to source for great IntelliSense
     "baseUrl": "./",
     "paths": {
       "@rflp/shared": ["../shared/src"],

@@ -48,6 +48,7 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
+      - DB_HOST=db
     ports:
       - "3000:3000"
     networks:

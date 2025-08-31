@@ -1,4 +1,4 @@
-import { Module, LoggerService } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { CacheModule, CacheInterceptor } from '@nestjs/cache-manager';
 import { ThrottlerModule } from '@nestjs/throttler';
 import {
@@ -8,7 +8,7 @@ import {
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import typeOrmConfig from './database/typeorm.config';
+import { buildTypeOrmOptions } from './database/typeorm.config';
 import { CustomersModule } from './customers/customers.module';
 import { JobsModule } from './jobs/jobs.module';
 import { EquipmentModule } from './equipment/equipment.module';
@@ -21,7 +21,6 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { MetricsThrottlerGuard } from './common/guards/metrics-throttler.guard';
 import { TenantGuard } from './common/tenant.guard';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { LoggerModule } from './logger/logger.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { MetricsModule } from './metrics/metrics.module';
@@ -78,16 +77,14 @@ import { HealthModule } from './health/health.module';
       }),
     }),
     TypeOrmModule.forRootAsync({
-      inject: [WINSTON_MODULE_NEST_PROVIDER],
-      useFactory: (logger: LoggerService) => {
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
         const isProduction = process.env.NODE_ENV === 'production';
+        const logger: Logger = new Logger('TYPEORM_FACTORY');
         logger.log(
-          `Connecting to DB in ${isProduction ? 'production' : 'development'} mode`,
+          `[TYPEORM_FACTORY] Connecting to DB in ${isProduction ? 'production' : 'development'} mode`,
         );
-        return {
-          ...typeOrmConfig,
-          autoLoadEntities: true,
-        };
+        return buildTypeOrmOptions(config);
       },
     }),
 

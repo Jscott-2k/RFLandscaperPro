@@ -22,8 +22,10 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
   try {
+    logger.log('[boot] A: create() starting');
     app = await NestFactory.create(AppModule, { bufferLogs: true });
-
+    logger.log('[boot] B: after create()');
+    logger.log('[boot] C: pre-listen setup starting');
     // Prefix all routes with /api
     app.setGlobalPrefix('api');
 

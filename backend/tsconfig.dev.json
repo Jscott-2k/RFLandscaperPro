@@ -1,7 +1,6 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noEmit": true,
     "rootDirs": ["./src", "../shared/src"],
     "baseUrl": "./",
     "paths": {
@@ -9,6 +8,8 @@
       "@rflp/shared/*": ["../shared/src/*"]
     }
   },
-  "include": ["src/**/*.ts", "../shared/src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "test", "**/*.spec.ts"]
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true
+  }
 }

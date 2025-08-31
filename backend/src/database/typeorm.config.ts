@@ -1,26 +1,77 @@
-import { config } from 'dotenv';
+// src/database/typeorm.config.ts
 import { join } from 'path';
-import { DataSourceOptions } from 'typeorm';
+import type { DataSourceOptions } from 'typeorm';
+import type { ConfigService } from '@nestjs/config';
+import { config as dotenvLoad } from 'dotenv';
 
-// Load environment variables based on current NODE_ENV
-config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
+function env(nodeEnv = process.env.NODE_ENV || 'development') {
+  return {
+    NODE_ENV: nodeEnv,
+    DB_HOST: process.env.DB_HOST,
+    DB_PORT: Number(process.env.DB_PORT ?? 5432),
+    DB_USERNAME: process.env.DB_USERNAME,
+    DB_PASSWORD: process.env.DB_PASSWORD,
+    DB_NAME: process.env.DB_NAME,
+  };
+}
 
-const isProduction = process.env.NODE_ENV === 'production';
+/**
+ * For Nest runtime: prefer ConfigService (validated by ConfigModule).
+ * Do NOT read .env files here — ConfigModule already did that.
+ */
+export function buildTypeOrmOptions(cfg: ConfigService): DataSourceOptions {
+  const nodeEnv = cfg.get<string>('NODE_ENV', 'development');
+  const isProd = nodeEnv === 'production';
 
-const typeOrmConfig: DataSourceOptions = {
-  type: 'postgres',
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT) || 5432,
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  entities: [join(__dirname, '..', '**/*.entity{.ts,.js}')],
-  migrations: [join(__dirname, '..', 'migrations/*{.ts,.js}')],
-  // Migrations are executed separately via CLI (npm run migration:run)
-  // to avoid unexpected latency and exit behavior at application startup.
-  migrationsRun: false,
-  synchronize: false,
-  ssl: isProduction ? { rejectUnauthorized: false } : false,
-};
+  return {
+    type: 'postgres',
+    host: cfg.get<string>('DB_HOST')!,
+    port: cfg.get<number>('DB_PORT', 5432),
+    username: cfg.get<string>('DB_USERNAME')!,
+    password: cfg.get<string>('DB_PASSWORD')!,
+    database: cfg.get<string>('DB_NAME')!,
+    logging: true,
+    synchronize: false,
+    migrationsRun: false,
+    migrations: [join(__dirname, 'migrations/*{.js}')],
+    entities: [join(__dirname, '..', '**/*.entity{.ts,.js}')],
+    ssl: isProd ? { rejectUnauthorized: false } : false,
+  };
+}
 
-export default typeOrmConfig;
+/**
+ * For CLI / scripts: load .env.<NODE_ENV> and build options from raw env.
+ * This version includes TS+JS globs so you can generate/run in dev.
+ */
+export function buildTypeOrmOptionsFromEnv(): DataSourceOptions {
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  dotenvLoad({ path: `.env.${nodeEnv}` });
+
+  const e = env(nodeEnv);
+  const isProd = e.NODE_ENV === 'production';
+
+  if (!e.DB_HOST || !e.DB_USERNAME || !e.DB_PASSWORD || !e.DB_NAME) {
+    throw new Error(
+      `Missing DB env vars (DB_HOST/DB_USERNAME/DB_PASSWORD/DB_NAME); NODE_ENV=${e.NODE_ENV}`,
+    );
+  }
+
+  return {
+    type: 'postgres',
+    host: e.DB_HOST,
+    port: e.DB_PORT,
+    username: e.DB_USERNAME,
+    password: e.DB_PASSWORD,
+    database: e.DB_NAME,
+    synchronize: false,
+    migrationsRun: false,
+    migrations: [
+      join(__dirname, 'migrations/*{.ts,.js}'),
+      join(__dirname, '..', 'database', 'migrations/*{.ts,.js}'),
+    ],
+    entities: [join(__dirname, '..', '**/*.entity{.ts,.js}')],
+    ssl: isProd ? { rejectUnauthorized: false } : false,
+  };
+}
+
+export default buildTypeOrmOptions;
