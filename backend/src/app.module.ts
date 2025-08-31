@@ -8,7 +8,7 @@ import {
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { join } from 'path';
+import typeOrmConfig from './database/typeorm.config';
 import { CustomersModule } from './customers/customers.module';
 import { JobsModule } from './jobs/jobs.module';
 import { EquipmentModule } from './equipment/equipment.module';
@@ -78,29 +78,15 @@ import { HealthModule } from './health/health.module';
       }),
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService, WINSTON_MODULE_NEST_PROVIDER],
-      useFactory: (config: ConfigService, logger: LoggerService) => {
-        const isProduction = config.get<string>('NODE_ENV') === 'production';
+      inject: [WINSTON_MODULE_NEST_PROVIDER],
+      useFactory: (logger: LoggerService) => {
+        const isProduction = process.env.NODE_ENV === 'production';
         logger.log(
           `Connecting to DB in ${isProduction ? 'production' : 'development'} mode`,
         );
         return {
-          type: 'postgres',
-          host: config.get<string>('DB_HOST'),
-          port: Number(config.get('DB_PORT')) || 5432,
-          username: config.get<string>('DB_USERNAME'),
-          password: config.get<string>('DB_PASSWORD'),
-          database: config.get<string>('DB_NAME'),
+          ...typeOrmConfig,
           autoLoadEntities: true,
-          synchronize: false,
-          migrations: [join(__dirname, 'migrations/*{.ts,.js}')],
-          migrationsRun: true,
-          ssl: isProduction
-            ? {
-                rejectUnauthorized: false,
-              }
-            : false,
         };
       },
     }),
