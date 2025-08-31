@@ -14,6 +14,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { buildTypeOrmOptions } from './database/typeorm.config';
 import { CustomersModule } from './customers/customers.module';
 import { JobsModule } from './jobs/jobs.module';
@@ -116,7 +117,21 @@ if (envFilePath) {
         new Logger('TYPEORM_FACTORY').log(
           `[TYPEORM_FACTORY] Connecting to DB in ${isProd ? 'production' : 'development'} mode`,
         );
-        return buildTypeOrmOptions(config);
+        return {
+          ...buildTypeOrmOptions(config),
+          retryAttempts: 1,
+          retryDelay: 0,
+        };
+      },
+      dataSourceFactory: async (options) => {
+        try {
+          return await new DataSource(options).initialize();
+        } catch (err) {
+          const logger = new Logger('TYPEORM_FACTORY');
+          const msg = err instanceof Error ? err.message : String(err);
+          logger.error(`Database connection failed: ${msg}`, err instanceof Error ? err.stack : undefined);
+          throw err;
+        }
       },
     }),
 

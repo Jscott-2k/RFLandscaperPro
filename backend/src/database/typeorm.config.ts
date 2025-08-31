@@ -83,6 +83,7 @@ function commonOptions({
     // pg driver extras
     extra: {
       connectionTimeoutMillis: 5_000,
+      connectTimeoutMS: 5_000,
       statement_timeout: 15_000,
       query_timeout: 15_000,
       idle_in_transaction_session_timeout: 15_000,
