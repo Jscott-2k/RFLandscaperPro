@@ -28,7 +28,6 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { MetricsThrottlerGuard } from './common/guards/metrics-throttler.guard';
 import { TenantGuard } from './common/tenant.guard';
-import { LoggerModule } from './logger/logger.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { MetricsModule } from './metrics/metrics.module';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -59,7 +58,6 @@ if (envFilePath) {
 @Module({
   imports: [
     PrometheusModule.register({ global: true }),
-    LoggerModule,
     MetricsModule,
     HealthModule,
     ScheduleModule.forRoot(),
