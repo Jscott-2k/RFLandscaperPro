@@ -1,6 +1,9 @@
 {
   "name": "rflandscaperpro",
   "private": true,
+  "engines": {
+    "node": ">=22.18.0"
+  },
   "devDependencies": {
     "concurrently": "^9.2.1"
   },
