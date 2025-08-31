@@ -6,7 +6,6 @@ import { Company } from '../companies/entities/company.entity';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { MeController } from './me.controller';
-import { EmailService } from '../common/email';
 import { UserCreationService } from './user-creation.service';
 import { CustomerRegistrationService } from './customer-registration.service';
 import { CompanyOnboardingService } from './company-onboarding.service';
@@ -14,6 +13,7 @@ import {
   USER_REPOSITORY,
   UserRepository,
 } from './repositories/user.repository';
+import { EmailModule } from '../common/email';
 
 const userRepositoryProvider = {
   provide: USER_REPOSITORY,
@@ -21,10 +21,12 @@ const userRepositoryProvider = {
 };
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, CompanyUser, Company])],
+  imports: [
+    TypeOrmModule.forFeature([User, CompanyUser, Company]),
+    EmailModule,
+  ],
   providers: [
     UsersService,
-    EmailService,
     UserCreationService,
     CustomerRegistrationService,
     CompanyOnboardingService,
