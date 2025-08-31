@@ -17,6 +17,6 @@ const equipmentRepositoryProvider = {
   imports: [TypeOrmModule.forFeature([Equipment])],
   controllers: [EquipmentController],
   providers: [EquipmentService, equipmentRepositoryProvider],
-  exports: [EquipmentService, equipmentRepositoryProvider],
+  exports: [EquipmentService, EQUIPMENT_REPOSITORY],
 })
 export class EquipmentModule {}
