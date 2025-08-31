@@ -20,9 +20,7 @@ const userRepositoryProvider = {
 };
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, CompanyUser, Company]),
-  ],
+  imports: [TypeOrmModule.forFeature([User, CompanyUser, Company])],
   providers: [
     UsersService,
     UserCreationService,

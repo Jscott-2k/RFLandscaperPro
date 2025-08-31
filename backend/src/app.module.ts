@@ -32,6 +32,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { MetricsModule } from './metrics/metrics.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { HealthModule } from './health/health.module';
+import { EmailModule } from './common/email';
 
 // --- Env file resolution ---
 const nodeEnv = (process.env.NODE_ENV || 'development').toLowerCase();
@@ -60,6 +61,7 @@ if (envFilePath) {
     PrometheusModule.register({ global: true }),
     MetricsModule,
     HealthModule,
+    EmailModule,
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,

@@ -19,11 +19,7 @@ import { MembersService } from './members.service';
     UsersModule,
     AuthModule,
   ],
-  providers: [
-    CompaniesService,
-    InvitationsService,
-    MembersService,
-  ],
+  providers: [CompaniesService, InvitationsService, MembersService],
   controllers: [CompaniesController, InvitationsController, MembersController],
   exports: [CompaniesService, InvitationsService, MembersService],
 })
