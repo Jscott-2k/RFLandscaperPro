@@ -5,6 +5,7 @@
     "moduleResolution": "node",
     "noEmit": false,
     "rootDirs": ["src", "../shared/src"],
+    "esModuleInterop": true,
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
