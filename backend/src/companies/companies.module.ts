@@ -12,14 +12,12 @@ import { UsersModule } from '../users/users.module';
 import { InvitationsService } from './invitations.service';
 import { AuthModule } from '../auth/auth.module';
 import { MembersService } from './members.service';
-import { EmailModule } from '../common/email';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Company, User, CompanyUser, Invitation]),
     UsersModule,
     AuthModule,
-    EmailModule,
   ],
   providers: [
     CompaniesService,

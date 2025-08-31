@@ -13,7 +13,6 @@ import {
   USER_REPOSITORY,
   UserRepository,
 } from './repositories/user.repository';
-import { EmailModule } from '../common/email';
 
 const userRepositoryProvider = {
   provide: USER_REPOSITORY,
@@ -23,7 +22,6 @@ const userRepositoryProvider = {
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, CompanyUser, Company]),
-    EmailModule,
   ],
   providers: [
     UsersService,
