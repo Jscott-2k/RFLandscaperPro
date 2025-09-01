@@ -5,7 +5,19 @@
     "node": ">=22.18.0"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "@eslint/js": "^9.34.0",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.34.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-perfectionist": "^4.15.0",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-sonarjs": "^3.0.5",
+    "eslint-plugin-unicorn": "^60.0.0",
+    "eslint-plugin-unused-imports": "^4.2.0",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.41.0"
   },
   "scripts": {
     "dev": "concurrently \"npm --prefix backend run start:dev\" \"npm --prefix frontend start\"",
@@ -19,7 +31,9 @@
     "migration:run": "npm --prefix backend run migration:run",
     "migration:revert": "npm --prefix backend run migration:revert",
     "seed": "npm --prefix backend run seed",
-    "seed:drop": "npm --prefix backend run seed:drop"
+    "seed:drop": "npm --prefix backend run seed:drop",
+    "lint": "eslint \"backend/src/**/*.ts\" \"backend/test/**/*.ts\" \"shared/src/**/*.ts\" \"frontend/src/**/*.ts\" --cache --cache-location .eslintcache --fix",
+    "lint:types": "eslint . --ext .ts --config eslint.types.config.mjs",
+    "format": "prettier --write ."
   }
 }
-
