@@ -5,13 +5,14 @@ import {
   Req,
   UsePipes,
   ValidationPipe,
+  HttpCode,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { Public } from '../common/decorators/public.decorator';
 import { type User } from '../users/user.entity';
 import { AuthService } from './auth.service';
-import { type LoginDto } from './dto/login.dto';
+import { LoginDto } from './dto/login.dto';
 import { type RefreshTokenDto } from './dto/refresh-token.dto';
 import { type RegisterDto } from './dto/register.dto';
 import { type RequestPasswordResetDto } from './dto/request-password-reset.dto';
@@ -36,6 +37,7 @@ export class AuthController {
 
   @Public()
   @Post('login')
+  @HttpCode(200)
   @UsePipes(
     new ValidationPipe({
       errorHttpStatusCode: 400,
