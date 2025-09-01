@@ -16,6 +16,7 @@ import {
 import { type AssignJobDto } from './dto/assign-job.dto';
 import { type CreateJobDto } from './dto/create-job.dto';
 import { type ScheduleJobDto } from './dto/schedule-job.dto';
+import { type Job } from './entities/job.entity';
 import { JobsService } from './jobs.service';
 import {
   ASSIGNMENT_REPOSITORY,
@@ -86,7 +87,7 @@ describe('JobsService', () => {
   it('throws ConflictException when scheduling with resource conflict', async () => {
     jobRepo.findById.mockResolvedValue({
       assignments: [{ equipment: { id: 2 }, user: { id: 1 } }],
-    } as any);
+    } as unknown as Job);
     assignmentRepo.hasConflict.mockResolvedValue(true);
     const dto: ScheduleJobDto = { scheduledDate: new Date() };
     await expect(service.schedule(1, dto, 1)).rejects.toBeInstanceOf(
@@ -98,9 +99,9 @@ describe('JobsService', () => {
     jobRepo.findById.mockResolvedValue({
       customer: {},
       scheduledDate: new Date(),
-    } as any);
-    userRepo.findById.mockResolvedValue({ id: 1 } as any);
-    equipmentRepo.findById.mockResolvedValue({ id: 2 } as any);
+    } as unknown as Job);
+    userRepo.findById.mockResolvedValue({ id: 1 } as { id: number });
+    equipmentRepo.findById.mockResolvedValue({ id: 2 } as { id: number });
     assignmentRepo.hasConflict.mockResolvedValue(true);
     const dto: AssignJobDto = { equipmentId: 2, userId: 1 };
     await expect(service.assign(1, dto, 1)).rejects.toBeInstanceOf(

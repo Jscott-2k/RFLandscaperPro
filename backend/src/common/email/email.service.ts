@@ -25,7 +25,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
 
   private readyResolve!: () => void;
   private readonly ready = new Promise<void>(
-    (res) => (this.readyResolve = res),
+    (resolve) => (this.readyResolve = resolve),
   );
 
   async onModuleInit(): Promise<void> {
@@ -55,7 +55,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
       try {
         await Promise.race([
           this.transporter.verify(),
-          new Promise<never>((_, reject) =>
+          new Promise<never>((_resolve, reject) =>
             setTimeout(() => reject(new Error('SMTP verify timeout')), 5000),
           ),
         ]);
