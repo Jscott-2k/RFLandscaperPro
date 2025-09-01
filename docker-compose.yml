@@ -46,11 +46,10 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile.dev
-    working_dir: /app
+    working_dir: /app/backend
     volumes:
-      - ./backend:/app
-      - ./shared:/shared
-      - backend_node_modules:/app/node_modules
+      - ./backend:/app/backend
+      - ./shared:/app/shared
     env_file:
       - ./backend/.env.development
     environment:
@@ -79,10 +78,10 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile.dev
+    working_dir: /app/frontend
     volumes:
-      - ./frontend:/app
-      - ./shared:/shared
-      - frontend_node_modules:/app/node_modules
+      - ./frontend:/app/frontend
+      - ./shared:/app/shared
     environment:
       NODE_ENV: development
       CHOKIDAR_USEPOLLING: "true"
@@ -133,8 +132,6 @@ services:
 volumes:
   postgres_data:
   grafana_data:
-  backend_node_modules:
-  frontend_node_modules:
 
 networks:
   rflandscaperpro: {}
