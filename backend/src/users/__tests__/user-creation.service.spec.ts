@@ -9,6 +9,7 @@ import { type CustomerRegistrationService } from '../customer-registration.servi
 import { UserCreationService } from '../user-creation.service';
 import { User, UserRole } from '../user.entity';
 import { Email } from '../value-objects/email.vo';
+import { PhoneNumber } from '../value-objects/phone-number.vo';
 
 const UNIQUE_VIOLATION = '23505';
 
@@ -73,13 +74,30 @@ describe('UserCreationService', () => {
       email: new Email('user1@example.com'),
       password,
       username: 'user1',
+      role: UserRole.Customer,
+      company: {
+        name: 'Acme Co',
+        address: '123 Street',
+        phone: '1234567890',
+        email: 'company@example.com',
+      },
+      firstName: 'First',
+      lastName: 'Last',
+      phone: new PhoneNumber('1234567890'),
+      isVerified: false,
     });
     const createMock = jest.spyOn(usersRepository, 'create');
-    expect(createMock).toHaveBeenCalledWith({
-      email: expect.any(Email) as unknown as Email,
-      password,
-      username: 'user1',
-    });
+    expect(createMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: expect.any(Email) as unknown as Email,
+        password,
+        username: 'user1',
+        role: UserRole.Customer,
+        firstName: 'First',
+        lastName: 'Last',
+        isVerified: false,
+      }),
+    );
     expect(customerRegistrationService.register).toHaveBeenCalled();
     expect(user.role).toBe(UserRole.Customer);
     const isMatch = await bcrypt.compare(password, user.password);
@@ -101,11 +119,20 @@ describe('UserCreationService', () => {
       },
     );
     const user = await service.createUser({
-      company: { name: 'ACME Landscaping' },
+      company: {
+        name: 'ACME Landscaping',
+        address: '123 Street',
+        phone: '1234567890',
+        email: 'acme@example.com',
+      },
       email: new Email('owner@example.com'),
       password: 'secret',
       role: UserRole.CompanyOwner,
       username: 'owner',
+      firstName: 'First',
+      lastName: 'Owner',
+      phone: new PhoneNumber('1234567890'),
+      isVerified: false,
     });
 
     expect(companyOnboardingService.onboard).toHaveBeenCalled();
@@ -122,6 +149,16 @@ describe('UserCreationService', () => {
         password: 'secret',
         role: UserRole.Worker,
         username: 'worker',
+        company: {
+          name: 'Acme Co',
+          address: '123 Street',
+          phone: '1234567890',
+          email: 'company@example.com',
+        },
+        firstName: 'First',
+        lastName: 'Worker',
+        phone: new PhoneNumber('1234567890'),
+        isVerified: false,
       }),
     ).rejects.toMatchObject({ status: 400 });
 
@@ -141,6 +178,17 @@ describe('UserCreationService', () => {
         email: new Email('existing@example.com'),
         password: 'secret',
         username: 'existing',
+        role: UserRole.Customer,
+        company: {
+          name: 'Acme Co',
+          address: '123 Street',
+          phone: '1234567890',
+          email: 'company@example.com',
+        },
+        firstName: 'First',
+        lastName: 'Last',
+        phone: new PhoneNumber('1234567890'),
+        isVerified: false,
       }),
     ).rejects.toMatchObject({
       message: 'Username or email already exists',

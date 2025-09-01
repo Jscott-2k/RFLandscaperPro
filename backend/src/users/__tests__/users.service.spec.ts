@@ -8,6 +8,7 @@ import { type UserCreationService } from '../user-creation.service';
 import { User, UserRole } from '../user.entity';
 import { UsersService } from '../users.service';
 import { Email } from '../value-objects/email.vo';
+import { PhoneNumber } from '../value-objects/phone-number.vo';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -59,6 +60,17 @@ describe('UsersService', () => {
       email: new Email('user1@example.com'),
       password: 'secret',
       username: 'user1',
+      role: UserRole.Customer,
+      company: {
+        name: 'Acme Co',
+        address: '123 Street',
+        phone: '1234567890',
+        email: 'company@example.com',
+      },
+      firstName: 'First',
+      lastName: 'Last',
+      phone: new PhoneNumber('1234567890'),
+      isVerified: false,
     };
     const created = Object.assign(new User(), dto);
     userCreationService.createUser.mockResolvedValueOnce(created);

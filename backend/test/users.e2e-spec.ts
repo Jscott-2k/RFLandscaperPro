@@ -61,6 +61,17 @@ describe('UsersController (e2e)', () => {
         email: 'user@example.com',
         password: 'SecurePass123!',
         username: 'user',
+        role: 'customer',
+        company: {
+          name: 'Acme Co',
+          address: '123 Street',
+          phone: '1234567890',
+          email: 'company@example.com',
+        },
+        firstName: 'First',
+        lastName: 'Last',
+        phone: '1234567890',
+        isVerified: false,
       })
       .expect(403);
   });
