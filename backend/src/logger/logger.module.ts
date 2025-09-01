@@ -64,23 +64,23 @@ class PrometheusLogger implements LoggerService {
 
   log(message: unknown, ...optionalParams: unknown[]): void {
     this.counters.info.inc();
-    this.logger.info?.(message, ...optionalParams);
+    this.logger.info?.(String(message), ...optionalParams);
   }
   error(message: unknown, ...optionalParams: unknown[]): void {
     this.counters.error.inc();
-    this.logger.error?.(message, ...optionalParams);
+    this.logger.error?.(String(message), ...optionalParams);
   }
   warn(message: unknown, ...optionalParams: unknown[]): void {
     this.counters.warn.inc();
-    this.logger.warn?.(message, ...optionalParams);
+    this.logger.warn?.(String(message), ...optionalParams);
   }
   debug(message: unknown, ...optionalParams: unknown[]): void {
     this.counters.debug.inc();
-    this.logger.debug?.(message, ...optionalParams);
+    this.logger.debug?.(String(message), ...optionalParams);
   }
   verbose(message: unknown, ...optionalParams: unknown[]): void {
     this.counters.verbose.inc();
-    this.logger.verbose?.(message, ...optionalParams);
+    this.logger.verbose?.(String(message), ...optionalParams);
   }
 }
 
