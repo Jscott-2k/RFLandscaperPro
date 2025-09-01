@@ -19,20 +19,25 @@
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.41.0"
   },
+  "workspaces": [
+    "backend",
+    "frontend",
+    "shared"
+  ],
   "scripts": {
-    "dev": "concurrently \"npm --prefix backend run start:dev\" \"npm --prefix frontend start\"",
+    "dev": "concurrently \"npm run start:dev -w rflandscaperpro-backend\" \"npm run start -w frontend\"",
     "dev:compose": "bash development.sh",
     "down": "bash down.sh",
-    "build": "npm --prefix shared run build && npm --prefix backend run build && npm --prefix frontend run build:browser",
-    "build:shared": "npm --prefix shared run build",
-    "build:backend": "npm --prefix backend run build",
-    "build:frontend": "npm --prefix frontend run build:browser",
-    "migration:generate": "npm --prefix backend run migration:generate",
-    "migration:run": "npm --prefix backend run migration:run",
-    "migration:revert": "npm --prefix backend run migration:revert",
-    "seed": "npm --prefix backend run seed",
-    "seed:drop": "npm --prefix backend run seed:drop",
-    "lint": "eslint \"backend/src/**/*.ts\" \"backend/test/**/*.ts\" \"shared/src/**/*.ts\" \"frontend/src/**/*.ts\" --cache --cache-location .eslintcache --fix",
+    "build": "npm run build -w @rflp/shared && npm run build -w rflandscaperpro-backend && npm run build:browser -w frontend",
+    "build:shared": "npm run build -w @rflp/shared",
+    "build:backend": "npm run build -w rflandscaperpro-backend",
+    "build:frontend": "npm run build:browser -w frontend",
+    "migration:generate": "npm run migration:generate -w rflandscaperpro-backend",
+    "migration:run": "npm run migration:run -w rflandscaperpro-backend",
+    "migration:revert": "npm run migration:revert -w rflandscaperpro-backend",
+    "seed": "npm run seed -w rflandscaperpro-backend",
+    "seed:drop": "npm run seed:drop -w rflandscaperpro-backend",
+    "lint": "eslint . --cache --cache-location .eslintcache --fix",
     "lint:types": "eslint . --ext .ts --config eslint.types.config.mjs",
     "format": "prettier --write ."
   }
