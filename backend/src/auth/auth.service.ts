@@ -124,16 +124,16 @@ export class AuthService {
     // Validate password strength
     validatePasswordStrength(registerDto.password);
 
-    const { email, phone, role, firstName, lastName, ...rest } = registerDto;
+    const { email, firstName, lastName, phone, role, ...rest } = registerDto;
     const user = await this.usersService.create({
       ...rest,
-      role: role ?? UserRole.Customer,
-      firstName: firstName ?? '',
-      lastName: lastName ?? '',
       company: registerDto.company,
       email: new Email(email),
-      phone: phone ? new PhoneNumber(phone) : undefined,
+      firstName: firstName ?? '',
       isVerified: false,
+      lastName: lastName ?? '',
+      phone: phone ? new PhoneNumber(phone) : undefined,
+      role: role ?? UserRole.Customer,
     });
 
     const token = await this.createVerificationToken(user.id);
@@ -148,8 +148,8 @@ export class AuthService {
       company: { name: dto.companyName },
       email: new Email(dto.email),
       firstName: dto.name,
-      lastName: dto.name,
       isVerified: true,
+      lastName: dto.name,
       password: dto.password,
       role: UserRole.CompanyOwner,
       username: dto.name,

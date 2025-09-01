@@ -1,8 +1,9 @@
-import 'reflect-metadata';
 import { Test, type TestingModule } from '@nestjs/testing';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+
+import 'reflect-metadata';
 
 describe('AppController', () => {
   let appController: AppController;

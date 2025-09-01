@@ -58,20 +58,20 @@ describe('UsersController (e2e)', () => {
     return request(app.getHttpServer())
       .post('/api/users')
       .send({
-        email: 'user@example.com',
-        password: 'SecurePass123!',
-        username: 'user',
-        role: 'customer',
         company: {
-          name: 'Acme Co',
           address: '123 Street',
-          phone: '1234567890',
           email: 'company@example.com',
+          name: 'Acme Co',
+          phone: '1234567890',
         },
+        email: 'user@example.com',
         firstName: 'First',
-        lastName: 'Last',
-        phone: '1234567890',
         isVerified: false,
+        lastName: 'Last',
+        password: 'SecurePass123!',
+        phone: '1234567890',
+        role: 'customer',
+        username: 'user',
       })
       .expect(403);
   });

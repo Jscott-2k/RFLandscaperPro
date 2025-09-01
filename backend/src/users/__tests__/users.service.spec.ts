@@ -57,20 +57,20 @@ describe('UsersService', () => {
 
   it('delegates user creation to UserCreationService', async () => {
     const dto = {
-      email: new Email('user1@example.com'),
-      password: 'secret',
-      username: 'user1',
-      role: UserRole.Customer,
       company: {
-        name: 'Acme Co',
         address: '123 Street',
-        phone: '1234567890',
         email: 'company@example.com',
+        name: 'Acme Co',
+        phone: '1234567890',
       },
+      email: new Email('user1@example.com'),
       firstName: 'First',
-      lastName: 'Last',
-      phone: new PhoneNumber('1234567890'),
       isVerified: false,
+      lastName: 'Last',
+      password: 'secret',
+      phone: new PhoneNumber('1234567890'),
+      role: UserRole.Customer,
+      username: 'user1',
     };
     const created = Object.assign(new User(), dto);
     userCreationService.createUser.mockResolvedValueOnce(created);

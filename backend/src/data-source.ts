@@ -1,7 +1,9 @@
-// src/database/data-source.ts
+// src/data-source.ts
 import { DataSource } from 'typeorm';
 
 import { buildTypeOrmOptionsFromEnv } from './database/typeorm.config';
+
+import 'reflect-metadata';
 
 const options = buildTypeOrmOptionsFromEnv();
 

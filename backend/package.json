@@ -22,8 +22,9 @@
     "test:watch": "cross-env NODE_ENV=test jest --watch",
     "migration:create": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:create",
     "migration:generate": "node scripts/generate-migration.mjs",
-    "migration:run": "cross-env NODE_ENV=development ts-node --transpile-only ./node_modules/typeorm/cli.js migration:run -d src/data-source.ts",
-    "migration:revert": "ts-node --transpile-only ./node_modules/typeorm/cli.js migration:revert -d src/data-source.ts",
+    "migration:run": "cross-env NODE_ENV=development NODE_OPTIONS=\"--require reflect-metadata --require ts-node/register --require tsconfig-paths/register\" npx typeorm-ts-node-commonjs migration:run -d src/data-source.ts",
+    "migration:revert": "cross-env NODE_ENV=development NODE_OPTIONS=\"--require reflect-metadata --require ts-node/register --require tsconfig-paths/register\" npx typeorm-ts-node-commonjs migration:revert -d src/data-source.ts",
+    "migration:show": "cross-env NODE_ENV=development NODE_OPTIONS=\"--require reflect-metadata --require ts-node/register --require tsconfig-paths/register\" npx typeorm-ts-node-commonjs migration:show -d src/data-source.ts",
     "migration:create:dev": "cross-env NODE_ENV=development npm run migration:create --",
     "migration:generate:dev": "cross-env NODE_ENV=development npm run migration:generate --",
     "migration:revert:dev": "cross-env NODE_ENV=development npm run migration:revert --",
@@ -33,6 +34,7 @@
     "seed:drop:dev": "cross-env NODE_ENV=development npm run seed:drop"
   },
   "dependencies": {
+    "@rflp/shared": "file:../shared",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.1.6",
     "@nestjs/config": "^4.0.2",
