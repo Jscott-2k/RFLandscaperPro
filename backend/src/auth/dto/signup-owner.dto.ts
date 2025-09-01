@@ -21,6 +21,12 @@ export class SignupOwnerDto {
   @IsNotEmpty()
   lastName: string;
 
+  @ApiProperty({ description: 'Username must be unique' })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3, { message: 'Username must be at least 3 characters long' })
+  username: string;
+
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()

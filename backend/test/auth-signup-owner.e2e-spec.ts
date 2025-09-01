@@ -51,6 +51,7 @@ describe('Auth signup-owner endpoint (e2e)', () => {
         email: 'owner@example.com',
         firstName: 'Owner',
         lastName: 'User',
+        username: 'owner',
         password: 'Password1!',
         phone: '5551234567',
       })
@@ -63,6 +64,7 @@ describe('Auth signup-owner endpoint (e2e)', () => {
           email: 'owner@example.com',
           firstName: 'Owner',
           lastName: 'User',
+          username: 'owner',
           password: 'Password1!',
           phone: '5551234567',
         });
@@ -80,6 +82,7 @@ describe('Auth signup-owner endpoint (e2e)', () => {
         email: 'owner@example.com',
         firstName: 'Owner',
         lastName: 'User',
+        username: 'owner',
         password: 'Password1!',
         phone: '5551234567',
       })

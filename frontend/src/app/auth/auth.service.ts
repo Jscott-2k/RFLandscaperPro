@@ -54,12 +54,12 @@ export class AuthService {
   }
 
   signupOwner(data: {
-    name: string;
+    username: string;
     email: string;
     password: string;
     companyName: string;
-    firstName?: string;
-    lastName?: string;
+    firstName: string;
+    lastName: string;
     phone?: string;
   }): Observable<{ access_token: string }> {
     return this.http

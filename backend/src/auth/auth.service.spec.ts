@@ -128,7 +128,7 @@ describe('AuthService.signupOwner', () => {
       email: 'owner@example.com',
       id: 1,
       role: UserRole.CompanyOwner,
-      username: 'Owner',
+      username: 'owner',
     });
     userCreationService.createUser.mockResolvedValue(user);
 
@@ -138,6 +138,7 @@ describe('AuthService.signupOwner', () => {
       password: 'Password123!',
       firstName: 'Owner',
       lastName: 'User',
+      username: 'owner',
       phone: '5551234567',
     });
 
@@ -149,7 +150,7 @@ describe('AuthService.signupOwner', () => {
       lastName: 'User',
       password: 'Password123!',
       role: UserRole.CompanyOwner,
-      username: 'Owner',
+      username: 'owner',
       phone: new PhoneNumber('5551234567'),
     });
 
