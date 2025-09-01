@@ -2,12 +2,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type, Transform } from 'class-transformer';
 import {
   IsEnum,
-  IsOptional,
   IsString,
   MinLength,
   Matches,
   ValidateNested,
   IsBoolean,
+  IsNotEmpty,
+  IsOptional,
 } from 'class-validator';
 
 import { CreateCompanyDto } from '../../companies/dto/create-company.dto';
@@ -18,14 +19,17 @@ import { PhoneNumber } from '../value-objects/phone-number.vo';
 export class CreateUserDto {
   @ApiProperty()
   @IsString()
+  @IsNotEmpty()
   username: string;
 
   @ApiProperty()
   @Transform(({ value }: { value: string }) => new Email(value))
+  @IsNotEmpty()
   email: Email;
 
   @ApiProperty()
   @IsString()
+  @IsNotEmpty()
   @MinLength(8, { message: 'Password must be at least 8 characters long' })
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
     message:
@@ -33,10 +37,9 @@ export class CreateUserDto {
   })
   password: string;
 
-  @ApiPropertyOptional({ enum: UserRole })
+  @ApiProperty({ enum: UserRole })
   @IsEnum(UserRole)
-  @IsOptional()
-  role?: UserRole;
+  role: UserRole;
 
   @ApiPropertyOptional({ type: () => CreateCompanyDto })
   @ValidateNested()
@@ -44,25 +47,25 @@ export class CreateUserDto {
   @IsOptional()
   company?: CreateCompanyDto;
 
-  @ApiPropertyOptional()
+  @ApiProperty()
   @IsString()
-  @IsOptional()
-  firstName?: string;
+  @IsNotEmpty()
+  firstName: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  lastName: string;
 
   @ApiPropertyOptional()
   @IsString()
-  @IsOptional()
-  lastName?: string;
-
-  @ApiPropertyOptional()
   @IsOptional()
   @Transform(({ value }: { value: string | undefined }) =>
     value ? new PhoneNumber(value) : undefined,
   )
   phone?: PhoneNumber;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsBoolean()
-  isVerified?: boolean;
+  isVerified: boolean;
 }

@@ -141,6 +141,8 @@ describe('AuthService.signupOwner', () => {
     expect(userCreationService.createUser).toHaveBeenCalledWith({
       company: { name: 'ACME' },
       email: new Email('owner@example.com'),
+      firstName: 'owner',
+      lastName: 'owner',
       isVerified: true,
       password: 'Password123!',
       role: UserRole.CompanyOwner,
