@@ -4,7 +4,7 @@ import {
   ForbiddenException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { type Reflector } from '@nestjs/core';
+import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { type Request } from 'express';
 

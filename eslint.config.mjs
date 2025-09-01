@@ -59,7 +59,11 @@ export default tseslint.config(
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
       "@typescript-eslint/consistent-type-imports": [
         "error",
-        { fixStyle: "inline-type-imports", prefer: "type-imports" },
+        { 
+          disallowTypeAnnotations: false,
+          fixStyle: "inline-type-imports",
+          prefer: "type-imports",
+        },
       ],
       "@typescript-eslint/explicit-function-return-type": [
         "warn",
@@ -159,6 +163,13 @@ export default tseslint.config(
     },
   },
 
+  // Backend: allow value imports for DI
+  {
+    files: ["backend/src/**/*.ts"],
+    rules: {
+      "@typescript-eslint/consistent-type-imports": "off",
+    },
+  },
   // Scripts (mjs)
   {
     files: ["scripts/**/*.mjs"],
