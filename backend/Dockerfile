@@ -27,6 +27,7 @@ RUN apt-get update -qq && \
 # Leverage root workspace lockfile to install only backend deps
 COPY package.json package-lock.json ./
 COPY backend/package.json backend/package.json
+COPY backend/package-lock.json backend/package-lock.json
 COPY shared/package.json shared/package.json
 RUN npm ci --include=dev --workspace backend
 

@@ -10,6 +10,7 @@ WORKDIR /app
 # Install dependencies using workspaces
 COPY package.json package-lock.json ./
 COPY frontend/package.json frontend/package.json
+COPY frontend/package-lock.json frontend/package-lock.json
 COPY shared/package.json shared/package.json
 RUN npm ci --include=dev --workspace frontend
 
@@ -30,6 +31,7 @@ WORKDIR /app
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/package-lock.json ./package-lock.json
 COPY --from=build /app/frontend/package.json frontend/package.json
+COPY --from=build /app/frontend/package-lock.json frontend/package-lock.json
 COPY --from=build /app/shared/package.json shared/package.json
 RUN npm ci --omit=dev --workspace frontend
 

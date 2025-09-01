@@ -10,7 +10,8 @@ RF Landscaper Pro is an enterprise-grade application that streamlines landscapin
 
 ## Package Management
 
-This monorepo uses a single root `package-lock.json` for all workspaces; per-package lockfiles are not used.
+Each workspace maintains its own `package-lock.json` to ensure reproducible installs.
+Run `npm ci` from the repository root so npm respects all workspace lockfiles.
 
 ## Windows Setup
 
