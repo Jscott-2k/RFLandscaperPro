@@ -20,17 +20,51 @@ if ($Local) {
   return
 }
 
+function Preflight {
+  Write-Host "→ Running Docker preflight checks" -ForegroundColor Cyan
+
+  if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+    throw "Docker CLI not found. Install Docker Desktop."
+  }
+
+  $desktopExe = Join-Path $Env:ProgramFiles 'Docker/Docker/Docker Desktop.exe'
+  if (-not (Test-Path $desktopExe)) { throw "Docker Desktop is not installed." }
+
+  $svc = Get-Service -Name 'com.docker.service' -ErrorAction SilentlyContinue
+  if ($null -eq $svc) { throw "Docker Desktop service 'com.docker.service' not found." }
+  if ($svc.Status -ne 'Running') { throw "Docker Desktop service is not running. Start Docker Desktop." }
+
+  if (Get-Command wsl -ErrorAction SilentlyContinue) {
+    try {
+      $wsl = wsl.exe -l -v 2>$null
+      if ($LASTEXITCODE -eq 0 -and -not ($wsl | Select-String 'docker-desktop')) {
+        throw "WSL backend is not running. Ensure Docker Desktop is configured for WSL2."
+      }
+    } catch {
+      throw "Unable to query WSL backend: $_"
+    }
+  }
+
+  $pipe = '\\.\pipe\docker_engine'
+  if (-not (Test-Path $pipe)) { throw "Docker engine socket '$pipe' not found." }
+
+  try { docker version | Out-Null } catch { throw "Cannot communicate with Docker engine." }
+}
+
 function Compose {
   param([Parameter(ValueFromRemainingArguments = $true)]
         [string[]]$Args)
 
   Write-Host "→ docker compose $($Args -join ' ')" -ForegroundColor Cyan
-  & docker compose @Args
+  $output = & docker compose @Args 2>&1
   $code = $LASTEXITCODE
 
   # Be lenient for `down` (it often returns non-zero when nothing exists); strict otherwise.
   $isDown = ($Args.Count -gt 0 -and $Args[0] -eq 'down')
   if ($code -ne 0) {
+    if ($output -match 'error during connect' -or $output -match 'pipe') {
+      throw "Failed to communicate with Docker engine. Is Docker Desktop running?"
+    }
     if ($isDown) {
       Write-Warning "docker compose down exited with $code (likely nothing to remove). Continuing…"
       return
@@ -81,9 +115,8 @@ function Wait-ComposeHealthy {
   return $false
 }
 
-# Sanity
-if (-not (Get-Command docker -ErrorAction SilentlyContinue)) { throw "Docker not found." }
-try { docker info | Out-Null } catch { throw "Docker daemon not running." }
+# Preflight checks before any docker compose commands
+Preflight
 
 # Optional bits
 if ($Clean) { Compose down --volumes --remove-orphans @Services }  # use long flag; avoids -Verbose capture
