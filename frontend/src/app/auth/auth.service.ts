@@ -58,6 +58,9 @@ export class AuthService {
     email: string;
     password: string;
     companyName: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
   }): Observable<{ access_token: string }> {
     return this.http
       .post<{ access_token: string }>(`${environment.apiUrl}/auth/signup-owner`, data)

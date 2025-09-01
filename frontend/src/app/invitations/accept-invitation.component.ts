@@ -36,7 +36,10 @@ const PASSWORD_REGEX =
         </div>
         <div *ngIf="mode === 'create'">
           <form [formGroup]="createForm" (ngSubmit)="create()">
-            <input type="text" formControlName="name" placeholder="Name" />
+            <input type="text" formControlName="name" placeholder="Username" />
+            <input type="text" formControlName="firstName" placeholder="First Name" />
+            <input type="text" formControlName="lastName" placeholder="Last Name" />
+            <input type="tel" formControlName="phone" placeholder="Phone" />
             <input
               type="password"
               formControlName="password"
@@ -70,6 +73,9 @@ export class AcceptInvitationComponent implements OnInit {
 
   createForm = this.fb.nonNullable.group({
     name: ['', Validators.required.bind(Validators)],
+    firstName: [''],
+    lastName: [''],
+    phone: [''],
     password: [
       '',
       [

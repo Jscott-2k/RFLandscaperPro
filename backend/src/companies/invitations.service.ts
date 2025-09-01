@@ -21,6 +21,7 @@ import { invitationMail, addedToCompanyMail } from '../common/email/templates';
 import { MetricsService } from '../metrics/metrics.service';
 import { User, UserRole } from '../users/user.entity';
 import { Email } from '../users/value-objects/email.vo';
+import { PhoneNumber } from '../users/value-objects/phone-number.vo';
 import { type AcceptInvitationDto } from './dto/accept-invitation.dto';
 import { type CreateInvitationDto } from './dto/create-invitation.dto';
 import {
@@ -341,6 +342,9 @@ export class InvitationsService {
       password: dto.password,
       role: UserRole.Worker,
       username: dto.name,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      phone: dto.phone ? new PhoneNumber(dto.phone) : undefined,
     });
 
     let savedUser: User;

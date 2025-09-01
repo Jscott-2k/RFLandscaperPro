@@ -13,6 +13,7 @@ import { type UserCreationService } from '../users/user-creation.service';
 import { User, UserRole } from '../users/user.entity';
 import { type UsersService } from '../users/users.service';
 import { Email } from '../users/value-objects/email.vo';
+import { PhoneNumber } from '../users/value-objects/phone-number.vo';
 import { AuthService } from './auth.service';
 import { type JwtUserPayload } from './interfaces/jwt-user-payload.interface';
 import { type CompanyMembershipRepository } from './repositories/company-membership.repository';
@@ -136,6 +137,8 @@ describe('AuthService.signupOwner', () => {
       email: 'owner@example.com',
       name: 'owner',
       password: 'Password123!',
+      firstName: 'Owner',
+      phone: '5551234567',
     });
 
     expect(userCreationService.createUser).toHaveBeenCalledWith({
@@ -145,6 +148,8 @@ describe('AuthService.signupOwner', () => {
       password: 'Password123!',
       role: UserRole.CompanyOwner,
       username: 'owner',
+      firstName: 'Owner',
+      phone: new PhoneNumber('5551234567'),
     });
     expect(loginSpy).toHaveBeenCalledWith(user);
   });

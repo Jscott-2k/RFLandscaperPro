@@ -68,6 +68,8 @@ describe('AuthController', () => {
       email: 'owner@example.com',
       name: 'Owner',
       password: 'Password1!',
+      firstName: 'Owner',
+      phone: '5551234567',
     };
     const response: { access_token: string } = { access_token: 'jwt' };
     authService.signupOwner.mockResolvedValue(response);
