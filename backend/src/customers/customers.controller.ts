@@ -27,7 +27,7 @@ import { CompanyId } from '../common/decorators/company-id.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { type PaginationParams, type Paginated } from '../common/pagination';
 import { UserRole , type User } from '../users/user.entity';
-import { type CustomersService } from './customers.service';
+import { CustomersService } from './customers.service';
 import { type CreateCustomerDto } from './dto/create-customer.dto';
 import { CustomerResponseDto } from './dto/customer-response.dto';
 import { type UpdateCustomerDto } from './dto/update-customer.dto';

@@ -47,7 +47,11 @@ describe('CustomersService', () => {
       .spyOn(repo, 'create')
       .mockReturnValue({} as Customer);
     repo.save.mockRejectedValue(
-      new QueryFailedError('', [], { code: '23505' } as { code: string }),
+      new QueryFailedError(
+        '',
+        [],
+        Object.assign(new Error(), { code: '23505' }),
+      ),
     );
 
     const createCustomerDto: CreateCustomerDto = {

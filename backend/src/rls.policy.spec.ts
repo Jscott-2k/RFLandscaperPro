@@ -1,13 +1,15 @@
 import { runWithCompanyId } from './common/tenant/tenant-context';
 import { Company } from './companies/entities/company.entity';
 import { Customer } from './customers/entities/customer.entity';
-import dataSource from './data-source';
 
 process.env.DB_HOST = 'localhost';
 process.env.DB_PORT = '5432';
 process.env.DB_USERNAME = 'appuser';
 process.env.DB_PASSWORD = 'test';
 process.env.DB_NAME = 'rflandscaperpro_test';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const dataSource = require('./data-source').default;
 
 async function enableCustomerRls() {
   const qr = dataSource.createQueryRunner();

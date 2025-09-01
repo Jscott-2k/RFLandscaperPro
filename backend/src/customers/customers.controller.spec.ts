@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { Test, type TestingModule } from '@nestjs/testing';
 
 import { PaginationParams } from '../common/pagination';

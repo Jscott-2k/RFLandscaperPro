@@ -95,6 +95,11 @@
     "moduleNameMapper": {
       "^@rflp/shared(.*)$": "<rootDir>/../../shared/src$1"
     },
+    "globals": {
+      "ts-jest": {
+        "tsconfig": "<rootDir>/../tsconfig.spec.json"
+      }
+    },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
