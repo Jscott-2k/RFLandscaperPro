@@ -9,13 +9,14 @@ import {
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { InvitationsService } from './invitations.service';
-import { InvitationRole } from './entities/invitation.entity';
 import { ApiTags } from '@nestjs/swagger';
-import { AcceptInvitationDto } from './dto/accept-invitation.dto';
+
+import { type AuthService } from '../auth/auth.service';
 import { Public } from '../common/decorators/public.decorator';
-import { AuthService } from '../auth/auth.service';
 import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
+import { type AcceptInvitationDto } from './dto/accept-invitation.dto';
+import { type InvitationRole } from './entities/invitation.entity';
+import { type InvitationsService } from './invitations.service';
 
 @ApiTags('invitations')
 @Controller('invitations')
@@ -42,9 +43,9 @@ export class InvitationsController {
     @Param('token') token: string,
     @Body(
       new ValidationPipe({
-        whitelist: true,
         forbidNonWhitelisted: true,
         skipMissingProperties: true,
+        whitelist: true,
       }),
     )
     dto: AcceptInvitationDto,

@@ -9,13 +9,15 @@ WORKDIR /app
 
 # ---- Set default environment ----
 ENV NODE_ENV=development
+ENV CHOKIDAR_USEPOLLING=true
 
 # ---- Install dependencies ----
 COPY frontend/package*.json ./
 RUN npm install
 
 # ---- Copy application code ----
-COPY frontend ./
+# Copy the frontend source directly into the workdir rather than nesting it
+COPY frontend/ ./
 COPY shared /shared
 
 # ---- Expose application port ----

@@ -13,8 +13,8 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 const logger = winston.createLogger({
-  level: 'info',
   format: winston.format.json(),
+  level: 'info',
   transports: [new winston.transports.Console()],
 });
 
@@ -35,8 +35,8 @@ const logger = winston.createLogger({
  */
 app.use(
   express.static(browserDistFolder, {
-    maxAge: '1y',
     index: false,
+    maxAge: '1y',
     redirect: false,
   }),
 );

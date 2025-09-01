@@ -1,5 +1,5 @@
-import { IsInt } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsInt } from 'class-validator';
 
 export class SwitchCompanyDto {
   @ApiProperty()

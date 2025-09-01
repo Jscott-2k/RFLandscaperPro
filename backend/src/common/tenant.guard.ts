@@ -1,9 +1,10 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Request } from 'express';
+import { type CanActivate, type ExecutionContext, Injectable } from '@nestjs/common';
+import { type Reflector } from '@nestjs/core';
+import { type Request } from 'express';
+
+import { UserRole } from '../users/user.entity';
 import { IS_PUBLIC_KEY } from './decorators/public.decorator';
 import { tenantStorage } from './tenant/tenant-context';
-import { UserRole } from '../users/user.entity';
 
 @Injectable()
 export class TenantGuard implements CanActivate {

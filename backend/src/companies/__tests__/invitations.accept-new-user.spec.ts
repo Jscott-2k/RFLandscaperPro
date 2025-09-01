@@ -1,12 +1,13 @@
-import * as crypto from 'crypto';
-import { Repository } from 'typeorm';
-import { InvitationsService } from '../invitations.service';
-import { Invitation, InvitationRole } from '../entities/invitation.entity';
+import * as crypto from 'node:crypto';
+import { type SendMailOptions } from 'nodemailer';
+import { type Repository } from 'typeorm';
+
+import { type EmailService } from '../../common/email';
+import { User } from '../../users/user.entity';
 import { CompanyUser, CompanyUserRole } from '../entities/company-user.entity';
 import { Company } from '../entities/company.entity';
-import { User } from '../../users/user.entity';
-import { EmailService } from '../../common/email';
-import { SendMailOptions } from 'nodemailer';
+import { Invitation, InvitationRole } from '../entities/invitation.entity';
+import { InvitationsService } from '../invitations.service';
 
 describe('InvitationsService acceptInvitation', () => {
   let service: InvitationsService;
@@ -65,10 +66,10 @@ describe('InvitationsService acceptInvitation', () => {
     const invitation = Object.assign(new Invitation(), {
       companyId: 7,
       email: 'new@user.com',
-      role: InvitationRole.ADMIN,
-      tokenHash,
       expiresAt: new Date(Date.now() + 10000),
       invitedBy: 1,
+      role: InvitationRole.ADMIN,
+      tokenHash,
     });
     invitationsRepo.findOne.mockResolvedValue(invitation);
 
@@ -81,9 +82,9 @@ describe('InvitationsService acceptInvitation', () => {
     expect(user.email.value).toBe('new@user.com');
     expect(companyUsersRepo.create).toHaveBeenCalledWith({
       companyId: 7,
-      userId: 42,
-      role: CompanyUserRole.ADMIN,
       invitedBy: 1,
+      role: CompanyUserRole.ADMIN,
+      userId: 42,
     });
     expect(invitation.acceptedAt).toBeInstanceOf(Date);
     const [[options]] = emailService.send.mock.calls;
@@ -97,11 +98,11 @@ describe('InvitationsService acceptInvitation', () => {
     const token = 'expired';
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const invitation = Object.assign(new Invitation(), {
-      tokenHash,
       companyId: 1,
       email: 'a@b.com',
-      role: InvitationRole.WORKER,
       expiresAt: new Date(Date.now() - 1000),
+      role: InvitationRole.WORKER,
+      tokenHash,
     });
     invitationsRepo.findOne.mockResolvedValue(invitation);
     await expect(
@@ -113,12 +114,12 @@ describe('InvitationsService acceptInvitation', () => {
     const token = 'revoked';
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const invitation = Object.assign(new Invitation(), {
-      tokenHash,
       companyId: 1,
       email: 'a@b.com',
-      role: InvitationRole.WORKER,
       expiresAt: new Date(Date.now() + 1000),
       revokedAt: new Date(),
+      role: InvitationRole.WORKER,
+      tokenHash,
     });
     invitationsRepo.findOne.mockResolvedValueOnce(invitation);
     await expect(
@@ -126,12 +127,12 @@ describe('InvitationsService acceptInvitation', () => {
     ).rejects.toMatchObject({ status: 400 });
 
     const used = Object.assign(new Invitation(), {
-      tokenHash,
+      acceptedAt: new Date(),
       companyId: 1,
       email: 'a@b.com',
-      role: InvitationRole.WORKER,
       expiresAt: new Date(Date.now() + 1000),
-      acceptedAt: new Date(),
+      role: InvitationRole.WORKER,
+      tokenHash,
     });
     invitationsRepo.findOne.mockResolvedValueOnce(used);
     await expect(

@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Company, CreateCompany, UpdateCompany } from './company.model';
-import { User } from '../users/user.model';
+import { type Observable } from 'rxjs';
+
 import { CompaniesApiService } from '../api/companies-api.service';
+import { type User } from '../users/user.model';
+import { type Company, type CreateCompany, type UpdateCompany } from './company.model';
 
 @Injectable({ providedIn: 'root' })
 export class CompanyService {

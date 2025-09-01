@@ -1,15 +1,16 @@
-import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { EquipmentService, Equipment } from './equipment.service';
+
 import { ErrorService } from '../error.service';
 import { ToasterService } from '../toaster.service';
+import { EquipmentService, type CreateEquipment, type Equipment } from './equipment.service';
 
 @Component({
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   selector: 'app-equipment-detail',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   template: `
     <div>
       <h2>Equipment Detail</h2>
@@ -62,11 +63,11 @@ export class EquipmentDetailComponent {
     const id = this.route.snapshot.paramMap.get('id');
     if (id && id !== 'new') {
       this.equipmentService.getEquipment(+id).subscribe({
+        error: () => this.errorService.show('Failed to load equipment'),
         next: (data) => {
           this.equipmentId = data.id;
           this.form.patchValue(data);
         },
-        error: () => this.errorService.show('Failed to load equipment'),
       });
     }
   }
@@ -76,22 +77,22 @@ export class EquipmentDetailComponent {
       this.form.markAllAsTouched();
       return;
     }
-    const payload = this.form.getRawValue() as Partial<Equipment>;
+    const payload = this.form.getRawValue() as CreateEquipment;
     if (this.equipmentId) {
       this.equipmentService.updateEquipment(this.equipmentId, payload).subscribe({
+        error: () => this.errorService.show('Failed to update equipment'),
         next: () => {
           this.notifications.show('Equipment updated successfully');
           void this.router.navigate(['/equipment']);
         },
-        error: () => this.errorService.show('Failed to update equipment'),
       });
     } else {
       this.equipmentService.createEquipment(payload).subscribe({
+        error: () => this.errorService.show('Failed to create equipment'),
         next: () => {
           this.notifications.show('Equipment created successfully');
           void this.router.navigate(['/equipment']);
         },
-        error: () => this.errorService.show('Failed to create equipment'),
       });
     }
   }
@@ -99,11 +100,11 @@ export class EquipmentDetailComponent {
   remove(): void {
     if (this.equipmentId) {
       this.equipmentService.deleteEquipment(this.equipmentId).subscribe({
+        error: () => this.errorService.show('Failed to delete equipment'),
         next: () => {
           this.notifications.show('Equipment deleted successfully');
           void this.router.navigate(['/equipment']);
         },
-        error: () => this.errorService.show('Failed to delete equipment'),
       });
     }
   }

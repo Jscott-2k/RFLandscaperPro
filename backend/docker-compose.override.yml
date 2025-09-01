@@ -2,6 +2,7 @@ services:
   backend:
     build:
       dockerfile: backend/Dockerfile.dev
+    working_dir: /app
     volumes:
       - .:/app
       - ../shared:/shared
@@ -10,3 +11,5 @@ services:
       - .env.development
     environment:
       - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - DB_HOST=db

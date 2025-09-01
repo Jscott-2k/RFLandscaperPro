@@ -1,4 +1,5 @@
 import { IsEmail, IsEnum } from 'class-validator';
+
 import { InvitationRole } from '../entities/invitation.entity';
 
 export class CreateInvitationDto {

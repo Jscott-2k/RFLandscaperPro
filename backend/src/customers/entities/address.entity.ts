@@ -6,8 +6,9 @@ import {
   Index,
   JoinColumn,
 } from 'typeorm';
-import { Customer } from './customer.entity';
+
 import { Company } from '../../companies/entities/company.entity';
+import { Customer } from './customer.entity';
 
 @Entity()
 @Index(['street', 'city', 'state', 'zip']) // Add composite index for address lookups
@@ -31,10 +32,10 @@ export class Address {
   @Column({ nullable: true })
   unit?: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ nullable: true, type: 'text' })
   notes?: string;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ default: true, type: 'boolean' })
   primary: boolean;
 
   @Column()

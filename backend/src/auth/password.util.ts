@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 
 export const PASSWORD_REGEX =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
 
 export function validatePasswordStrength(password: string): void {
   if (password.length < 8) {

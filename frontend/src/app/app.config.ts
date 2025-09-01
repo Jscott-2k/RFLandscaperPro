@@ -1,19 +1,20 @@
+import { isPlatformServer } from '@angular/common';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
-  ApplicationConfig,
+  type ApplicationConfig,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
   APP_INITIALIZER,
   PLATFORM_ID,
 } from '@angular/core';
-import { provideRouter, Router } from '@angular/router';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { isPlatformServer } from '@angular/common';
+import { provideRouter, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+
+import { ApiService } from './api.service';
+import { routes } from './app.routes';
 import { authInterceptor } from './auth.interceptor';
 import { httpErrorInterceptor } from './http-error.interceptor';
-import { routes } from './app.routes';
-import { ApiService } from './api.service';
-import { firstValueFrom } from 'rxjs';
 
 function backendHealthInitializer(
   api: ApiService,
@@ -41,10 +42,10 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay()),
     provideHttpClient(withInterceptors([authInterceptor, httpErrorInterceptor])),
     {
-      provide: APP_INITIALIZER,
-      useFactory: backendHealthInitializer,
       deps: [ApiService, Router, PLATFORM_ID],
       multi: true,
+      provide: APP_INITIALIZER,
+      useFactory: backendHealthInitializer,
     },
   ],
 };

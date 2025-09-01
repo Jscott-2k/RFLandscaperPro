@@ -1,22 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, EntityManager } from 'typeorm';
+import { type Repository, type EntityManager } from 'typeorm';
+
+import { type Equipment } from '../../equipment/entities/equipment.entity';
+import { type User } from '../../users/user.entity';
 import { Assignment } from '../entities/assignment.entity';
-import { Job } from '../entities/job.entity';
-import { User } from '../../users/user.entity';
-import { Equipment } from '../../equipment/entities/equipment.entity';
+import { type Job } from '../entities/job.entity';
 
 export const ASSIGNMENT_REPOSITORY = Symbol('ASSIGNMENT_REPOSITORY');
 
-export interface IAssignmentRepository {
+export type IAssignmentRepository = {
+  bulkCreate(
+    assignments: { userId: number; equipmentId: number }[],
+    job: Job,
+    companyId: number,
+  ): Promise<void>;
   create(data: Partial<Assignment>): Assignment;
-  save(assignment: Assignment): Promise<Assignment>;
   findById(
     id: number,
     jobId: number,
     companyId: number,
   ): Promise<Assignment | null>;
-  remove(assignment: Assignment): Promise<void>;
   hasConflict(
     date: Date,
     userId: number,
@@ -24,11 +28,8 @@ export interface IAssignmentRepository {
     companyId: number,
     jobId?: number,
   ): Promise<boolean>;
-  bulkCreate(
-    assignments: { userId: number; equipmentId: number }[],
-    job: Job,
-    companyId: number,
-  ): Promise<void>;
+  remove(assignment: Assignment): Promise<void>;
+  save(assignment: Assignment): Promise<Assignment>;
 }
 
 @Injectable()
@@ -52,8 +53,8 @@ export class AssignmentRepository implements IAssignmentRepository {
     companyId: number,
   ): Promise<Assignment | null> {
     return this.repo.findOne({
-      where: { id, companyId, job: { id: jobId } },
       relations: ['job'],
+      where: { companyId, id, job: { id: jobId } },
     });
   }
 
@@ -75,7 +76,7 @@ export class AssignmentRepository implements IAssignmentRepository {
       .andWhere('assignment.companyId = :companyId', { companyId })
       .andWhere(
         '(assignment.userId = :userId OR assignment.equipmentId = :equipmentId)',
-        { userId, equipmentId },
+        { equipmentId, userId },
       );
 
     if (jobId !== undefined) {
@@ -83,7 +84,7 @@ export class AssignmentRepository implements IAssignmentRepository {
     }
 
     const conflict = await query.getOne();
-    return !!conflict;
+    return Boolean(conflict);
   }
 
   async bulkCreate(
@@ -94,10 +95,10 @@ export class AssignmentRepository implements IAssignmentRepository {
     await this.repo.manager.transaction(async (manager: EntityManager) => {
       const entities = assignments.map((data) =>
         manager.create(Assignment, {
+          companyId,
+          equipment: { id: data.equipmentId } as Equipment,
           job,
           user: { id: data.userId } as User,
-          equipment: { id: data.equipmentId } as Equipment,
-          companyId,
         }),
       );
       await manager.save(entities);

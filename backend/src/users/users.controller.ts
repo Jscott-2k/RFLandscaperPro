@@ -14,21 +14,22 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { Roles } from '../common/decorators/roles.decorator';
-import { CompanyId } from '../common/decorators/company-id.decorator';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UpdateUserRoleDto } from './dto/update-user-role.dto';
-import { UserRole } from './user.entity';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+
+import { CompanyId } from '../common/decorators/company-id.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
+import { type CreateUserDto } from './dto/create-user.dto';
+import { type UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { type UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { UserRole } from './user.entity';
 import { toUserResponseDto } from './users.mapper';
+import { UsersService } from './users.service';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -40,8 +41,8 @@ export class UsersController {
   @Post()
   @ApiOperation({ summary: 'Create user' })
   @ApiResponse({
-    status: 201,
     description: 'User created',
+    status: 201,
     type: UserResponseDto,
   })
   async create(
@@ -67,8 +68,8 @@ export class UsersController {
   @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'List users' })
   @ApiResponse({
-    status: 200,
     description: 'List of users',
+    status: 200,
     type: [UserResponseDto],
   })
   async findAll(): Promise<UserResponseDto[]> {
@@ -80,8 +81,8 @@ export class UsersController {
   @Roles(UserRole.CompanyOwner)
   @ApiOperation({ summary: 'List company workers' })
   @ApiResponse({
-    status: 200,
     description: 'List of workers',
+    status: 200,
     type: [UserResponseDto],
   })
   async findWorkers(
@@ -97,15 +98,15 @@ export class UsersController {
   @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Get user by id' })
   @ApiResponse({
-    status: 200,
     description: 'User retrieved',
+    status: 200,
     type: UserResponseDto,
   })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<UserResponseDto> {
     const user = await this.usersService.findById(id);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) {throw new NotFoundException('User not found');}
     return toUserResponseDto(user);
   }
 
@@ -113,8 +114,8 @@ export class UsersController {
   @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Update user' })
   @ApiResponse({
-    status: 200,
     description: 'User updated',
+    status: 200,
     type: UserResponseDto,
   })
   async update(
@@ -129,8 +130,8 @@ export class UsersController {
   @Roles(UserRole.CompanyOwner)
   @ApiOperation({ summary: 'Update company worker' })
   @ApiResponse({
-    status: 200,
     description: 'Worker updated',
+    status: 200,
     type: UserResponseDto,
   })
   async updateWorker(
@@ -154,7 +155,7 @@ export class UsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Delete user' })
-  @ApiResponse({ status: 204, description: 'User deleted' })
+  @ApiResponse({ description: 'User deleted', status: 204 })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     await this.usersService.remove(id);
   }
@@ -163,8 +164,8 @@ export class UsersController {
   @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Update user role' })
   @ApiResponse({
-    status: 200,
     description: 'User role updated',
+    status: 200,
     type: UserResponseDto,
   })
   async updateRole(
@@ -178,23 +179,23 @@ export class UsersController {
   @Get('me')
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({
-    status: 200,
     description: 'Current user',
+    status: 200,
     type: UserResponseDto,
   })
   async getMe(
     @Req() req: { user: { userId: number } },
   ): Promise<UserResponseDto> {
     const user = await this.usersService.findById(req.user.userId);
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) {throw new NotFoundException('User not found');}
     return toUserResponseDto(user);
   }
 
   @Put('me')
   @ApiOperation({ summary: 'Update current user profile' })
   @ApiResponse({
-    status: 200,
     description: 'Updated user',
+    status: 200,
     type: UserResponseDto,
   })
   async updateMe(

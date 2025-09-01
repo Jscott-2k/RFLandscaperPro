@@ -1,9 +1,3 @@
-import { Job } from '../../jobs/entities/job.entity';
-import { Contract } from '../../contracts/entities/contract.entity';
-import { Address } from './address.entity';
-import { User } from '../../users/user.entity';
-import { Company } from '../../companies/entities/company.entity';
-
 import {
   Entity,
   Column,
@@ -17,6 +11,12 @@ import {
   ManyToOne,
   Unique,
 } from 'typeorm';
+
+import { Company } from '../../companies/entities/company.entity';
+import { Contract } from '../../contracts/entities/contract.entity';
+import { Job } from '../../jobs/entities/job.entity';
+import { User } from '../../users/user.entity';
+import { Address } from './address.entity';
 
 @Entity()
 @Unique(['email', 'companyId'])
@@ -35,10 +35,10 @@ export class Customer {
   @Column({ nullable: true })
   phone?: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ nullable: true, type: 'text' })
   notes?: string;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ default: true, type: 'boolean' })
   active: boolean;
 
   @Column()

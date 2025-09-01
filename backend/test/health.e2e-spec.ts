@@ -1,10 +1,12 @@
-import './env.test';
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ServiceUnavailableException } from '@nestjs/common';
-import * as request from 'supertest';
-import { App } from 'supertest/types';
-import { HealthController } from './../src/health/health.controller';
+import { type INestApplication, ServiceUnavailableException } from '@nestjs/common';
 import { HealthCheckService, TypeOrmHealthIndicator } from '@nestjs/terminus';
+import { Test, type TestingModule } from '@nestjs/testing';
+import request from 'supertest';
+import { type App } from 'supertest/types';
+
+import { HealthController } from './../src/health/health.controller';
+
+import './env.test';
 
 describe('HealthCheck (e2e)', () => {
   let app: INestApplication<App>;

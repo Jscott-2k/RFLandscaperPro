@@ -1,17 +1,29 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiService, Paginated, PaginationQuery } from '../api.service';
-import { environment } from '../../environments/environment';
-import { EquipmentCount } from '../models/dashboard.models';
+import { type Observable } from 'rxjs';
 
-export interface Equipment {
+import { environment } from '../../environments/environment';
+import { ApiService, type Paginated, type PaginationQuery } from '../api.service';
+import { type EquipmentCount } from '../models/dashboard.models';
+
+export type Equipment = {
   id: number;
   name: string;
   status: string;
   type: string;
-}
+  location?: string;
+  description?: string;
+  lastMaintenanceDate?: string;
+};
 
-export type CreateEquipment = Partial<Omit<Equipment, 'id'>>;
+export type CreateEquipment = {
+  name: string;
+  type: string;
+  status?: string;
+  location?: string;
+  description?: string;
+  lastMaintenanceDate?: string;
+};
+
 export type UpdateEquipment = Partial<CreateEquipment>;
 
 @Injectable({ providedIn: 'root' })
@@ -53,7 +65,7 @@ export class EquipmentApiService extends ApiService {
       'GET',
       `${environment.apiUrl}/equipment`,
       {
-        params: { status, limit: 1 },
+        params: { limit: 1, status },
       },
     );
   }

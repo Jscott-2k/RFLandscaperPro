@@ -12,7 +12,8 @@ COPY frontend/package*.json ./
 RUN npm ci
 
 # Copy source code
-COPY frontend ./
+# Copy frontend sources directly into /app
+COPY frontend/ ./
 COPY shared /shared
 
 # Build the Angular app

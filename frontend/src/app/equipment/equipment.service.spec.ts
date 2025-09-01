@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { EquipmentService } from './equipment.service';
+
 import { EquipmentApiService } from '../api/equipment-api.service';
+import { EquipmentService } from './equipment.service';
 
 describe('EquipmentService', () => {
   let service: EquipmentService;
@@ -20,7 +21,7 @@ describe('EquipmentService', () => {
 
   it('should call EquipmentApiService.getEquipment', () => {
     service.getEquipmentList().subscribe();
-    // eslint-disable-next-line @typescript-eslint/unbound-method
+     
     expect(apiSpy.getEquipment).toHaveBeenCalled();
   });
 });

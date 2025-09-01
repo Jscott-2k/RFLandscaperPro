@@ -1,12 +1,13 @@
-import * as crypto from 'crypto';
-import { Repository, FindOneOptions } from 'typeorm';
-import { InvitationsService } from '../invitations.service';
-import { Invitation, InvitationRole } from '../entities/invitation.entity';
-import { CompanyUser } from '../entities/company-user.entity';
+import * as crypto from 'node:crypto';
+import { type SendMailOptions } from 'nodemailer';
+import { type Repository, type FindOneOptions } from 'typeorm';
+
+import { type EmailService } from '../../common/email';
+import { type User } from '../../users/user.entity';
+import { type CompanyUser } from '../entities/company-user.entity';
 import { Company } from '../entities/company.entity';
-import { User } from '../../users/user.entity';
-import { EmailService } from '../../common/email';
-import { SendMailOptions } from 'nodemailer';
+import { Invitation, InvitationRole } from '../entities/invitation.entity';
+import { InvitationsService } from '../invitations.service';
 
 describe('InvitationsService revoke and resend', () => {
   let invitationsRepo: jest.Mocked<
@@ -38,12 +39,12 @@ describe('InvitationsService revoke and resend', () => {
     const token = 'abc';
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const invitation = Object.assign(new Invitation(), {
-      id: 1,
       companyId: 2,
       email: 'a@b.com',
+      expiresAt: new Date(Date.now() + 1000),
+      id: 1,
       role: InvitationRole.WORKER,
       tokenHash,
-      expiresAt: new Date(Date.now() + 1000),
     });
     invitationsRepo.findOne.mockImplementation(
       (options: FindOneOptions<Invitation>) => {
@@ -62,7 +63,7 @@ describe('InvitationsService revoke and resend', () => {
     await service.revokeInvitation(2, 1);
 
     await expect(
-      service.acceptExistingUser(token, { userId: 5, email: 'a@b.com' }),
+      service.acceptExistingUser(token, { email: 'a@b.com', userId: 5 }),
     ).rejects.toMatchObject({ status: 400 });
   });
 
@@ -70,13 +71,13 @@ describe('InvitationsService revoke and resend', () => {
     const token = 'old';
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const invitation = Object.assign(new Invitation(), {
-      id: 3,
+      company: Object.assign(new Company(), { name: 'Co' }),
       companyId: 4,
       email: 'resend@ex.com',
+      expiresAt: new Date(Date.now() - 1000),
+      id: 3,
       role: InvitationRole.ADMIN,
       tokenHash,
-      expiresAt: new Date(Date.now() - 1000),
-      company: Object.assign(new Company(), { name: 'Co' }),
     });
     invitationsRepo.findOne.mockImplementation(
       (options: FindOneOptions<Invitation>) => {

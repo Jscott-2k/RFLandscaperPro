@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { type Observable } from 'rxjs';
+
 import { UsersApiService } from '../api/users-api.service';
-import { User, CreateUser, UpdateUser } from './user.model';
+import { type User, type CreateUser, type UpdateUser } from './user.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -20,7 +21,11 @@ export class UserService {
   }
 
   updateUser(user: UpdateUser & { id: number }): Observable<User> {
-    const { id, ...payload } = user;
+    const { id, role, company, ...payload } = user as UpdateUser & {
+      id: number;
+      role?: unknown;
+      company?: unknown;
+    };
     return this.api.updateUser(id, payload);
   }
 

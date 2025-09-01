@@ -1,10 +1,11 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
-import { CompanyMembership, CompanyUserRole } from '@rflp/shared';
+import { Injectable, inject } from '@angular/core';
+import { type CompanyMembership, type CompanyUserRole } from '@rflp/shared';
+import { type Observable } from 'rxjs';
 
-export interface InvitationPreview {
+import { environment } from '../../environments/environment';
+
+export type InvitationPreview = {
   companyName: string;
   email: string;
   role: CompanyUserRole;

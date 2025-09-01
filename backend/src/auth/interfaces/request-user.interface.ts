@@ -1,7 +1,7 @@
-import { UserRole } from '../../users/user.entity';
+import { type UserRole } from '../../users/user.entity';
 
-export interface RequestUser {
-  id: number;
+export type RequestUser = {
   companyId?: number | null;
+  id: number;
   role: UserRole;
 }

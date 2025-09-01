@@ -1,6 +1,6 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { type ExecutionContext, Injectable } from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { Request } from 'express';
+import { type Request } from 'express';
 
 @Injectable()
 export class MetricsThrottlerGuard extends ThrottlerGuard {

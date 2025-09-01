@@ -1,0 +1,44 @@
+{
+  "name": "rflandscaperpro",
+  "private": true,
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.34.0",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.34.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-perfectionist": "^4.15.0",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-sonarjs": "^3.0.5",
+    "eslint-plugin-unicorn": "^60.0.0",
+    "eslint-plugin-unused-imports": "^4.2.0",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.41.0"
+  },
+  "workspaces": [
+    "backend",
+    "frontend",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run start:dev -w rflandscaperpro-backend\" \"npm run start -w frontend\"",
+    "dev:compose": "bash development.sh",
+    "down": "bash down.sh",
+    "build": "npm run build -w @rflp/shared && npm run build -w rflandscaperpro-backend && npm run build:browser -w frontend",
+    "build:shared": "npm run build -w @rflp/shared",
+    "build:backend": "npm run build -w rflandscaperpro-backend",
+    "build:frontend": "npm run build:browser -w frontend",
+    "migration:generate": "npm run migration:generate -w rflandscaperpro-backend",
+    "migration:run": "npm run migration:run -w rflandscaperpro-backend",
+    "migration:revert": "npm run migration:revert -w rflandscaperpro-backend",
+    "seed": "npm run seed -w rflandscaperpro-backend",
+    "seed:drop": "npm run seed:drop -w rflandscaperpro-backend",
+    "lint": "eslint . --cache --cache-location .eslintcache --fix",
+    "lint:types": "eslint . --ext .ts --config eslint.types.config.mjs",
+    "format": "prettier --write ."
+  }
+}

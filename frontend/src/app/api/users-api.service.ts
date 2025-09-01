@@ -1,25 +1,42 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiService } from '../api.service';
-import { environment } from '../../environments/environment';
+import { type Observable } from 'rxjs';
 
-export interface User {
-  id: number;
-  username: string;
-  email: string;
-  role: string;
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
+import { environment } from '../../environments/environment';
+import { ApiService } from '../api.service';
+
+export type User = {
   company?: {
     name: string;
     address?: string;
     phone?: string;
+    email?: string;
   };
-}
+  email: string;
+  firstName?: string;
+  id: number;
+  lastName?: string;
+  phone?: string;
+  role: string;
+  username: string;
+};
 
-export type CreateUser = Partial<Omit<User, 'id'>>;
-export type UpdateUser = Partial<CreateUser>;
+export type CreateUser = {
+  username: string;
+  email: string;
+  password: string;
+  role?: string;
+  company?: {
+    name: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+  };
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+};
+
+export type UpdateUser = Partial<Omit<CreateUser, 'role' | 'company'>>;
 
 @Injectable({ providedIn: 'root' })
 export class UsersApiService extends ApiService {

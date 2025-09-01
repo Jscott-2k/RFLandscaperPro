@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { type MigrationInterface, type QueryRunner } from 'typeorm';
 
 export class Auto1756502290800 implements MigrationInterface {
   name = 'Auto1756502290800';

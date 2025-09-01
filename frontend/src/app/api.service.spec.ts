@@ -1,11 +1,11 @@
-import { TestBed } from '@angular/core/testing';
+import { provideHttpClient, withInterceptors , HttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { ApiService } from './api.service';
-import { ErrorService } from './error.service';
+import { TestBed } from '@angular/core/testing';
+
 import { environment } from '../environments/environment';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { ApiService } from './api.service';
 import { authInterceptor } from './auth.interceptor';
-import { HttpClient } from '@angular/common/http';
+import { ErrorService } from './error.service';
 
 describe('ApiService auth interceptor', () => {
   let service: ApiService;

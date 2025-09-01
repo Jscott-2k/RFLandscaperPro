@@ -12,18 +12,6 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-
-import { JobsService } from './jobs.service';
-import { CreateJobDto } from './dto/create-job.dto';
-import { UpdateJobDto } from './dto/update-job.dto';
-import { JobResponseDto } from './dto/job-response.dto';
-import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole } from '../users/user.entity';
-import { ScheduleJobDto } from './dto/schedule-job.dto';
-import { AssignJobDto } from './dto/assign-job.dto';
-import { BulkAssignJobDto } from './dto/bulk-assign-job.dto';
-import { PaginationParams, Paginated } from '../common/pagination';
-import { CompanyId } from '../common/decorators/company-id.decorator';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -33,6 +21,18 @@ import {
   ApiBadRequestResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+
+import { CompanyId } from '../common/decorators/company-id.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
+import { type PaginationParams, type Paginated } from '../common/pagination';
+import { UserRole } from '../users/user.entity';
+import { type AssignJobDto } from './dto/assign-job.dto';
+import { type BulkAssignJobDto } from './dto/bulk-assign-job.dto';
+import { type CreateJobDto } from './dto/create-job.dto';
+import { JobResponseDto } from './dto/job-response.dto';
+import { type ScheduleJobDto } from './dto/schedule-job.dto';
+import { type UpdateJobDto } from './dto/update-job.dto';
+import { JobsService } from './jobs.service';
 
 @ApiTags('jobs')
 @ApiBearerAuth()
@@ -44,8 +44,8 @@ export class JobsController {
   @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Create job' })
   @ApiResponse({
-    status: 201,
     description: 'Job created',
+    status: 201,
     type: JobResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -68,7 +68,7 @@ export class JobsController {
   @ApiQuery({ name: 'endDate', required: false, type: String })
   @ApiQuery({ name: 'workerId', required: false, type: Number })
   @ApiQuery({ name: 'equipmentId', required: false, type: Number })
-  @ApiResponse({ status: 200, description: 'List of jobs' })
+  @ApiResponse({ description: 'List of jobs', status: 200 })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   findAll(
@@ -100,8 +100,8 @@ export class JobsController {
   @Roles(UserRole.CompanyAdmin, UserRole.Worker, UserRole.Customer)
   @ApiOperation({ summary: 'Get job by id' })
   @ApiResponse({
-    status: 200,
     description: 'Job retrieved',
+    status: 200,
     type: JobResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -117,8 +117,8 @@ export class JobsController {
   @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Update job' })
   @ApiResponse({
-    status: 200,
     description: 'Job updated',
+    status: 200,
     type: JobResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -135,8 +135,8 @@ export class JobsController {
   @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Schedule job' })
   @ApiResponse({
-    status: 200,
     description: 'Job scheduled',
+    status: 200,
     type: JobResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -153,8 +153,8 @@ export class JobsController {
   @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Assign resources to job' })
   @ApiResponse({
-    status: 200,
     description: 'Job assignment added',
+    status: 200,
     type: JobResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -171,8 +171,8 @@ export class JobsController {
   @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Assign multiple resources to job' })
   @ApiResponse({
-    status: 200,
     description: 'Multiple job assignments added',
+    status: 200,
     type: JobResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -189,8 +189,8 @@ export class JobsController {
   @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Remove assignment from job' })
   @ApiResponse({
-    status: 200,
     description: 'Assignment removed',
+    status: 200,
     type: JobResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -207,7 +207,7 @@ export class JobsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Roles(UserRole.CompanyAdmin, UserRole.Worker)
   @ApiOperation({ summary: 'Delete job' })
-  @ApiResponse({ status: 204, description: 'Job deleted' })
+  @ApiResponse({ description: 'Job deleted', status: 204 })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async remove(

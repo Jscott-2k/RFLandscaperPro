@@ -1,4 +1,5 @@
 import { IsString, MinLength, Matches } from 'class-validator';
+
 import { PASSWORD_REGEX } from '../../auth/password.util';
 
 export class AcceptInvitationDto {

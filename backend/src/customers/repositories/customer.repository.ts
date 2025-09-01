@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { type Repository } from 'typeorm';
+
+import { type Paginated, type PaginationParams, paginate } from '../../common/pagination';
 import { Customer } from '../entities/customer.entity';
-import { Paginated, PaginationParams, paginate } from '../../common/pagination';
 
 export const CUSTOMER_REPOSITORY = Symbol('CUSTOMER_REPOSITORY');
 
-export interface ICustomerRepository {
+export type ICustomerRepository = {
   create(data: Partial<Customer>): Customer;
-  save(customer: Customer): Promise<Customer>;
   findAll(
     pagination: PaginationParams,
     companyId: number,
@@ -18,6 +18,7 @@ export interface ICustomerRepository {
   findById(id: number, companyId: number): Promise<Customer | null>;
   findByUserId(userId: number, companyId: number): Promise<Customer | null>;
   remove(customer: Customer): Promise<void>;
+  save(customer: Customer): Promise<Customer>;
 }
 
 @Injectable()
@@ -63,15 +64,15 @@ export class CustomerRepository implements ICustomerRepository {
 
   findById(id: number, companyId: number): Promise<Customer | null> {
     return this.repo.findOne({
-      where: { id, companyId },
       relations: ['jobs', 'addresses'],
+      where: { companyId, id },
     });
   }
 
   findByUserId(userId: number, companyId: number): Promise<Customer | null> {
     return this.repo.findOne({
-      where: { userId, companyId },
       relations: ['jobs', 'addresses'],
+      where: { companyId, userId },
     });
   }
 

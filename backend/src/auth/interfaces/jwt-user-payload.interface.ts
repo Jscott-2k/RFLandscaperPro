@@ -1,10 +1,10 @@
-import { UserRole } from '../../users/user.entity';
+import { type UserRole } from '../../users/user.entity';
 
-export interface JwtUserPayload {
+export type JwtUserPayload = {
+  companyId?: number | null;
+  email: string;
+  role?: UserRole;
+  roles?: UserRole[];
   userId: number;
   username: string;
-  email: string;
-  roles?: UserRole[];
-  role?: UserRole;
-  companyId?: number | null;
 }

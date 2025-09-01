@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Company } from './entities/company.entity';
+import { type Repository } from 'typeorm';
+
 import { User, UserRole } from '../users/user.entity';
-import { CreateCompanyDto } from './dto/create-company.dto';
-import { UpdateCompanyDto } from './dto/update-company.dto';
-import { CompanyResponseDto } from './dto/company-response.dto';
+import { type CompanyResponseDto } from './dto/company-response.dto';
+import { type CreateCompanyDto } from './dto/create-company.dto';
+import { type UpdateCompanyDto } from './dto/update-company.dto';
+import { Company } from './entities/company.entity';
 
 @Injectable()
 export class CompaniesService {
@@ -41,7 +42,7 @@ export class CompaniesService {
 
   async update(id: number, dto: UpdateCompanyDto): Promise<CompanyResponseDto> {
     const company = await this.companyRepository.findOne({ where: { id } });
-    if (!company) throw new NotFoundException('Company not found');
+    if (!company) {throw new NotFoundException('Company not found');}
     Object.assign(company, dto);
     const saved = await this.companyRepository.save(company);
     return this.toCompanyResponseDto(saved);
@@ -49,12 +50,12 @@ export class CompaniesService {
 
   private toCompanyResponseDto(company: Company): CompanyResponseDto {
     return {
+      address: company.address ?? null,
+      email: company.email ?? null,
       id: company.id,
       name: company.name,
-      address: company.address ?? null,
-      phone: company.phone ?? null,
-      email: company.email ?? null,
       ownerId: company.ownerId ?? null,
+      phone: company.phone ?? null,
     };
   }
 }

@@ -3,6 +3,6 @@ const apiUrl =
   'https://staging.rflandscaperpro.com/api';
 
 export const environment = {
-  production: false,
   apiUrl,
+  production: false,
 };

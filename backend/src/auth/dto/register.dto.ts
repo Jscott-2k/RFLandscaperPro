@@ -1,3 +1,5 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsEmail,
   IsString,
@@ -8,12 +10,9 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { Type } from 'class-transformer';
-
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PASSWORD_REGEX } from '../password.util';
-import { UserRole } from '../../users/user.entity';
 import { CreateCompanyDto } from '../../companies/dto/create-company.dto';
+import { UserRole } from '../../users/user.entity';
+import { PASSWORD_REGEX } from '../password.util';
 
 export class RegisterDto {
   @ApiProperty({ description: 'Username must be unique' })

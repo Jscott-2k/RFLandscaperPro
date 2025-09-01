@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CompanyMembership, CompanyUserRole } from '@rflp/shared';
+import { type CompanyMembership, CompanyUserRole } from '@rflp/shared';
 
 export class CompanyMembershipResponseDto implements CompanyMembership {
   @ApiProperty()

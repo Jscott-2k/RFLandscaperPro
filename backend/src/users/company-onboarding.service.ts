@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { EntityManager } from 'typeorm';
+import { type EntityManager } from 'typeorm';
+
+import { type CreateCompanyDto } from '../companies/dto/create-company.dto';
 import { Company } from '../companies/entities/company.entity';
-import { CreateCompanyDto } from '../companies/dto/create-company.dto';
 import { User, UserRole } from './user.entity';
 
 @Injectable()

@@ -4,39 +4,40 @@ import {
   Inject,
   Optional,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as crypto from 'node:crypto';
 import { Repository } from 'typeorm';
-import * as crypto from 'crypto';
-import { UsersService } from '../users/users.service';
-import { User, UserRole } from '../users/user.entity';
-import { Email } from '../users/value-objects/email.vo';
-import { PhoneNumber } from '../users/value-objects/phone-number.vo';
-import { UserCreationService } from '../users/user-creation.service';
-import { RegisterDto } from './dto/register.dto';
-import { SignupOwnerDto } from './dto/signup-owner.dto';
-import { validatePasswordStrength } from './password.util';
+
 import { EmailService } from '../common/email';
 import { verificationMail } from '../common/email/templates';
 import {
   CompanyUserRole,
   CompanyUserStatus,
 } from '../companies/entities/company-user.entity';
-import { JwtUserPayload } from './interfaces/jwt-user-payload.interface';
+import { MetricsService } from '../metrics/metrics.service';
+import { UserCreationService } from '../users/user-creation.service';
+import { User, UserRole } from '../users/user.entity';
+import { UsersService } from '../users/users.service';
+import { Email } from '../users/value-objects/email.vo';
+import { PhoneNumber } from '../users/value-objects/phone-number.vo';
+import { type RegisterDto } from './dto/register.dto';
+import { type SignupOwnerDto } from './dto/signup-owner.dto';
+import { type JwtUserPayload } from './interfaces/jwt-user-payload.interface';
+import { validatePasswordStrength } from './password.util';
 import {
-  RefreshTokenRepository,
+  type CompanyMembershipRepository,
+  COMPANY_MEMBERSHIP_REPOSITORY,
+} from './repositories/company-membership.repository';
+import {
+  type RefreshTokenRepository,
   REFRESH_TOKEN_REPOSITORY,
 } from './repositories/refresh-token.repository';
 import {
-  VerificationTokenRepository,
+  type VerificationTokenRepository,
   VERIFICATION_TOKEN_REPOSITORY,
 } from './repositories/verification-token.repository';
-import {
-  CompanyMembershipRepository,
-  COMPANY_MEMBERSHIP_REPOSITORY,
-} from './repositories/company-membership.repository';
-import { MetricsService } from '../metrics/metrics.service';
 
 @Injectable()
 export class AuthService {
@@ -71,8 +72,8 @@ export class AuthService {
     const isValidPassword = await user.validatePassword(pass);
     if (!isValidPassword) {
       this.metrics?.incrementCounter('login_failures_total', {
-        route: 'auth.login',
         companyId: user.companyId ?? undefined,
+        route: 'auth.login',
         status: 'invalid_password',
       });
       throw new UnauthorizedException('Invalid credentials');
@@ -80,8 +81,8 @@ export class AuthService {
 
     if (!user.isVerified) {
       this.metrics?.incrementCounter('login_failures_total', {
-        route: 'auth.login',
         companyId: user.companyId ?? undefined,
+        route: 'auth.login',
         status: 'email_not_verified',
       });
       throw new UnauthorizedException('Email not verified');
@@ -93,12 +94,12 @@ export class AuthService {
   async login(user: User) {
     const roles = [user.role];
     const payload = {
-      username: user.username,
-      sub: user.id,
-      email: user.email,
       companyId: null as number | null,
-      roles,
+      email: user.email,
       role: user.role,
+      roles,
+      sub: user.id,
+      username: user.username,
     };
 
     const refreshToken = await this.jwtService.signAsync(payload, {
@@ -110,11 +111,11 @@ export class AuthService {
       access_token: await this.jwtService.signAsync(payload),
       refresh_token: refreshToken,
       user: {
-        id: user.id,
-        username: user.username,
         email: user.email.value,
+        id: user.id,
         role: user.role,
         roles,
+        username: user.username,
       },
     };
   }
@@ -126,9 +127,9 @@ export class AuthService {
     const { email, phone, ...rest } = registerDto;
     const user = await this.usersService.create({
       ...rest,
+      company: registerDto.company,
       email: new Email(email),
       phone: phone ? new PhoneNumber(phone) : undefined,
-      company: registerDto.company,
     });
 
     const token = await this.createVerificationToken(user.id);
@@ -140,12 +141,12 @@ export class AuthService {
     validatePasswordStrength(dto.password);
 
     const user = await this.userCreationService.createUser({
-      username: dto.name,
+      company: { name: dto.companyName },
       email: new Email(dto.email),
+      isVerified: true,
       password: dto.password,
       role: UserRole.CompanyOwner,
-      company: { name: dto.companyName },
-      isVerified: true,
+      username: dto.name,
     });
 
     return this.login(user);
@@ -158,12 +159,12 @@ export class AuthService {
     // Allow master users to switch companies without membership lookup
     if (user.role === UserRole.Master) {
       const payload = {
-        username: user.username,
-        sub: user.userId,
-        email: user.email,
         companyId,
-        roles: [UserRole.Master],
+        email: user.email,
         role: UserRole.Master,
+        roles: [UserRole.Master],
+        sub: user.userId,
+        username: user.username,
       };
 
       return {
@@ -174,8 +175,8 @@ export class AuthService {
     const membership = await this.companyMembershipRepository.findOne({
       where: {
         companyId,
-        userId: user.userId,
         status: CompanyUserStatus.ACTIVE,
+        userId: user.userId,
       },
     });
     if (!membership) {
@@ -184,12 +185,12 @@ export class AuthService {
 
     const role = this.mapRole(membership.role);
     const payload = {
-      username: user.username,
-      sub: user.userId,
-      email: user.email,
       companyId,
-      roles: [role],
+      email: user.email,
       role,
+      roles: [role],
+      sub: user.userId,
+      username: user.username,
     };
 
     return {
@@ -249,7 +250,7 @@ export class AuthService {
       }>(token);
       const hashed = this.hashToken(token);
       const tokenEntity = await this.refreshTokenRepository.findOne({
-        where: { token: hashed, userId: payload.sub, isRevoked: false },
+        where: { isRevoked: false, token: hashed, userId: payload.sub },
       });
       if (!tokenEntity || tokenEntity.expiresAt < new Date()) {
         throw new UnauthorizedException('Invalid refresh token');
@@ -258,12 +259,12 @@ export class AuthService {
       await this.refreshTokenRepository.save(tokenEntity);
       const newRefresh = await this.jwtService.signAsync(
         {
-          username: payload.username,
-          sub: payload.sub,
-          email: payload.email,
           companyId: payload.companyId,
-          roles: payload.roles ?? (payload.role ? [payload.role] : []),
+          email: payload.email,
           role: payload.role ?? payload.roles?.[0],
+          roles: payload.roles ?? (payload.role ? [payload.role] : []),
+          sub: payload.sub,
+          username: payload.username,
         },
         {
           expiresIn: this.configService.get<string>(
@@ -275,12 +276,12 @@ export class AuthService {
       await this.saveRefreshToken(payload.sub, newRefresh);
       return {
         access_token: await this.jwtService.signAsync({
-          username: payload.username,
-          sub: payload.sub,
-          email: payload.email,
           companyId: payload.companyId,
-          roles: payload.roles ?? (payload.role ? [payload.role] : []),
+          email: payload.email,
           role: payload.role ?? payload.roles?.[0],
+          roles: payload.roles ?? (payload.role ? [payload.role] : []),
+          sub: payload.sub,
+          username: payload.username,
         }),
         refresh_token: newRefresh,
       };
@@ -304,9 +305,9 @@ export class AuthService {
     const hashed = this.hashToken(token);
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const entity = this.verificationTokenRepository.create({
+      expiresAt,
       token: hashed,
       userId,
-      expiresAt,
     });
     await this.verificationTokenRepository.save(entity);
     return token;
@@ -324,9 +325,9 @@ export class AuthService {
         ? new Date((decoded as { exp: number }).exp * 1000)
         : new Date();
     const entity = this.refreshTokenRepository.create({
+      expiresAt,
       token: hashed,
       userId,
-      expiresAt,
     });
     await this.refreshTokenRepository.save(entity);
   }

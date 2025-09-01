@@ -1,16 +1,17 @@
-import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, type OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize, switchMap } from 'rxjs';
-import { InvitationsService, InvitationPreview } from './invitations.service';
+
 import { AuthService } from '../auth/auth.service';
 import { ErrorService } from '../error.service';
+import { InvitationsService, type InvitationPreview } from './invitations.service';
 
 @Component({
+  imports: [CommonModule, ReactiveFormsModule],
   selector: 'app-accept-invitation',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
   template: `
     <ng-container *ngIf="loading">Loading...</ng-container>
     <ng-container *ngIf="!loading && preview">
@@ -75,14 +76,14 @@ export class AcceptInvitationComponent implements OnInit {
         .preview(this.token)
         .pipe(finalize(() => (this.loading = false)))
         .subscribe({
+          error: (err: unknown) => {
+            this.errorService.show((err as Error).message);
+          },
           next: (res) => {
             this.preview = res;
             if (res.status === 'valid') {
               this.loginForm.patchValue({ email: res.email });
             }
-          },
-          error: (err: unknown) => {
-            this.errorService.show((err as Error).message);
           },
         });
     } else {
@@ -101,11 +102,11 @@ export class AcceptInvitationComponent implements OnInit {
           finalize(() => (this.loginLoading = false)),
         )
         .subscribe({
+          error: (err: unknown) => this.errorService.show((err as Error).message),
           next: (res) => {
             this.auth.handleAuth(res);
             void this.router.navigate(['/dashboard']);
           },
-          error: (err: unknown) => this.errorService.show((err as Error).message),
         });
     }
   }
@@ -117,11 +118,11 @@ export class AcceptInvitationComponent implements OnInit {
         .accept(this.token, this.createForm.getRawValue())
         .pipe(finalize(() => (this.createLoading = false)))
         .subscribe({
+          error: (err: unknown) => this.errorService.show((err as Error).message),
           next: (res) => {
             this.auth.handleAuth(res);
             void this.router.navigate(['/dashboard']);
           },
-          error: (err: unknown) => this.errorService.show((err as Error).message),
         });
     }
   }

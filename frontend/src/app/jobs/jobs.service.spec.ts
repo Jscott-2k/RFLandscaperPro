@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { JobsService } from './jobs.service';
+
 import { JobsApiService } from '../api/jobs-api.service';
+import { JobsService } from './jobs.service';
 
 describe('JobsService', () => {
   let service: JobsService;
@@ -20,7 +21,7 @@ describe('JobsService', () => {
 
   it('should call JobsApiService.getJobs', () => {
     service.list().subscribe();
-    // eslint-disable-next-line @typescript-eslint/unbound-method
+     
     expect(apiSpy.getJobs).toHaveBeenCalled();
   });
 });

@@ -1,14 +1,17 @@
-import { IsEmail, IsString, MinLength, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsString, Matches, MinLength } from 'class-validator';
+
 import { PASSWORD_REGEX } from '../password.util';
 
 export class SignupOwnerDto {
   @ApiProperty()
   @IsString()
+  @IsNotEmpty()
   name: string;
 
   @ApiProperty()
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   @ApiProperty({
@@ -17,6 +20,7 @@ export class SignupOwnerDto {
     example: 'SecurePass123!',
   })
   @IsString()
+  @IsNotEmpty()
   @MinLength(8, { message: 'Password must be at least 8 characters long' })
   @Matches(PASSWORD_REGEX, {
     message:
@@ -26,5 +30,6 @@ export class SignupOwnerDto {
 
   @ApiProperty()
   @IsString()
+  @IsNotEmpty()
   companyName: string;
 }

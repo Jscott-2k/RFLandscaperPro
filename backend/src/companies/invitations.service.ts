@@ -10,23 +10,24 @@ import {
   Optional,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThan, IsNull, QueryFailedError } from 'typeorm';
-import { Invitation, InvitationRole } from './entities/invitation.entity';
+import * as crypto from 'node:crypto';
+import { type Repository, MoreThan, IsNull, QueryFailedError } from 'typeorm';
+
+import { validatePasswordStrength } from '../auth/password.util';
+import { type EmailService } from '../common/email';
+import { invitationMail, addedToCompanyMail } from '../common/email/templates';
+import { type MetricsService } from '../metrics/metrics.service';
+import { User, UserRole } from '../users/user.entity';
+import { Email } from '../users/value-objects/email.vo';
+import { type AcceptInvitationDto } from './dto/accept-invitation.dto';
+import { type CreateInvitationDto } from './dto/create-invitation.dto';
 import {
   CompanyUser,
   CompanyUserStatus,
   CompanyUserRole,
 } from './entities/company-user.entity';
 import { Company } from './entities/company.entity';
-import { User, UserRole } from '../users/user.entity';
-import { Email } from '../users/value-objects/email.vo';
-import { CreateInvitationDto } from './dto/create-invitation.dto';
-import { AcceptInvitationDto } from './dto/accept-invitation.dto';
-import * as crypto from 'crypto';
-import { EmailService } from '../common/email';
-import { invitationMail, addedToCompanyMail } from '../common/email/templates';
-import { validatePasswordStrength } from '../auth/password.util';
-import { MetricsService } from '../metrics/metrics.service';
+import { Invitation, InvitationRole } from './entities/invitation.entity';
 
 @Injectable()
 export class InvitationsService {
@@ -65,8 +66,8 @@ export class InvitationsService {
       const membership = await this.companyUsersRepository.findOne({
         where: {
           companyId,
-          userId: existingUser.id,
           status: CompanyUserStatus.ACTIVE,
+          userId: existingUser.id,
         },
       });
       if (membership) {
@@ -76,9 +77,9 @@ export class InvitationsService {
 
     const existingInvitation = await this.invitationsRepository.findOne({
       where: {
+        acceptedAt: IsNull(),
         companyId,
         email: dto.email.toLowerCase(),
-        acceptedAt: IsNull(),
         revokedAt: IsNull(),
       },
     });
@@ -90,8 +91,8 @@ export class InvitationsService {
     const recentCount = await this.invitationsRepository.count({
       where: {
         companyId,
-        invitedBy: inviter.id,
         createdAt: MoreThan(since),
+        invitedBy: inviter.id,
       },
     });
     if (recentCount >= this.RATE_LIMIT) {
@@ -111,10 +112,10 @@ export class InvitationsService {
     const invitation = this.invitationsRepository.create({
       companyId,
       email: dto.email.toLowerCase(),
-      role: dto.role,
-      tokenHash,
       expiresAt,
       invitedBy: inviter.id,
+      role: dto.role,
+      tokenHash,
     });
 
     const saved = await this.invitationsRepository.save(invitation);
@@ -132,8 +133,8 @@ export class InvitationsService {
       ),
     );
     this.metrics?.incrementCounter('invitations_sent_total', {
-      route: 'invitations.create',
       companyId,
+      route: 'invitations.create',
       status: 'sent',
     });
     return saved;
@@ -144,7 +145,7 @@ export class InvitationsService {
     invitationId: number,
   ): Promise<void> {
     const invitation = await this.invitationsRepository.findOne({
-      where: { id: invitationId, companyId },
+      where: { companyId, id: invitationId },
     });
     if (!invitation) {
       throw new NotFoundException('Invitation not found');
@@ -161,13 +162,13 @@ export class InvitationsService {
     invitationId: number,
   ): Promise<Invitation> {
     const invitation = await this.invitationsRepository.findOne({
+      relations: ['company'],
       where: {
-        id: invitationId,
-        companyId,
         acceptedAt: IsNull(),
+        companyId,
+        id: invitationId,
         revokedAt: IsNull(),
       },
-      relations: ['company'],
     });
     if (!invitation) {
       throw new NotFoundException('Invitation not found');
@@ -201,17 +202,17 @@ export class InvitationsService {
   }> {
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const invitation = await this.invitationsRepository.findOne({
-      where: { tokenHash },
       relations: ['company'],
+      where: { tokenHash },
     });
     if (!invitation) {
       throw new NotFoundException('Invitation not found');
     }
     let status: 'valid' | 'expired' | 'revoked' | 'accepted';
-    if (invitation.acceptedAt) status = 'accepted';
-    else if (invitation.revokedAt) status = 'revoked';
-    else if (invitation.expiresAt.getTime() < Date.now()) status = 'expired';
-    else status = 'valid';
+    if (invitation.acceptedAt) {status = 'accepted';}
+    else if (invitation.revokedAt) {status = 'revoked';}
+    else if (invitation.expiresAt.getTime() < Date.now()) {status = 'expired';}
+    else {status = 'valid';}
 
     return {
       companyName: invitation.company.name,
@@ -275,12 +276,12 @@ export class InvitationsService {
 
     const membership = this.companyUsersRepository.create({
       companyId: invitation.companyId,
-      userId: user.id,
+      invitedBy: invitation.invitedBy,
       role:
         invitation.role === InvitationRole.ADMIN
           ? CompanyUserRole.ADMIN
           : CompanyUserRole.WORKER,
-      invitedBy: invitation.invitedBy,
+      userId: user.id,
     });
     await this.companyUsersRepository.save(membership);
 
@@ -300,8 +301,8 @@ export class InvitationsService {
 
     this.acceptAttempts.delete(tokenHash);
     this.metrics?.incrementCounter('invitations_accepted_total', {
-      route: 'invitations.accept',
       companyId: invitation.companyId,
+      route: 'invitations.accept',
       status: 'accepted',
     });
     return user;
@@ -332,12 +333,12 @@ export class InvitationsService {
     validatePasswordStrength(dto.password);
 
     const user = this.usersRepository.create({
-      username: dto.name,
+      companyId: invitation.companyId,
       email: new Email(invitation.email),
+      isVerified: true,
       password: dto.password,
       role: UserRole.Worker,
-      isVerified: true,
-      companyId: invitation.companyId,
+      username: dto.name,
     });
 
     let savedUser: User;
@@ -355,12 +356,12 @@ export class InvitationsService {
 
     const membership = this.companyUsersRepository.create({
       companyId: invitation.companyId,
-      userId: savedUser.id,
+      invitedBy: invitation.invitedBy,
       role:
         invitation.role === InvitationRole.ADMIN
           ? CompanyUserRole.ADMIN
           : CompanyUserRole.WORKER,
-      invitedBy: invitation.invitedBy,
+      userId: savedUser.id,
     });
     await this.companyUsersRepository.save(membership);
 
@@ -381,8 +382,8 @@ export class InvitationsService {
 
     this.acceptAttempts.delete(tokenHash);
     this.metrics?.incrementCounter('invitations_accepted_total', {
-      route: 'invitations.accept',
       companyId: invitation.companyId,
+      route: 'invitations.accept',
       status: 'accepted',
     });
     return savedUser;

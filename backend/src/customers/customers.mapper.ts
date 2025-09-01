@@ -1,30 +1,30 @@
-import { Customer } from './entities/customer.entity';
-import { CustomerResponseDto } from './dto/customer-response.dto';
+import { type CustomerResponseDto } from './dto/customer-response.dto';
+import { type Customer } from './entities/customer.entity';
 
 export function toCustomerResponseDto(customer: Customer): CustomerResponseDto {
   return {
-    id: customer.id,
-    name: customer.name,
-    email: customer.email,
-    phone: customer.phone,
-    notes: customer.notes,
     active: customer.active,
+    addresses: customer.addresses?.map((addr) => ({
+      city: addr.city,
+      id: addr.id,
+      notes: addr.notes,
+      primary: addr.primary,
+      state: addr.state,
+      street: addr.street,
+      unit: addr.unit,
+      zip: addr.zip,
+    })),
     createdAt: customer.createdAt,
-    updatedAt: customer.updatedAt,
-    userId: customer.userId,
+    email: customer.email,
+    id: customer.id,
     jobs: customer.jobs?.map((job) => ({
       id: job.id,
       title: job.title,
     })),
-    addresses: customer.addresses?.map((addr) => ({
-      id: addr.id,
-      street: addr.street,
-      city: addr.city,
-      state: addr.state,
-      zip: addr.zip,
-      unit: addr.unit,
-      notes: addr.notes,
-      primary: addr.primary,
-    })),
+    name: customer.name,
+    notes: customer.notes,
+    phone: customer.phone,
+    updatedAt: customer.updatedAt,
+    userId: customer.userId,
   };
 }

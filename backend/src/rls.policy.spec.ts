@@ -1,16 +1,19 @@
+import { type DataSource } from 'typeorm';
+
+import { runWithCompanyId } from './common/tenant/tenant-context';
+import { Company } from './companies/entities/company.entity';
+import { Customer } from './customers/entities/customer.entity';
+
 process.env.DB_HOST = 'localhost';
 process.env.DB_PORT = '5432';
 process.env.DB_USERNAME = 'appuser';
 process.env.DB_PASSWORD = 'test';
 process.env.DB_NAME = 'rflandscaperpro_test';
 
-import dataSource from '../data-source';
-import { Company } from './companies/entities/company.entity';
-import { Customer } from './customers/entities/customer.entity';
-import { runWithCompanyId } from './common/tenant/tenant-context';
+let dataSource: DataSource;
 
-async function enableCustomerRls() {
-  const qr = dataSource.createQueryRunner();
+async function enableCustomerRls(ds: DataSource) {
+  const qr = ds.createQueryRunner();
   await qr.query('ALTER TABLE "customer" ENABLE ROW LEVEL SECURITY');
   await qr.query(
     'DROP POLICY IF EXISTS customer_tenant_isolation ON "customer"',
@@ -30,29 +33,30 @@ describe.skip('RLS enforcement', () => {
   let customer2: Customer;
 
   beforeAll(async () => {
+    ({ default: dataSource } = await import('./data-source'));
     dataSource.setOptions({
-      synchronize: true,
       dropSchema: true,
       migrationsRun: false,
+      synchronize: true,
     });
     await dataSource.initialize();
-    await enableCustomerRls();
+    await enableCustomerRls(dataSource);
     const companyRepo = dataSource.getRepository(Company);
     const customerRepo = dataSource.getRepository(Customer);
     company1 = await companyRepo.save({ name: 'Company One' });
     company2 = await companyRepo.save({ name: 'Company Two' });
     customer1 = await runWithCompanyId(company1.id, () =>
       customerRepo.save({
-        name: 'Alice',
-        email: 'alice@example.com',
         companyId: company1.id,
+        email: 'alice@example.com',
+        name: 'Alice',
       }),
     );
     customer2 = await runWithCompanyId(company2.id, () =>
       customerRepo.save({
-        name: 'Bob',
-        email: 'bob@example.com',
         companyId: company2.id,
+        email: 'bob@example.com',
+        name: 'Bob',
       }),
     );
   });
@@ -79,9 +83,9 @@ describe.skip('RLS enforcement', () => {
     await expect(
       runWithCompanyId(company1.id, () =>
         qr.manager.getRepository(Customer).save({
-          name: 'Eve',
-          email: 'eve@example.com',
           companyId: company2.id,
+          email: 'eve@example.com',
+          name: 'Eve',
         }),
       ),
     ).rejects.toThrow();

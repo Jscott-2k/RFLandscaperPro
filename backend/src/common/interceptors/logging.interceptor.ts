@@ -1,21 +1,21 @@
 import {
-  CallHandler,
-  ExecutionContext,
+  type CallHandler,
+  type ExecutionContext,
   Inject,
   Injectable,
-  LoggerService,
-  NestInterceptor,
+  type LoggerService,
+  type NestInterceptor,
 } from '@nestjs/common';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { InjectMetric } from '@willsoto/nestjs-prometheus';
-import { Histogram } from 'prom-client';
-import { Observable } from 'rxjs';
+import { type Request, type Response } from 'express';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { type Histogram } from 'prom-client';
+import { type Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { Request, Response } from 'express';
 
-interface RequestWithRoute extends Request {
+type RequestWithRoute = {
   route: { path?: string };
-}
+} & Request
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {

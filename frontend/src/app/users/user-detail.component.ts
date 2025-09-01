@@ -1,17 +1,18 @@
-import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, type OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { UserService } from './user.service';
-import { User } from './user.model';
+
 import { AuthService } from '../auth/auth.service';
 import { ErrorService } from '../error.service';
 import { ToasterService } from '../toaster.service';
+import { type User } from './user.model';
+import { UserService } from './user.service';
 
 @Component({
+  imports: [CommonModule, ReactiveFormsModule],
   selector: 'app-user-detail',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div *ngIf="user">
       <h3>{{ form.controls.username.value }}</h3>
@@ -101,25 +102,25 @@ export class UserDetailComponent implements OnInit {
   private fb = inject(FormBuilder);
   user?: User;
 
-  /* eslint-disable @typescript-eslint/unbound-method */
+   
   form = this.fb.nonNullable.group({
-    username: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
     phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
     role: [''],
+    username: ['', Validators.required],
   });
-  /* eslint-enable @typescript-eslint/unbound-method */
+   
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.userService.getUser(id).subscribe({
+      error: () => this.errorService.show('Failed to load user'),
       next: (u) => {
         this.user = u;
         this.form.patchValue(u);
       },
-      error: () => this.errorService.show('Failed to load user'),
     });
   }
 
@@ -131,12 +132,14 @@ export class UserDetailComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const payload: User = { ...this.user, ...this.form.getRawValue() } as User;
-    this.userService.updateUser(payload).subscribe({
+    const { role, ...data } = { ...this.user, ...this.form.getRawValue() } as User & {
+      role?: string;
+    };
+    this.userService.updateUser({ ...data, id: this.user.id }).subscribe({
+      error: () => this.errorService.show('Failed to save user'),
       next: () => {
         this.notifications.show('User updated successfully');
       },
-      error: () => this.errorService.show('Failed to save user'),
     });
   }
 }

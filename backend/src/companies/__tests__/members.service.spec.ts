@@ -1,12 +1,13 @@
-import { Repository } from 'typeorm';
-import { MembersService } from '../members.service';
+import { type Repository } from 'typeorm';
+
 import { Email } from '../../users/value-objects/email.vo';
+import { type UpdateCompanyMemberDto } from '../dto/update-company-member.dto';
 import {
   CompanyUser,
   CompanyUserRole,
   CompanyUserStatus,
 } from '../entities/company-user.entity';
-import { UpdateCompanyMemberDto } from '../dto/update-company-member.dto';
+import { MembersService } from '../members.service';
 
 describe('MembersService', () => {
   let service: MembersService;
@@ -19,11 +20,11 @@ describe('MembersService', () => {
 
   beforeEach(() => {
     repo = {
+      count: jest.fn(),
+      delete: jest.fn(),
       find: jest.fn(),
       findOne: jest.fn(),
-      count: jest.fn(),
       save: jest.fn(),
-      delete: jest.fn(),
     } as unknown as jest.Mocked<
       Pick<
         Repository<CompanyUser>,
@@ -36,10 +37,10 @@ describe('MembersService', () => {
   it('updates role and status for a member', async () => {
     const membership = Object.assign(new CompanyUser(), {
       companyId: 1,
-      userId: 2,
       role: CompanyUserRole.WORKER,
       status: CompanyUserStatus.ACTIVE,
-      user: { id: 2, username: 'u', email: new Email('u@e.com') },
+      user: { email: new Email('u@e.com'), id: 2, username: 'u' },
+      userId: 2,
     });
     repo.findOne.mockResolvedValue(membership);
     repo.save.mockImplementation((m) => Promise.resolve(m as CompanyUser));
@@ -56,10 +57,10 @@ describe('MembersService', () => {
   it('prevents demoting the last owner', async () => {
     const membership = Object.assign(new CompanyUser(), {
       companyId: 1,
-      userId: 1,
       role: CompanyUserRole.OWNER,
       status: CompanyUserStatus.ACTIVE,
-      user: { id: 1, username: 'o', email: new Email('o@e.com') },
+      user: { email: new Email('o@e.com'), id: 1, username: 'o' },
+      userId: 1,
     });
     repo.findOne.mockResolvedValue(membership);
     repo.count.mockResolvedValue(1);
@@ -72,9 +73,9 @@ describe('MembersService', () => {
   it('prevents removing the last owner', async () => {
     const membership = Object.assign(new CompanyUser(), {
       companyId: 1,
-      userId: 1,
       role: CompanyUserRole.OWNER,
       status: CompanyUserStatus.ACTIVE,
+      userId: 1,
     });
     repo.findOne.mockResolvedValue(membership);
     repo.count.mockResolvedValue(1);
@@ -87,9 +88,9 @@ describe('MembersService', () => {
   it('removes a member', async () => {
     const membership = Object.assign(new CompanyUser(), {
       companyId: 1,
-      userId: 2,
       role: CompanyUserRole.ADMIN,
       status: CompanyUserStatus.ACTIVE,
+      userId: 2,
     });
     repo.findOne.mockResolvedValue(membership);
 

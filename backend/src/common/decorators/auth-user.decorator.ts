@@ -1,11 +1,12 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
+
 import { User } from '../../users/user.entity';
 
-interface RequestUser {
+type RequestUser = {
+  companyId: number;
+  role: User['role'];
   userId: number;
   username: string;
-  role: User['role'];
-  companyId: number;
 }
 
 export const AuthUser = createParamDecorator(
@@ -16,10 +17,10 @@ export const AuthUser = createParamDecorator(
       return undefined;
     }
     return Object.assign(new User(), {
-      id: user.userId,
-      username: user.username,
-      role: user.role,
       companyId: user.companyId,
+      id: user.userId,
+      role: user.role,
+      username: user.username,
     });
   },
 );

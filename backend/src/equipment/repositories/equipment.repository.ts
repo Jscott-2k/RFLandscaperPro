@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Equipment, EquipmentStatus } from '../entities/equipment.entity';
-import { Paginated, PaginationParams, paginate } from '../../common/pagination';
+import { type Repository } from 'typeorm';
+
+import { type Paginated, type PaginationParams, paginate } from '../../common/pagination';
+import { Equipment, type EquipmentStatus } from '../entities/equipment.entity';
 
 export const EQUIPMENT_REPOSITORY = Symbol('EQUIPMENT_REPOSITORY');
 
-export interface IEquipmentRepository {
+export type IEquipmentRepository = {
   create(data: Partial<Equipment>): Equipment;
-  save(equipment: Equipment): Promise<Equipment>;
   findAll(
     pagination: PaginationParams,
     companyId: number,
@@ -18,6 +18,7 @@ export interface IEquipmentRepository {
   ): Promise<Paginated<Equipment>>;
   findById(id: number, companyId: number): Promise<Equipment | null>;
   remove(equipment: Equipment): Promise<void>;
+  save(equipment: Equipment): Promise<Equipment>;
 }
 
 @Injectable()
@@ -66,7 +67,7 @@ export class EquipmentRepository implements IEquipmentRepository {
 
   findById(id: number, companyId: number): Promise<Equipment | null> {
     return this.repo.findOne({
-      where: { id, companyId },
+      where: { companyId, id },
     });
   }
 

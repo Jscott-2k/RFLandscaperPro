@@ -1,15 +1,16 @@
-import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, type OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CompanyService } from './company.service';
-import { Company } from './company.model';
+
 import { ErrorService } from '../error.service';
 import { ToasterService } from '../toaster.service';
+import { type Company } from './company.model';
+import { CompanyService } from './company.service';
 
 @Component({
+  imports: [CommonModule, ReactiveFormsModule],
   selector: 'app-company-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div *ngIf="company">
       <h2>Company Profile</h2>
@@ -72,24 +73,24 @@ export class CompanyProfileComponent implements OnInit {
   company?: Company;
 
   form = this.fb.nonNullable.group({
-    name: ['', Validators.required.bind(Validators)],
     address: ['', Validators.required.bind(Validators)],
-    phone: ['', [Validators.required.bind(Validators), Validators.pattern(/^\d{10}$/)]],
     email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
+    name: ['', Validators.required.bind(Validators)],
+    phone: ['', [Validators.required.bind(Validators), Validators.pattern(/^\d{10}$/)]],
   });
 
   ngOnInit(): void {
     this.companyService.getProfile().subscribe({
+      error: () => this.errorService.show('Failed to load company profile'),
       next: (c) => {
         this.company = c;
         this.form.patchValue({
-          name: c.name,
           address: c.address ?? '',
-          phone: c.phone ?? '',
           email: c.email ?? '',
+          name: c.name,
+          phone: c.phone ?? '',
         });
       },
-      error: () => this.errorService.show('Failed to load company profile'),
     });
   }
 
@@ -104,10 +105,10 @@ export class CompanyProfileComponent implements OnInit {
     this.companyService
       .updateCompany(this.company.id, { ...this.company, ...this.form.getRawValue() })
       .subscribe({
+        error: () => this.errorService.show('Failed to save company'),
         next: () => {
           this.notifications.show('Company updated successfully');
         },
-        error: () => this.errorService.show('Failed to save company'),
       });
   }
 }

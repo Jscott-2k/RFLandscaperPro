@@ -1,15 +1,16 @@
-import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, type OnInit, inject } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
-import { CompanyService } from './company.service';
-import { UserService } from '../users/user.service';
-import { User } from '../users/user.model';
+
 import { AuthService } from '../auth/auth.service';
+import { type User } from '../users/user.model';
+import { UserService } from '../users/user.service';
+import { CompanyService } from './company.service';
 
 @Component({
+  imports: [CommonModule, RouterLink],
   selector: 'app-worker-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
   template: `
     <h2>Workers</h2>
     <ul>

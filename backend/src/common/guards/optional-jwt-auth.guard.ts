@@ -1,9 +1,10 @@
 import {
-  ExecutionContext,
+  type ExecutionContext,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { RequestUser } from '../../auth/interfaces/request-user.interface';
+
+import { type RequestUser } from '../../auth/interfaces/request-user.interface';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Injectable()

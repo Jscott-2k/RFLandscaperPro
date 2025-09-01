@@ -2,8 +2,9 @@ import { Controller, Get } from '@nestjs/common';
 import {
   HealthCheckService,
   TypeOrmHealthIndicator,
-  HealthCheckResult,
+  type HealthCheckResult,
 } from '@nestjs/terminus';
+
 import { Public } from '../common/decorators/public.decorator';
 
 @Controller('health')

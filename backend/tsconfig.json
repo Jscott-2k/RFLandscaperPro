@@ -1,19 +1,25 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
     "target": "ES2023",
-    "sourceMap": true,
+    "moduleResolution": "node",
+    "noEmit": false,
+    "rootDirs": ["src", "../shared/src"],
+    "esModuleInterop": true,
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
       "@rflp/shared": ["../shared/src"],
       "@rflp/shared/*": ["../shared/src/*"]
     },
+
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+
+    // keep the usual safety/ergonomics
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
@@ -21,5 +27,7 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
+  "include": ["src/**/*.ts", "../shared/src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "test", "scripts", "**/*.spec.ts"],
 }

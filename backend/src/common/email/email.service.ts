@@ -1,12 +1,14 @@
+import type SMTPTransport from 'nodemailer/lib/smtp-transport';
+
 import {
   Injectable,
   Logger,
-  OnModuleInit,
-  OnModuleDestroy,
+  type OnModuleInit,
+  type OnModuleDestroy,
 } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import { EtherealTransport, SmtpTransport, MailDriver } from './transports';
+
+import { EtherealTransport, SmtpTransport, type MailDriver } from './transports';
 
 function toError(e: unknown): Error {
   return e instanceof Error
@@ -23,11 +25,20 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
 
   private readyResolve!: () => void;
   private readonly ready = new Promise<void>(
-    (res) => (this.readyResolve = res),
+    (resolve) => (this.readyResolve = resolve),
   );
 
   async onModuleInit(): Promise<void> {
-    const hasMailhog = !!process.env.MAILHOG_HOST || !!process.env.MAILHOG_PORT;
+    const emailEnabled =
+      process.env.EMAIL_ENABLED !== 'false' &&
+      process.env.EMAIL_ENABLED !== '0';
+    if (!emailEnabled) {
+      this.logger.log('EmailService disabled via EMAIL_ENABLED');
+      this.readyResolve();
+      return;
+    }
+
+    const hasMailhog = Boolean(process.env.MAILHOG_HOST) || Boolean(process.env.MAILHOG_PORT);
     this.driver =
       process.env.NODE_ENV === 'production'
         ? 'smtp'
@@ -42,13 +53,18 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
       const { transporter } = await new SmtpTransport().create();
       this.transporter = transporter;
       try {
-        await this.transporter.verify();
+        await Promise.race([
+          this.transporter.verify(),
+          new Promise<never>((_resolve, reject) =>
+            setTimeout(() => reject(new Error('SMTP verify timeout')), 5000),
+          ),
+        ]);
         this.logger.log('SMTP transporter verified.');
       } catch (e) {
         const err = toError(e);
         if (process.env.NODE_ENV !== 'production') {
           this.logger.warn(
-            `SMTP verify failed: ${err.message}. Falling back to ethereal.`,
+            `SMTP verify failed or timed out: ${err.message}. Falling back to ethereal.`,
           );
           const ethereal = await new EtherealTransport().create();
           this.transporter = ethereal.transporter;
@@ -56,7 +72,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
           this.driver = 'ethereal';
         } else {
           this.logger.warn(
-            `SMTP verify failed (will still try to send): ${err.message}`,
+            `SMTP verify failed or timed out (will still try to send): ${err.message}`,
           );
         }
       }
@@ -70,13 +86,13 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleDestroy(): void {
-    this.transporter.close?.();
+    this.transporter?.close?.();
   }
 
   private formatRecipients(to: nodemailer.SendMailOptions['to']): string {
     const extract = (address: string | { address: string }): string =>
       typeof address === 'string' ? address : address.address;
-    if (!to) return 'unknown';
+    if (!to) {return 'unknown';}
     return Array.isArray(to) ? to.map(extract).join(', ') : extract(to);
   }
 
@@ -105,7 +121,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
       if (this.driver === 'ethereal') {
         const url = nodemailer.getTestMessageUrl(info);
         previewUrl = typeof url === 'string' ? url : undefined;
-        if (previewUrl) this.logger.log(`Preview URL: ${previewUrl}`);
+        if (previewUrl) {this.logger.log(`Preview URL: ${previewUrl}`);}
       }
 
       return { messageId: info.messageId, previewUrl };

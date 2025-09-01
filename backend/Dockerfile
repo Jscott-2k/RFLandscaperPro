@@ -28,8 +28,8 @@ COPY backend/package*.json ./
 RUN npm ci --include=dev
 
 # Copy source code
-COPY backend ./
-COPY shared /shared
+# Copy backend sources directly into /app
+COPY backend/ ./
 
 # Build the app
 RUN npm run build

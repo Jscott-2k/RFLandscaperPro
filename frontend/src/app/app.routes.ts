@@ -1,83 +1,84 @@
-import { Routes } from '@angular/router';
-import { AuthGuard } from './auth/auth.guard';
+import { type Routes } from '@angular/router';
+
 import { AdminGuard } from './auth/admin.guard';
-import { RootRedirectGuard } from './auth/root-redirect.guard';
+import { AuthGuard } from './auth/auth.guard';
 import { roleGuard } from './auth/role.guard';
+import { RootRedirectGuard } from './auth/root-redirect.guard';
 
 export const routes: Routes = [
   {
-    path: 'server-error',
     loadComponent: () =>
       import('./server-error/server-error.component').then((m) => m.ServerErrorComponent),
+    path: 'server-error',
   },
   {
-    path: 'login',
     loadComponent: () => import('./auth/login/login.component').then((m) => m.LoginComponent),
+    path: 'login',
   },
   {
-    path: 'signup/company',
     loadComponent: () =>
       import('./auth/signup-owner/signup-owner.component').then((m) => m.SignupOwnerComponent),
+    path: 'signup/company',
   },
   {
-    path: 'verify',
     loadComponent: () => import('./auth/verify/verify.component').then((m) => m.VerifyComponent),
+    path: 'verify',
   },
   {
-    path: 'invite/accept',
     loadComponent: () =>
       import('./invitations/accept-invitation.component').then((m) => m.AcceptInvitationComponent),
+    path: 'invite/accept',
   },
   {
-    path: 'customers',
     canActivate: [AuthGuard],
     loadChildren: () => import('./customers/customers.routes').then((m) => m.customersRoutes),
+    path: 'customers',
   },
   {
-    path: 'equipment',
     canActivate: [AuthGuard],
     loadChildren: () => import('./equipment/equipment.routes').then((m) => m.equipmentRoutes),
+    path: 'equipment',
   },
   {
-    path: 'jobs',
     canActivate: [AuthGuard],
     loadChildren: () => import('./jobs/jobs.routes').then((m) => m.jobsRoutes),
+    path: 'jobs',
   },
   {
-    path: 'contracts',
     canActivate: [AuthGuard],
     loadChildren: () => import('./contracts/contracts.routes').then((m) => m.contractsRoutes),
+    path: 'contracts',
   },
   {
-    path: 'users',
     canActivate: [AuthGuard],
     loadChildren: () => import('./users/users.routes').then((m) => m.usersRoutes),
+    path: 'users',
   },
   {
-    path: 'company',
     canActivate: [AuthGuard],
     loadChildren: () => import('./companies/companies.routes').then((m) => m.companiesRoutes),
+    path: 'company',
   },
   {
-    path: 'team',
     canActivate: [AuthGuard, roleGuard],
     data: { roles: ['company_owner', 'company_admin'] },
     loadChildren: () => import('./team/team.routes').then((m) => m.teamRoutes),
+    path: 'team',
   },
   {
-    path: 'admin',
     canActivate: [AdminGuard],
     loadChildren: () => import('./admin/admin.routes').then((m) => m.adminRoutes),
+    path: 'admin',
   },
   {
-    path: 'dashboard',
     canActivate: [AuthGuard],
     loadChildren: () => import('./dashboard/dashboard.routes').then((m) => m.dashboardRoutes),
+    path: 'dashboard',
   },
   {
-    path: '',
     canActivate: [RootRedirectGuard],
     loadComponent: () => import('./auth/login/login.component').then((m) => m.LoginComponent),
+    path: '',
     pathMatch: 'full',
   },
 ];

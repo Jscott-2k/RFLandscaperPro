@@ -1,3 +1,4 @@
+import * as bcrypt from 'bcrypt';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -10,11 +11,11 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { Customer } from '../customers/entities/customer.entity';
-import { Company } from '../companies/entities/company.entity';
+
 import { CompanyUser } from '../companies/entities/company-user.entity';
+import { Company } from '../companies/entities/company.entity';
 import { Invitation } from '../companies/entities/invitation.entity';
+import { Customer } from '../customers/entities/customer.entity';
 import { Email } from './value-objects/email.vo';
 import { PhoneNumber } from './value-objects/phone-number.vo';
 
@@ -35,47 +36,47 @@ export class User {
   username: string;
 
   @Column({
+    transformer: {
+      from: (value: string): Email => new Email(value),
+      to: (value: Email): string => value.value,
+    },
     type: 'varchar',
     unique: true,
-    transformer: {
-      to: (value: Email): string => value.value,
-      from: (value: string): Email => new Email(value),
-    },
   })
   email: Email;
 
   @Column()
   password: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.Customer })
+  @Column({ default: UserRole.Customer, enum: UserRole, type: 'enum' })
   role: UserRole;
 
   @Column({ default: false })
   isVerified: boolean;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   firstName: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   lastName: string | null;
 
   @Column({
-    type: 'varchar',
     nullable: true,
     transformer: {
-      to: (value: PhoneNumber | null): string | null =>
-        value ? value.value : null,
       from: (value: string | null): PhoneNumber | null =>
         value ? new PhoneNumber(value) : null,
+      to: (value: PhoneNumber | null): string | null =>
+        value ? value.value : null,
     },
+    type: 'varchar',
   })
   phone: PhoneNumber | null;
 
   @Index('IDX_user_password_reset_token')
-  @Column({ type: 'varchar', length: 64, nullable: true })
+  @Column({ length: 64, nullable: true, type: 'varchar' })
   passwordResetToken: string | null;
 
-  @Column({ type: 'timestamptz', nullable: true })
+  @Column({ nullable: true, type: 'timestamptz' })
   passwordResetExpires: Date | null;
 
   @OneToOne(() => Customer, (customer) => customer.user)

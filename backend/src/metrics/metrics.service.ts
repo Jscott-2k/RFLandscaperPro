@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Counter, Histogram } from 'prom-client';
+
 import { getCurrentCompanyId } from '../common/tenant/tenant-context';
 
-interface LabelOptions {
-  route?: string;
+type LabelOptions = {
   companyId?: number;
+  route?: string;
   status?: string;
 }
 
@@ -17,11 +18,11 @@ export class MetricsService {
     const counter =
       this.counters[name] ||
       (this.counters[name] = new Counter({
-        name,
         help: `${name} counter`,
         labelNames: ['route', 'companyId', 'status'],
+        name,
       }));
-    const { route, companyId, status } = this.getLabelValues(labels);
+    const { companyId, route, status } = this.getLabelValues(labels);
     counter.labels(route, companyId, status).inc();
   }
 
@@ -33,18 +34,18 @@ export class MetricsService {
     const histogram =
       this.histograms[name] ||
       (this.histograms[name] = new Histogram({
-        name,
         help: `${name} histogram`,
         labelNames: ['route', 'companyId', 'status'],
+        name,
       }));
-    const { route, companyId, status } = this.getLabelValues(labels);
+    const { companyId, route, status } = this.getLabelValues(labels);
     histogram.labels(route, companyId, status).observe(value);
   }
 
   private getLabelValues(labels: LabelOptions) {
     return {
-      route: labels.route ?? 'unknown',
       companyId: String(labels.companyId ?? getCurrentCompanyId() ?? 'unknown'),
+      route: labels.route ?? 'unknown',
       status: labels.status ?? 'unknown',
     };
   }

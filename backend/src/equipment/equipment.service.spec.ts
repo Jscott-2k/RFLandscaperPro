@@ -1,11 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { EquipmentService } from './equipment.service';
+import { Test, type TestingModule } from '@nestjs/testing';
+
+import { type PaginationParams } from '../common/pagination';
+import { type EquipmentResponseDto } from './dto/equipment-response.dto';
 import { EquipmentStatus } from './entities/equipment.entity';
-import { EquipmentResponseDto } from './dto/equipment-response.dto';
-import { PaginationParams } from '../common/pagination';
+import { EquipmentService } from './equipment.service';
 import {
   EQUIPMENT_REPOSITORY,
-  IEquipmentRepository,
+  type IEquipmentRepository,
 } from './repositories/equipment.repository';
 
 describe('EquipmentService', () => {
@@ -15,10 +16,10 @@ describe('EquipmentService', () => {
   beforeEach(async () => {
     repo = {
       create: jest.fn(),
-      save: jest.fn(),
       findAll: jest.fn(),
       findById: jest.fn(),
       remove: jest.fn(),
+      save: jest.fn(),
     } as unknown as jest.Mocked<IEquipmentRepository>;
     const module: TestingModule = await Test.createTestingModule({
       providers: [

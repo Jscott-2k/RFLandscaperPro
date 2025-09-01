@@ -1,16 +1,17 @@
-import * as crypto from 'crypto';
-import { Repository } from 'typeorm';
-import { InvitationsService } from '../invitations.service';
-import { Invitation, InvitationRole } from '../entities/invitation.entity';
+import * as crypto from 'node:crypto';
+import { type SendMailOptions } from 'nodemailer';
+import { type Repository } from 'typeorm';
+
+import { type EmailService } from '../../common/email';
+import { User } from '../../users/user.entity';
+import { Email } from '../../users/value-objects/email.vo';
 import {
   CompanyUser,
   CompanyUserStatus,
 } from '../entities/company-user.entity';
 import { Company } from '../entities/company.entity';
-import { User } from '../../users/user.entity';
-import { Email } from '../../users/value-objects/email.vo';
-import { EmailService } from '../../common/email';
-import { SendMailOptions } from 'nodemailer';
+import { Invitation, InvitationRole } from '../entities/invitation.entity';
+import { InvitationsService } from '../invitations.service';
 
 describe('InvitationsService', () => {
   let service: InvitationsService;
@@ -24,15 +25,15 @@ describe('InvitationsService', () => {
 
   beforeEach(() => {
     invitationsRepo = {
+      count: jest.fn(),
       create: jest.fn((dto: Partial<Invitation>) =>
         Object.assign(new Invitation(), dto),
       ),
+      findOne: jest.fn(),
       save: jest.fn((inv: Invitation) => {
         inv.id = inv.id ?? 1;
         return Promise.resolve(inv);
       }),
-      findOne: jest.fn(),
-      count: jest.fn(),
     } as unknown as jest.Mocked<
       Pick<Repository<Invitation>, 'create' | 'save' | 'findOne' | 'count'>
     >;
@@ -84,8 +85,8 @@ describe('InvitationsService', () => {
 
   it('rejects inviting existing active member', async () => {
     const existingUser = Object.assign(new User(), {
-      id: 10,
       email: new Email('a@b.com'),
+      id: 10,
     });
     usersRepo.findOne.mockResolvedValue(existingUser);
     companyUsersRepo.findOne.mockResolvedValue(

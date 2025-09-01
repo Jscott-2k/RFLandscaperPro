@@ -2,6 +2,16 @@
 /dist
 /node_modules
 /build
+/test/*.d.ts
+/test/*.js
+/test/*.js.map
+/src/*.d.ts
+/src/*.js
+/src/*.js.map
+/src/**/*.d.ts
+/src/**/*.js
+/src/**/*.js.map
+*.tsbuildinfo
 
 # Logs
 logs
@@ -60,8 +70,3 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-
-# Database Migrations
-# (keep directory but allow committing migration files)
-!src/migrations/
-!src/migrations/*.ts

@@ -1,11 +1,12 @@
-import { MeController } from './me.controller';
-import { Repository } from 'typeorm';
+import { type Repository } from 'typeorm';
+
 import {
   CompanyUser,
   CompanyUserRole,
   CompanyUserStatus,
 } from '../companies/entities/company-user.entity';
 import { Company } from '../companies/entities/company.entity';
+import { MeController } from './me.controller';
 import { User, UserRole } from './user.entity';
 
 describe('MeController', () => {
@@ -29,10 +30,10 @@ describe('MeController', () => {
   it('returns active memberships', async () => {
     companyUserRepo.find.mockResolvedValue([
       Object.assign(new CompanyUser(), {
+        company: { name: 'Acme' },
         companyId: 1,
         role: CompanyUserRole.ADMIN,
         status: CompanyUserStatus.ACTIVE,
-        company: { name: 'Acme' },
       }),
     ]);
 
@@ -40,8 +41,8 @@ describe('MeController', () => {
     const result = await controller.listCompanies(user);
 
     expect(companyUserRepo.find).toHaveBeenCalledWith({
-      where: { userId: 1, status: CompanyUserStatus.ACTIVE },
       relations: ['company'],
+      where: { status: CompanyUserStatus.ACTIVE, userId: 1 },
     });
     expect(result).toEqual([
       { companyId: 1, companyName: 'Acme', role: CompanyUserRole.ADMIN },

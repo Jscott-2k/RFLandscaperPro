@@ -1,13 +1,14 @@
-import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { CustomerService } from './customer.service';
 import { switchMap } from 'rxjs';
 
+import { CustomerService } from './customer.service';
+
 @Component({
+  imports: [CommonModule, RouterLink],
   selector: 'app-customer-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
   template: `
     <ng-container *ngIf="customer$ | async as customer">
       <h2>{{ customer.name }}</h2>

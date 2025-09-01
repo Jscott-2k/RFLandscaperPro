@@ -1,13 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { CustomersService } from './customers.service';
-import { Customer } from './entities/customer.entity';
-import { QueryFailedError } from 'typeorm';
 import { ConflictException } from '@nestjs/common';
-import { CreateCustomerDto } from './dto/create-customer.dto';
-import { PaginationParams } from '../common/pagination';
+import { Test, type TestingModule } from '@nestjs/testing';
+import { QueryFailedError } from 'typeorm';
+
+import { type PaginationParams } from '../common/pagination';
+import { CustomersService } from './customers.service';
+import { type CreateCustomerDto } from './dto/create-customer.dto';
+import { type Customer } from './entities/customer.entity';
 import {
   CUSTOMER_REPOSITORY,
-  ICustomerRepository,
+  type ICustomerRepository,
 } from './repositories/customer.repository';
 
 describe('CustomersService', () => {
@@ -23,11 +24,11 @@ describe('CustomersService', () => {
           provide: CUSTOMER_REPOSITORY,
           useValue: {
             create: jest.fn(),
-            save: jest.fn(),
             findAll: jest.fn(),
             findById: jest.fn(),
             findByUserId: jest.fn(),
             remove: jest.fn(),
+            save: jest.fn(),
           },
         },
       ],
@@ -46,20 +47,24 @@ describe('CustomersService', () => {
       .spyOn(repo, 'create')
       .mockReturnValue({} as Customer);
     repo.save.mockRejectedValue(
-      new QueryFailedError('', [], { code: '23505' } as any),
+      new QueryFailedError(
+        '',
+        [],
+        Object.assign(new Error(), { code: '23505' }),
+      ),
     );
 
     const createCustomerDto: CreateCustomerDto = {
-      name: 'John Doe',
-      email: 'john@example.com',
       addresses: [
         {
-          street: '123 Main St',
           city: 'Anytown',
           state: 'CA',
+          street: '123 Main St',
           zip: '12345',
         },
       ],
+      email: 'john@example.com',
+      name: 'John Doe',
     };
 
     const promise = service.create(createCustomerDto, 1);
@@ -70,18 +75,18 @@ describe('CustomersService', () => {
     );
     expect(createMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: 'John Doe',
-        email: 'john@example.com',
-        companyId: 1,
         addresses: [
           expect.objectContaining({
-            street: '123 Main St',
             city: 'Anytown',
-            state: 'CA',
-            zip: '12345',
             companyId: 1,
+            state: 'CA',
+            street: '123 Main St',
+            zip: '12345',
           }),
         ],
+        companyId: 1,
+        email: 'john@example.com',
+        name: 'John Doe',
       }),
     );
   });
@@ -93,16 +98,16 @@ describe('CustomersService', () => {
       .mockResolvedValueOnce({ id: 2 } as Customer);
 
     const createCustomerDto: CreateCustomerDto = {
-      name: 'John Doe',
-      email: 'john@example.com',
       addresses: [
         {
-          street: '123 Main St',
           city: 'Anytown',
           state: 'CA',
+          street: '123 Main St',
           zip: '12345',
         },
       ],
+      email: 'john@example.com',
+      name: 'John Doe',
     };
 
     await expect(service.create(createCustomerDto, 1)).resolves.toBeDefined();

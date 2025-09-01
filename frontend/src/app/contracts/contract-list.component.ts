@@ -1,12 +1,13 @@
-import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, type OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { ContractsService, Contract } from './contracts.service';
+
+import { ContractsService, type Contract } from './contracts.service';
 
 @Component({
+  imports: [CommonModule, RouterModule],
   selector: 'app-contract-list',
   standalone: true,
-  imports: [CommonModule, RouterModule],
   templateUrl: './contract-list.component.html',
 })
 export class ContractListComponent implements OnInit {

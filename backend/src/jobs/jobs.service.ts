@@ -5,34 +5,33 @@ import {
   Inject,
   Optional,
 } from '@nestjs/common';
-import { JobResponseDto } from './dto/job-response.dto';
-import { CreateJobDto } from './dto/create-job.dto';
-import { UpdateJobDto } from './dto/update-job.dto';
-import { AssignJobDto } from './dto/assign-job.dto';
-import { BulkAssignJobDto } from './dto/bulk-assign-job.dto';
-import { ScheduleJobDto } from './dto/schedule-job.dto';
-import { Paginated, PaginationParams } from '../common/pagination';
 
-import { JOB_REPOSITORY, IJobRepository } from './repositories/job.repository';
+import { type Paginated, type PaginationParams } from '../common/pagination';
 import {
   CUSTOMER_REPOSITORY,
-  ICustomerRepository,
+  type ICustomerRepository,
 } from '../customers/repositories/customer.repository';
 import {
-  USER_REPOSITORY,
-  IUserRepository,
-} from '../users/repositories/user.repository';
-import {
   EQUIPMENT_REPOSITORY,
-  IEquipmentRepository,
+  type IEquipmentRepository,
 } from '../equipment/repositories/equipment.repository';
+import { type MetricsService } from '../metrics/metrics.service';
+import {
+  USER_REPOSITORY,
+  type IUserRepository,
+} from '../users/repositories/user.repository';
+import { type AssignJobDto } from './dto/assign-job.dto';
+import { type BulkAssignJobDto } from './dto/bulk-assign-job.dto';
+import { type CreateJobDto } from './dto/create-job.dto';
+import { type JobResponseDto } from './dto/job-response.dto';
+import { type ScheduleJobDto } from './dto/schedule-job.dto';
+import { type UpdateJobDto } from './dto/update-job.dto';
+import { toJobResponseDto } from './jobs.mapper';
 import {
   ASSIGNMENT_REPOSITORY,
-  IAssignmentRepository,
+  type IAssignmentRepository,
 } from './repositories/assignment.repository';
-
-import { toJobResponseDto } from './jobs.mapper';
-import { MetricsService } from '../metrics/metrics.service';
+import { JOB_REPOSITORY, type IJobRepository } from './repositories/job.repository';
 
 @Injectable()
 export class JobsService {
@@ -64,13 +63,13 @@ export class JobsService {
     }
     const job = this.jobRepository.create({
       ...jobData,
-      customer,
       companyId,
+      customer,
     });
     const savedJob = await this.jobRepository.save(job);
     this.metrics?.incrementCounter('jobs_created_total', {
-      route: 'jobs.create',
       companyId,
+      route: 'jobs.create',
       status: 'success',
     });
     return toJobResponseDto(savedJob);
@@ -92,10 +91,10 @@ export class JobsService {
       {
         completed,
         customerId,
-        startDate,
         endDate,
-        workerId,
         equipmentId,
+        startDate,
+        workerId,
       },
     );
 
@@ -243,10 +242,10 @@ export class JobsService {
     }
 
     const assignment = this.assignmentRepository.create({
+      companyId,
+      equipment,
       job,
       user,
-      equipment,
-      companyId,
     });
     await this.assignmentRepository.save(assignment);
 

@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CustomersService } from './customers.service';
+
 import { CustomersController } from './customers.controller';
-import { Customer } from './entities/customer.entity';
+import { CustomersService } from './customers.service';
 import { Address } from './entities/address.entity';
+import { Customer } from './entities/customer.entity';
 import {
   CustomerRepository,
   CUSTOMER_REPOSITORY,
@@ -15,9 +16,9 @@ const customerRepositoryProvider = {
 };
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Customer, Address])],
   controllers: [CustomersController],
+  exports: [CustomersService, CUSTOMER_REPOSITORY],
+  imports: [TypeOrmModule.forFeature([Customer, Address])],
   providers: [CustomersService, customerRepositoryProvider],
-  exports: [CustomersService, customerRepositoryProvider],
 })
 export class CustomersModule {}

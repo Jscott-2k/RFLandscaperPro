@@ -1,13 +1,14 @@
-import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+
+import { type Job } from './job.model';
 import { JobsService } from './jobs.service';
-import { Job } from './job.model';
 
 @Component({
+  imports: [CommonModule, FormsModule],
   selector: 'app-job-calendar',
   standalone: true,
-  imports: [CommonModule, FormsModule],
   templateUrl: './job-calendar.component.html',
 })
 export class JobCalendarComponent {

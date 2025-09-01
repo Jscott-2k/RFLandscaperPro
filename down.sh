@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-docker compose down
+# Stop containers and remove volumes
+docker compose down -v
 
-if [[ "$1" == "--prune" ]]; then
+if [[ "${1:-}" == "--prune" ]]; then
   docker network prune -f
 fi

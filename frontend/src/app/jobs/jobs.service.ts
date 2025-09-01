@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { type Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+
 import { JobsApiService } from '../api/jobs-api.service';
-import { Job, CreateJob, UpdateJob } from './job.model';
+import { type Job, type CreateJob, type UpdateJob } from './job.model';
 
 @Injectable({ providedIn: 'root' })
 export class JobsService {

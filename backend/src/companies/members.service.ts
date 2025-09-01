@@ -4,14 +4,15 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { type Repository } from 'typeorm';
+
+import { type CompanyMemberResponseDto } from './dto/company-member-response.dto';
+import { type UpdateCompanyMemberDto } from './dto/update-company-member.dto';
 import {
   CompanyUser,
   CompanyUserRole,
   CompanyUserStatus,
 } from './entities/company-user.entity';
-import { CompanyMemberResponseDto } from './dto/company-member-response.dto';
-import { UpdateCompanyMemberDto } from './dto/update-company-member.dto';
 
 @Injectable()
 export class MembersService {
@@ -22,8 +23,8 @@ export class MembersService {
 
   async findMembers(companyId: number): Promise<CompanyMemberResponseDto[]> {
     const members = await this.companyUsersRepository.find({
-      where: { companyId },
       relations: ['user'],
+      where: { companyId },
     });
     return members.map((m) => this.toResponseDto(m));
   }
@@ -34,10 +35,10 @@ export class MembersService {
     dto: UpdateCompanyMemberDto,
   ): Promise<CompanyMemberResponseDto> {
     const membership = await this.companyUsersRepository.findOne({
-      where: { companyId, userId },
       relations: ['user'],
+      where: { companyId, userId },
     });
-    if (!membership) throw new NotFoundException('Member not found');
+    if (!membership) {throw new NotFoundException('Member not found');}
 
     if (membership.role === CompanyUserRole.OWNER) {
       const ownerCount = await this.companyUsersRepository.count({
@@ -56,8 +57,8 @@ export class MembersService {
       }
     }
 
-    if (dto.role) membership.role = dto.role;
-    if (dto.status) membership.status = dto.status;
+    if (dto.role) {membership.role = dto.role;}
+    if (dto.status) {membership.status = dto.status;}
     const saved = await this.companyUsersRepository.save(membership);
     return this.toResponseDto(saved);
   }
@@ -66,7 +67,7 @@ export class MembersService {
     const membership = await this.companyUsersRepository.findOne({
       where: { companyId, userId },
     });
-    if (!membership) throw new NotFoundException('Member not found');
+    if (!membership) {throw new NotFoundException('Member not found');}
     if (membership.role === CompanyUserRole.OWNER) {
       const ownerCount = await this.companyUsersRepository.count({
         where: {
@@ -76,18 +77,18 @@ export class MembersService {
         },
       });
       if (ownerCount === 1)
-        throw new BadRequestException('Cannot remove the last owner');
+        {throw new BadRequestException('Cannot remove the last owner');}
     }
     await this.companyUsersRepository.delete({ companyId, userId });
   }
 
   private toResponseDto(m: CompanyUser): CompanyMemberResponseDto {
     return {
-      userId: m.userId,
-      username: m.user?.username ?? '',
       email: m.user?.email.value ?? '',
       role: m.role,
       status: m.status,
+      userId: m.userId,
+      username: m.user?.username ?? '',
     };
   }
 }

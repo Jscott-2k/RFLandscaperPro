@@ -1,6 +1,7 @@
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, type HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
+
 import { ErrorService } from './error.service';
 import { HTTP_ERROR_MESSAGES } from './http-error-messages';
 

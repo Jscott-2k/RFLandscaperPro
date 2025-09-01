@@ -1,19 +1,20 @@
+import { HttpClient, type HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { environment } from '../environments/environment';
-import { Observable, throwError } from 'rxjs';
+import { type Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+
+import { environment } from '../environments/environment';
 import { ErrorService } from './error.service';
 
-export interface Paginated<T> {
+export type Paginated<T> = {
   items: T[];
   total: number;
 }
 
-export interface PaginationQuery {
-  page?: number;
-  limit?: number;
+export type PaginationQuery = {
   [key: string]: unknown;
+  limit?: number;
+  page?: number;
 }
 
 @Injectable({ providedIn: 'root' })

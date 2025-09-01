@@ -1,15 +1,17 @@
-import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UserService } from './user.service';
+
 import { ErrorService } from '../error.service';
 import { ToasterService } from '../toaster.service';
+import { UserService } from './user.service';
+import { type CreateUser } from './user.model';
 
 @Component({
+  imports: [CommonModule, ReactiveFormsModule],
   selector: 'app-user-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
   template: `
     <h2>New User</h2>
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -74,44 +76,44 @@ export class UserFormComponent {
   private errorService = inject(ErrorService);
   private notifications = inject(ToasterService);
 
-  /* eslint-disable @typescript-eslint/unbound-method */
+   
   form = this.fb.nonNullable.group({
-    username: ['', Validators.required],
+    company: this.fb.nonNullable.group({
+      address: [''],
+      email: [''],
+      name: [''],
+      phone: [''],
+    }),
     email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
     firstName: [''],
     lastName: [''],
+    password: ['', Validators.required],
     phone: [''],
     role: ['customer'],
-    company: this.fb.nonNullable.group({
-      name: [''],
-      address: [''],
-      phone: [''],
-      email: [''],
-    }),
+    username: ['', Validators.required],
   });
-  /* eslint-enable @typescript-eslint/unbound-method */
+   
 
   onSubmit(): void {
     if (this.form.valid) {
-      const { username, email, password, firstName, lastName, phone, role, company } =
-        this.form.getRawValue();
-      const payload: Parameters<UserService['createUser']>[0] & { password: string } = {
-        username,
-        email,
-        password,
-      };
-      if (firstName) payload.firstName = firstName;
-      if (lastName) payload.lastName = lastName;
-      if (phone) payload.phone = phone;
-      if (role) payload.role = role;
-      if (this.isOwner) payload.company = company;
-      this.userService.createUser(payload).subscribe({
-        next: () => {
-          this.notifications.show('User created successfully');
-          void this.router.navigate(['/users']);
-        },
-        error: () => this.errorService.show('Failed to create user'),
+    const { company, email, firstName, lastName, password, phone, role, username } =
+      this.form.getRawValue();
+    const payload: CreateUser = {
+      email,
+      password,
+      username,
+    };
+    if (firstName) payload.firstName = firstName;
+    if (lastName) payload.lastName = lastName;
+    if (phone) payload.phone = phone;
+    if (role) payload.role = role;
+    if (this.isOwner) payload.company = company;
+    this.userService.createUser(payload).subscribe({
+      error: () => this.errorService.show('Failed to create user'),
+      next: () => {
+        this.notifications.show('User created successfully');
+        void this.router.navigate(['/users']);
+      },
       });
     }
   }

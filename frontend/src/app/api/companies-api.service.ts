@@ -1,34 +1,40 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiService } from '../api.service';
-import { environment } from '../../environments/environment';
-import { User } from './users-api.service';
+import { type Observable } from 'rxjs';
 
-export interface Company {
+import { environment } from '../../environments/environment';
+import { ApiService } from '../api.service';
+import { type User } from './users-api.service';
+
+export type Company = {
   id: number;
   name: string;
   address?: string;
   phone?: string;
   email?: string;
   ownerId?: number;
-}
+};
 
-export type CreateCompany = Partial<Omit<Company, 'id'>>;
+export type CreateCompany = {
+  name: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+};
 export type UpdateCompany = Partial<CreateCompany>;
 
-export interface CompanyMember {
-  userId: number;
-  username: string;
+export type CompanyMember = {
   email: string;
   role: string;
   status: string;
+  userId: number;
+  username: string;
 }
 
-export interface CompanyInvitation {
-  id: number;
+export type CompanyInvitation = {
   email: string;
-  role: string;
   expiresAt: string;
+  id: number;
+  role: string;
 }
 
 @Injectable({ providedIn: 'root' })

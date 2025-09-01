@@ -6,11 +6,12 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../../users/user.entity';
+
+import { Contract } from '../../contracts/entities/contract.entity';
 import { Customer } from '../../customers/entities/customer.entity';
 import { Equipment } from '../../equipment/entities/equipment.entity';
 import { Job } from '../../jobs/entities/job.entity';
-import { Contract } from '../../contracts/entities/contract.entity';
+import { User } from '../../users/user.entity';
 import { CompanyUser } from './company-user.entity';
 import { Invitation } from './invitation.entity';
 

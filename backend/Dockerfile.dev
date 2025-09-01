@@ -10,14 +10,15 @@ WORKDIR /app
 # ---- Set default environment ----
 # Allows NestJS to fall back to .env.development when run via `docker run`
 ENV NODE_ENV=development
+ENV CHOKIDAR_USEPOLLING=true
 
 # ---- Install dependencies ----
 COPY backend/package*.json ./
-RUN npm install
+RUN npm ci --include=dev
 
 # ---- Copy application code ----
-COPY backend ./
-COPY shared /shared
+# Copy the backend source directly into the workdir rather than nesting it
+COPY backend/ ./
 
 # ---- Expose application port ----
 EXPOSE 3000

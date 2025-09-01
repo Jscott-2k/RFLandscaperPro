@@ -1,5 +1,6 @@
-import { ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { type ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+
 import { UserRole } from '../../users/user.entity';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
@@ -7,11 +8,11 @@ describe('JwtAuthGuard', () => {
   it('allows access to metrics endpoint with global prefix', () => {
     const guard = new JwtAuthGuard(new Reflector());
     const context = {
+      getClass: () => undefined,
+      getHandler: () => undefined,
       switchToHttp: () => ({
         getRequest: () => ({ path: '/api/metrics' }),
       }),
-      getHandler: () => undefined,
-      getClass: () => undefined,
     } as unknown as ExecutionContext;
 
     expect(guard.canActivate(context)).toBe(true);
@@ -28,7 +29,7 @@ describe('JwtAuthGuard', () => {
     expect(() =>
       guard.handleRequest(
         null,
-        { id: 1, companyId: 1, role: UserRole.CompanyAdmin },
+        { companyId: 1, id: 1, role: UserRole.CompanyAdmin },
         null,
         context,
       ),

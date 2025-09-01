@@ -1,14 +1,15 @@
 import { Injectable, NotFoundException, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Contract, ContractFrequency } from './entities/contract.entity';
+import { type Repository } from 'typeorm';
+
 import { Customer } from '../customers/entities/customer.entity';
 import { Job } from '../jobs/entities/job.entity';
-import { CreateContractDto } from './dto/create-contract.dto';
-import { UpdateContractDto } from './dto/update-contract.dto';
-import { ContractResponseDto } from './dto/contract-response.dto';
+import { type MetricsService } from '../metrics/metrics.service';
 import { toContractResponseDto } from './contracts.mapper';
-import { MetricsService } from '../metrics/metrics.service';
+import { type ContractResponseDto } from './dto/contract-response.dto';
+import { type CreateContractDto } from './dto/create-contract.dto';
+import { type UpdateContractDto } from './dto/update-contract.dto';
+import { Contract, ContractFrequency } from './entities/contract.entity';
 
 @Injectable()
 export class ContractsService {
@@ -27,7 +28,7 @@ export class ContractsService {
     companyId: number,
   ): Promise<ContractResponseDto> {
     const customer = await this.customerRepository.findOne({
-      where: { id: dto.customerId, companyId },
+      where: { companyId, id: dto.customerId },
     });
     if (!customer) {
       throw new NotFoundException(
@@ -35,19 +36,19 @@ export class ContractsService {
       );
     }
     const contract = this.contractRepository.create({
-      customer,
       companyId,
-      startDate: dto.startDate,
+      customer,
       endDate: dto.endDate,
       frequency: dto.frequency,
-      totalOccurrences: dto.totalOccurrences,
       jobTemplate: dto.jobTemplate,
+      startDate: dto.startDate,
+      totalOccurrences: dto.totalOccurrences,
     });
     const saved = await this.contractRepository.save(contract);
     await this.generateJobsForContract(saved);
     this.metrics?.incrementCounter('contracts_active_total', {
-      route: 'contracts.create',
       companyId,
+      route: 'contracts.create',
       status: 'active',
     });
     return toContractResponseDto(saved);
@@ -55,8 +56,8 @@ export class ContractsService {
 
   async findAll(companyId: number): Promise<ContractResponseDto[]> {
     const contracts = await this.contractRepository.find({
-      where: { companyId },
       relations: ['customer'],
+      where: { companyId },
     });
     return contracts.map((c) => toContractResponseDto(c));
   }
@@ -67,15 +68,15 @@ export class ContractsService {
     companyId: number,
   ): Promise<ContractResponseDto> {
     const contract = await this.contractRepository.findOne({
-      where: { id, companyId },
       relations: ['customer'],
+      where: { companyId, id },
     });
     if (!contract) {
       throw new NotFoundException(`Contract with ID ${id} not found.`);
     }
     if (dto.customerId !== undefined) {
       const customer = await this.customerRepository.findOne({
-        where: { id: dto.customerId, companyId },
+        where: { companyId, id: dto.customerId },
       });
       if (!customer) {
         throw new NotFoundException(
@@ -85,11 +86,11 @@ export class ContractsService {
       contract.customer = customer;
     }
     Object.assign(contract, {
-      startDate: dto.startDate ?? contract.startDate,
       endDate: dto.endDate ?? contract.endDate,
       frequency: dto.frequency ?? contract.frequency,
-      totalOccurrences: dto.totalOccurrences ?? contract.totalOccurrences,
       jobTemplate: dto.jobTemplate ?? contract.jobTemplate,
+      startDate: dto.startDate ?? contract.startDate,
+      totalOccurrences: dto.totalOccurrences ?? contract.totalOccurrences,
     });
     const saved = await this.contractRepository.save(contract);
     await this.generateJobsForContract(saved);
@@ -98,7 +99,7 @@ export class ContractsService {
 
   async cancel(id: number, companyId: number): Promise<void> {
     const contract = await this.contractRepository.findOne({
-      where: { id, companyId },
+      where: { companyId, id },
     });
     if (!contract) {
       throw new NotFoundException(`Contract with ID ${id} not found.`);
@@ -106,14 +107,14 @@ export class ContractsService {
     contract.active = false;
     await this.contractRepository.save(contract);
     this.metrics?.incrementCounter('contracts_expired_total', {
-      route: 'contracts.cancel',
       companyId,
+      route: 'contracts.cancel',
       status: 'expired',
     });
   }
 
   async generateJobsForContract(contract: Contract): Promise<void> {
-    if (!contract.active) return;
+    if (!contract.active) {return;}
     const now = new Date();
     let nextDate = contract.lastGeneratedDate
       ? this.addFrequency(contract.lastGeneratedDate, contract.frequency)
@@ -125,14 +126,14 @@ export class ContractsService {
         contract.occurrencesGenerated < contract.totalOccurrences)
     ) {
       const job = this.jobRepository.create({
-        title: contract.jobTemplate.title,
+        companyId: contract.companyId,
+        contract: { id: contract.id } as Contract,
+        customer: contract.customer,
         description: contract.jobTemplate.description,
         estimatedHours: contract.jobTemplate.estimatedHours,
         notes: contract.jobTemplate.notes,
         scheduledDate: nextDate,
-        customer: contract.customer,
-        companyId: contract.companyId,
-        contract: { id: contract.id } as Contract,
+        title: contract.jobTemplate.title,
       });
       await this.jobRepository.save(job);
       contract.lastGeneratedDate = nextDate;
@@ -144,8 +145,8 @@ export class ContractsService {
 
   async generateUpcomingJobs(): Promise<void> {
     const contracts = await this.contractRepository.find({
-      where: { active: true },
       relations: ['customer'],
+      where: { active: true },
     });
     for (const contract of contracts) {
       await this.generateJobsForContract(contract);
