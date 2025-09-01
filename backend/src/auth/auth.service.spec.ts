@@ -128,30 +128,28 @@ describe('AuthService.signupOwner', () => {
       email: 'owner@example.com',
       id: 1,
       role: UserRole.CompanyOwner,
-      username: 'owner',
+      username: 'Owner',
     });
     userCreationService.createUser.mockResolvedValue(user);
 
     await service.signupOwner({
       companyName: 'ACME',
       email: 'owner@example.com',
-      username: 'owner',
       password: 'Password123!',
       firstName: 'Owner',
-      lastName: 'owner',
+      lastName: 'User',
       phone: '5551234567',
     });
 
     expect(userCreationService.createUser).toHaveBeenCalledWith({
       company: { name: 'ACME' },
       email: new Email('owner@example.com'),
-      firstName: 'owner',
       isVerified: true,
-      lastName: 'owner',
+      firstName: 'Owner',
+      lastName: 'User',
       password: 'Password123!',
       role: UserRole.CompanyOwner,
-      username: 'owner',
-      firstName: 'Owner',
+      username: 'Owner',
       phone: new PhoneNumber('5551234567'),
     });
 
