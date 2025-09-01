@@ -11,13 +11,13 @@ export class Init1756658984658 implements MigrationInterface {
       `CREATE TYPE "public"."user_role_enum" AS ENUM('master', 'company_admin', 'company_owner', 'worker', 'customer')`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user" ALTER COLUMN "role" DROP DEFAULT`,
+      `ALTER TABLE "users" ALTER COLUMN "role" DROP DEFAULT`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user" ALTER COLUMN "role" TYPE "public"."user_role_enum" USING "role"::"text"::"public"."user_role_enum"`,
+      `ALTER TABLE "users" ALTER COLUMN "role" TYPE "public"."user_role_enum" USING "role"::"text"::"public"."user_role_enum"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user" ALTER COLUMN "role" SET DEFAULT 'customer'`,
+      `ALTER TABLE "users" ALTER COLUMN "role" SET DEFAULT 'customer'`,
     );
     await queryRunner.query(`DROP TYPE "public"."user_role_enum_old"`);
     await queryRunner.query(
@@ -27,13 +27,13 @@ export class Init1756658984658 implements MigrationInterface {
       `CREATE TYPE "public"."user_role_enum" AS ENUM('master', 'company_admin', 'company_owner', 'worker', 'customer')`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user" ALTER COLUMN "role" DROP DEFAULT`,
+      `ALTER TABLE "users" ALTER COLUMN "role" DROP DEFAULT`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user" ALTER COLUMN "role" TYPE "public"."user_role_enum" USING "role"::"text"::"public"."user_role_enum"`,
+      `ALTER TABLE "users" ALTER COLUMN "role" TYPE "public"."user_role_enum" USING "role"::"text"::"public"."user_role_enum"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user" ALTER COLUMN "role" SET DEFAULT 'customer'`,
+      `ALTER TABLE "users" ALTER COLUMN "role" SET DEFAULT 'customer'`,
     );
     await queryRunner.query(`DROP TYPE "public"."user_role_enum_old"`);
   }
@@ -43,13 +43,13 @@ export class Init1756658984658 implements MigrationInterface {
       `CREATE TYPE "public"."user_role_enum_old" AS ENUM('admin', 'master', 'owner', 'worker', 'customer')`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user" ALTER COLUMN "role" DROP DEFAULT`,
+      `ALTER TABLE "users" ALTER COLUMN "role" DROP DEFAULT`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user" ALTER COLUMN "role" TYPE "public"."user_role_enum_old" USING "role"::"text"::"public"."user_role_enum_old"`,
+      `ALTER TABLE "users" ALTER COLUMN "role" TYPE "public"."user_role_enum_old" USING "role"::"text"::"public"."user_role_enum_old"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user" ALTER COLUMN "role" SET DEFAULT 'customer'`,
+      `ALTER TABLE "users" ALTER COLUMN "role" SET DEFAULT 'customer'`,
     );
     await queryRunner.query(`DROP TYPE "public"."user_role_enum"`);
     await queryRunner.query(
@@ -59,13 +59,13 @@ export class Init1756658984658 implements MigrationInterface {
       `CREATE TYPE "public"."user_role_enum_old" AS ENUM('admin', 'master', 'owner', 'worker', 'customer')`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user" ALTER COLUMN "role" DROP DEFAULT`,
+      `ALTER TABLE "users" ALTER COLUMN "role" DROP DEFAULT`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user" ALTER COLUMN "role" TYPE "public"."user_role_enum_old" USING "role"::"text"::"public"."user_role_enum_old"`,
+      `ALTER TABLE "users" ALTER COLUMN "role" TYPE "public"."user_role_enum_old" USING "role"::"text"::"public"."user_role_enum_old"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user" ALTER COLUMN "role" SET DEFAULT 'customer'`,
+      `ALTER TABLE "users" ALTER COLUMN "role" SET DEFAULT 'customer'`,
     );
     await queryRunner.query(`DROP TYPE "public"."user_role_enum"`);
     await queryRunner.query(
