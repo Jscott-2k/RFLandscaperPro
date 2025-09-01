@@ -14,9 +14,11 @@ import * as crypto from 'node:crypto';
 import { type Repository, MoreThan, IsNull, QueryFailedError } from 'typeorm';
 
 import { validatePasswordStrength } from '../auth/password.util';
-import { type EmailService } from '../common/email';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { EmailService } from '../common/email';
 import { invitationMail, addedToCompanyMail } from '../common/email/templates';
-import { type MetricsService } from '../metrics/metrics.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { MetricsService } from '../metrics/metrics.service';
 import { User, UserRole } from '../users/user.entity';
 import { Email } from '../users/value-objects/email.vo';
 import { type AcceptInvitationDto } from './dto/accept-invitation.dto';
