@@ -24,15 +24,19 @@ RUN apt-get update -qq && \
     python-is-python3
 
 # Install dependencies
-COPY backend/package*.json ./
-RUN npm ci --include=dev
+# Leverage root workspace lockfile to install only backend deps
+COPY package.json package-lock.json ./
+COPY backend/package.json backend/package.json
+COPY shared/package.json shared/package.json
+RUN npm ci --include=dev --workspace backend
 
 # Copy source code
-# Copy backend sources directly into /app
-COPY backend/ ./
+# Copy backend and shared workspaces into the image
+COPY backend/ backend/
+COPY shared/ shared/
 
 # Build the app
-RUN npm run build
+RUN npm run build --workspace backend
 
 # ---------- Final Stage ----------
 FROM base
@@ -44,4 +48,4 @@ COPY --from=build /app /app
 EXPOSE 3000
 
 # Start the app in production mode
-CMD ["npm", "run", "start:prod"]
+CMD ["npm", "run", "start:prod", "--workspace", "backend"]
