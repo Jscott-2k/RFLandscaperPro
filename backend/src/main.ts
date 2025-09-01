@@ -33,56 +33,31 @@ function parseAllowedOrigins(raw: string | undefined): string[] {
     .filter(Boolean);
 }
 
-async function createAppWithWatchdog(): Promise<NestExpressApplication> {
-  console.log('[boot] A: NestFactory.create() starting');
-
-  // Prevent early process exit in some environments while create() is pending
-  const keepalive: NodeJS.Timeout = setInterval(() => void 0, 1 << 30);
-  const timeoutMs = Number(process.env.BOOT_CREATE_TIMEOUT_MS ?? 15_000);
+export async function bootstrap(): Promise<void> {
+  let app: NestExpressApplication | undefined;
 
   try {
-    const app = await Promise.race([
-      NestFactory.create<NestExpressApplication>(AppModule, {
+    console.log('[boot] A: NestFactory.create() starting');
+
+    // Create the app directly — no watchdog/Promise.race/keepalive
+    const created = await NestFactory.create<NestExpressApplication>(
+      AppModule,
+      {
         bufferLogs: false,
         logger:
           process.env.NEST_LOG_LEVEL === 'debug'
             ? ['error', 'warn', 'log', 'debug', 'verbose']
             : undefined,
-      }),
-      new Promise<never>((_, reject) =>
-        setTimeout(
-          () =>
-            reject(
-              new Error(
-                `NestFactory.create timed out after ${timeoutMs}ms. A provider may be hanging (e.g., DB connect in a constructor).`,
-              ),
-            ),
-          timeoutMs,
-        ),
-      ),
-    ]);
-
-    console.log('[boot] B: after create()');
-    return app;
-  } finally {
-    clearInterval(keepalive);
-  }
-}
-
-export async function bootstrap(): Promise<void> {
-  let app: NestExpressApplication | undefined;
-
-  try {
-    console.time('createAppWithWatchdog');
-    app = await createAppWithWatchdog();
-    console.timeEnd('createAppWithWatchdog');
-
-    // Prefer an existing Nest-bound logger; otherwise create a lean default
+      },
+    );
     const winstonLogger: LoggerService =
-      app.get(WINSTON_MODULE_NEST_PROVIDER, { strict: false }) ??
+      created.get(WINSTON_MODULE_NEST_PROVIDER, { strict: false }) ??
       WinstonModule.createLogger({
         transports: [new winston.transports.Console()],
       });
+
+    const appLocal = created;
+    app = appLocal; // keep a reference for error logging below
     app.useLogger(winstonLogger);
 
     // Core HTTP config
@@ -170,9 +145,7 @@ export async function bootstrap(): Promise<void> {
     const host = process.env.HOST || '0.0.0.0';
     const port = Number(process.env.PORT ?? 3000);
 
-    await app.init();
-    console.log('[boot] C: after app.init()');
-
+    console.log('[boot] C: starting app.listen()');
     app.enableShutdownHooks();
     await app.listen(port, host);
     console.log(`[boot] D: listening on http://${host}:${port}`);
@@ -189,6 +162,7 @@ export async function bootstrap(): Promise<void> {
     }
 
     console.error('[boot] FATAL:', msg, stack);
+    // non-zero exit so tooling catches the failure, but no watchdog timers
     process.exit(1);
   }
 }

@@ -1,10 +1,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noEmit": false,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "baseUrl": "./",
     "paths": {
       "@rflp/shared": ["../shared/dist"],
       "@rflp/shared/*": ["../shared/dist/*"]
     }
-  }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "test", "scripts", "**/*.spec.ts"]
 }

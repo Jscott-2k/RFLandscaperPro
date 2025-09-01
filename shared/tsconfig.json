@@ -1,16 +1,15 @@
 {
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": false,
+    "target": "ES2023",
     "module": "commonjs",
-    "target": "ES2022",
     "moduleResolution": "node",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "rootDir": "src",
-    "outDir": "dist"
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strictNullChecks": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*.ts"]
 }

@@ -1,16 +1,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "rootDirs": ["./src", "../shared/src"],
+    "rootDir": "./src",
+    "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-      "@rflp/shared": ["../shared/src"],
-      "@rflp/shared/*": ["../shared/src/*"]
+      "@rflp/shared": ["../shared/dist"],
+      "@rflp/shared/*": ["../shared/dist/*"]
     }
   },
-  "ts-node": {
-    "transpileOnly": true,
-    "files": true,
-    "require": ["tsconfig-paths/register"]
-  }
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "test", "scripts", "**/*.spec.ts"]
 }

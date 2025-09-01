@@ -1,11 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "backend/src",
+  "sourceRoot": "src",
   "compilerOptions": {
-    "deleteOutDir": true,
-    "tsConfigPath": "tsconfig.json",
-    "assets": [],
-    "watchAssets": true
+    "tsConfigPath": "tsconfig.dev.json"
   }
 }
