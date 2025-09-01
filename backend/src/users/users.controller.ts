@@ -29,7 +29,7 @@ import { type UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UserRole } from './user.entity';
 import { toUserResponseDto } from './users.mapper';
-import { type UsersService } from './users.service';
+import { UsersService } from './users.service';
 
 @ApiTags('users')
 @ApiBearerAuth()

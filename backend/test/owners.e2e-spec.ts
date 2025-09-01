@@ -2,7 +2,7 @@ import { type INestApplication } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { type Request, type Response, type NextFunction } from 'express';
-import * as request from 'supertest';
+import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { EmailService } from '../src/common/email';
@@ -13,6 +13,8 @@ import { User, UserRole } from '../src/users/user.entity';
 import { UsersController } from '../src/users/users.controller';
 import { UsersService } from '../src/users/users.service';
 import { Email } from '../src/users/value-objects/email.vo';
+
+import './env.test';
 
 describe('Owner user endpoints (e2e)', () => {
   let app: INestApplication<App>;
@@ -122,7 +124,7 @@ describe('Owner user endpoints (e2e)', () => {
       .expect(200)
       .expect((res: request.Response) => {
         const body = res.body as { id: number }[];
-        expect(body).toHaveLength(1);
+        expect(body.length).toBe(1);
         expect(body[0].id).toBe(2);
       });
   });

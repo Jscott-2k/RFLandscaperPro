@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import * as request from 'supertest';
+import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { AuthController } from '../src/auth/auth.controller';
@@ -18,6 +18,8 @@ import { UserCreationService } from '../src/users/user-creation.service';
 import { User, UserRole } from '../src/users/user.entity';
 import { UsersService } from '../src/users/users.service';
 import { Email } from '../src/users/value-objects/email.vo';
+
+import './env.test';
 
 describe('Auth login endpoint (e2e)', () => {
   let app: INestApplication<App>;
