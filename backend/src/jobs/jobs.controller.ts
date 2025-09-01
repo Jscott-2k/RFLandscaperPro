@@ -32,7 +32,7 @@ import { type CreateJobDto } from './dto/create-job.dto';
 import { JobResponseDto } from './dto/job-response.dto';
 import { type ScheduleJobDto } from './dto/schedule-job.dto';
 import { type UpdateJobDto } from './dto/update-job.dto';
-import { type JobsService } from './jobs.service';
+import { JobsService } from './jobs.service';
 
 @ApiTags('jobs')
 @ApiBearerAuth()

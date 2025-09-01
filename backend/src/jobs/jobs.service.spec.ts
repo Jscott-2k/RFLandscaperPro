@@ -9,10 +9,12 @@ import {
   EQUIPMENT_REPOSITORY,
   type IEquipmentRepository,
 } from '../equipment/repositories/equipment.repository';
+import { Equipment } from '../equipment/entities/equipment.entity';
 import {
   USER_REPOSITORY,
   type IUserRepository,
 } from '../users/repositories/user.repository';
+import { User } from '../users/user.entity';
 import { type AssignJobDto } from './dto/assign-job.dto';
 import { type CreateJobDto } from './dto/create-job.dto';
 import { type ScheduleJobDto } from './dto/schedule-job.dto';
@@ -100,8 +102,8 @@ describe('JobsService', () => {
       customer: {},
       scheduledDate: new Date(),
     } as unknown as Job);
-    userRepo.findById.mockResolvedValue({ id: 1 } as { id: number });
-    equipmentRepo.findById.mockResolvedValue({ id: 2 } as { id: number });
+    userRepo.findById.mockResolvedValue({ id: 1 } as unknown as User);
+    equipmentRepo.findById.mockResolvedValue({ id: 2 } as unknown as Equipment);
     assignmentRepo.hasConflict.mockResolvedValue(true);
     const dto: AssignJobDto = { equipmentId: 2, userId: 1 };
     await expect(service.assign(1, dto, 1)).rejects.toBeInstanceOf(

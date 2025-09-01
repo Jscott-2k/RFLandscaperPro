@@ -31,7 +31,7 @@ import { EquipmentResponseDto } from './dto/equipment-response.dto';
 import { type UpdateEquipmentStatusDto } from './dto/update-equipment-status.dto';
 import { type UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentStatus, EquipmentType } from './entities/equipment.entity';
-import { type EquipmentService } from './equipment.service';
+import { EquipmentService } from './equipment.service';
 
 @ApiTags('equipment')
 @ApiBearerAuth()

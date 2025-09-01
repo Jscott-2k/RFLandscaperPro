@@ -1,7 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { type ConfigService } from '@nestjs/config';
 import { type JwtService } from '@nestjs/jwt';
-import { describe, beforeEach, it } from 'node:test';
 import { type Repository } from 'typeorm';
 
 import { type EmailService } from '../common/email';
