@@ -49,7 +49,8 @@ describe('Auth signup-owner endpoint (e2e)', () => {
       .send({
         companyName: 'Acme Co',
         email: 'owner@example.com',
-        name: 'Owner',
+        firstName: 'Owner',
+        lastName: 'User',
         password: 'Password1!',
       })
       .expect(201)
@@ -69,7 +70,8 @@ describe('Auth signup-owner endpoint (e2e)', () => {
       .send({
         companyName: 'Acme Co',
         email: 'owner@example.com',
-        name: 'Owner',
+        firstName: 'Owner',
+        lastName: 'User',
         password: 'Password1!',
       })
       .expect(409);

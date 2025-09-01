@@ -131,23 +131,24 @@ describe('AuthService.signupOwner', () => {
     });
     userCreationService.createUser.mockResolvedValue(user);
 
-    await service.signupOwner({
-      companyName: 'ACME',
-      email: 'owner@example.com',
-      name: 'owner',
-      password: 'Password123!',
-    });
+      await service.signupOwner({
+        companyName: 'ACME',
+        email: 'owner@example.com',
+        firstName: 'owner',
+        lastName: 'owner',
+        password: 'Password123!',
+      });
 
-    expect(userCreationService.createUser).toHaveBeenCalledWith({
-      company: { name: 'ACME' },
-      email: new Email('owner@example.com'),
-      firstName: 'owner',
-      isVerified: true,
-      lastName: 'owner',
-      password: 'Password123!',
-      role: UserRole.CompanyOwner,
-      username: 'owner',
-    });
+      expect(userCreationService.createUser).toHaveBeenCalledWith({
+        company: { name: 'ACME' },
+        email: new Email('owner@example.com'),
+        firstName: 'owner',
+        isVerified: true,
+        lastName: 'owner',
+        password: 'Password123!',
+        role: UserRole.CompanyOwner,
+        username: 'owner',
+      });
     expect(loginSpy).toHaveBeenCalledWith(user);
   });
 });
