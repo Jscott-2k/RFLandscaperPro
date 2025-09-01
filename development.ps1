@@ -9,7 +9,7 @@ param(
   [switch]$Pull,         # pull
   [switch]$Local         # run backend and frontend without Docker
 )
-
+$Env:BUILDKIT_PROGRESS = 'plain'
 $ErrorActionPreference = 'Stop'
 Set-Location -Path (Resolve-Path $PSScriptRoot)
 
