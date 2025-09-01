@@ -33,7 +33,15 @@ function Preflight {
   $svc = Get-Service -Name 'com.docker.service' -ErrorAction SilentlyContinue
   if ($null -eq $svc) { throw "Docker Desktop service 'com.docker.service' not found." }
   if ($svc.Status -ne 'Running') {
-    Start-Service -Name 'com.docker.service' -ErrorAction Stop
+    $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+    if (-not $isAdmin) {
+      throw "Docker Desktop service is not running and current user lacks permission to start it. Start Docker Desktop manually or run PowerShell as Administrator."
+    }
+    try {
+      Start-Service -Name 'com.docker.service' -ErrorAction Stop
+    } catch {
+      throw "Failed to start Docker Desktop service: $_"
+    }
     do {
       Start-Sleep -Seconds 1
       $svc = Get-Service -Name 'com.docker.service' -ErrorAction SilentlyContinue
