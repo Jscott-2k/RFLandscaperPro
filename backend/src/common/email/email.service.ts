@@ -1,12 +1,14 @@
+import type SMTPTransport from 'nodemailer/lib/smtp-transport';
+
 import {
   Injectable,
   Logger,
-  OnModuleInit,
-  OnModuleDestroy,
+  type OnModuleInit,
+  type OnModuleDestroy,
 } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import { EtherealTransport, SmtpTransport, MailDriver } from './transports';
+
+import { EtherealTransport, SmtpTransport, type MailDriver } from './transports';
 
 function toError(e: unknown): Error {
   return e instanceof Error
@@ -36,7 +38,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    const hasMailhog = !!process.env.MAILHOG_HOST || !!process.env.MAILHOG_PORT;
+    const hasMailhog = Boolean(process.env.MAILHOG_HOST) || Boolean(process.env.MAILHOG_PORT);
     this.driver =
       process.env.NODE_ENV === 'production'
         ? 'smtp'
@@ -90,7 +92,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
   private formatRecipients(to: nodemailer.SendMailOptions['to']): string {
     const extract = (address: string | { address: string }): string =>
       typeof address === 'string' ? address : address.address;
-    if (!to) return 'unknown';
+    if (!to) {return 'unknown';}
     return Array.isArray(to) ? to.map(extract).join(', ') : extract(to);
   }
 
@@ -119,7 +121,7 @@ export class EmailService implements OnModuleInit, OnModuleDestroy {
       if (this.driver === 'ethereal') {
         const url = nodemailer.getTestMessageUrl(info);
         previewUrl = typeof url === 'string' ? url : undefined;
-        if (previewUrl) this.logger.log(`Preview URL: ${previewUrl}`);
+        if (previewUrl) {this.logger.log(`Preview URL: ${previewUrl}`);}
       }
 
       return { messageId: info.messageId, previewUrl };

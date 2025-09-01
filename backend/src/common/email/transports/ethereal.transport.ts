@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
-import { EmailTransport, MailDriver } from './transport.interface';
+
+import { type EmailTransport, type MailDriver } from './transport.interface';
 
 function toError(e: unknown): Error {
   return e instanceof Error
@@ -24,15 +25,15 @@ export class EtherealTransport implements EmailTransport {
         ),
       ]);
       const transporter = nodemailer.createTransport({
+        auth: {
+          pass: testAccount.pass,
+          user: testAccount.user,
+        },
         host: 'smtp.ethereal.email',
         port: 587,
         secure: false,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass,
-        },
       });
-      return { transporter, testAccount };
+      return { testAccount, transporter };
     } catch (e) {
       const err = toError(e);
       this.logger.warn(

@@ -1,16 +1,20 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
+
+import { CompanyUser } from '../companies/entities/company-user.entity';
+import { Company } from '../companies/entities/company.entity';
+import { User } from '../users/user.entity';
 import { UsersModule } from '../users/users.module';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { RefreshToken } from './refresh-token.entity';
-import { VerificationToken } from './verification-token.entity';
-import { User } from '../users/user.entity';
-import { Company } from '../companies/entities/company.entity';
-import { CompanyUser } from '../companies/entities/company-user.entity';
+import {
+  COMPANY_MEMBERSHIP_REPOSITORY,
+  TypeOrmCompanyMembershipRepository,
+} from './repositories/company-membership.repository';
 import {
   REFRESH_TOKEN_REPOSITORY,
   TypeOrmRefreshTokenRepository,
@@ -19,10 +23,7 @@ import {
   VERIFICATION_TOKEN_REPOSITORY,
   TypeOrmVerificationTokenRepository,
 } from './repositories/verification-token.repository';
-import {
-  COMPANY_MEMBERSHIP_REPOSITORY,
-  TypeOrmCompanyMembershipRepository,
-} from './repositories/company-membership.repository';
+import { VerificationToken } from './verification-token.entity';
 
 @Module({
   imports: [

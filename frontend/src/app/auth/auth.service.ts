@@ -1,8 +1,9 @@
-import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Injectable, inject, signal } from '@angular/core';
+import { type CompanyMembership, CompanyUserRole } from '@rflp/shared';
+import { type Observable, tap } from 'rxjs';
+
 import { environment } from '../../environments/environment';
-import { CompanyMembership, CompanyUserRole } from '@rflp/shared';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -78,8 +79,8 @@ export class AuthService {
 
   resetPassword(token: string, password: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/reset-password`, {
-      token,
       password,
+      token,
     });
   }
 
@@ -130,7 +131,7 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    return Boolean(this.getToken());
   }
 
   getCompany(): number | null {
