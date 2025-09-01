@@ -7,7 +7,12 @@ export class SignupOwnerDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  name: string;
+  firstName: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  lastName: string;
 
   @ApiProperty()
   @IsEmail()

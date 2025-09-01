@@ -147,12 +147,12 @@ export class AuthService {
     const user = await this.userCreationService.createUser({
       company: { name: dto.companyName },
       email: new Email(dto.email),
-      firstName: dto.name,
+      firstName: dto.firstName,
       isVerified: true,
-      lastName: dto.name,
+      lastName: dto.lastName,
       password: dto.password,
       role: UserRole.CompanyOwner,
-      username: dto.name,
+      username: dto.firstName,
     });
 
     return this.login(user);
