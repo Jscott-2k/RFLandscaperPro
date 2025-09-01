@@ -11,12 +11,12 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
-import { type AuthService } from '../auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 import { Public } from '../common/decorators/public.decorator';
 import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
 import { type AcceptInvitationDto } from './dto/accept-invitation.dto';
 import { type InvitationRole } from './entities/invitation.entity';
-import { type InvitationsService } from './invitations.service';
+import { InvitationsService } from './invitations.service';
 
 @ApiTags('invitations')
 @Controller('invitations')

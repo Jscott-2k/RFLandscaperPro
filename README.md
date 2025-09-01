@@ -8,6 +8,10 @@ RF Landscaper Pro is an enterprise-grade application that streamlines landscapin
 - PostgreSQL 14 or later
 - Docker and Docker Compose (optional)
 
+## Package Management
+
+This monorepo uses a single root `package-lock.json` for all workspaces; per-package lockfiles are not used. After adding or upgrading dependencies, run `npm run lockfiles` to regenerate the lockfile before committing.
+
 ## Windows Setup
 
 ### Required tools

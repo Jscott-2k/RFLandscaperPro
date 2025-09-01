@@ -2,10 +2,10 @@ services:
   frontend:
     build:
       dockerfile: frontend/Dockerfile.dev
+    working_dir: /app/frontend
     volumes:
-      - .:/app
-      - ../shared:/shared
-      - /app/node_modules
+      - .:/app/frontend
+      - ../shared:/app/shared
     ports:
       - "4200:4200"
     environment:

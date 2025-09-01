@@ -17,7 +17,7 @@ import {
 import { CompanyId } from '../common/decorators/company-id.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '../users/user.entity';
-import { type ContractsService } from './contracts.service';
+import { ContractsService } from './contracts.service';
 import { ContractResponseDto } from './dto/contract-response.dto';
 import { type CreateContractDto } from './dto/create-contract.dto';
 import { type UpdateContractDto } from './dto/update-contract.dto';

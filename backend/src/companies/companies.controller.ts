@@ -15,14 +15,14 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { type UserResponseDto } from '../users/dto/user-response.dto';
 import { type User, UserRole } from '../users/user.entity';
 import { toUserResponseDto } from '../users/users.mapper';
-import { type UsersService } from '../users/users.service';
-import { type CompaniesService } from './companies.service';
+import { UsersService } from '../users/users.service';
+import { CompaniesService } from './companies.service';
 import { type CompanyResponseDto } from './dto/company-response.dto';
 import { type CreateCompanyDto } from './dto/create-company.dto';
 import { type CreateInvitationDto } from './dto/create-invitation.dto';
 import { type UpdateCompanyDto } from './dto/update-company.dto';
 import { type InvitationRole } from './entities/invitation.entity';
-import { type InvitationsService } from './invitations.service';
+import { InvitationsService } from './invitations.service';
 
 @ApiTags('companies')
 @ApiBearerAuth()

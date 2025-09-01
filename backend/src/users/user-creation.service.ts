@@ -2,8 +2,8 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { type Repository, QueryFailedError } from 'typeorm';
 
-import { type CompanyOnboardingService } from './company-onboarding.service';
-import { type CustomerRegistrationService } from './customer-registration.service';
+import { CompanyOnboardingService } from './company-onboarding.service';
+import { CustomerRegistrationService } from './customer-registration.service';
 import { type CreateUserDto } from './dto/create-user.dto';
 import { User, UserRole } from './user.entity';
 
