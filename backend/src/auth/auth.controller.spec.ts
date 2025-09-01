@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { Test, type TestingModule } from '@nestjs/testing';
 
 import { AuthController } from './auth.controller';
@@ -8,6 +7,8 @@ import { type RegisterDto } from './dto/register.dto';
 import { type RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { type ResetPasswordDto } from './dto/reset-password.dto';
 import { type SignupOwnerDto } from './dto/signup-owner.dto';
+
+import 'reflect-metadata';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -47,7 +48,7 @@ describe('AuthController', () => {
   it('logs in without company', async () => {
     const dto: LoginDto = { email: 'user@example.com', password: 'pass' };
     const user: { id: number } = { id: 1 };
-    const resultPayload = { access_token: 'token' } as any;
+    const resultPayload: { access_token: string } = { access_token: 'token' };
     authService.validateUser.mockResolvedValue(user);
     authService.login.mockResolvedValue(resultPayload);
 
@@ -68,7 +69,7 @@ describe('AuthController', () => {
       name: 'Owner',
       password: 'Password1!',
     };
-    const response = { access_token: 'jwt' } as any;
+    const response: { access_token: string } = { access_token: 'jwt' };
     authService.signupOwner.mockResolvedValue(response);
 
     const result = await controller.signupOwner(dto);

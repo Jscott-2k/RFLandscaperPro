@@ -1,9 +1,15 @@
-import { type Repository, type SelectQueryBuilder } from 'typeorm';
+import {
+  type ObjectLiteral,
+  type Repository,
+  type SelectQueryBuilder,
+} from 'typeorm';
 
 import { paginate } from './pagination';
 
+type Entity = ObjectLiteral & { id: number };
+
 describe('paginate', () => {
-  let repo: jest.Mocked<Repository<any>>;
+  let repo: jest.Mocked<Repository<Entity>>;
   let qb: Record<string, jest.Mock>;
 
   beforeEach(() => {
@@ -17,8 +23,8 @@ describe('paginate', () => {
     repo = {
       createQueryBuilder: jest
         .fn()
-        .mockReturnValue(qb as unknown as SelectQueryBuilder<any>),
-    } as unknown as jest.Mocked<Repository<any>>;
+        .mockReturnValue(qb as unknown as SelectQueryBuilder<Entity>),
+    } as unknown as jest.Mocked<Repository<Entity>>;
   });
 
   it('caps limit at 100', async () => {
@@ -28,8 +34,8 @@ describe('paginate', () => {
 
   it('applies provided filters', async () => {
     const filter = (
-      qb: SelectQueryBuilder<any>,
-    ): SelectQueryBuilder<any> =>
+      qb: SelectQueryBuilder<Entity>,
+    ): SelectQueryBuilder<Entity> =>
       qb.andWhere('entity.active = :active', { active: true });
 
     await paginate(repo, { limit: 10 }, 'entity', filter);
