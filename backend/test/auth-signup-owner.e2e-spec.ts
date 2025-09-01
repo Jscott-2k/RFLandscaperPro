@@ -10,6 +10,7 @@ import { type App } from 'supertest/types';
 import { AuthController } from '../src/auth/auth.controller';
 import { AuthService } from '../src/auth/auth.service';
 
+import 'reflect-metadata';
 import './env.test';
 
 describe('Auth signup-owner endpoint (e2e)', () => {

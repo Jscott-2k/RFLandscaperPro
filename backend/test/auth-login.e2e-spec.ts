@@ -19,6 +19,7 @@ import { User, UserRole } from '../src/users/user.entity';
 import { UsersService } from '../src/users/users.service';
 import { Email } from '../src/users/value-objects/email.vo';
 
+import 'reflect-metadata'; 
 import './env.test';
 
 describe('Auth login endpoint (e2e)', () => {
