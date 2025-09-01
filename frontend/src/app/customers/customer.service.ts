@@ -2,8 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { type Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CustomersApiService } from '../api/customers-api.service';
-import { type Customer } from './customer.model';
+import {
+  CustomersApiService,
+  type Customer,
+  type CreateCustomer,
+  type UpdateCustomer,
+} from '../api/customers-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
@@ -17,11 +21,11 @@ export class CustomerService {
     return this.api.getCustomer(id);
   }
 
-  createCustomer(customer: Partial<Customer>): Observable<Customer> {
+  createCustomer(customer: CreateCustomer): Observable<Customer> {
     return this.api.createCustomer(customer);
   }
 
-  updateCustomer(id: number, customer: Partial<Customer>): Observable<Customer> {
+  updateCustomer(id: number, customer: UpdateCustomer): Observable<Customer> {
     return this.api.updateCustomer(id, customer);
   }
 

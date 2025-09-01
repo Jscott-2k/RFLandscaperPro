@@ -9,9 +9,23 @@ export type Job = {
   completed: boolean;
   id: number;
   title: string;
-}
+  description?: string;
+  scheduledDate?: string;
+  customerId: number;
+  estimatedHours?: number;
+  notes?: string;
+};
 
-export type CreateJob = Partial<Omit<Job, 'id'>>;
+export type CreateJob = {
+  title: string;
+  customerId: number;
+  description?: string;
+  scheduledDate?: string;
+  completed?: boolean;
+  estimatedHours?: number;
+  notes?: string;
+};
+
 export type UpdateJob = Partial<CreateJob>;
 
 @Injectable({ providedIn: 'root' })

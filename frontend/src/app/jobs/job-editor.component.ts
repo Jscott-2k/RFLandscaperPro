@@ -5,7 +5,7 @@ import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 
 import { ErrorService } from '../error.service';
 import { ToasterService } from '../toaster.service';
-import { type Job } from './job.model';
+import { type Job, type CreateJob } from './job.model';
 import { JobsService } from './jobs.service';
 
 @Component({
@@ -21,7 +21,7 @@ export class JobEditorComponent implements OnInit {
   private errorService = inject(ErrorService);
   private notifications = inject(ToasterService);
   private fb = inject(FormBuilder);
-  job: Job = { customerId: 1, title: '' };
+  job: Partial<Job> = { customerId: 1, title: '', completed: false };
 
   form = this.fb.nonNullable.group({
     description: [''],
@@ -50,7 +50,7 @@ export class JobEditorComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const payload: Job = { ...this.job, ...this.form.getRawValue() } as Job;
+    const payload = { ...this.job, ...this.form.getRawValue() } as CreateJob;
     if (this.job.id) {
       this.jobsService.update(this.job.id, payload).subscribe({
         error: () => this.errorService.show('Failed to update job'),

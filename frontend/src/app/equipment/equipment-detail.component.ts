@@ -5,7 +5,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import { ErrorService } from '../error.service';
 import { ToasterService } from '../toaster.service';
-import { EquipmentService, type Equipment } from './equipment.service';
+import { EquipmentService, type CreateEquipment, type Equipment } from './equipment.service';
 
 @Component({
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
@@ -77,7 +77,7 @@ export class EquipmentDetailComponent {
       this.form.markAllAsTouched();
       return;
     }
-    const payload = this.form.getRawValue() as Partial<Equipment>;
+    const payload = this.form.getRawValue() as CreateEquipment;
     if (this.equipmentId) {
       this.equipmentService.updateEquipment(this.equipmentId, payload).subscribe({
         error: () => this.errorService.show('Failed to update equipment'),

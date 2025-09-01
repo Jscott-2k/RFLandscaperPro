@@ -6,15 +6,20 @@ import { ApiService } from '../api.service';
 import { type User } from './users-api.service';
 
 export type Company = {
-  address?: string;
-  email?: string;
   id: number;
   name: string;
-  ownerId?: number;
+  address?: string;
   phone?: string;
-}
+  email?: string;
+  ownerId?: number;
+};
 
-export type CreateCompany = Partial<Omit<Company, 'id'>>;
+export type CreateCompany = {
+  name: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+};
 export type UpdateCompany = Partial<CreateCompany>;
 
 export type CompanyMember = {
