@@ -15,7 +15,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { type User, UserRole } from '../users/user.entity';
 import { type CompanyMemberResponseDto } from './dto/company-member-response.dto';
 import { type UpdateCompanyMemberDto } from './dto/update-company-member.dto';
-import { type MembersService } from './members.service';
+import { MembersService } from './members.service';
 
 @ApiTags('companies')
 @ApiBearerAuth()
