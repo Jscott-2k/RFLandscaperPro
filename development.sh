@@ -39,6 +39,10 @@ if [[ "${1:-}" == "--local" ]]; then
 else
   preflight || exit 1
 
+  echo "→ Building Docker images"
+  compose build || exit 1
+
+  echo "→ Starting Docker containers"
   compose up -d || exit 1
 
   printf '%s\n' \

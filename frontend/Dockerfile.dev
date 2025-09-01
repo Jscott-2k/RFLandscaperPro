@@ -11,20 +11,8 @@ WORKDIR /app
 ENV NODE_ENV=development
 ENV CHOKIDAR_USEPOLLING=true
 
-# ---- Install dependencies ----
-# Use root workspace lockfile to install frontend dependencies
-COPY package.json package-lock.json ./
-COPY frontend/package.json frontend/package.json
-COPY shared/package.json shared/package.json
-RUN npm ci --include=dev --workspace frontend
-
-# ---- Copy application code ----
-# Copy frontend and shared sources into dedicated workspace directories
-COPY frontend/ frontend/
-COPY shared/ shared/
-
 # ---- Expose application port ----
 EXPOSE 4200
 
 # ---- Start development server ----
-CMD ["npm", "run", "dev:ssr"]
+CMD ["sh", "-c", "npm install && npm run dev:ssr"]

@@ -205,16 +205,15 @@ if ($Pull)  {
   if ($svc.Count -gt 0) { Compose pull @svc } else { Compose pull }
 }
 
-if ($NoCache) {
-  if ($svc.Count -gt 0) { Compose build --no-cache @svc } else { Compose build --no-cache }
-  if ($svc.Count -gt 0) { Compose up -d @svc } else { Compose up -d }
-}
-elseif ($Rebuild) {
-  if ($svc.Count -gt 0) { Compose up --build -d @svc } else { Compose up --build -d }
-}
-else {
-  if ($svc.Count -gt 0) { Compose up -d @svc } else { Compose up -d }
-}
+$buildArgs = @()
+if ($NoCache) { $buildArgs += '--no-cache' }
+if ($svc.Count -gt 0) { $buildArgs += $svc }
+
+Write-Host 'Building Docker images...' -ForegroundColor Cyan
+Compose build @buildArgs
+
+Write-Host 'Starting Docker containers...' -ForegroundColor Cyan
+if ($svc.Count -gt 0) { Compose up -d @svc } else { Compose up -d }
 
 if ($svc.Count -gt 0) { Compose ps @svc } else { Compose ps }
 
