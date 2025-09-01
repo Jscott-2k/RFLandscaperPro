@@ -1,3 +1,5 @@
+import { type DataSource } from 'typeorm';
+
 import { runWithCompanyId } from './common/tenant/tenant-context';
 import { Company } from './companies/entities/company.entity';
 import { Customer } from './customers/entities/customer.entity';
@@ -8,11 +10,10 @@ process.env.DB_USERNAME = 'appuser';
 process.env.DB_PASSWORD = 'test';
 process.env.DB_NAME = 'rflandscaperpro_test';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const dataSource = require('./data-source').default;
+let dataSource: DataSource;
 
-async function enableCustomerRls() {
-  const qr = dataSource.createQueryRunner();
+async function enableCustomerRls(ds: DataSource) {
+  const qr = ds.createQueryRunner();
   await qr.query('ALTER TABLE "customer" ENABLE ROW LEVEL SECURITY');
   await qr.query(
     'DROP POLICY IF EXISTS customer_tenant_isolation ON "customer"',
@@ -32,13 +33,14 @@ describe.skip('RLS enforcement', () => {
   let customer2: Customer;
 
   beforeAll(async () => {
+    ({ default: dataSource } = await import('./data-source'));
     dataSource.setOptions({
       dropSchema: true,
       migrationsRun: false,
       synchronize: true,
     });
     await dataSource.initialize();
-    await enableCustomerRls();
+    await enableCustomerRls(dataSource);
     const companyRepo = dataSource.getRepository(Company);
     const customerRepo = dataSource.getRepository(Customer);
     company1 = await companyRepo.save({ name: 'Company One' });
