@@ -66,9 +66,9 @@ describe('AuthController', () => {
     const dto: SignupOwnerDto = {
       companyName: 'Acme Co',
       email: 'owner@example.com',
-      name: 'Owner',
-      password: 'Password1!',
       firstName: 'Owner',
+      lastName: 'User',
+      password: 'Password1!',
       phone: '5551234567',
     };
     const response: { access_token: string } = { access_token: 'jwt' };

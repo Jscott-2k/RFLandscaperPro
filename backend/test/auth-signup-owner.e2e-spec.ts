@@ -52,7 +52,6 @@ describe('Auth signup-owner endpoint (e2e)', () => {
         firstName: 'Owner',
         lastName: 'User',
         password: 'Password1!',
-        firstName: 'Owner',
         phone: '5551234567',
       })
       .expect(201)
@@ -62,9 +61,9 @@ describe('Auth signup-owner endpoint (e2e)', () => {
         expect(signupOwner).toHaveBeenCalledWith({
           companyName: 'Acme Co',
           email: 'owner@example.com',
-          name: 'Owner',
-          password: 'Password1!',
           firstName: 'Owner',
+          lastName: 'User',
+          password: 'Password1!',
           phone: '5551234567',
         });
       });
@@ -82,7 +81,6 @@ describe('Auth signup-owner endpoint (e2e)', () => {
         firstName: 'Owner',
         lastName: 'User',
         password: 'Password1!',
-        firstName: 'Owner',
         phone: '5551234567',
       })
       .expect(409);
