@@ -7,14 +7,15 @@ FROM node:${NODE_VERSION}-slim AS build
 # Set working directory
 WORKDIR /app
 
-# Install dependencies
-COPY frontend/package*.json ./
-RUN npm ci
+# Install dependencies using workspaces
+COPY package.json package-lock.json ./
+COPY frontend/package.json frontend/package.json
+COPY shared/package.json shared/package.json
+RUN npm ci --include=dev --workspace frontend
 
 # Copy source code
-# Copy frontend sources directly into /app
-COPY frontend/ ./
-COPY shared /shared
+COPY frontend/ frontend/
+COPY shared/ shared/
 
 # Build the Angular app
 RUN npm run build
@@ -25,9 +26,12 @@ FROM node:${NODE_VERSION}-slim AS prod
 # Set working directory for the runtime image
 WORKDIR /app
 
-# Install only production dependencies
-COPY --from=build /app/package*.json ./
-RUN npm ci --omit=dev
+# Install only production dependencies for the frontend workspace
+COPY --from=build /app/package.json ./package.json
+COPY --from=build /app/package-lock.json ./package-lock.json
+COPY --from=build /app/frontend/package.json frontend/package.json
+COPY --from=build /app/shared/package.json shared/package.json
+RUN npm ci --omit=dev --workspace frontend
 
 # Copy the built application
 COPY --from=build /app/dist ./dist
