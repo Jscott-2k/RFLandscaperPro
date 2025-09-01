@@ -21,7 +21,11 @@ export class UserService {
   }
 
   updateUser(user: UpdateUser & { id: number }): Observable<User> {
-    const { id, ...payload } = user;
+    const { id, role, company, ...payload } = user as UpdateUser & {
+      id: number;
+      role?: unknown;
+      company?: unknown;
+    };
     return this.api.updateUser(id, payload);
   }
 

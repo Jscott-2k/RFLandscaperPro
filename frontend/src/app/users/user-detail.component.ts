@@ -132,8 +132,10 @@ export class UserDetailComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const payload: User = { ...this.user, ...this.form.getRawValue() } as User;
-    this.userService.updateUser(payload).subscribe({
+    const { role, ...data } = { ...this.user, ...this.form.getRawValue() } as User & {
+      role?: string;
+    };
+    this.userService.updateUser({ ...data, id: this.user.id }).subscribe({
       error: () => this.errorService.show('Failed to save user'),
       next: () => {
         this.notifications.show('User updated successfully');
