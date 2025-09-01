@@ -32,7 +32,13 @@ function Preflight {
 
   $svc = Get-Service -Name 'com.docker.service' -ErrorAction SilentlyContinue
   if ($null -eq $svc) { throw "Docker Desktop service 'com.docker.service' not found." }
-  if ($svc.Status -ne 'Running') { throw "Docker Desktop service is not running. Start Docker Desktop." }
+  if ($svc.Status -ne 'Running') {
+    Start-Service -Name 'com.docker.service' -ErrorAction Stop
+    do {
+      Start-Sleep -Seconds 1
+      $svc = Get-Service -Name 'com.docker.service' -ErrorAction SilentlyContinue
+    } until ($svc.Status -eq 'Running')
+  }
 
   if (Get-Command wsl -ErrorAction SilentlyContinue) {
     try {
