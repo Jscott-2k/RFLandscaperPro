@@ -62,16 +62,17 @@ describe('AuthController', () => {
     expect(result).toEqual(resultPayload);
   });
 
-    it('signs up a new owner', async () => {
-      const dto: SignupOwnerDto = {
-        companyName: 'Acme Co',
-        email: 'owner@example.com',
-        firstName: 'Owner',
-        lastName: 'User',
-        password: 'Password1!',
-      };
-      const response: { access_token: string } = { access_token: 'jwt' };
-      authService.signupOwner.mockResolvedValue(response);
+  it('signs up a new owner', async () => {
+    const dto: SignupOwnerDto = {
+      companyName: 'Acme Co',
+      email: 'owner@example.com',
+      firstName: 'Owner',
+      lastName: 'User',
+      password: 'Password1!',
+      phone: '5551234567',
+    };
+    const response: { access_token: string } = { access_token: 'jwt' };
+    authService.signupOwner.mockResolvedValue(response);
 
     const result = await controller.signupOwner(dto);
 

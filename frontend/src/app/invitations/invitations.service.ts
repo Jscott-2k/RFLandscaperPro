@@ -22,7 +22,13 @@ export class InvitationsService {
 
   accept(
     token: string,
-    data?: { name: string; password: string },
+    data?: {
+      name: string;
+      password: string;
+      firstName?: string;
+      lastName?: string;
+      phone?: string;
+    },
   ): Observable<{ access_token: string; companies?: CompanyMembership[] }> {
     return this.http.post<{ access_token: string; companies?: CompanyMembership[] }>(
       `${environment.apiUrl}/invitations/${token}/accept`,

@@ -52,12 +52,20 @@ describe('Auth signup-owner endpoint (e2e)', () => {
         firstName: 'Owner',
         lastName: 'User',
         password: 'Password1!',
+        phone: '5551234567',
       })
       .expect(201)
       .expect((res: request.Response) => {
         const body = res.body as { access_token: string };
         expect(body.access_token).toBe('jwt');
-        expect(signupOwner).toHaveBeenCalled();
+        expect(signupOwner).toHaveBeenCalledWith({
+          companyName: 'Acme Co',
+          email: 'owner@example.com',
+          firstName: 'Owner',
+          lastName: 'User',
+          password: 'Password1!',
+          phone: '5551234567',
+        });
       });
   });
 
@@ -73,6 +81,7 @@ describe('Auth signup-owner endpoint (e2e)', () => {
         firstName: 'Owner',
         lastName: 'User',
         password: 'Password1!',
+        phone: '5551234567',
       })
       .expect(409);
   });

@@ -13,6 +13,7 @@ import { type UserCreationService } from '../users/user-creation.service';
 import { User, UserRole } from '../users/user.entity';
 import { type UsersService } from '../users/users.service';
 import { Email } from '../users/value-objects/email.vo';
+import { PhoneNumber } from '../users/value-objects/phone-number.vo';
 import { AuthService } from './auth.service';
 import { type JwtUserPayload } from './interfaces/jwt-user-payload.interface';
 import { type CompanyMembershipRepository } from './repositories/company-membership.repository';
@@ -127,28 +128,31 @@ describe('AuthService.signupOwner', () => {
       email: 'owner@example.com',
       id: 1,
       role: UserRole.CompanyOwner,
-      username: 'owner',
+      username: 'Owner',
     });
     userCreationService.createUser.mockResolvedValue(user);
 
-      await service.signupOwner({
-        companyName: 'ACME',
-        email: 'owner@example.com',
-        firstName: 'owner',
-        lastName: 'owner',
-        password: 'Password123!',
-      });
+    await service.signupOwner({
+      companyName: 'ACME',
+      email: 'owner@example.com',
+      password: 'Password123!',
+      firstName: 'Owner',
+      lastName: 'User',
+      phone: '5551234567',
+    });
 
-      expect(userCreationService.createUser).toHaveBeenCalledWith({
-        company: { name: 'ACME' },
-        email: new Email('owner@example.com'),
-        firstName: 'owner',
-        isVerified: true,
-        lastName: 'owner',
-        password: 'Password123!',
-        role: UserRole.CompanyOwner,
-        username: 'owner',
-      });
+    expect(userCreationService.createUser).toHaveBeenCalledWith({
+      company: { name: 'ACME' },
+      email: new Email('owner@example.com'),
+      isVerified: true,
+      firstName: 'Owner',
+      lastName: 'User',
+      password: 'Password123!',
+      role: UserRole.CompanyOwner,
+      username: 'Owner',
+      phone: new PhoneNumber('5551234567'),
+    });
+
     expect(loginSpy).toHaveBeenCalledWith(user);
   });
 });
