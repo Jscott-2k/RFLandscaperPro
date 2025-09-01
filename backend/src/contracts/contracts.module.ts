@@ -9,7 +9,10 @@ import { Job } from '../jobs/entities/job.entity';
 import { ContractScheduler } from './contract-scheduler.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Contract, Customer, Job]), ScheduleModule],
+  imports: [
+    TypeOrmModule.forFeature([Contract, Customer, Job]),
+    ScheduleModule,
+  ],
   controllers: [ContractsController],
   providers: [ContractsService, ContractScheduler],
   exports: [ContractsService],
