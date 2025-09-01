@@ -1,19 +1,33 @@
-# syntax=docker/dockerfile:1
+ # syntax=docker/dockerfile:1
 
-# ---- Base image ----
-ARG NODE_VERSION=24.3.0
-FROM node:${NODE_VERSION}-slim AS base
+ # ---- Dependencies stage ----
+ ARG NODE_VERSION=24.3.0
+ FROM node:${NODE_VERSION}-slim AS deps
 
-# ---- Set working directory ----
-WORKDIR /app
+ # Use root workspace lockfile to install backend dependencies
+ WORKDIR /app
+ COPY package.json package-lock.json ./
+ COPY backend/package.json backend/package.json
+ COPY shared/package.json shared/package.json
+ RUN npm ci --include=dev --workspace backend
 
-# ---- Set default environment ----
-# Allows NestJS to fall back to .env.development when run via `docker run`
-ENV NODE_ENV=development
-ENV CHOKIDAR_USEPOLLING=true
+ # ---- Development stage ----
+ FROM node:${NODE_VERSION}-slim AS base
+ WORKDIR /app
 
-# ---- Expose application port ----
-EXPOSE 3000
 
-# ---- Start development server with live reload ----
-CMD ["sh", "-c", "npm install && npm run start:dev"]
+ # Set default environment
+ ENV NODE_ENV=development
+ ENV CHOKIDAR_USEPOLLING=true
+
+ # Copy installed modules and application code
+ COPY --from=deps /app/node_modules ./node_modules
+ COPY package.json package-lock.json ./
+ COPY backend/ backend/
+ COPY shared/ shared/
+
+ # Expose application port
+ EXPOSE 3000
+
+ # Start development server with live reload
+ CMD ["npm", "run", "start:dev"]

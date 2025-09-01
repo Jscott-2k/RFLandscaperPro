@@ -1,18 +1,32 @@
 # syntax=docker/dockerfile:1
 
-# ---- Base image ----
+# ---- Dependencies stage ----
 ARG NODE_VERSION=24.3.0
-FROM node:${NODE_VERSION}-slim AS base
+FROM node:${NODE_VERSION}-slim AS deps
 
-# ---- Set working directory ----
+# Use root workspace lockfile to install frontend dependencies
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY frontend/package.json frontend/package.json
+COPY shared/package.json shared/package.json
+RUN npm ci --include=dev --workspace frontend
+
+# ---- Development stage ----
+FROM node:${NODE_VERSION}-slim AS base
 WORKDIR /app
 
-# ---- Set default environment ----
+# Set default environment
 ENV NODE_ENV=development
 ENV CHOKIDAR_USEPOLLING=true
 
-# ---- Expose application port ----
+# Copy installed modules and application code
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json ./
+COPY frontend/ frontend/
+COPY shared/ shared/
+
+# Expose application port
 EXPOSE 4200
 
-# ---- Start development server ----
-CMD ["sh", "-c", "npm install && npm run dev:ssr"]
+# Start development server
+CMD ["npm", "run", "dev:ssr"]
