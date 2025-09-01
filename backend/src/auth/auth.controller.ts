@@ -17,7 +17,7 @@ import { type RefreshTokenDto } from './dto/refresh-token.dto';
 import { type RegisterDto } from './dto/register.dto';
 import { type RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { type ResetPasswordDto } from './dto/reset-password.dto';
-import { type SignupOwnerDto } from './dto/signup-owner.dto';
+import { SignupOwnerDto } from './dto/signup-owner.dto';
 import { type SwitchCompanyDto } from './dto/switch-company.dto';
 import { type VerifyEmailDto } from './dto/verify-email.dto';
 import { type JwtUserPayload } from './interfaces/jwt-user-payload.interface';
