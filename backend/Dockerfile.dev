@@ -13,15 +13,19 @@ ENV NODE_ENV=development
 ENV CHOKIDAR_USEPOLLING=true
 
 # ---- Install dependencies ----
-COPY backend/package*.json ./
-RUN npm ci --include=dev
+# Use root workspace lockfile to install backend dependencies
+COPY package.json package-lock.json ./
+COPY backend/package.json backend/package.json
+COPY shared/package.json shared/package.json
+RUN npm ci --include=dev --workspace backend
 
 # ---- Copy application code ----
-# Copy the backend source directly into the workdir rather than nesting it
-COPY backend/ ./
+# Copy backend and shared sources into dedicated workspace directories
+COPY backend/ backend/
+COPY shared/ shared/
 
 # ---- Expose application port ----
 EXPOSE 3000
 
 # ---- Start development server with live reload ----
-CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "start:dev", "--workspace", "backend"]
