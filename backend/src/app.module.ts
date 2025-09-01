@@ -161,9 +161,7 @@ if (envFilePath) {
     LoggingInterceptor,
     {
       provide: APP_INTERCEPTOR,
-      useFactory: (cache: Cache, reflector: Reflector) =>
-        new CacheInterceptor(cache, reflector),
-      inject: [CACHE_MANAGER, Reflector],
+      useClass: CacheInterceptor,
     },
     {
       provide: APP_GUARD,
