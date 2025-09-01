@@ -10,6 +10,7 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { requestIdMiddleware } from './common/middleware/request-id.middleware';
+import { validationPipeOptions } from './common/validation-pipe-options';
 
 // src/main.ts
 import 'reflect-metadata';
@@ -69,16 +70,7 @@ export async function bootstrap(): Promise<void> {
     const loggingInterceptor = app.get(LoggingInterceptor, { strict: false });
     if (loggingInterceptor) {app.useGlobalInterceptors(loggingInterceptor);}
 
-    app.useGlobalPipes(
-      new ValidationPipe({
-        errorHttpStatusCode: 422,
-        forbidNonWhitelisted: true,
-        stopAtFirstError: true,
-        transform: true,
-        transformOptions: { enableImplicitConversion: true },
-        whitelist: true,
-      }),
-    );
+    app.useGlobalPipes(new ValidationPipe(validationPipeOptions));
 
     app.useGlobalFilters(new HttpExceptionFilter(winstonLogger));
 
