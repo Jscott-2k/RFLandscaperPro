@@ -9,6 +9,7 @@ export type User = {
     name: string;
     address?: string;
     phone?: string;
+    email?: string;
   };
   email: string;
   firstName?: string;
@@ -17,10 +18,25 @@ export type User = {
   phone?: string;
   role: string;
   username: string;
-}
+};
 
-export type CreateUser = Partial<Omit<User, 'id'>>;
-export type UpdateUser = Partial<CreateUser>;
+export type CreateUser = {
+  username: string;
+  email: string;
+  password: string;
+  role?: string;
+  company?: {
+    name: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+  };
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+};
+
+export type UpdateUser = Partial<Omit<CreateUser, 'role' | 'company'>>;
 
 @Injectable({ providedIn: 'root' })
 export class UsersApiService extends ApiService {

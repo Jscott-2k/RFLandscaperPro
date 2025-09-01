@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { ErrorService } from '../error.service';
 import { ToasterService } from '../toaster.service';
 import { UserService } from './user.service';
+import { type CreateUser } from './user.model';
 
 @Component({
   imports: [CommonModule, ReactiveFormsModule],
@@ -95,24 +96,24 @@ export class UserFormComponent {
 
   onSubmit(): void {
     if (this.form.valid) {
-      const { company, email, firstName, lastName, password, phone, role, username } =
-        this.form.getRawValue();
-      const payload: Parameters<UserService['createUser']>[0] & { password: string } = {
-        email,
-        password,
-        username,
-      };
-      if (firstName) {payload.firstName = firstName;}
-      if (lastName) {payload.lastName = lastName;}
-      if (phone) {payload.phone = phone;}
-      if (role) {payload.role = role;}
-      if (this.isOwner) {payload.company = company;}
-      this.userService.createUser(payload).subscribe({
-        error: () => this.errorService.show('Failed to create user'),
-        next: () => {
-          this.notifications.show('User created successfully');
-          void this.router.navigate(['/users']);
-        },
+    const { company, email, firstName, lastName, password, phone, role, username } =
+      this.form.getRawValue();
+    const payload: CreateUser = {
+      email,
+      password,
+      username,
+    };
+    if (firstName) payload.firstName = firstName;
+    if (lastName) payload.lastName = lastName;
+    if (phone) payload.phone = phone;
+    if (role) payload.role = role;
+    if (this.isOwner) payload.company = company;
+    this.userService.createUser(payload).subscribe({
+      error: () => this.errorService.show('Failed to create user'),
+      next: () => {
+        this.notifications.show('User created successfully');
+        void this.router.navigate(['/users']);
+      },
       });
     }
   }

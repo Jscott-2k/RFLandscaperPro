@@ -10,9 +10,20 @@ export type Equipment = {
   name: string;
   status: string;
   type: string;
-}
+  location?: string;
+  description?: string;
+  lastMaintenanceDate?: string;
+};
 
-export type CreateEquipment = Partial<Omit<Equipment, 'id'>>;
+export type CreateEquipment = {
+  name: string;
+  type: string;
+  status?: string;
+  location?: string;
+  description?: string;
+  lastMaintenanceDate?: string;
+};
+
 export type UpdateEquipment = Partial<CreateEquipment>;
 
 @Injectable({ providedIn: 'root' })

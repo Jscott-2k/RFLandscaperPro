@@ -75,9 +75,10 @@ export class CreateCustomerDto {
   @IsInt()
   userId?: number;
 
-  @ApiProperty({ type: [CreateAddressDto] })
+  @ApiPropertyOptional({ type: [CreateAddressDto] })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateAddressDto)
-  addresses: CreateAddressDto[];
+  @IsOptional()
+  addresses?: CreateAddressDto[];
 }

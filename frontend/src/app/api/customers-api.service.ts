@@ -5,13 +5,31 @@ import { environment } from '../../environments/environment';
 import { ApiService, type Paginated, type PaginationQuery } from '../api.service';
 
 export type Customer = {
-  active: boolean;
-  email: string;
   id: number;
   name: string;
-}
+  email: string;
+  phone?: string;
+  notes?: string;
+  active: boolean;
+};
 
-export type CreateCustomer = Partial<Omit<Customer, 'id'>>;
+export type CreateCustomer = {
+  name: string;
+  email: string;
+  phone?: string;
+  notes?: string;
+  active?: boolean;
+  addresses?: Array<{
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    unit?: string;
+    notes?: string;
+    primary?: boolean;
+  }>;
+};
+
 export type UpdateCustomer = Partial<CreateCustomer>;
 
 @Injectable({ providedIn: 'root' })
