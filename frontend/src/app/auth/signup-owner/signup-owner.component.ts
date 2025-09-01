@@ -19,7 +19,7 @@ const PASSWORD_REGEX =
       <small>Company details are required to create a company owner account.</small>
     </p>
     <form [formGroup]="form" (ngSubmit)="submit()">
-      <input type="text" formControlName="name" placeholder="Username" />
+      <input type="text" formControlName="username" placeholder="Username" />
       <input type="text" formControlName="firstName" placeholder="First Name" />
       <input type="text" formControlName="lastName" placeholder="Last Name" />
       <input type="tel" formControlName="phone" placeholder="Phone" />
@@ -43,9 +43,15 @@ export class SignupOwnerComponent {
   form = this.fb.nonNullable.group({
     companyName: ['', Validators.required.bind(Validators)],
     email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
-    name: ['', Validators.required.bind(Validators)],
-    firstName: [''],
-    lastName: [''],
+    username: [
+      '',
+      [
+        Validators.required.bind(Validators),
+        Validators.minLength(3).bind(Validators),
+      ],
+    ],
+    firstName: ['', Validators.required.bind(Validators)],
+    lastName: ['', Validators.required.bind(Validators)],
     phone: [''],
     password: [
       '',

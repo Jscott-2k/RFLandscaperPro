@@ -152,7 +152,7 @@ export class AuthService {
       lastName: dto.lastName,
       password: dto.password,
       role: UserRole.CompanyOwner,
-      username: dto.firstName,
+      username: dto.username,
       phone: dto.phone ? new PhoneNumber(dto.phone) : undefined,
     });
 
