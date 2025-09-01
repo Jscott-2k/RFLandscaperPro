@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOneOptions, FindOptionsWhere } from 'typeorm';
+import { type Repository, type FindOneOptions, type FindOptionsWhere } from 'typeorm';
+
 import { VerificationToken } from '../verification-token.entity';
 
-export interface VerificationTokenRepository {
+export type VerificationTokenRepository = {
+  create(data: Partial<VerificationToken>): VerificationToken;
+  delete(criteria: FindOptionsWhere<VerificationToken>): Promise<void>;
   findOne(
     options: FindOneOptions<VerificationToken>,
   ): Promise<VerificationToken | null>;
-  create(data: Partial<VerificationToken>): VerificationToken;
   save(entity: VerificationToken): Promise<VerificationToken>;
-  delete(criteria: FindOptionsWhere<VerificationToken>): Promise<void>;
 }
 
 export const VERIFICATION_TOKEN_REPOSITORY = Symbol(

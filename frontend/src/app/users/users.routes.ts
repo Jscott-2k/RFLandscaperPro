@@ -1,23 +1,24 @@
-import { Routes } from '@angular/router';
+import { type Routes } from '@angular/router';
+
 import { roleGuard } from '../auth/role.guard';
 
 export const usersRoutes: Routes = [
   {
-    path: '',
     canActivate: [roleGuard],
     data: { roles: ['company_admin'] },
     loadComponent: () => import('./user-list.component').then((m) => m.UserListComponent),
+    path: '',
   },
   {
-    path: 'new',
     canActivate: [roleGuard],
     data: { roles: ['company_admin'] },
     loadComponent: () => import('./user-form.component').then((m) => m.UserFormComponent),
+    path: 'new',
   },
   {
-    path: ':id',
     canActivate: [roleGuard],
     data: { roles: ['company_admin'] },
     loadComponent: () => import('./user-detail.component').then((m) => m.UserDetailComponent),
+    path: ':id',
   },
 ];

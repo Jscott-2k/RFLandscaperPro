@@ -1,13 +1,14 @@
-import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Equipment, EquipmentService } from './equipment.service';
+
+import { type Equipment, EquipmentService } from './equipment.service';
 
 @Component({
+  imports: [CommonModule, FormsModule, RouterModule],
   selector: 'app-equipment-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <h2>Equipment</h2>
     <input type="text" [(ngModel)]="filter" placeholder="Search equipment" />

@@ -1,28 +1,30 @@
-// seed.ts
-import 'dotenv/config';
-import dataSource from './data-source';
-import { DataSource } from 'typeorm';
-import { User, UserRole } from './users/user.entity';
-import { Customer } from './customers/entities/customer.entity';
-import { Company } from './companies/entities/company.entity';
+import * as bcrypt from 'bcrypt';
+import * as crypto from 'node:crypto';
+import { type DataSource } from 'typeorm';
+import winston from 'winston';
+
 import {
   CompanyUser,
   CompanyUserRole,
 } from './companies/entities/company-user.entity';
+import { Company } from './companies/entities/company.entity';
 import {
   Contract,
   ContractFrequency,
 } from './contracts/entities/contract.entity';
+import { Customer } from './customers/entities/customer.entity';
+import dataSource from './data-source';
 import { Job } from './jobs/entities/job.entity';
+import { User, UserRole } from './users/user.entity';
 import { Email } from './users/value-objects/email.vo';
 import { PhoneNumber } from './users/value-objects/phone-number.vo';
-import * as crypto from 'crypto';
-import * as bcrypt from 'bcrypt';
-import winston from 'winston';
+
+// seed.ts
+import 'dotenv/config';
 
 const logger = winston.createLogger({
-  level: 'info',
   format: winston.format.json(),
+  level: 'info',
   transports: [new winston.transports.Console()],
 });
 
@@ -69,14 +71,14 @@ async function main() {
 
       await userRepo.upsert(
         {
-          username: masterUsername,
           email: new Email(masterEmail),
-          password: masterHashed,
-          role: UserRole.Master,
           firstName: 'Master',
-          lastName: 'User',
-          phone: new PhoneNumber('555-000-0000'),
           isVerified: true,
+          lastName: 'User',
+          password: masterHashed,
+          phone: new PhoneNumber('555-000-0000'),
+          role: UserRole.Master,
+          username: masterUsername,
         },
         {
           conflictPaths: ['username'],
@@ -110,14 +112,14 @@ async function main() {
 
       await userRepo.upsert(
         {
-          username: companyAdminUsername,
           email: new Email(companyAdminEmail),
-          password: hashed,
-          role: UserRole.CompanyAdmin,
           firstName: 'Admin',
-          lastName: 'User',
-          phone: new PhoneNumber('555-000-0000'),
           isVerified: true,
+          lastName: 'User',
+          password: hashed,
+          phone: new PhoneNumber('555-000-0000'),
+          role: UserRole.CompanyAdmin,
+          username: companyAdminUsername,
         },
         {
           conflictPaths: ['username'],
@@ -155,8 +157,8 @@ async function main() {
       await companyUserRepo.upsert(
         {
           companyId: company.id,
-          userId: adminUser.id,
           role: CompanyUserRole.OWNER,
+          userId: adminUser.id,
         },
         {
           conflictPaths: ['companyId', 'userId'],
@@ -169,19 +171,19 @@ async function main() {
         process.env.SAMPLE_CUSTOMER_EMAIL ?? 'customer@example.com';
       await customerRepo.upsert(
         {
-          name: 'John Doe',
-          email: customerEmail,
-          phone: '555-1234',
-          companyId: company.id,
           addresses: [
             {
-              street: '123 Main St',
               city: 'Townsville',
-              state: 'CA',
-              zip: '12345',
               companyId: company.id,
+              state: 'CA',
+              street: '123 Main St',
+              zip: '12345',
             },
           ],
+          companyId: company.id,
+          email: customerEmail,
+          name: 'John Doe',
+          phone: '555-1234',
         },
         {
           conflictPaths: ['email', 'companyId'],
@@ -189,33 +191,33 @@ async function main() {
         },
       );
       const customer = await customerRepo.findOneOrFail({
-        where: { email: customerEmail, companyId: company.id },
+        where: { companyId: company.id, email: customerEmail },
       });
       logger.info('Sample customer ensured.');
 
       // --- Sample contract ---
       const contractStart = new Date('2024-01-01');
       let contract = await contractRepo.findOne({
+        relations: ['customer'],
         where: {
           companyId: company.id,
           customer: { id: customer.id },
           startDate: contractStart,
         },
-        relations: ['customer'],
       });
       if (!contract) {
         contract = contractRepo.create({
+          active: true,
           companyId: company.id,
           customer,
-          startDate: contractStart,
           frequency: ContractFrequency.MONTHLY,
           jobTemplate: {
-            title: 'Monthly Lawn Care',
             description: 'Recurring maintenance service',
             estimatedHours: 2,
             notes: 'Includes mowing and trimming',
+            title: 'Monthly Lawn Care',
           },
-          active: true,
+          startDate: contractStart,
         });
         contract = await contractRepo.save(contract);
       }
@@ -224,18 +226,18 @@ async function main() {
       // --- Sample job ---
       const existingJob = await jobRepo.findOne({
         where: {
-          title: 'Initial Lawn Care Visit',
           customer: { id: customer.id },
+          title: 'Initial Lawn Care Visit',
         },
       });
       if (!existingJob) {
         await jobRepo.save({
-          title: 'Initial Lawn Care Visit',
+          companyId: company.id,
+          contract,
+          customer,
           description: 'Kick-off job for the sample contract',
           scheduledDate: new Date(),
-          companyId: company.id,
-          customer,
-          contract,
+          title: 'Initial Lawn Care Visit',
         });
       }
       logger.info('Sample job ensured.');

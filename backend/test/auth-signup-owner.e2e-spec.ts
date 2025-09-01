@@ -1,11 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import {
-  INestApplication,
+  type INestApplication,
   ConflictException,
   ValidationPipe,
 } from '@nestjs/common';
+import { Test, type TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
-import { App } from 'supertest/types';
+import { type App } from 'supertest/types';
+
 import { AuthController } from '../src/auth/auth.controller';
 import { AuthService } from '../src/auth/auth.service';
 
@@ -24,11 +25,11 @@ describe('Auth signup-owner endpoint (e2e)', () => {
     app.setGlobalPrefix('api');
     app.useGlobalPipes(
       new ValidationPipe({
-        whitelist: true,
+        errorHttpStatusCode: 422,
         forbidNonWhitelisted: true,
         transform: true,
         transformOptions: { enableImplicitConversion: true },
-        errorHttpStatusCode: 422,
+        whitelist: true,
       }),
     );
     await app.init();
@@ -43,10 +44,10 @@ describe('Auth signup-owner endpoint (e2e)', () => {
     return request(app.getHttpServer())
       .post('/api/auth/signup-owner')
       .send({
-        name: 'Owner',
-        email: 'owner@example.com',
-        password: 'Password1!',
         companyName: 'Acme Co',
+        email: 'owner@example.com',
+        name: 'Owner',
+        password: 'Password1!',
       })
       .expect(201)
       .expect((res: request.Response) => {
@@ -63,10 +64,10 @@ describe('Auth signup-owner endpoint (e2e)', () => {
     return request(app.getHttpServer())
       .post('/api/auth/signup-owner')
       .send({
-        name: 'Owner',
-        email: 'owner@example.com',
-        password: 'Password1!',
         companyName: 'Acme Co',
+        email: 'owner@example.com',
+        name: 'Owner',
+        password: 'Password1!',
       })
       .expect(409);
   });

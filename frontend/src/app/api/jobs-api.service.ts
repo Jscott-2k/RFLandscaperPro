@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiService, Paginated, PaginationQuery } from '../api.service';
-import { environment } from '../../environments/environment';
-import { UpcomingJobSummary } from '../models/dashboard.models';
+import { type Observable } from 'rxjs';
 
-export interface Job {
+import { environment } from '../../environments/environment';
+import { ApiService, type Paginated, type PaginationQuery } from '../api.service';
+import { type UpcomingJobSummary } from '../models/dashboard.models';
+
+export type Job = {
+  completed: boolean;
   id: number;
   title: string;
-  completed: boolean;
 }
 
 export type CreateJob = Partial<Omit<Job, 'id'>>;

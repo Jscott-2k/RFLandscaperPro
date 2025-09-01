@@ -7,10 +7,11 @@ import {
   Index,
   JoinColumn,
 } from 'typeorm';
-import { Job } from './job.entity';
-import { User } from '../../users/user.entity';
-import { Equipment } from '../../equipment/entities/equipment.entity';
+
 import { Company } from '../../companies/entities/company.entity';
+import { Equipment } from '../../equipment/entities/equipment.entity';
+import { User } from '../../users/user.entity';
+import { Job } from './job.entity';
 
 @Entity()
 @Index(['user', 'job']) // Add index for user-job queries
@@ -36,13 +37,13 @@ export class Assignment {
   @JoinColumn({ name: 'companyId' })
   company: Company;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ nullable: true, type: 'timestamp' })
   startTime?: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ nullable: true, type: 'timestamp' })
   endTime?: Date;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ nullable: true, type: 'text' })
   notes?: string;
 
   @CreateDateColumn()

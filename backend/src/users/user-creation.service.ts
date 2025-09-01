@@ -1,10 +1,11 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, QueryFailedError } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
+import { type Repository, QueryFailedError } from 'typeorm';
+
+import { type CompanyOnboardingService } from './company-onboarding.service';
+import { type CustomerRegistrationService } from './customer-registration.service';
+import { type CreateUserDto } from './dto/create-user.dto';
 import { User, UserRole } from './user.entity';
-import { CustomerRegistrationService } from './customer-registration.service';
-import { CompanyOnboardingService } from './company-onboarding.service';
 
 const UNIQUE_VIOLATION = '23505';
 

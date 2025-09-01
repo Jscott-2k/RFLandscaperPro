@@ -9,10 +9,11 @@ import {
   Index,
   JoinColumn,
 } from 'typeorm';
-import { Customer } from '../../customers/entities/customer.entity';
-import { Assignment } from './assignment.entity';
+
 import { Company } from '../../companies/entities/company.entity';
 import { Contract } from '../../contracts/entities/contract.entity';
+import { Customer } from '../../customers/entities/customer.entity';
+import { Assignment } from './assignment.entity';
 
 @Entity()
 @Index(['scheduledDate', 'completed']) // Add index for common queries
@@ -24,22 +25,22 @@ export class Job {
   @Column()
   title: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ nullable: true, type: 'text' })
   description?: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ nullable: true, type: 'date' })
   scheduledDate?: Date;
 
   @Column({ default: false })
   completed: boolean;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ nullable: true, precision: 10, scale: 2, type: 'decimal' })
   estimatedHours?: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  @Column({ nullable: true, precision: 10, scale: 2, type: 'decimal' })
   actualHours?: number;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ nullable: true, type: 'text' })
   notes?: string;
 
   @Column()
@@ -52,8 +53,8 @@ export class Job {
   company: Company;
 
   @ManyToOne(() => Customer, (customer) => customer.jobs, {
-    onDelete: 'CASCADE',
     nullable: false,
+    onDelete: 'CASCADE',
   })
   customer: Customer;
 

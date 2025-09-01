@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOneOptions } from 'typeorm';
+import { type Repository, type FindOneOptions } from 'typeorm';
+
 import { CompanyUser } from '../../companies/entities/company-user.entity';
 
-export interface CompanyMembershipRepository {
+export type CompanyMembershipRepository = {
   findOne(options: FindOneOptions<CompanyUser>): Promise<CompanyUser | null>;
 }
 

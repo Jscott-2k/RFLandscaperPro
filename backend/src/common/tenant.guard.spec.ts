@@ -1,7 +1,8 @@
-import { ExecutionContext } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { TenantGuard } from './tenant.guard';
+import { type ExecutionContext } from '@nestjs/common';
+import { type Reflector } from '@nestjs/core';
+
 import { UserRole } from '../users/user.entity';
+import { TenantGuard } from './tenant.guard';
 
 describe('TenantGuard', () => {
   it('allows access to metrics endpoint without company ID', () => {
@@ -9,11 +10,11 @@ describe('TenantGuard', () => {
       getAllAndOverride: jest.fn(),
     } as unknown as Reflector);
     const context = {
-      switchToHttp: () => ({
-        getRequest: () => ({ path: '/api/metrics', headers: {} }),
-      }),
-      getHandler: () => undefined,
       getClass: () => undefined,
+      getHandler: () => undefined,
+      switchToHttp: () => ({
+        getRequest: () => ({ headers: {}, path: '/api/metrics' }),
+      }),
     } as unknown as ExecutionContext;
 
     expect(guard.canActivate(context)).toBe(true);
@@ -24,11 +25,11 @@ describe('TenantGuard', () => {
       getAllAndOverride: jest.fn(),
     } as unknown as Reflector);
     const context = {
-      switchToHttp: () => ({
-        getRequest: () => ({ user: { role: UserRole.Master }, headers: {} }),
-      }),
-      getHandler: () => undefined,
       getClass: () => undefined,
+      getHandler: () => undefined,
+      switchToHttp: () => ({
+        getRequest: () => ({ headers: {}, user: { role: UserRole.Master } }),
+      }),
     } as unknown as ExecutionContext;
 
     expect(guard.canActivate(context)).toBe(true);

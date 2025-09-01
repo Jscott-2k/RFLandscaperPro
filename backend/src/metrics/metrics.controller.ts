@@ -1,5 +1,6 @@
 import { Controller, Get, Header } from '@nestjs/common';
 import { register } from 'prom-client';
+
 import { Public } from '../common/decorators/public.decorator';
 
 @Controller()

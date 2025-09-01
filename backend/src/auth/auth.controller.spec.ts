@@ -1,11 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
+
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
-import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { LoginDto } from './dto/login.dto';
-import { SignupOwnerDto } from './dto/signup-owner.dto';
+import { type LoginDto } from './dto/login.dto';
+import { type RegisterDto } from './dto/register.dto';
+import { type RequestPasswordResetDto } from './dto/request-password-reset.dto';
+import { type ResetPasswordDto } from './dto/reset-password.dto';
+import { type SignupOwnerDto } from './dto/signup-owner.dto';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -23,15 +24,15 @@ describe('AuthController', () => {
 
   beforeEach(async () => {
     authService = {
-      validateUser: jest.fn(),
       login: jest.fn(),
+      logout: jest.fn(),
+      refresh: jest.fn(),
       register: jest.fn(),
-      verifyEmail: jest.fn(),
       requestPasswordReset: jest.fn(),
       resetPassword: jest.fn(),
-      refresh: jest.fn(),
-      logout: jest.fn(),
       signupOwner: jest.fn(),
+      validateUser: jest.fn(),
+      verifyEmail: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -61,10 +62,10 @@ describe('AuthController', () => {
 
   it('signs up a new owner', async () => {
     const dto: SignupOwnerDto = {
-      name: 'Owner',
-      email: 'owner@example.com',
-      password: 'Password1!',
       companyName: 'Acme Co',
+      email: 'owner@example.com',
+      name: 'Owner',
+      password: 'Password1!',
     };
     const response = { access_token: 'jwt' };
     authService.signupOwner.mockResolvedValue(response);
@@ -77,9 +78,9 @@ describe('AuthController', () => {
 
   it('registers a new user and sends verification email', async () => {
     const dto: RegisterDto = {
-      username: 'user',
       email: 'user@example.com',
       password: 'pass',
+      username: 'user',
     };
     const response = { message: 'Verification email sent' };
     authService.register.mockResolvedValue(response);
@@ -104,7 +105,7 @@ describe('AuthController', () => {
   });
 
   it('resets password', async () => {
-    const dto: ResetPasswordDto = { token: 'abc', password: 'new' };
+    const dto: ResetPasswordDto = { password: 'new', token: 'abc' };
     await controller.resetPassword(dto);
     expect(authService.resetPassword).toHaveBeenCalledWith('abc', 'new');
   });

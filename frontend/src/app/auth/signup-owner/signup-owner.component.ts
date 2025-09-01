@@ -1,15 +1,16 @@
-import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AuthService } from '../auth.service';
+
 import { ErrorService } from '../../error.service';
+import { AuthService } from '../auth.service';
 
 @Component({
+  imports: [CommonModule, ReactiveFormsModule],
   selector: 'app-signup-owner',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
   template: `
     <p>
       <small>Company details are required to create a company owner account.</small>
@@ -30,10 +31,10 @@ export class SignupOwnerComponent {
   private errorService = inject(ErrorService);
 
   form = this.fb.nonNullable.group({
-    name: ['', Validators.required.bind(Validators)],
-    email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
-    password: ['', Validators.required.bind(Validators)],
     companyName: ['', Validators.required.bind(Validators)],
+    email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
+    name: ['', Validators.required.bind(Validators)],
+    password: ['', Validators.required.bind(Validators)],
   });
 
   loading = false;
@@ -45,12 +46,12 @@ export class SignupOwnerComponent {
         .signupOwner(this.form.getRawValue())
         .pipe(finalize(() => (this.loading = false)))
         .subscribe({
-          next: () => void this.router.navigate(['/dashboard']),
           error: (err: unknown) => {
             const status = (err as { status?: number }).status;
             const message = status === 409 ? 'Email already exists' : (err as Error).message;
             this.errorService.show(message);
           },
+          next: () => void this.router.navigate(['/dashboard']),
         });
     }
   }

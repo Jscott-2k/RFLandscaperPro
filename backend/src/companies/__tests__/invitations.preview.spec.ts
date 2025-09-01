@@ -1,11 +1,12 @@
-import * as crypto from 'crypto';
-import { Repository } from 'typeorm';
-import { InvitationsService } from '../invitations.service';
-import { Invitation, InvitationRole } from '../entities/invitation.entity';
+import * as crypto from 'node:crypto';
+import { type Repository } from 'typeorm';
+
+import { type EmailService } from '../../common/email';
+import { type User } from '../../users/user.entity';
+import { type CompanyUser } from '../entities/company-user.entity';
 import { Company } from '../entities/company.entity';
-import { CompanyUser } from '../entities/company-user.entity';
-import { User } from '../../users/user.entity';
-import { EmailService } from '../../common/email';
+import { Invitation, InvitationRole } from '../entities/invitation.entity';
+import { InvitationsService } from '../invitations.service';
 
 describe('InvitationsService previewInvitation', () => {
   let service: InvitationsService;
@@ -29,8 +30,8 @@ describe('InvitationsService previewInvitation', () => {
     const invitation = Object.assign(new Invitation(), {
       company: Object.assign(new Company(), { name: 'ACME' }),
       email: 'worker@example.com',
-      role: InvitationRole.WORKER,
       expiresAt: new Date(Date.now() + 1000),
+      role: InvitationRole.WORKER,
     });
     invitationsRepo.findOne.mockResolvedValue(invitation);
 
@@ -44,8 +45,8 @@ describe('InvitationsService previewInvitation', () => {
     });
     const hash = crypto.createHash('sha256').update('tok').digest('hex');
     expect(invitationsRepo.findOne).toHaveBeenCalledWith({
-      where: { tokenHash: hash },
       relations: ['company'],
+      where: { tokenHash: hash },
     });
   });
 
@@ -53,8 +54,8 @@ describe('InvitationsService previewInvitation', () => {
     const invitation = Object.assign(new Invitation(), {
       company: Object.assign(new Company(), { name: 'ACME' }),
       email: 'a@b.com',
-      role: InvitationRole.ADMIN,
       expiresAt: new Date(Date.now() - 1000),
+      role: InvitationRole.ADMIN,
     });
     invitationsRepo.findOne.mockResolvedValue(invitation);
 
@@ -66,9 +67,9 @@ describe('InvitationsService previewInvitation', () => {
     const invitation = Object.assign(new Invitation(), {
       company: Object.assign(new Company(), { name: 'ACME' }),
       email: 'a@b.com',
-      role: InvitationRole.ADMIN,
       expiresAt: new Date(Date.now() + 1000),
       revokedAt: new Date(),
+      role: InvitationRole.ADMIN,
     });
     invitationsRepo.findOne.mockResolvedValue(invitation);
 
@@ -78,11 +79,11 @@ describe('InvitationsService previewInvitation', () => {
 
   it('returns accepted status when invitation accepted', async () => {
     const invitation = Object.assign(new Invitation(), {
+      acceptedAt: new Date(),
       company: Object.assign(new Company(), { name: 'ACME' }),
       email: 'a@b.com',
-      role: InvitationRole.ADMIN,
       expiresAt: new Date(Date.now() + 1000),
-      acceptedAt: new Date(),
+      role: InvitationRole.ADMIN,
     });
     invitationsRepo.findOne.mockResolvedValue(invitation);
 

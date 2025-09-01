@@ -1,6 +1,7 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { type ConfigService } from '@nestjs/config';
 import { type JwtService } from '@nestjs/jwt';
+import { describe, beforeEach, it } from 'node:test';
 import { type Repository } from 'typeorm';
 
 import { type EmailService } from '../common/email';
@@ -18,7 +19,6 @@ import { type JwtUserPayload } from './interfaces/jwt-user-payload.interface';
 import { type CompanyMembershipRepository } from './repositories/company-membership.repository';
 import { type RefreshTokenRepository } from './repositories/refresh-token.repository';
 import { type VerificationTokenRepository } from './repositories/verification-token.repository';
-import { describe, beforeEach, it } from 'node:test';
 
 describe('AuthService.switchCompany', () => {
   let service: AuthService;

@@ -1,4 +1,4 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
 
 export const CompanyId = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext): number | undefined => {

@@ -1,8 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
+
+import { type EquipmentResponseDto } from './dto/equipment-response.dto';
+import { EquipmentStatus, EquipmentType } from './entities/equipment.entity';
 import { EquipmentController } from './equipment.controller';
 import { EquipmentService } from './equipment.service';
-import { EquipmentResponseDto } from './dto/equipment-response.dto';
-import { EquipmentStatus, EquipmentType } from './entities/equipment.entity';
 
 describe('EquipmentController', () => {
   let controller: EquipmentController;
@@ -15,8 +16,8 @@ describe('EquipmentController', () => {
         {
           provide: EquipmentService,
           useValue: {
-            updateStatus: jest.fn(),
             findAll: jest.fn(),
+            updateStatus: jest.fn(),
           },
         },
       ],
@@ -47,7 +48,7 @@ describe('EquipmentController', () => {
 
   describe('findAll', () => {
     it('should call equipmentService.findAll with companyId and search term', async () => {
-      const pagination = { page: 1, limit: 10 };
+      const pagination = { limit: 10, page: 1 };
       const companyId = 1;
       const status = EquipmentStatus.AVAILABLE;
       const type = EquipmentType.MOWER;

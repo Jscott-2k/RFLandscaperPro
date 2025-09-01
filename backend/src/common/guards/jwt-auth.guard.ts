@@ -1,14 +1,15 @@
 import {
-  ExecutionContext,
+  type ExecutionContext,
   Injectable,
   ForbiddenException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { type Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { Reflector } from '@nestjs/core';
-import { Request } from 'express';
+import { type Request } from 'express';
+
+import { type RequestUser } from '../../auth/interfaces/request-user.interface';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { RequestUser } from '../../auth/interfaces/request-user.interface';
 import { userStorage } from '../user/user-context';
 
 @Injectable()

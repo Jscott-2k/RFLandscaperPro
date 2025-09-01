@@ -1,5 +1,6 @@
-import { Test } from '@nestjs/testing';
 import { Module, Injectable } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+
 import { EmailModule, EmailService } from './';
 
 @Injectable()

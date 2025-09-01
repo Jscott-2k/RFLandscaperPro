@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
 import { EquipmentType, EquipmentStatus } from '../entities/equipment.entity';
 
 export class EquipmentResponseDto {

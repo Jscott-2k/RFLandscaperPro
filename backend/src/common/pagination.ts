@@ -1,7 +1,7 @@
-import { Repository, SelectQueryBuilder, ObjectLiteral } from 'typeorm';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, Min, Max } from 'class-validator';
+import { type Repository, type SelectQueryBuilder, type ObjectLiteral } from 'typeorm';
 
 export class PaginationParams {
   @ApiPropertyOptional({ default: 10, maximum: 100 })
@@ -20,7 +20,7 @@ export class PaginationParams {
   cursor?: number;
 }
 
-export interface Paginated<T> {
+export type Paginated<T> = {
   items: T[];
   nextCursor: number | null;
 }
@@ -39,7 +39,7 @@ export async function paginate<T extends ObjectLiteral & { id: number }>(
   alias: string,
   customizeQuery?: QueryBuilderCustomizer<T>,
 ): Promise<Paginated<T>> {
-  const { limit = 10, cursor } = pagination;
+  const { cursor, limit = 10 } = pagination;
   const cappedLimit = Math.min(limit, 100);
 
   let qb = repository.createQueryBuilder(alias);

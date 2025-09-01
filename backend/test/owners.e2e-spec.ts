@@ -1,16 +1,17 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { type INestApplication } from '@nestjs/common';
+import { Test, type TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { type Request, type Response, type NextFunction } from 'express';
 import * as request from 'supertest';
-import { App } from 'supertest/types';
-import { Request, Response, NextFunction } from 'express';
+import { type App } from 'supertest/types';
+
+import { EmailService } from '../src/common/email';
+import { Company } from '../src/companies/entities/company.entity';
+import { Customer } from '../src/customers/entities/customer.entity';
+import { UserCreationService } from '../src/users/user-creation.service';
+import { User, UserRole } from '../src/users/user.entity';
 import { UsersController } from '../src/users/users.controller';
 import { UsersService } from '../src/users/users.service';
-import { User, UserRole } from '../src/users/user.entity';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Customer } from '../src/customers/entities/customer.entity';
-import { Company } from '../src/companies/entities/company.entity';
-import { EmailService } from '../src/common/email';
-import { UserCreationService } from '../src/users/user-creation.service';
 import { Email } from '../src/users/value-objects/email.vo';
 
 describe('Owner user endpoints (e2e)', () => {
@@ -20,34 +21,34 @@ describe('Owner user endpoints (e2e)', () => {
   beforeEach(async () => {
     users = [
       Object.assign(new User(), {
-        id: 1,
-        username: 'owner1',
+        companyId: 1,
         email: new Email('owner1@example.com'),
+        id: 1,
         role: UserRole.CompanyOwner,
-        companyId: 1,
+        username: 'owner1',
       }),
       Object.assign(new User(), {
-        id: 2,
-        username: 'worker1',
+        companyId: 1,
         email: new Email('worker1@example.com'),
-        role: UserRole.Worker,
-        companyId: 1,
         firstName: 'W1',
-      }),
-      Object.assign(new User(), {
-        id: 3,
-        username: 'owner2',
-        email: new Email('owner2@example.com'),
-        role: UserRole.CompanyOwner,
-        companyId: 2,
-      }),
-      Object.assign(new User(), {
-        id: 4,
-        username: 'worker2',
-        email: new Email('worker2@example.com'),
+        id: 2,
         role: UserRole.Worker,
+        username: 'worker1',
+      }),
+      Object.assign(new User(), {
         companyId: 2,
+        email: new Email('owner2@example.com'),
+        id: 3,
+        role: UserRole.CompanyOwner,
+        username: 'owner2',
+      }),
+      Object.assign(new User(), {
+        companyId: 2,
+        email: new Email('worker2@example.com'),
         firstName: 'W2',
+        id: 4,
+        role: UserRole.Worker,
+        username: 'worker2',
       }),
     ];
 
@@ -104,7 +105,7 @@ describe('Owner user endpoints (e2e)', () => {
         _res: Response,
         next: NextFunction,
       ) => {
-        req.user = { userId: 1, role: UserRole.CompanyOwner, companyId: 1 };
+        req.user = { companyId: 1, role: UserRole.CompanyOwner, userId: 1 };
         next();
       },
     );

@@ -1,22 +1,23 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
-import { App } from 'supertest/types';
+import { type INestApplication, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { Test, type TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import * as request from 'supertest';
+import { type App } from 'supertest/types';
+
 import { AuthController } from '../src/auth/auth.controller';
 import { AuthService } from '../src/auth/auth.service';
-import { UsersService } from '../src/users/users.service';
-import { User, UserRole } from '../src/users/user.entity';
-import { Email } from '../src/users/value-objects/email.vo';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { UserCreationService } from '../src/users/user-creation.service';
+import { type RefreshToken } from '../src/auth/refresh-token.entity';
+import { COMPANY_MEMBERSHIP_REPOSITORY } from '../src/auth/repositories/company-membership.repository';
 import { REFRESH_TOKEN_REPOSITORY } from '../src/auth/repositories/refresh-token.repository';
 import { VERIFICATION_TOKEN_REPOSITORY } from '../src/auth/repositories/verification-token.repository';
-import { COMPANY_MEMBERSHIP_REPOSITORY } from '../src/auth/repositories/company-membership.repository';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { EmailService } from '../src/common/email';
-import { RefreshToken } from '../src/auth/refresh-token.entity';
+import { UserCreationService } from '../src/users/user-creation.service';
+import { User, UserRole } from '../src/users/user.entity';
+import { UsersService } from '../src/users/users.service';
+import { Email } from '../src/users/value-objects/email.vo';
 
 describe('Auth login endpoint (e2e)', () => {
   let app: INestApplication<App>;
@@ -27,12 +28,12 @@ describe('Auth login endpoint (e2e)', () => {
     const password = 'Password1!';
     const hashed = await bcrypt.hash(password, 12);
     const user = Object.assign(new User(), {
-      id: 1,
-      username: 'verified',
       email: new Email('verified@example.com'),
+      id: 1,
+      isVerified: true,
       password: hashed,
       role: UserRole.Customer,
-      isVerified: true,
+      username: 'verified',
     });
 
     findByEmail = jest.fn().mockResolvedValue(user);
@@ -47,7 +48,7 @@ describe('Auth login endpoint (e2e)', () => {
         AuthService,
         { provide: UsersService, useValue: { findByEmail } },
         { provide: UserCreationService, useValue: {} },
-        { provide: JwtService, useValue: { signAsync, decode } },
+        { provide: JwtService, useValue: { decode, signAsync } },
         { provide: ConfigService, useValue: { get: () => '1h' } },
         {
           provide: REFRESH_TOKEN_REPOSITORY,
@@ -72,11 +73,11 @@ describe('Auth login endpoint (e2e)', () => {
     app.setGlobalPrefix('api');
     app.useGlobalPipes(
       new ValidationPipe({
-        whitelist: true,
+        errorHttpStatusCode: 400,
         forbidNonWhitelisted: true,
         transform: true,
         transformOptions: { enableImplicitConversion: true },
-        errorHttpStatusCode: 400,
+        whitelist: true,
       }),
     );
     await app.init();

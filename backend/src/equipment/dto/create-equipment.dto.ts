@@ -1,5 +1,6 @@
-import { IsString, IsOptional, IsEnum, IsDateString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsOptional, IsEnum, IsDateString } from 'class-validator';
+
 import { EquipmentType, EquipmentStatus } from '../entities/equipment.entity';
 
 export class CreateEquipmentDto {
@@ -12,8 +13,8 @@ export class CreateEquipmentDto {
   type: EquipmentType;
 
   @ApiPropertyOptional({
-    enum: EquipmentStatus,
     default: EquipmentStatus.AVAILABLE,
+    enum: EquipmentStatus,
   })
   @IsOptional()
   @IsEnum(EquipmentStatus)

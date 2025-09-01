@@ -1,12 +1,13 @@
-import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+
 import { CustomerService } from './customer.service';
 
 @Component({
+  imports: [CommonModule, RouterLink],
   selector: 'app-customer-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
   template: `
     <h2>Customers</h2>
     <table *ngIf="customers$ | async as customers">

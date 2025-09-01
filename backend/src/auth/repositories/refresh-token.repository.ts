@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOneOptions, FindOptionsWhere } from 'typeorm';
+import { type Repository, type FindOneOptions, type FindOptionsWhere } from 'typeorm';
+
 import { RefreshToken } from '../refresh-token.entity';
 
-export interface RefreshTokenRepository {
-  findOne(options: FindOneOptions<RefreshToken>): Promise<RefreshToken | null>;
+export type RefreshTokenRepository = {
   create(data: Partial<RefreshToken>): RefreshToken;
+  findOne(options: FindOneOptions<RefreshToken>): Promise<RefreshToken | null>;
   save(token: RefreshToken): Promise<RefreshToken>;
   update(
     criteria: FindOptionsWhere<RefreshToken>,

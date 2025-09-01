@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { type Repository } from 'typeorm';
+
+import { type Paginated, type PaginationParams, paginate } from '../../common/pagination';
 import { Job } from '../entities/job.entity';
-import { Paginated, PaginationParams, paginate } from '../../common/pagination';
 
 export const JOB_REPOSITORY = Symbol('JOB_REPOSITORY');
 
-export interface IJobRepository {
+export type IJobRepository = {
   create(data: Partial<Job>): Job;
-  save(job: Job): Promise<Job>;
   findAll(
     pagination: PaginationParams,
     companyId: number,
@@ -27,6 +27,7 @@ export interface IJobRepository {
     relations?: string[],
   ): Promise<Job | null>;
   remove(job: Job): Promise<void>;
+  save(job: Job): Promise<Job>;
 }
 
 @Injectable()
@@ -56,7 +57,7 @@ export class JobRepository implements IJobRepository {
       equipmentId?: number;
     },
   ): Promise<Paginated<Job>> {
-    const { completed, customerId, startDate, endDate, workerId, equipmentId } =
+    const { completed, customerId, endDate, equipmentId, startDate, workerId } =
       filters;
 
     return paginate(this.repo, pagination, 'job', (qb) => {
@@ -105,8 +106,8 @@ export class JobRepository implements IJobRepository {
     relations: string[] = [],
   ): Promise<Job | null> {
     return this.repo.findOne({
-      where: { id, companyId },
       relations,
+      where: { companyId, id },
     });
   }
 

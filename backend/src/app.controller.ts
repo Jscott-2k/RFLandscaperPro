@@ -1,6 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+
+import { type AppService } from './app.service';
 
 @ApiTags('app')
 @Controller()
@@ -9,7 +10,7 @@ export class AppController {
 
   @Get()
   @ApiOperation({ summary: 'Get API status' })
-  @ApiResponse({ status: 200, description: 'Returns a greeting message' })
+  @ApiResponse({ description: 'Returns a greeting message', status: 200 })
   getHello(): string {
     return this.appService.getHello();
   }

@@ -1,3 +1,4 @@
+import { CompanyUserRole } from '@rflp/shared';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,9 +10,10 @@ import {
   Unique,
   Index,
 } from 'typeorm';
-import { Company } from './company.entity';
+
 import { User } from '../../users/user.entity';
-import { CompanyUserRole } from '@rflp/shared';
+import { Company } from './company.entity';
+
 export { CompanyUserRole } from '@rflp/shared';
 
 export enum CompanyUserStatus {
@@ -45,13 +47,13 @@ export class CompanyUser {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ type: 'enum', enum: CompanyUserRole })
+  @Column({ enum: CompanyUserRole, type: 'enum' })
   role: CompanyUserRole;
 
   @Column({
-    type: 'enum',
-    enum: CompanyUserStatus,
     default: CompanyUserStatus.ACTIVE,
+    enum: CompanyUserStatus,
+    type: 'enum',
   })
   status: CompanyUserStatus;
 

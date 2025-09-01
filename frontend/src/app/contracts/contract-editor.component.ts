@@ -1,13 +1,14 @@
-import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, type OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
-import { ContractsService, Contract } from './contracts.service';
+
+import { ContractsService, type Contract } from './contracts.service';
 
 @Component({
+  imports: [CommonModule, FormsModule, RouterModule],
   selector: 'app-contract-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './contract-editor.component.html',
 })
 export class ContractEditorComponent implements OnInit {
@@ -17,9 +18,9 @@ export class ContractEditorComponent implements OnInit {
 
   contract: Contract = {
     customerId: 1,
-    startDate: '',
     frequency: 'WEEKLY',
     jobTemplate: { title: '' },
+    startDate: '',
   };
 
   ngOnInit(): void {

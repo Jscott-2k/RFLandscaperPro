@@ -9,19 +9,20 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CompaniesService } from './companies.service';
-import { CompanyResponseDto } from './dto/company-response.dto';
-import { CreateCompanyDto } from './dto/create-company.dto';
-import { UpdateCompanyDto } from './dto/update-company.dto';
-import { Roles } from '../common/decorators/roles.decorator';
+
 import { AuthUser } from '../common/decorators/auth-user.decorator';
-import { User, UserRole } from '../users/user.entity';
-import { UsersService } from '../users/users.service';
+import { Roles } from '../common/decorators/roles.decorator';
+import { type UserResponseDto } from '../users/dto/user-response.dto';
+import { type User, UserRole } from '../users/user.entity';
 import { toUserResponseDto } from '../users/users.mapper';
-import { UserResponseDto } from '../users/dto/user-response.dto';
-import { InvitationsService } from './invitations.service';
-import { CreateInvitationDto } from './dto/create-invitation.dto';
-import { InvitationRole } from './entities/invitation.entity';
+import { type UsersService } from '../users/users.service';
+import { type CompaniesService } from './companies.service';
+import { type CompanyResponseDto } from './dto/company-response.dto';
+import { type CreateCompanyDto } from './dto/create-company.dto';
+import { type CreateInvitationDto } from './dto/create-invitation.dto';
+import { type UpdateCompanyDto } from './dto/update-company.dto';
+import { type InvitationRole } from './entities/invitation.entity';
+import { type InvitationsService } from './invitations.service';
 
 @ApiTags('companies')
 @ApiBearerAuth()
@@ -51,7 +52,7 @@ export class CompaniesController {
   ): Promise<UserResponseDto[]> {
     const owner = await this.usersService.findById(user!.id);
     if (!owner?.companyId)
-      throw new NotFoundException('Owner company not found');
+      {throw new NotFoundException('Owner company not found');}
     const workers = await this.companiesService.findWorkers(owner.companyId);
     return workers.map(toUserResponseDto);
   }
@@ -73,7 +74,7 @@ export class CompaniesController {
     @AuthUser() user: User | undefined,
   ): Promise<CompanyResponseDto> {
     if (user!.companyId !== id)
-      throw new NotFoundException('Company not found');
+      {throw new NotFoundException('Company not found');}
     return this.companiesService.update(id, dto);
   }
 
@@ -90,17 +91,17 @@ export class CompaniesController {
     expiresAt: Date;
   }> {
     if (user!.companyId !== companyId)
-      throw new NotFoundException('Company not found');
+      {throw new NotFoundException('Company not found');}
     const invitation = await this.invitationsService.createInvitation(
       companyId,
       dto,
       user!,
     );
     return {
-      id: invitation.id,
       email: invitation.email,
-      role: invitation.role,
       expiresAt: invitation.expiresAt,
+      id: invitation.id,
+      role: invitation.role,
     };
   }
 
@@ -112,7 +113,7 @@ export class CompaniesController {
     @AuthUser() user: User | undefined,
   ): Promise<{ success: true }> {
     if (user!.companyId !== companyId)
-      throw new NotFoundException('Company not found');
+      {throw new NotFoundException('Company not found');}
     await this.invitationsService.revokeInvitation(companyId, inviteId);
     return { success: true };
   }
@@ -130,16 +131,16 @@ export class CompaniesController {
     expiresAt: Date;
   }> {
     if (user!.companyId !== companyId)
-      throw new NotFoundException('Company not found');
+      {throw new NotFoundException('Company not found');}
     const invitation = await this.invitationsService.resendInvitation(
       companyId,
       inviteId,
     );
     return {
-      id: invitation.id,
       email: invitation.email,
-      role: invitation.role,
       expiresAt: invitation.expiresAt,
+      id: invitation.id,
+      role: invitation.role,
     };
   }
 }

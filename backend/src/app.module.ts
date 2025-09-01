@@ -1,39 +1,39 @@
-import { Module, Logger } from '@nestjs/common';
 import {
   CacheModule,
   CacheInterceptor,
-  CACHE_MANAGER,
 } from '@nestjs/cache-manager';
+import { Module, Logger } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   PrometheusModule,
   makeHistogramProvider,
 } from '@willsoto/nestjs-prometheus';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import * as fs from 'fs';
-import * as path from 'path';
 import * as Joi from 'joi';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { DataSource } from 'typeorm';
-import { buildTypeOrmOptions } from './database/typeorm.config';
-import { CustomersModule } from './customers/customers.module';
-import { JobsModule } from './jobs/jobs.module';
-import { EquipmentModule } from './equipment/equipment.module';
-import { UsersModule } from './users/users.module';
+
 import { AuthModule } from './auth/auth.module';
+import { EmailModule } from './common/email';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { MetricsThrottlerGuard } from './common/guards/metrics-throttler.guard';
+import { RolesGuard } from './common/guards/roles.guard';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { TenantGuard } from './common/tenant.guard';
 import { CompaniesModule } from './companies/companies.module';
 import { ContractsModule } from './contracts/contracts.module';
-import { APP_GUARD, APP_INTERCEPTOR, Reflector } from '@nestjs/core';
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
-import { RolesGuard } from './common/guards/roles.guard';
-import { MetricsThrottlerGuard } from './common/guards/metrics-throttler.guard';
-import { TenantGuard } from './common/tenant.guard';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { MetricsModule } from './metrics/metrics.module';
-import { ScheduleModule } from '@nestjs/schedule';
+import { CustomersModule } from './customers/customers.module';
+import { buildTypeOrmOptions } from './database/typeorm.config';
+import { EquipmentModule } from './equipment/equipment.module';
 import { HealthModule } from './health/health.module';
-import { EmailModule } from './common/email';
+import { JobsModule } from './jobs/jobs.module';
 import { LoggerModule } from './logger/logger.module';
+import { MetricsModule } from './metrics/metrics.module';
+import { UsersModule } from './users/users.module';
 
 // --- Env file resolution ---
 const nodeEnv = (process.env.NODE_ENV || 'development').toLowerCase();
@@ -58,6 +58,7 @@ if (envFilePath) {
 }
 
 @Module({
+  controllers: [],
   imports: [
     PrometheusModule.register({ global: true }),
     MetricsModule,
@@ -66,36 +67,36 @@ if (envFilePath) {
     LoggerModule,
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
-      isGlobal: true,
       envFilePath: envFilePath ? [envFilePath] : [],
       ignoreEnvFile: !envFilePath,
+      isGlobal: true,
       validationSchema: Joi.object({
+        CACHE_MAX: Joi.number().default(100),
+        CACHE_TTL: Joi.number().default(60_000),
+
+        DB_HOST: Joi.string().required(),
+        DB_NAME: Joi.string().required(),
+        DB_PASSWORD: Joi.string().required(),
+        DB_PORT: Joi.number().default(5432),
+        DB_USERNAME: Joi.string().required(),
+
+        JWT_SECRET: Joi.string().required(),
+        LOG_LEVEL: Joi.string().default('debug'),
         NODE_ENV: Joi.string()
           .valid('development', 'production', 'test')
           .default('development'),
         PORT: Joi.number().default(3000),
-
-        DB_HOST: Joi.string().required(),
-        DB_PORT: Joi.number().default(5432),
-        DB_USERNAME: Joi.string().required(),
-        DB_PASSWORD: Joi.string().required(),
-        DB_NAME: Joi.string().required(),
-
-        JWT_SECRET: Joi.string().required(),
-        LOG_LEVEL: Joi.string().default('debug'),
-        CACHE_TTL: Joi.number().default(60_000),
-        CACHE_MAX: Joi.number().default(100),
-        THROTTLE_TTL: Joi.number().default(60),
         THROTTLE_LIMIT: Joi.number().default(20),
+        THROTTLE_TTL: Joi.number().default(60),
       }).unknown(true),
     }),
     CacheModule.registerAsync({
-      isGlobal: true,
       imports: [ConfigModule],
       inject: [ConfigService],
+      isGlobal: true,
       useFactory: (config: ConfigService) => ({
-        ttl: Number(config.get('CACHE_TTL')) || 60_000,
         max: Number(config.get('CACHE_MAX')) || 100,
+        ttl: Number(config.get('CACHE_TTL')) || 60_000,
       }),
     }),
     ThrottlerModule.forRootAsync({
@@ -104,25 +105,13 @@ if (envFilePath) {
       useFactory: (config: ConfigService) => ({
         throttlers: [
           {
-            ttl: Number(config.get('THROTTLE_TTL')) || 60,
             limit: Number(config.get('THROTTLE_LIMIT')) || 20,
+            ttl: Number(config.get('THROTTLE_TTL')) || 60,
           },
         ],
       }),
     }),
     TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        const isProd = process.env.NODE_ENV === 'production';
-        new Logger('TYPEORM_FACTORY').log(
-          `[TYPEORM_FACTORY] Connecting to DB in ${isProd ? 'production' : 'development'} mode`,
-        );
-        return {
-          ...buildTypeOrmOptions(config),
-          retryAttempts: 1,
-          retryDelay: 0,
-        };
-      },
       dataSourceFactory: async (options) => {
         try {
           if (!options) {
@@ -141,6 +130,18 @@ if (envFilePath) {
           throw err;
         }
       },
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const isProd = process.env.NODE_ENV === 'production';
+        new Logger('TYPEORM_FACTORY').log(
+          `[TYPEORM_FACTORY] Connecting to DB in ${isProd ? 'production' : 'development'} mode`,
+        );
+        return {
+          ...buildTypeOrmOptions(config),
+          retryAttempts: 1,
+          retryDelay: 0,
+        };
+      },
     }),
 
     CustomersModule,
@@ -151,12 +152,11 @@ if (envFilePath) {
     CompaniesModule,
     ContractsModule,
   ],
-  controllers: [],
   providers: [
     makeHistogramProvider({
-      name: 'http_request_duration_seconds',
       help: 'HTTP request duration in seconds',
       labelNames: ['method', 'path', 'status_code'],
+      name: 'http_request_duration_seconds',
     }),
     LoggingInterceptor,
     {

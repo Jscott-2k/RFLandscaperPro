@@ -1,14 +1,13 @@
 import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
-import { Repository } from 'typeorm';
+import * as crypto from 'node:crypto';
+import { type SendMailOptions } from 'nodemailer';
+import { type Repository } from 'typeorm';
 
-import { UsersService } from '../users.service';
+import { type EmailService } from '../../common/email';
+import { type UserCreationService } from '../user-creation.service';
 import { User, UserRole } from '../user.entity';
+import { UsersService } from '../users.service';
 import { Email } from '../value-objects/email.vo';
-import { EmailService } from '../../common/email';
-import { SendMailOptions } from 'nodemailer';
-
-import { UserCreationService } from '../user-creation.service';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -27,6 +26,9 @@ describe('UsersService', () => {
             ...dto,
           }) as User,
       ),
+      find: jest.fn(),
+      findOne: jest.fn(),
+      remove: jest.fn(),
       save: jest.fn(async (user: User) => {
         if (user.password) {
           await user.hashPassword();
@@ -36,9 +38,6 @@ describe('UsersService', () => {
         }
         return user;
       }),
-      findOne: jest.fn(),
-      find: jest.fn(),
-      remove: jest.fn(),
     } as unknown as jest.Mocked<
       Pick<Repository<User>, 'create' | 'save' | 'findOne' | 'find' | 'remove'>
     >;
@@ -57,9 +56,9 @@ describe('UsersService', () => {
 
   it('delegates user creation to UserCreationService', async () => {
     const dto = {
-      username: 'user1',
       email: new Email('user1@example.com'),
       password: 'secret',
+      username: 'user1',
     };
     const created = Object.assign(new User(), dto);
     userCreationService.createUser.mockResolvedValueOnce(created);
@@ -72,8 +71,8 @@ describe('UsersService', () => {
 
   it('generates reset token and emails user', async () => {
     const user = Object.assign(new User(), {
-      username: 'user3',
       email: new Email('user3@example.com'),
+      username: 'user3',
     });
     usersRepository.findOne.mockResolvedValueOnce(user);
 
@@ -100,9 +99,9 @@ describe('UsersService', () => {
       .update(rawToken)
       .digest('hex');
     const user = Object.assign(new User(), {
-      username: 'user4',
-      passwordResetToken: hashedToken,
       passwordResetExpires: new Date(Date.now() + 1000 * 60),
+      passwordResetToken: hashedToken,
+      username: 'user4',
     });
     usersRepository.findOne.mockResolvedValueOnce(user);
 
@@ -122,9 +121,9 @@ describe('UsersService', () => {
       .update(rawToken)
       .digest('hex');
     const user = Object.assign(new User(), {
-      username: 'user5',
-      passwordResetToken: hashedToken,
       passwordResetExpires: new Date(Date.now() + 1000 * 60),
+      passwordResetToken: hashedToken,
+      username: 'user5',
     });
     usersRepository.findOne.mockResolvedValueOnce(user);
 
@@ -139,17 +138,17 @@ describe('UsersService', () => {
 
   it('updates profile and hashes new password', async () => {
     const user = Object.assign(new User(), {
-      id: 1,
-      username: 'old',
       email: new Email('old@example.com'),
+      id: 1,
       password: 'oldpass',
+      username: 'old',
     });
     usersRepository.findOne.mockResolvedValue(user);
 
     const updated = await service.updateProfile(1, {
-      username: 'new',
       email: new Email('new@example.com'),
       password: 'Newpass1!',
+      username: 'new',
     });
 
     expect(updated.username).toBe('new');

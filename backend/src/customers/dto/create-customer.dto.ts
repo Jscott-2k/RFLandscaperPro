@@ -1,3 +1,5 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsEmail,
@@ -8,8 +10,6 @@ import {
   Length,
   IsInt,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 class CreateAddressDto {
   @ApiProperty()
@@ -20,12 +20,12 @@ class CreateAddressDto {
   @IsString()
   city: string;
 
-  @ApiProperty({ minLength: 2, maxLength: 2, example: 'CA' })
+  @ApiProperty({ example: 'CA', maxLength: 2, minLength: 2 })
   @IsString()
   @Length(2, 2, { message: 'State must be exactly 2 characters' })
   state: string;
 
-  @ApiProperty({ minLength: 5, maxLength: 10, example: '12345' })
+  @ApiProperty({ example: '12345', maxLength: 10, minLength: 5 })
   @IsString()
   @Length(5, 10, { message: 'ZIP code must be between 5 and 10 characters' })
   zip: string;

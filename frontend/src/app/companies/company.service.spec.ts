@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
+
+import { CompaniesApiService, type Company } from '../api/companies-api.service';
 import { CompanyService } from './company.service';
-import { CompaniesApiService, Company } from '../api/companies-api.service';
 
 describe('CompanyService', () => {
   let service: CompanyService;
@@ -22,7 +23,7 @@ describe('CompanyService', () => {
 
   it('should call CompaniesApiService.getCompanyProfile', () => {
     service.getProfile().subscribe();
-    // eslint-disable-next-line @typescript-eslint/unbound-method
+     
     expect(apiSpy.getCompanyProfile).toHaveBeenCalled();
   });
 });

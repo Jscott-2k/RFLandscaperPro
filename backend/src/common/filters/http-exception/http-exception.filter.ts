@@ -1,13 +1,13 @@
 import {
-  ExceptionFilter,
+  type ExceptionFilter,
   Catch,
-  ArgumentsHost,
+  type ArgumentsHost,
   HttpException,
   HttpStatus,
   Inject,
-  LoggerService,
+  type LoggerService,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { type Request, type Response } from 'express';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Catch()
@@ -44,10 +44,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
     );
 
     response.status(status).json({
-      statusCode: status,
       message: msg,
-      timestamp: new Date().toISOString(),
       path: request.url,
+      statusCode: status,
+      timestamp: new Date().toISOString(),
     });
   }
 }

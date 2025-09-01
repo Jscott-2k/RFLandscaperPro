@@ -6,19 +6,20 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
-import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { Public } from '../common/decorators/public.decorator';
-import { User } from '../users/user.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { VerifyEmailDto } from './dto/verify-email.dto';
-import { SignupOwnerDto } from './dto/signup-owner.dto';
-import { SwitchCompanyDto } from './dto/switch-company.dto';
-import { JwtUserPayload } from './interfaces/jwt-user-payload.interface';
+
+import { Public } from '../common/decorators/public.decorator';
+import { type User } from '../users/user.entity';
+import { type AuthService } from './auth.service';
+import { type LoginDto } from './dto/login.dto';
+import { type RefreshTokenDto } from './dto/refresh-token.dto';
+import { type RegisterDto } from './dto/register.dto';
+import { type RequestPasswordResetDto } from './dto/request-password-reset.dto';
+import { type ResetPasswordDto } from './dto/reset-password.dto';
+import { type SignupOwnerDto } from './dto/signup-owner.dto';
+import { type SwitchCompanyDto } from './dto/switch-company.dto';
+import { type VerifyEmailDto } from './dto/verify-email.dto';
+import { type JwtUserPayload } from './interfaces/jwt-user-payload.interface';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -28,7 +29,7 @@ export class AuthController {
   @Public()
   @Post('signup-owner')
   @ApiOperation({ summary: 'Self-register a new company owner' })
-  @ApiResponse({ status: 201, description: 'Created owner and company' })
+  @ApiResponse({ description: 'Created owner and company', status: 201 })
   async signupOwner(@Body() dto: SignupOwnerDto) {
     return this.authService.signupOwner(dto);
   }
@@ -37,15 +38,15 @@ export class AuthController {
   @Post('login')
   @UsePipes(
     new ValidationPipe({
-      whitelist: true,
+      errorHttpStatusCode: 400,
       forbidNonWhitelisted: true,
       transform: true,
       transformOptions: { enableImplicitConversion: true },
-      errorHttpStatusCode: 400,
+      whitelist: true,
     }),
   )
   @ApiOperation({ summary: 'Authenticate user and return JWT' })
-  @ApiResponse({ status: 200, description: 'JWT token payload' })
+  @ApiResponse({ description: 'JWT token payload', status: 200 })
   async login(@Body() loginDto: LoginDto) {
     const user: User = await this.authService.validateUser(
       loginDto.email,
@@ -56,7 +57,7 @@ export class AuthController {
 
   @Post('switch-company')
   @ApiOperation({ summary: 'Switch active company for user' })
-  @ApiResponse({ status: 200, description: 'New JWT for selected company' })
+  @ApiResponse({ description: 'New JWT for selected company', status: 200 })
   async switchCompany(
     @Body() dto: SwitchCompanyDto,
     @Req() req: { user: JwtUserPayload },
@@ -67,7 +68,7 @@ export class AuthController {
   @Public()
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiResponse({ status: 201, description: 'Created user' })
+  @ApiResponse({ description: 'Created user', status: 201 })
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
@@ -75,7 +76,7 @@ export class AuthController {
   @Public()
   @Post('verify-email')
   @ApiOperation({ summary: 'Verify user email' })
-  @ApiResponse({ status: 200, description: 'Email verified' })
+  @ApiResponse({ description: 'Email verified', status: 200 })
   async verifyEmail(@Body() dto: VerifyEmailDto): Promise<{ message: string }> {
     await this.authService.verifyEmail(dto.token);
     return { message: 'Email verified' };
@@ -84,7 +85,7 @@ export class AuthController {
   @Public()
   @Post('request-password-reset')
   @ApiOperation({ summary: 'Request a password reset token' })
-  @ApiResponse({ status: 200, description: 'Token sent if user exists' })
+  @ApiResponse({ description: 'Token sent if user exists', status: 200 })
   async requestPasswordReset(
     @Body() requestDto: RequestPasswordResetDto,
   ): Promise<{ message: string }> {
@@ -95,7 +96,7 @@ export class AuthController {
   @Public()
   @Post('reset-password')
   @ApiOperation({ summary: 'Reset password using token' })
-  @ApiResponse({ status: 200, description: 'Password reset successful' })
+  @ApiResponse({ description: 'Password reset successful', status: 200 })
   async resetPassword(
     @Body() dto: ResetPasswordDto,
   ): Promise<{ message: string }> {
@@ -106,7 +107,7 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh access token' })
-  @ApiResponse({ status: 200, description: 'New access token' })
+  @ApiResponse({ description: 'New access token', status: 200 })
   async refresh(@Body() dto: RefreshTokenDto) {
     return this.authService.refresh(dto.refreshToken);
   }
@@ -114,7 +115,7 @@ export class AuthController {
   @Public()
   @Post('logout')
   @ApiOperation({ summary: 'Logout current user' })
-  @ApiResponse({ status: 200, description: 'Logged out' })
+  @ApiResponse({ description: 'Logged out', status: 200 })
   async logout(@Body() dto: RefreshTokenDto): Promise<{ message: string }> {
     await this.authService.logout(dto.refreshToken);
     return { message: 'Logged out' };

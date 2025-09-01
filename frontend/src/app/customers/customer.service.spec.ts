@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { CustomerService } from './customer.service';
+
 import { CustomersApiService } from '../api/customers-api.service';
+import { CustomerService } from './customer.service';
 
 describe('CustomerService', () => {
   let service: CustomerService;
@@ -20,7 +21,7 @@ describe('CustomerService', () => {
 
   it('should call CustomersApiService.getCustomers', () => {
     service.getCustomers().subscribe();
-    // eslint-disable-next-line @typescript-eslint/unbound-method
+     
     expect(apiSpy.getCustomers).toHaveBeenCalled();
   });
 });

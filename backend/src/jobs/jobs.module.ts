@@ -1,18 +1,18 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { JobsService } from './jobs.service';
-import { JobsController } from './jobs.controller';
-import { Job } from './entities/job.entity';
-import { Assignment } from './entities/assignment.entity';
 import { CustomersModule } from '../customers/customers.module';
-import { UsersModule } from '../users/users.module';
 import { EquipmentModule } from '../equipment/equipment.module';
-import { JobRepository, JOB_REPOSITORY } from './repositories/job.repository';
+import { UsersModule } from '../users/users.module';
+import { Assignment } from './entities/assignment.entity';
+import { Job } from './entities/job.entity';
+import { JobsController } from './jobs.controller';
+import { JobsService } from './jobs.service';
 import {
   AssignmentRepository,
   ASSIGNMENT_REPOSITORY,
 } from './repositories/assignment.repository';
+import { JobRepository, JOB_REPOSITORY } from './repositories/job.repository';
 
 const jobRepositoryProvider = {
   provide: JOB_REPOSITORY,
@@ -25,14 +25,14 @@ const assignmentRepositoryProvider = {
 };
 
 @Module({
+  controllers: [JobsController],
+  exports: [JobsService],
   imports: [
     TypeOrmModule.forFeature([Job, Assignment]),
     CustomersModule,
     UsersModule,
     EquipmentModule,
   ],
-  controllers: [JobsController],
   providers: [JobsService, jobRepositoryProvider, assignmentRepositoryProvider],
-  exports: [JobsService],
 })
 export class JobsModule {}

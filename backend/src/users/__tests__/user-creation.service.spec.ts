@@ -1,13 +1,14 @@
+import { BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { EntityManager, QueryFailedError, Repository } from 'typeorm';
+import { type EntityManager, QueryFailedError, type Repository } from 'typeorm';
+
+import { type CreateCompanyDto } from '../../companies/dto/create-company.dto';
+import { type Company } from '../../companies/entities/company.entity';
+import { type CompanyOnboardingService } from '../company-onboarding.service';
+import { type CustomerRegistrationService } from '../customer-registration.service';
 import { UserCreationService } from '../user-creation.service';
 import { User, UserRole } from '../user.entity';
 import { Email } from '../value-objects/email.vo';
-import { CustomerRegistrationService } from '../customer-registration.service';
-import { CompanyOnboardingService } from '../company-onboarding.service';
-import { CreateCompanyDto } from '../../companies/dto/create-company.dto';
-import { Company } from '../../companies/entities/company.entity';
-import { BadRequestException } from '@nestjs/common';
 
 const UNIQUE_VIOLATION = '23505';
 
@@ -69,15 +70,15 @@ describe('UserCreationService', () => {
   it('hashes passwords and registers customer by default', async () => {
     const password = 'plainpassword';
     const user = await service.createUser({
-      username: 'user1',
       email: new Email('user1@example.com'),
       password,
+      username: 'user1',
     });
     const createMock = jest.spyOn(usersRepository, 'create');
     expect(createMock).toHaveBeenCalledWith({
-      username: 'user1',
       email: expect.any(Email) as unknown as Email,
       password,
+      username: 'user1',
     });
     expect(customerRegistrationService.register).toHaveBeenCalled();
     expect(user.role).toBe(UserRole.Customer);
@@ -100,11 +101,11 @@ describe('UserCreationService', () => {
       },
     );
     const user = await service.createUser({
-      username: 'owner',
+      company: { name: 'ACME Landscaping' },
       email: new Email('owner@example.com'),
       password: 'secret',
       role: UserRole.CompanyOwner,
-      company: { name: 'ACME Landscaping' },
+      username: 'owner',
     });
 
     expect(companyOnboardingService.onboard).toHaveBeenCalled();
@@ -117,10 +118,10 @@ describe('UserCreationService', () => {
     );
     await expect(
       service.createUser({
-        username: 'worker',
         email: new Email('w@example.com'),
         password: 'secret',
         role: UserRole.Worker,
+        username: 'worker',
       }),
     ).rejects.toMatchObject({ status: 400 });
 
@@ -137,9 +138,9 @@ describe('UserCreationService', () => {
 
     await expect(
       service.createUser({
-        username: 'existing',
         email: new Email('existing@example.com'),
         password: 'secret',
+        username: 'existing',
       }),
     ).rejects.toMatchObject({
       message: 'Username or email already exists',

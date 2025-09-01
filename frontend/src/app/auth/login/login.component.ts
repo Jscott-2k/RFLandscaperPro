@@ -1,15 +1,16 @@
-import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { AuthService } from '../auth.service';
+
 import { ErrorService } from '../../error.service';
+import { AuthService } from '../auth.service';
 
 @Component({
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()">
       <input type="email" formControlName="email" placeholder="Email" />
@@ -47,10 +48,10 @@ export class LoginComponent {
         .login(this.form.getRawValue())
         .pipe(finalize(() => (this.loading = false)))
         .subscribe({
+          error: (err: unknown) => this.errorService.show((err as Error).message),
           next: () => {
             void this.router.navigate(['/dashboard']);
           },
-          error: (err: unknown) => this.errorService.show((err as Error).message),
         });
     }
   }

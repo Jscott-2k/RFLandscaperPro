@@ -4,17 +4,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, MoreThan, Repository } from 'typeorm';
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
+import { type FindOptionsWhere, MoreThan, type Repository } from 'typeorm';
 
-import { EmailService } from '../common/email';
-import { passwordResetMail } from '../common/email/templates';
-
-import { User, UserRole } from './user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { validatePasswordStrength } from '../auth/password.util';
-import { UserCreationService } from './user-creation.service';
+import { type EmailService } from '../common/email';
+import { passwordResetMail } from '../common/email/templates';
+import { type CreateUserDto } from './dto/create-user.dto';
+import { type UpdateUserDto } from './dto/update-user.dto';
+import { type UserCreationService } from './user-creation.service';
+import { User, type UserRole } from './user.entity';
 import { Email } from './value-objects/email.vo';
 
 @Injectable()
@@ -42,8 +41,8 @@ export class UsersService {
       where.companyId = companyId;
     }
     return this.usersRepository.findOne({
-      where,
       relations: ['company'],
+      where,
     });
   }
 
@@ -78,8 +77,8 @@ export class UsersService {
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
     const user = await this.usersRepository.findOne({
       where: {
-        passwordResetToken: hashedToken,
         passwordResetExpires: MoreThan(new Date()),
+        passwordResetToken: hashedToken,
       },
     });
     if (!user) {

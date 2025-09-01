@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { type Observable } from 'rxjs';
+
 import {
   CompaniesApiService,
-  CompanyMember,
-  CompanyInvitation,
+  type CompanyMember,
+  type CompanyInvitation,
 } from '../api/companies-api.service';
 import { AuthService } from '../auth/auth.service';
 

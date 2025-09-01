@@ -1,5 +1,6 @@
+import { type Repository, type SelectQueryBuilder } from 'typeorm';
+
 import { paginate } from './pagination';
-import { Repository, SelectQueryBuilder } from 'typeorm';
 
 describe('paginate', () => {
   let repo: jest.Mocked<Repository<any>>;
@@ -8,9 +9,9 @@ describe('paginate', () => {
   beforeEach(() => {
     qb = {
       andWhere: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([]),
       orderBy: jest.fn().mockReturnThis(),
       take: jest.fn().mockReturnThis(),
-      getMany: jest.fn().mockResolvedValue([]),
     };
 
     repo = {

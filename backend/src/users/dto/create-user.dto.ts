@@ -1,3 +1,5 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type, Transform } from 'class-transformer';
 import {
   IsEnum,
   IsOptional,
@@ -7,10 +9,9 @@ import {
   ValidateNested,
   IsBoolean,
 } from 'class-validator';
-import { UserRole } from '../user.entity';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type, Transform } from 'class-transformer';
+
 import { CreateCompanyDto } from '../../companies/dto/create-company.dto';
+import { UserRole } from '../user.entity';
 import { Email } from '../value-objects/email.vo';
 import { PhoneNumber } from '../value-objects/phone-number.vo';
 

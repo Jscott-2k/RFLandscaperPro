@@ -13,7 +13,7 @@ const migrationsDir = path.resolve('src/migrations');
 const dsPath = path.resolve('src/data-source.ts');
 const timestamp = Date.now();
 const outPath = path.join(migrationsDir, name);
-if (!fs.existsSync(migrationsDir)) fs.mkdirSync(migrationsDir, { recursive: true });
+if (!fs.existsSync(migrationsDir)) {fs.mkdirSync(migrationsDir, { recursive: true });}
 
 const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx';
 console.log(`[migrations] generating -> ${outPath}`);
@@ -32,9 +32,9 @@ const result = spawnSync(
     String(timestamp),
   ],
   {
-    stdio: 'inherit',
     env: {
       ...process.env,
+      DEBUG_TYPEORM_CONFIG: '1',
       NODE_ENV: process.env.NODE_ENV || 'development',
       // force-load tsconfig-paths for the node process that runs data-source.ts
       NODE_OPTIONS: [
@@ -42,9 +42,9 @@ const result = spawnSync(
         '--require ts-node/register/transpile-only',
         '--require tsconfig-paths/register'
       ].filter(Boolean).join(' '),
-      DEBUG_TYPEORM_CONFIG: '1',
       TS_NODE_PROJECT: 'tsconfig.dev.json' // ensure the dev tsconfig is used
-    }
+    },
+    stdio: 'inherit'
   }
 );
 

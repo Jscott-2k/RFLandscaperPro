@@ -1,13 +1,14 @@
-import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, type OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+
+import { type CompanyMember, type CompanyInvitation } from '../api/companies-api.service';
 import { TeamService } from './team.service';
-import { CompanyMember, CompanyInvitation } from '../api/companies-api.service';
 
 @Component({
+  imports: [CommonModule, FormsModule],
   selector: 'app-team',
   standalone: true,
-  imports: [CommonModule, FormsModule],
   template: `
     <h2>Members</h2>
     <table>
@@ -105,7 +106,7 @@ export class TeamComponent implements OnInit {
   }
 
   removeMember(m: CompanyMember): void {
-    if (!confirm('Remove this member?')) return;
+    if (!confirm('Remove this member?')) {return;}
     this.service.removeMember(m.userId).subscribe(() => {
       this.members = this.members.filter((x) => x.userId !== m.userId);
     });
@@ -121,12 +122,12 @@ export class TeamComponent implements OnInit {
   resend(inv: CompanyInvitation): void {
     this.service.resendInvite(inv.id).subscribe((updated) => {
       const idx = this.invitations.findIndex((x) => x.id === updated.id);
-      if (idx > -1) this.invitations[idx] = updated;
+      if (idx > -1) {this.invitations[idx] = updated;}
     });
   }
 
   revoke(inv: CompanyInvitation): void {
-    if (!confirm('Revoke this invitation?')) return;
+    if (!confirm('Revoke this invitation?')) {return;}
     this.service.revokeInvite(inv.id).subscribe(() => {
       this.invitations = this.invitations.filter((x) => x.id !== inv.id);
     });

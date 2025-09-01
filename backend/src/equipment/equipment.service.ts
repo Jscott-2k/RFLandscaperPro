@@ -2,18 +2,18 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
-} from '@nestjs/common';
+ Inject } from '@nestjs/common';
+
+import { type Paginated, type PaginationParams } from '../common/pagination';
+import { type CreateEquipmentDto } from './dto/create-equipment.dto';
+import { type EquipmentResponseDto } from './dto/equipment-response.dto';
+import { type UpdateEquipmentDto } from './dto/update-equipment.dto';
 import { EquipmentStatus } from './entities/equipment.entity';
-import { CreateEquipmentDto } from './dto/create-equipment.dto';
-import { UpdateEquipmentDto } from './dto/update-equipment.dto';
-import { EquipmentResponseDto } from './dto/equipment-response.dto';
-import { Paginated, PaginationParams } from '../common/pagination';
+import { toEquipmentResponseDto } from './equipment.mapper';
 import {
   EQUIPMENT_REPOSITORY,
-  IEquipmentRepository,
+  type IEquipmentRepository,
 } from './repositories/equipment.repository';
-import { Inject } from '@nestjs/common';
-import { toEquipmentResponseDto } from './equipment.mapper';
 
 @Injectable()
 export class EquipmentService {
@@ -28,10 +28,10 @@ export class EquipmentService {
   ): Promise<EquipmentResponseDto> {
     const equipment = this.equipmentRepository.create({
       ...createEquipmentDto,
+      companyId,
       lastMaintenanceDate: createEquipmentDto.lastMaintenanceDate
         ? new Date(createEquipmentDto.lastMaintenanceDate)
         : undefined,
-      companyId,
     });
     const savedEquipment = await this.equipmentRepository.save(equipment);
     return toEquipmentResponseDto(savedEquipment);

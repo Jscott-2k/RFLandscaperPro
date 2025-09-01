@@ -8,8 +8,9 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { Customer } from '../../customers/entities/customer.entity';
+
 import { Company } from '../../companies/entities/company.entity';
+import { Customer } from '../../customers/entities/customer.entity';
 import { Job } from '../../jobs/entities/job.entity';
 
 export enum ContractFrequency {
@@ -34,24 +35,24 @@ export class Contract {
   company: Company;
 
   @ManyToOne(() => Customer, (customer) => customer.contracts, {
-    onDelete: 'CASCADE',
     nullable: false,
+    onDelete: 'CASCADE',
   })
   customer: Customer;
 
   @Column({ type: 'date' })
   startDate: Date;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ nullable: true, type: 'date' })
   endDate?: Date;
 
-  @Column({ type: 'enum', enum: ContractFrequency })
+  @Column({ enum: ContractFrequency, type: 'enum' })
   frequency: ContractFrequency;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ nullable: true, type: 'int' })
   totalOccurrences?: number;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ default: 0, type: 'int' })
   occurrencesGenerated: number;
 
   @Column({ type: 'jsonb' })
@@ -62,7 +63,7 @@ export class Contract {
     notes?: string;
   };
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ nullable: true, type: 'date' })
   lastGeneratedDate?: Date;
 
   @Column({ default: true })

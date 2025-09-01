@@ -1,7 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
+
+import { type PaginationParams } from '../common/pagination';
 import { JobsController } from './jobs.controller';
 import { JobsService } from './jobs.service';
-import { PaginationParams } from '../common/pagination';
 
 describe('JobsController', () => {
   let controller: JobsController;

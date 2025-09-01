@@ -1,17 +1,18 @@
-// src/main.ts
-import 'reflect-metadata';
-import { ValidationPipe, LoggerService } from '@nestjs/common';
+import { ValidationPipe, type LoggerService } from '@nestjs/common';
 import { NestFactory, ModuleRef } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { type NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import basicAuth from 'express-basic-auth';
-import * as winston from 'winston';
 import { WinstonModule, WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import * as winston from 'winston';
 
 import { AppModule } from './app.module';
-import { requestIdMiddleware } from './common/middleware/request-id.middleware';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { requestIdMiddleware } from './common/middleware/request-id.middleware';
+
+// src/main.ts
+import 'reflect-metadata';
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -66,16 +67,16 @@ export async function bootstrap(): Promise<void> {
     app.use(requestIdMiddleware);
 
     const loggingInterceptor = app.get(LoggingInterceptor, { strict: false });
-    if (loggingInterceptor) app.useGlobalInterceptors(loggingInterceptor);
+    if (loggingInterceptor) {app.useGlobalInterceptors(loggingInterceptor);}
 
     app.useGlobalPipes(
       new ValidationPipe({
-        whitelist: true,
+        errorHttpStatusCode: 422,
         forbidNonWhitelisted: true,
+        stopAtFirstError: true,
         transform: true,
         transformOptions: { enableImplicitConversion: true },
-        errorHttpStatusCode: 422,
-        stopAtFirstError: true,
+        whitelist: true,
       }),
     );
 
@@ -84,8 +85,8 @@ export async function bootstrap(): Promise<void> {
     // CORS
     const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
     app.enableCors({
-      origin: isProd ? allowedOrigins : true,
       credentials: true,
+      origin: isProd ? allowedOrigins : true,
     });
 
     // Swagger (dev only, behind basic auth)

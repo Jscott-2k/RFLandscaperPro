@@ -4,7 +4,7 @@ export enum CompanyUserRole {
   WORKER = 'WORKER',
 }
 
-export interface CompanyMembership {
+export type CompanyMembership = {
   companyId: number;
   companyName: string;
   role: CompanyUserRole;

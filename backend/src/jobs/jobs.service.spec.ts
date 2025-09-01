@@ -1,26 +1,27 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
-import { JobsService } from './jobs.service';
-import { JOB_REPOSITORY, IJobRepository } from './repositories/job.repository';
+import { Test, type TestingModule } from '@nestjs/testing';
+
 import {
   CUSTOMER_REPOSITORY,
-  ICustomerRepository,
+  type ICustomerRepository,
 } from '../customers/repositories/customer.repository';
 import {
-  USER_REPOSITORY,
-  IUserRepository,
-} from '../users/repositories/user.repository';
-import {
   EQUIPMENT_REPOSITORY,
-  IEquipmentRepository,
+  type IEquipmentRepository,
 } from '../equipment/repositories/equipment.repository';
 import {
+  USER_REPOSITORY,
+  type IUserRepository,
+} from '../users/repositories/user.repository';
+import { type AssignJobDto } from './dto/assign-job.dto';
+import { type CreateJobDto } from './dto/create-job.dto';
+import { type ScheduleJobDto } from './dto/schedule-job.dto';
+import { JobsService } from './jobs.service';
+import {
   ASSIGNMENT_REPOSITORY,
-  IAssignmentRepository,
+  type IAssignmentRepository,
 } from './repositories/assignment.repository';
-import { CreateJobDto } from './dto/create-job.dto';
-import { AssignJobDto } from './dto/assign-job.dto';
-import { ScheduleJobDto } from './dto/schedule-job.dto';
+import { JOB_REPOSITORY, type IJobRepository } from './repositories/job.repository';
 
 describe('JobsService', () => {
   let service: JobsService;
@@ -33,10 +34,10 @@ describe('JobsService', () => {
   beforeEach(async () => {
     jobRepo = {
       create: jest.fn(),
-      save: jest.fn(),
       findAll: jest.fn(),
       findById: jest.fn(),
       remove: jest.fn(),
+      save: jest.fn(),
     } as unknown as jest.Mocked<IJobRepository>;
     customerRepo = {
       findById: jest.fn(),
@@ -48,12 +49,12 @@ describe('JobsService', () => {
       findById: jest.fn(),
     } as unknown as jest.Mocked<IEquipmentRepository>;
     assignmentRepo = {
-      create: jest.fn(),
-      save: jest.fn(),
-      findById: jest.fn(),
-      remove: jest.fn(),
-      hasConflict: jest.fn(),
       bulkCreate: jest.fn(),
+      create: jest.fn(),
+      findById: jest.fn(),
+      hasConflict: jest.fn(),
+      remove: jest.fn(),
+      save: jest.fn(),
     } as unknown as jest.Mocked<IAssignmentRepository>;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -76,7 +77,7 @@ describe('JobsService', () => {
 
   it('throws NotFoundException when customer missing on create', async () => {
     customerRepo.findById.mockResolvedValue(null);
-    const dto: CreateJobDto = { title: 'Test', customerId: 1 };
+    const dto: CreateJobDto = { customerId: 1, title: 'Test' };
     await expect(service.create(dto, 1)).rejects.toBeInstanceOf(
       NotFoundException,
     );
@@ -84,7 +85,7 @@ describe('JobsService', () => {
 
   it('throws ConflictException when scheduling with resource conflict', async () => {
     jobRepo.findById.mockResolvedValue({
-      assignments: [{ user: { id: 1 }, equipment: { id: 2 } }],
+      assignments: [{ equipment: { id: 2 }, user: { id: 1 } }],
     } as any);
     assignmentRepo.hasConflict.mockResolvedValue(true);
     const dto: ScheduleJobDto = { scheduledDate: new Date() };
@@ -95,13 +96,13 @@ describe('JobsService', () => {
 
   it('throws ConflictException when assigning conflicting resources', async () => {
     jobRepo.findById.mockResolvedValue({
-      scheduledDate: new Date(),
       customer: {},
+      scheduledDate: new Date(),
     } as any);
     userRepo.findById.mockResolvedValue({ id: 1 } as any);
     equipmentRepo.findById.mockResolvedValue({ id: 2 } as any);
     assignmentRepo.hasConflict.mockResolvedValue(true);
-    const dto: AssignJobDto = { userId: 1, equipmentId: 2 };
+    const dto: AssignJobDto = { equipmentId: 2, userId: 1 };
     await expect(service.assign(1, dto, 1)).rejects.toBeInstanceOf(
       ConflictException,
     );

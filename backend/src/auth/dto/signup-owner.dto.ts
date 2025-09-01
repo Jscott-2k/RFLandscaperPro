@@ -1,5 +1,6 @@
-import { IsEmail, IsString, MinLength, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsString, MinLength, Matches } from 'class-validator';
+
 import { PASSWORD_REGEX } from '../password.util';
 
 export class SignupOwnerDto {

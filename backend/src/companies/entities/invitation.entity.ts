@@ -8,8 +8,9 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
-import { Company } from './company.entity';
+
 import { User } from '../../users/user.entity';
+import { Company } from './company.entity';
 
 export enum InvitationRole {
   ADMIN = 'ADMIN',
@@ -40,19 +41,19 @@ export class Invitation {
   @Column()
   email: string;
 
-  @Column({ type: 'enum', enum: InvitationRole })
+  @Column({ enum: InvitationRole, type: 'enum' })
   role: InvitationRole;
 
-  @Column({ type: 'varchar', length: 128 })
+  @Column({ length: 128, type: 'varchar' })
   tokenHash: string;
 
   @Column({ type: 'timestamptz' })
   expiresAt: Date;
 
-  @Column({ type: 'timestamptz', nullable: true })
+  @Column({ nullable: true, type: 'timestamptz' })
   acceptedAt?: Date | null;
 
-  @Column({ type: 'timestamptz', nullable: true })
+  @Column({ nullable: true, type: 'timestamptz' })
   revokedAt?: Date | null;
 
   @Column()

@@ -2,17 +2,18 @@ import {
   Module,
   Injectable,
   Inject,
-  LoggerService,
+  type LoggerService,
   Global,
 } from '@nestjs/common';
+import { makeCounterProvider, InjectMetric } from '@willsoto/nestjs-prometheus';
 import {
   WinstonModule,
   WINSTON_MODULE_NEST_PROVIDER,
   WINSTON_MODULE_PROVIDER,
 } from 'nest-winston';
+import { type Counter } from 'prom-client';
 import * as winston from 'winston';
-import { makeCounterProvider, InjectMetric } from '@willsoto/nestjs-prometheus';
-import { Counter } from 'prom-client';
+
 import { getRequestId } from '../common/middleware/request-id.middleware';
 import { getCurrentCompanyId } from '../common/tenant/tenant-context';
 import { getCurrentUserId } from '../common/user/user-context';
@@ -26,10 +27,10 @@ if (process.env.REMOTE_LOG_HOST) {
   transports.push(
     new winston.transports.Http({
       host: process.env.REMOTE_LOG_HOST,
+      path: process.env.REMOTE_LOG_PATH || '/',
       port: process.env.REMOTE_LOG_PORT
         ? Number(process.env.REMOTE_LOG_PORT)
         : 1234,
-      path: process.env.REMOTE_LOG_PATH || '/',
     }),
   );
 }
@@ -53,11 +54,11 @@ class PrometheusLogger implements LoggerService {
     @InjectMetric('log_verbose_total') verboseCounter: Counter<string>,
   ) {
     this.counters = {
-      error: errorCounter,
-      warn: warnCounter,
-      info: infoCounter,
       debug: debugCounter,
+      error: errorCounter,
+      info: infoCounter,
       verbose: verboseCounter,
+      warn: warnCounter,
     };
   }
 
@@ -85,33 +86,33 @@ class PrometheusLogger implements LoggerService {
 
 @Global()
 @Module({
+  exports: [WINSTON_MODULE_NEST_PROVIDER],
   imports: [
     WinstonModule.forRoot({
-      level: process.env.LOG_LEVEL || 'info',
       format: winston.format.combine(
         winston.format((info) => {
           return Object.assign(info, {
+            companyId: getCurrentCompanyId() ?? null,
             requestId: getRequestId() ?? null,
             userId: getCurrentUserId() ?? null,
-            companyId: getCurrentCompanyId() ?? null,
           });
         })(),
         winston.format.timestamp(),
         winston.format.json(),
       ),
+      level: process.env.LOG_LEVEL || 'info',
       transports,
     }),
   ],
   providers: [
     ...LOG_LEVELS.map((level) =>
       makeCounterProvider({
-        name: `log_${level}_total`,
         help: `Total number of ${level} logs`,
+        name: `log_${level}_total`,
       }),
     ),
     PrometheusLogger,
     { provide: WINSTON_MODULE_NEST_PROVIDER, useExisting: PrometheusLogger },
   ],
-  exports: [WINSTON_MODULE_NEST_PROVIDER],
 })
 export class LoggerModule {}

@@ -1,23 +1,24 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { type Observable } from 'rxjs';
+
 import { environment } from '../../environments/environment';
 
-export interface Contract {
-  id?: number;
+export type Contract = {
+  active?: boolean;
+  customer?: { id: number; name: string; email: string };
   customerId: number;
-  startDate: string;
   endDate?: string;
   frequency: string;
-  totalOccurrences?: number;
+  id?: number;
   jobTemplate?: {
     title: string;
     description?: string;
     estimatedHours?: number;
     notes?: string;
   };
-  active?: boolean;
-  customer?: { id: number; name: string; email: string };
+  startDate: string;
+  totalOccurrences?: number;
 }
 
 @Injectable({ providedIn: 'root' })

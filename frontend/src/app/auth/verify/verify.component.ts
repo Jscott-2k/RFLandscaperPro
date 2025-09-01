@@ -1,12 +1,13 @@
-import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+
 import { AuthService } from '../auth.service';
 
 @Component({
+  imports: [CommonModule],
   selector: 'app-verify',
   standalone: true,
-  imports: [CommonModule],
   template: ` <p>{{ message }}</p> `,
 })
 export class VerifyComponent {
@@ -18,8 +19,8 @@ export class VerifyComponent {
     const token = this.route.snapshot.queryParamMap.get('token');
     if (token) {
       this.auth.verifyEmail(token).subscribe({
-        next: () => (this.message = 'Email verified. You can now login.'),
         error: () => (this.message = 'Verification failed.'),
+        next: () => (this.message = 'Email verified. You can now login.'),
       });
     } else {
       this.message = 'No token provided.';

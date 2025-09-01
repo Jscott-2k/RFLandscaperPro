@@ -1,16 +1,17 @@
-import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject, type OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CustomerService } from './customer.service';
-import { Customer } from './customer.model';
+
 import { ErrorService } from '../error.service';
 import { ToasterService } from '../toaster.service';
+import { type Customer } from './customer.model';
+import { CustomerService } from './customer.service';
 
 @Component({
+  imports: [CommonModule, ReactiveFormsModule],
   selector: 'app-customer-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
   template: `
     <h2>{{ customerId ? 'Edit Customer' : 'New Customer' }}</h2>
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -41,8 +42,8 @@ export class CustomerFormComponent implements OnInit {
   customerId?: number;
 
   form = this.fb.nonNullable.group({
-    name: ['', Validators.required.bind(Validators)],
     email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
+    name: ['', Validators.required.bind(Validators)],
     phone: [''],
   });
 
@@ -51,8 +52,8 @@ export class CustomerFormComponent implements OnInit {
     if (idParam) {
       this.customerId = Number(idParam);
       this.customerService.getCustomer(this.customerId).subscribe({
-        next: (customer) => this.form.patchValue(customer),
         error: () => this.errorService.show('Failed to load customer'),
+        next: (customer) => this.form.patchValue(customer),
       });
     }
   }
@@ -67,11 +68,11 @@ export class CustomerFormComponent implements OnInit {
       : this.customerService.createCustomer(this.form.value as Customer);
 
     action$.subscribe({
+      error: () => this.errorService.show('Failed to save customer'),
       next: () => {
         this.notifications.show('Customer saved successfully');
         void this.router.navigate(['/customers']);
       },
-      error: () => this.errorService.show('Failed to save customer'),
     });
   }
 }

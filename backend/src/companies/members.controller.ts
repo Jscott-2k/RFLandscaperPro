@@ -9,12 +9,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Roles } from '../common/decorators/roles.decorator';
-import { User, UserRole } from '../users/user.entity';
+
 import { AuthUser } from '../common/decorators/auth-user.decorator';
-import { MembersService } from './members.service';
-import { CompanyMemberResponseDto } from './dto/company-member-response.dto';
-import { UpdateCompanyMemberDto } from './dto/update-company-member.dto';
+import { Roles } from '../common/decorators/roles.decorator';
+import { type User, UserRole } from '../users/user.entity';
+import { type CompanyMemberResponseDto } from './dto/company-member-response.dto';
+import { type UpdateCompanyMemberDto } from './dto/update-company-member.dto';
+import { type MembersService } from './members.service';
 
 @ApiTags('companies')
 @ApiBearerAuth()
@@ -29,7 +30,7 @@ export class MembersController {
     @AuthUser() user: User | undefined,
   ): Promise<CompanyMemberResponseDto[]> {
     if (user!.companyId !== companyId)
-      throw new NotFoundException('Company not found');
+      {throw new NotFoundException('Company not found');}
     return this.membersService.findMembers(companyId);
   }
 
@@ -41,7 +42,7 @@ export class MembersController {
     @AuthUser() user: User | undefined,
   ): Promise<CompanyMemberResponseDto> {
     if (user!.companyId !== companyId)
-      throw new NotFoundException('Company not found');
+      {throw new NotFoundException('Company not found');}
     return this.membersService.updateMember(companyId, userId, dto);
   }
 
@@ -52,7 +53,7 @@ export class MembersController {
     @AuthUser() user: User | undefined,
   ): Promise<void> {
     if (user!.companyId !== companyId)
-      throw new NotFoundException('Company not found');
+      {throw new NotFoundException('Company not found');}
     await this.membersService.removeMember(companyId, userId);
   }
 }

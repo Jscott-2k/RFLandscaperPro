@@ -1,4 +1,5 @@
-import { SendMailOptions } from 'nodemailer';
+import { type SendMailOptions } from 'nodemailer';
+
 import { InvitationRole } from '../../../companies/entities/invitation.entity';
 
 function formatRole(role: InvitationRole): string {
@@ -17,9 +18,9 @@ export function invitationMail(
   const roleName = formatRole(role);
   const expiry = expiresAt.toDateString();
   return {
-    to,
+    html: `<p>You have been invited to join <strong>${companyName}</strong> as <strong>${roleName}</strong>.</p><p>This invitation expires on <strong>${expiry}</strong>.</p><p><a href="${link}">Accept Invitation</a></p>`,
     subject: 'Company Invitation',
     text: `You have been invited to join ${companyName} as ${roleName}. This invitation expires on ${expiry}. Accept here: ${link}`,
-    html: `<p>You have been invited to join <strong>${companyName}</strong> as <strong>${roleName}</strong>.</p><p>This invitation expires on <strong>${expiry}</strong>.</p><p><a href="${link}">Accept Invitation</a></p>`,
+    to,
   };
 }

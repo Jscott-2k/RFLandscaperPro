@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { type MigrationInterface, type QueryRunner } from 'typeorm';
 
 export class EnableRlsPolicies1756502290802 implements MigrationInterface {
   name = 'EnableRlsPolicies1756502290802';

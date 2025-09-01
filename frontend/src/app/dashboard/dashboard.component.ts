@@ -1,13 +1,15 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, type OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { JobsApiService } from '../api/jobs-api.service';
+
 import { EquipmentApiService } from '../api/equipment-api.service';
+import { JobsApiService } from '../api/jobs-api.service';
 import { UsersApiService } from '../api/users-api.service';
 
 @Component({
+  imports: [RouterLink],
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink],
+  styleUrl: './dashboard.component.scss',
   template: `
     <div class="dashboard">
       <a routerLink="/jobs" class="widget">
@@ -25,7 +27,6 @@ import { UsersApiService } from '../api/users-api.service';
       </a>
     </div>
   `,
-  styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
   private readonly jobsApi = inject(JobsApiService);

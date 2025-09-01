@@ -1,13 +1,14 @@
-import * as crypto from 'crypto';
-import { Repository } from 'typeorm';
-import { InvitationsService } from '../invitations.service';
-import { Invitation, InvitationRole } from '../entities/invitation.entity';
-import { CompanyUser, CompanyUserRole } from '../entities/company-user.entity';
-import { Company } from '../entities/company.entity';
+import * as crypto from 'node:crypto';
+import { type SendMailOptions } from 'nodemailer';
+import { type Repository } from 'typeorm';
+
+import { type EmailService } from '../../common/email';
 import { User } from '../../users/user.entity';
 import { Email } from '../../users/value-objects/email.vo';
-import { EmailService } from '../../common/email';
-import { SendMailOptions } from 'nodemailer';
+import { CompanyUser, CompanyUserRole } from '../entities/company-user.entity';
+import { Company } from '../entities/company.entity';
+import { Invitation, InvitationRole } from '../entities/invitation.entity';
+import { InvitationsService } from '../invitations.service';
 
 describe('InvitationsService acceptExistingUser', () => {
   let service: InvitationsService;
@@ -63,30 +64,30 @@ describe('InvitationsService acceptExistingUser', () => {
     const invitation = Object.assign(new Invitation(), {
       companyId: 7,
       email: 'existing@user.com',
-      role: InvitationRole.ADMIN,
-      tokenHash,
       expiresAt: new Date(Date.now() + 10000),
       invitedBy: 1,
+      role: InvitationRole.ADMIN,
+      tokenHash,
     });
     invitationsRepo.findOne.mockResolvedValue(invitation);
     usersRepo.findOne.mockResolvedValue(
       Object.assign(new User(), {
-        id: 5,
         email: new Email('existing@user.com'),
+        id: 5,
       }),
     );
 
     const user = await service.acceptExistingUser(token, {
-      userId: 5,
       email: 'existing@user.com',
+      userId: 5,
     });
 
     expect(user.companyId).toBe(7);
     expect(companyUsersRepo.create).toHaveBeenCalledWith({
       companyId: 7,
-      userId: 5,
-      role: CompanyUserRole.ADMIN,
       invitedBy: 1,
+      role: CompanyUserRole.ADMIN,
+      userId: 5,
     });
     expect(invitation.acceptedAt).toBeInstanceOf(Date);
     const [[options]] = emailService.send.mock.calls;
@@ -102,21 +103,21 @@ describe('InvitationsService acceptExistingUser', () => {
     const invitation = Object.assign(new Invitation(), {
       companyId: 7,
       email: 'invited@user.com',
+      expiresAt: new Date(Date.now() + 10000),
       role: InvitationRole.WORKER,
       tokenHash,
-      expiresAt: new Date(Date.now() + 10000),
     });
     invitationsRepo.findOne.mockResolvedValue(invitation);
     usersRepo.findOne.mockResolvedValue(
       Object.assign(new User(), {
-        id: 5,
         email: new Email('invited@user.com'),
+        id: 5,
       }),
     );
     await expect(
       service.acceptExistingUser(token, {
-        userId: 5,
         email: 'other@user.com',
+        userId: 5,
       }),
     ).rejects.toMatchObject({ status: 403 });
   });
@@ -125,20 +126,20 @@ describe('InvitationsService acceptExistingUser', () => {
     const token = 'expired';
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const invitation = Object.assign(new Invitation(), {
-      tokenHash,
       companyId: 1,
       email: 'a@b.com',
-      role: InvitationRole.WORKER,
       expiresAt: new Date(Date.now() - 1000),
+      role: InvitationRole.WORKER,
+      tokenHash,
     });
     invitationsRepo.findOne.mockResolvedValue(invitation);
     usersRepo.findOne.mockResolvedValue(
-      Object.assign(new User(), { id: 1, email: new Email('a@b.com') }),
+      Object.assign(new User(), { email: new Email('a@b.com'), id: 1 }),
     );
     await expect(
       service.acceptExistingUser(token, {
-        userId: 1,
         email: 'a@b.com',
+        userId: 1,
       }),
     ).rejects.toMatchObject({ status: 400 });
   });
@@ -147,37 +148,37 @@ describe('InvitationsService acceptExistingUser', () => {
     const token = 'revoked';
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const invitation = Object.assign(new Invitation(), {
-      tokenHash,
       companyId: 1,
       email: 'a@b.com',
-      role: InvitationRole.WORKER,
       expiresAt: new Date(Date.now() + 1000),
       revokedAt: new Date(),
+      role: InvitationRole.WORKER,
+      tokenHash,
     });
     invitationsRepo.findOne.mockResolvedValueOnce(invitation);
     usersRepo.findOne.mockResolvedValue(
-      Object.assign(new User(), { id: 1, email: new Email('a@b.com') }),
+      Object.assign(new User(), { email: new Email('a@b.com'), id: 1 }),
     );
     await expect(
       service.acceptExistingUser(token, {
-        userId: 1,
         email: 'a@b.com',
+        userId: 1,
       }),
     ).rejects.toMatchObject({ status: 400 });
 
     const used = Object.assign(new Invitation(), {
-      tokenHash,
+      acceptedAt: new Date(),
       companyId: 1,
       email: 'a@b.com',
-      role: InvitationRole.WORKER,
       expiresAt: new Date(Date.now() + 1000),
-      acceptedAt: new Date(),
+      role: InvitationRole.WORKER,
+      tokenHash,
     });
     invitationsRepo.findOne.mockResolvedValueOnce(used);
     await expect(
       service.acceptExistingUser(token, {
-        userId: 1,
         email: 'a@b.com',
+        userId: 1,
       }),
     ).rejects.toMatchObject({ status: 400 });
   });

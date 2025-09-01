@@ -1,4 +1,4 @@
-import { ContractFrequency } from '../entities/contract.entity';
+import { type ContractFrequency } from '../entities/contract.entity';
 
 export class ContractResponseDto {
   id: number;

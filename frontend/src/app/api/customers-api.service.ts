@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiService, Paginated, PaginationQuery } from '../api.service';
-import { environment } from '../../environments/environment';
+import { type Observable } from 'rxjs';
 
-export interface Customer {
+import { environment } from '../../environments/environment';
+import { ApiService, type Paginated, type PaginationQuery } from '../api.service';
+
+export type Customer = {
+  active: boolean;
+  email: string;
   id: number;
   name: string;
-  email: string;
-  active: boolean;
 }
 
 export type CreateCustomer = Partial<Omit<Customer, 'id'>>;

@@ -26,6 +26,8 @@ import {
 import { VerificationToken } from './verification-token.entity';
 
 @Module({
+  controllers: [AuthController],
+  exports: [AuthService],
   imports: [
     UsersModule,
     ConfigModule,
@@ -69,7 +71,5 @@ import { VerificationToken } from './verification-token.entity';
       useClass: TypeOrmCompanyMembershipRepository,
     },
   ],
-  controllers: [AuthController],
-  exports: [AuthService],
 })
 export class AuthModule {}

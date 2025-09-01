@@ -1,14 +1,14 @@
+import { type Request, type Response, type NextFunction } from 'express';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
-import { Request, Response, NextFunction } from 'express';
 
-interface RequestStore {
+type RequestStore = {
   requestId: string;
 }
 
-interface RequestWithId extends Request {
+type RequestWithId = {
   requestId?: string;
-}
+} & Request
 
 export const requestIdStorage = new AsyncLocalStorage<RequestStore>();
 

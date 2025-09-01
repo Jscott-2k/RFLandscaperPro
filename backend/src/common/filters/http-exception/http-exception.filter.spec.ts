@@ -1,14 +1,15 @@
+import { type LoggerService } from '@nestjs/common';
+
 import { HttpExceptionFilter } from './http-exception.filter';
-import { LoggerService } from '@nestjs/common';
 
 describe('HttpExceptionFilter', () => {
   it('should be defined', () => {
     const logger: LoggerService = {
-      log: () => undefined,
-      error: () => undefined,
-      warn: () => undefined,
       debug: () => undefined,
+      error: () => undefined,
+      log: () => undefined,
       verbose: () => undefined,
+      warn: () => undefined,
     } as LoggerService;
     expect(new HttpExceptionFilter(logger)).toBeDefined();
   });

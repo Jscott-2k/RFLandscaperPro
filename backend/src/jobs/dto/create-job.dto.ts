@@ -1,3 +1,5 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsNumber,
@@ -7,8 +9,6 @@ import {
   Min,
   Max,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateJobDto {
   @ApiProperty()

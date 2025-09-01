@@ -1,21 +1,22 @@
-// src/database/typeorm.config.ts
-import { join, resolve } from 'path';
-import { existsSync } from 'fs';
-import type { DataSourceOptions } from 'typeorm';
 import type { ConfigService } from '@nestjs/config';
+import type { DataSourceOptions } from 'typeorm';
+
 import { config as dotenvLoad } from 'dotenv';
+import { existsSync } from 'node:fs';
+// src/database/typeorm.config.ts
+import { join, resolve } from 'node:path';
 
 /* ---------- helpers ---------- */
 
 function coalesce<T>(...vals: (T | undefined | null | '')[]): T | undefined {
   for (const v of vals)
-    if (v !== undefined && v !== null && v !== ('' as any)) return v as T;
+    {if (v !== undefined && v !== null && v !== ('' as any)) {return v as T;}}
   return undefined;
 }
 function toBool(v: unknown, fallback = false): boolean {
-  if (typeof v === 'boolean') return v;
+  if (typeof v === 'boolean') {return v;}
   if (typeof v === 'string')
-    return ['1', 'true', 'yes', 'on'].includes(v.toLowerCase());
+    {return ['1', 'true', 'yes', 'on'].includes(v.toLowerCase());}
   return fallback;
 }
 
@@ -24,13 +25,13 @@ type OrmLogLevel = 'query' | 'error' | 'warn' | 'schema' | 'log' | 'migration';
 function parseLogging(envVal?: string): DataSourceOptions['logging'] {
   const v = (envVal || '').toLowerCase();
 
-  if (v === 'all') return true;
-  if (v === 'false' || v === 'off' || v === 'none') return false;
-  if (v === 'true') return true;
+  if (v === 'all') {return true;}
+  if (v === 'false' || v === 'off' || v === 'none') {return false;}
+  if (v === 'true') {return true;}
 
   // Presets
-  if (v === 'query') return ['query', 'error', 'warn'] as OrmLogLevel[];
-  if (v === 'minimal') return ['error', 'warn'] as OrmLogLevel[];
+  if (v === 'query') {return ['query', 'error', 'warn'] as OrmLogLevel[];}
+  if (v === 'minimal') {return ['error', 'warn'] as OrmLogLevel[];}
 
   // Single channels
   if (['query', 'schema', 'error', 'warn', 'log', 'migration'].includes(v)) {
@@ -42,13 +43,13 @@ function parseLogging(envVal?: string): DataSourceOptions['logging'] {
 }
 
 function commonOptions({
-  host,
-  port,
-  username,
-  password,
   database,
-  ssl,
+  host,
   logging,
+  password,
+  port,
+  ssl,
+  username,
 }: {
   host: string;
   port: number;
@@ -65,34 +66,34 @@ function commonOptions({
   ];
 
   return {
-    type: 'postgres',
-    host,
-    port,
-    username,
-    password,
     database,
-
     entities,
-    migrations,
-
-    // Never block boot:
-    synchronize: false,
-    migrationsRun: false,
-
-    logging,
-    maxQueryExecutionTime: 10_000,
-
     // pg driver extras
     extra: {
       connectionTimeoutMillis: 5_000,
       connectTimeoutMS: 5_000,
-      statement_timeout: 15_000,
-      query_timeout: 15_000,
       idle_in_transaction_session_timeout: 15_000,
+      query_timeout: 15_000,
+      statement_timeout: 15_000,
     },
+    host,
+    logging,
+    maxQueryExecutionTime: 10_000,
+
+    migrations,
+    migrationsRun: false,
+
+    password,
+    port,
 
     // proper top-level SSL flag/object for TypeORM
     ssl: ssl ? { rejectUnauthorized: false } : false,
+    // Never block boot:
+    synchronize: false,
+
+    type: 'postgres',
+
+    username,
   };
 }
 
@@ -118,13 +119,13 @@ export function buildTypeOrmOptions(cfg: ConfigService): DataSourceOptions {
   }
 
   return commonOptions({
-    host,
-    port,
-    username,
-    password,
     database,
-    ssl,
+    host,
     logging,
+    password,
+    port,
+    ssl,
+    username,
   });
 }
 
@@ -163,13 +164,13 @@ export function buildTypeOrmOptionsFromEnv(): DataSourceOptions {
   const logging = parseLogging(process.env.TYPEORM_LOGGING);
 
   return commonOptions({
-    host,
-    port,
-    username,
-    password,
     database,
-    ssl,
+    host,
     logging,
+    password,
+    port,
+    ssl,
+    username,
   });
 }
 

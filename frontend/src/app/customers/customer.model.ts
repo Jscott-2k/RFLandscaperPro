@@ -1,6 +1,6 @@
-export interface Customer {
+export type Customer = {
+  email: string;
   id?: number;
   name: string;
-  email: string;
   phone?: string;
 }

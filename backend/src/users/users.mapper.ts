@@ -1,14 +1,14 @@
-import { User } from './user.entity';
-import { UserResponseDto } from './dto/user-response.dto';
+import { type UserResponseDto } from './dto/user-response.dto';
+import { type User } from './user.entity';
 
 export function toUserResponseDto(user: User): UserResponseDto {
   return {
-    id: user.id,
-    username: user.username,
     email: user.email.toString(),
-    role: user.role,
     firstName: user.firstName ?? null,
+    id: user.id,
     lastName: user.lastName ?? null,
     phone: user.phone ? user.phone.toString() : null,
+    role: user.role,
+    username: user.username,
   };
 }

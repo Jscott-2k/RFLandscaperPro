@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { ToasterService } from './toaster.service';
+
 import { LoggerService } from './logger.service';
+import { ToasterService } from './toaster.service';
 
 @Injectable({ providedIn: 'root' })
 export class ErrorService {

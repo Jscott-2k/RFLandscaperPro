@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { ContractsService } from './contracts.service';
+
+import { type ContractsService } from './contracts.service';
 
 @Injectable()
 export class ContractScheduler {

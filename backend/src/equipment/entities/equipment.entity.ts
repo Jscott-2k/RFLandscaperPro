@@ -8,6 +8,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+
 import { Company } from '../../companies/entities/company.entity';
 
 export enum EquipmentType {
@@ -37,23 +38,23 @@ export class Equipment {
   @Column()
   name: string;
 
-  @Column({ type: 'enum', enum: EquipmentType })
+  @Column({ enum: EquipmentType, type: 'enum' })
   type: EquipmentType;
 
   @Column({
-    type: 'enum',
-    enum: EquipmentStatus,
     default: EquipmentStatus.AVAILABLE,
+    enum: EquipmentStatus,
+    type: 'enum',
   })
   status: EquipmentStatus;
 
   @Column({ nullable: true })
   location?: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ nullable: true, type: 'text' })
   description?: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ nullable: true, type: 'date' })
   lastMaintenanceDate?: Date;
 
   @Column()

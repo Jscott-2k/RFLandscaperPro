@@ -7,19 +7,20 @@ import {
   Param,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ContractsService } from './contracts.service';
-import { CreateContractDto } from './dto/create-contract.dto';
-import { UpdateContractDto } from './dto/update-contract.dto';
-import { ContractResponseDto } from './dto/contract-response.dto';
-import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole } from '../users/user.entity';
-import { CompanyId } from '../common/decorators/company-id.decorator';
 import {
   ApiBearerAuth,
   ApiTags,
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
+
+import { CompanyId } from '../common/decorators/company-id.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
+import { UserRole } from '../users/user.entity';
+import { type ContractsService } from './contracts.service';
+import { ContractResponseDto } from './dto/contract-response.dto';
+import { type CreateContractDto } from './dto/create-contract.dto';
+import { type UpdateContractDto } from './dto/update-contract.dto';
 
 @ApiTags('contracts')
 @ApiBearerAuth()
@@ -61,7 +62,7 @@ export class ContractsController {
   @Post(':id/cancel')
   @Roles(UserRole.CompanyAdmin)
   @ApiOperation({ summary: 'Cancel contract' })
-  @ApiResponse({ status: 200, description: 'Contract cancelled' })
+  @ApiResponse({ description: 'Contract cancelled', status: 200 })
   cancel(
     @Param('id', ParseIntPipe) id: number,
     @CompanyId() companyId: number,

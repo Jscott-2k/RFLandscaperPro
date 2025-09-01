@@ -3,19 +3,19 @@ import {
   NotFoundException,
   InternalServerErrorException,
   ConflictException,
-} from '@nestjs/common';
+ Inject } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
-import { Address } from './entities/address.entity';
-import { CreateCustomerDto } from './dto/create-customer.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
-import { CustomerResponseDto } from './dto/customer-response.dto';
-import { Paginated, PaginationParams } from '../common/pagination';
+
+import { type Paginated, type PaginationParams } from '../common/pagination';
+import { toCustomerResponseDto } from './customers.mapper';
+import { type CreateCustomerDto } from './dto/create-customer.dto';
+import { type CustomerResponseDto } from './dto/customer-response.dto';
+import { type UpdateCustomerDto } from './dto/update-customer.dto';
+import { type Address } from './entities/address.entity';
 import {
-  ICustomerRepository,
+  type ICustomerRepository,
   CUSTOMER_REPOSITORY,
 } from './repositories/customer.repository';
-import { Inject } from '@nestjs/common';
-import { toCustomerResponseDto } from './customers.mapper';
 
 @Injectable()
 export class CustomersService {
@@ -31,11 +31,11 @@ export class CustomersService {
     try {
       const customer = this.customerRepository.create({
         ...createCustomerDto,
-        companyId,
         addresses: createCustomerDto.addresses?.map((addr) => ({
           ...addr,
           companyId,
         })) as Address[],
+        companyId,
       });
       const savedCustomer = await this.customerRepository.save(customer);
       return toCustomerResponseDto(savedCustomer);

@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsEnum,
   IsInt,
@@ -6,7 +7,7 @@ import {
   IsDateString,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+
 import { ContractFrequency } from '../entities/contract.entity';
 
 class JobTemplateDto {

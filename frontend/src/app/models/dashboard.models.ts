@@ -1,10 +1,10 @@
-export interface UpcomingJobSummary {
+export type UpcomingJobSummary = {
+  completed: boolean;
   id: number;
   title: string;
-  completed: boolean;
 }
 
-export interface EquipmentCount {
+export type EquipmentCount = {
   id: number;
   name: string;
   status: string;
