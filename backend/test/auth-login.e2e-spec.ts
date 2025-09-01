@@ -34,6 +34,8 @@ describe('Auth login endpoint (e2e)', () => {
       email: new Email('verified@example.com'),
       id: 1,
       isVerified: true,
+      firstName: 'Verified',
+      lastName: 'User',
       password: hashed,
       role: UserRole.Customer,
       username: 'verified',

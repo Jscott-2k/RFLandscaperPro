@@ -135,9 +135,10 @@ describe('AuthService.signupOwner', () => {
     await service.signupOwner({
       companyName: 'ACME',
       email: 'owner@example.com',
-      name: 'owner',
+      username: 'owner',
       password: 'Password123!',
       firstName: 'Owner',
+      lastName: 'owner',
       phone: '5551234567',
     });
 
@@ -153,6 +154,7 @@ describe('AuthService.signupOwner', () => {
       firstName: 'Owner',
       phone: new PhoneNumber('5551234567'),
     });
+
     expect(loginSpy).toHaveBeenCalledWith(user);
   });
 });
