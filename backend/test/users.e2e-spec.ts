@@ -3,7 +3,7 @@ import { APP_GUARD , Reflector } from '@nestjs/core';
 import { Test, type TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { type Request, type Response, type NextFunction } from 'express';
-import * as request from 'supertest';
+import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { EmailService } from '../src/common/email';

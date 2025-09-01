@@ -8,7 +8,8 @@ on:
 
 jobs:
   # ---------- LINT ----------
-  lint:
+  lint-backend:
+    name: lint (backend)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,13 +19,26 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
       - run: npm ci
-      - run: npm run lint
+      - run: npm run lint -w rflandscaperpro-backend
+
+  lint-frontend:
+    name: lint (frontend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run lint -w frontend
 
   # ---------- TEST ----------
   test-backend-unit:
     name: test (backend, unit, npm test)
     runs-on: ubuntu-latest
-    needs: [lint]
+    needs: [lint-backend]
     services:
       postgres:
         image: postgres:16
@@ -60,7 +74,7 @@ jobs:
   test-backend-e2e:
     name: test (backend, e2e, npm run test:e2e)
     runs-on: ubuntu-latest
-    needs: [lint]
+    needs: [lint-backend]
     services:
       postgres:
         image: postgres:16
@@ -96,7 +110,7 @@ jobs:
   test-frontend-unit:
     name: test (frontend, unit, npm test)
     runs-on: ubuntu-latest
-    needs: [lint]
+    needs: [lint-frontend]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

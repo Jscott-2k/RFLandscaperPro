@@ -8,11 +8,11 @@ import * as crypto from 'node:crypto';
 import { type FindOptionsWhere, MoreThan, type Repository } from 'typeorm';
 
 import { validatePasswordStrength } from '../auth/password.util';
-import { type EmailService } from '../common/email';
+import { EmailService } from '../common/email';
 import { passwordResetMail } from '../common/email/templates';
 import { type CreateUserDto } from './dto/create-user.dto';
 import { type UpdateUserDto } from './dto/update-user.dto';
-import { type UserCreationService } from './user-creation.service';
+import { UserCreationService } from './user-creation.service';
 import { User, type UserRole } from './user.entity';
 import { Email } from './value-objects/email.vo';
 

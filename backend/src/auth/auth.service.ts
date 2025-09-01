@@ -4,22 +4,22 @@ import {
   Inject,
   Optional,
 } from '@nestjs/common';
-import { type ConfigService } from '@nestjs/config';
-import { type JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as crypto from 'node:crypto';
-import { type Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
-import { type EmailService } from '../common/email';
+import { EmailService } from '../common/email';
 import { verificationMail } from '../common/email/templates';
 import {
   CompanyUserRole,
   CompanyUserStatus,
 } from '../companies/entities/company-user.entity';
-import { type MetricsService } from '../metrics/metrics.service';
-import { type UserCreationService } from '../users/user-creation.service';
+import { MetricsService } from '../metrics/metrics.service';
+import { UserCreationService } from '../users/user-creation.service';
 import { User, UserRole } from '../users/user.entity';
-import { type UsersService } from '../users/users.service';
+import { UsersService } from '../users/users.service';
 import { Email } from '../users/value-objects/email.vo';
 import { PhoneNumber } from '../users/value-objects/phone-number.vo';
 import { type RegisterDto } from './dto/register.dto';

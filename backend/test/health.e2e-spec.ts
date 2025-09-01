@@ -1,7 +1,7 @@
 import { type INestApplication, ServiceUnavailableException } from '@nestjs/common';
 import { HealthCheckService, TypeOrmHealthIndicator } from '@nestjs/terminus';
 import { Test, type TestingModule } from '@nestjs/testing';
-import * as request from 'supertest';
+import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { HealthController } from './../src/health/health.controller';

@@ -4,11 +4,13 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { Test, type TestingModule } from '@nestjs/testing';
-import * as request from 'supertest';
+import request from 'supertest';
 import { type App } from 'supertest/types';
 
 import { AuthController } from '../src/auth/auth.controller';
 import { AuthService } from '../src/auth/auth.service';
+
+import './env.test';
 
 describe('Auth signup-owner endpoint (e2e)', () => {
   let app: INestApplication<App>;

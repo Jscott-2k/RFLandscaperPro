@@ -10,7 +10,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { Public } from '../common/decorators/public.decorator';
 import { type User } from '../users/user.entity';
-import { type AuthService } from './auth.service';
+import { AuthService } from './auth.service';
 import { type LoginDto } from './dto/login.dto';
 import { type RefreshTokenDto } from './dto/refresh-token.dto';
 import { type RegisterDto } from './dto/register.dto';
