@@ -5,7 +5,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import { ErrorService } from '../error.service';
 import { ToasterService } from '../toaster.service';
-import { EquipmentService, type CreateEquipment, type Equipment } from './equipment.service';
+import { EquipmentService, type CreateEquipment } from './equipment.service';
 
 @Component({
   imports: [CommonModule, ReactiveFormsModule, RouterModule],

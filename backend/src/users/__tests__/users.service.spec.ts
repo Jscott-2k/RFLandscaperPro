@@ -8,6 +8,7 @@ import { type UserCreationService } from '../user-creation.service';
 import { User, UserRole } from '../user.entity';
 import { UsersService } from '../users.service';
 import { Email } from '../value-objects/email.vo';
+import { PhoneNumber } from '../value-objects/phone-number.vo';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -56,8 +57,19 @@ describe('UsersService', () => {
 
   it('delegates user creation to UserCreationService', async () => {
     const dto = {
+      company: {
+        address: '123 Street',
+        email: 'company@example.com',
+        name: 'Acme Co',
+        phone: '1234567890',
+      },
       email: new Email('user1@example.com'),
+      firstName: 'First',
+      isVerified: false,
+      lastName: 'Last',
       password: 'secret',
+      phone: new PhoneNumber('1234567890'),
+      role: UserRole.Customer,
       username: 'user1',
     };
     const created = Object.assign(new User(), dto);

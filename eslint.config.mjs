@@ -10,6 +10,17 @@ import unusedImports from "eslint-plugin-unused-imports";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
+/** @type {Record<string, import('eslint').ESLint.Plugin>} */
+const plugins = {
+  import: /** @type {any} */ (importPlugin),
+  perfectionist: /** @type {any} */ (perfectionist),
+  promise: /** @type {any} */ (promisePlugin),
+  sonarjs: /** @type {any} */ (sonarjs),
+  unicorn: /** @type {any} */ (unicorn),
+  "unused-imports": /** @type {any} */ (unusedImports),
+};
+
+
 export default tseslint.config(
   // Global ignores (monorepo-friendly)
   {
@@ -46,20 +57,17 @@ export default tseslint.config(
 
   // Enable plugins + rules (fast profile)
   {
-    plugins: {
-      import: importPlugin,
-      perfectionist,
-      promise: promisePlugin,
-      sonarjs,
-      unicorn,
-      "unused-imports": unusedImports,
-    },
+    plugins,
     rules: {
       // TypeScript (non-type-checked)
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
       "@typescript-eslint/consistent-type-imports": [
         "error",
-        { fixStyle: "inline-type-imports", prefer: "type-imports" },
+        { 
+          disallowTypeAnnotations: false,
+          fixStyle: "inline-type-imports",
+          prefer: "type-imports",
+        },
       ],
       "@typescript-eslint/explicit-function-return-type": [
         "warn",
@@ -159,6 +167,14 @@ export default tseslint.config(
     },
   },
 
+  // Backend: allow value imports for DI
+  {
+    files: ["backend/src/**/*.ts"],
+    rules: {
+      "@typescript-eslint/consistent-type-imports": "off",
+    },
+  },
+  
   // Scripts (mjs)
   {
     files: ["scripts/**/*.mjs"],

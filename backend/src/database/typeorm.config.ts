@@ -61,8 +61,8 @@ function commonOptions({
 }): DataSourceOptions {
   const entities = [join(__dirname, '..', '**', '*.entity.{ts,js}')];
   const migrations = [
-    join(__dirname, 'migrations', '*.{ts,js}'),
-    join(__dirname, '..', 'database', 'migrations', '*.{ts,js}'),
+    join(__dirname, '..', 'migrations', '*.{ts,js}'),
+    join(__dirname, 'migrations', '*.{ts,js}'),  
   ];
 
   return {

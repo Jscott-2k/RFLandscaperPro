@@ -1,9 +1,10 @@
-import 'reflect-metadata';
 import { Test, type TestingModule } from '@nestjs/testing';
 
 import { type PaginationParams } from '../common/pagination';
 import { JobsController } from './jobs.controller';
 import { JobsService } from './jobs.service';
+
+import 'reflect-metadata';
 
 describe('JobsController', () => {
   let controller: JobsController;

@@ -21,7 +21,7 @@ export class JobEditorComponent implements OnInit {
   private errorService = inject(ErrorService);
   private notifications = inject(ToasterService);
   private fb = inject(FormBuilder);
-  job: Partial<Job> = { customerId: 1, title: '', completed: false };
+  job: Partial<Job> = { completed: false, customerId: 1, title: '' };
 
   form = this.fb.nonNullable.group({
     description: [''],

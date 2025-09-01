@@ -5,11 +5,11 @@ import {
   CUSTOMER_REPOSITORY,
   type ICustomerRepository,
 } from '../customers/repositories/customer.repository';
+import { Equipment } from '../equipment/entities/equipment.entity';
 import {
   EQUIPMENT_REPOSITORY,
   type IEquipmentRepository,
 } from '../equipment/repositories/equipment.repository';
-import { Equipment } from '../equipment/entities/equipment.entity';
 import {
   USER_REPOSITORY,
   type IUserRepository,
