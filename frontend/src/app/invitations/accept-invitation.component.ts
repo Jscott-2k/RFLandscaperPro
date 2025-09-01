@@ -8,6 +8,9 @@ import { AuthService } from '../auth/auth.service';
 import { ErrorService } from '../error.service';
 import { InvitationsService, type InvitationPreview } from './invitations.service';
 
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
+
 @Component({
   imports: [CommonModule, ReactiveFormsModule],
   selector: 'app-accept-invitation',
@@ -34,7 +37,11 @@ import { InvitationsService, type InvitationPreview } from './invitations.servic
         <div *ngIf="mode === 'create'">
           <form [formGroup]="createForm" (ngSubmit)="create()">
             <input type="text" formControlName="name" placeholder="Name" />
-            <input type="password" formControlName="password" placeholder="Password" />
+            <input
+              type="password"
+              formControlName="password"
+              placeholder="Password (8+ chars, upper & lower case, number, special)"
+            />
             <button type="submit" [disabled]="createLoading">Create Account</button>
           </form>
           <button type="button" (click)="mode = 'login'">I have an account</button>
@@ -63,7 +70,14 @@ export class AcceptInvitationComponent implements OnInit {
 
   createForm = this.fb.nonNullable.group({
     name: ['', Validators.required.bind(Validators)],
-    password: ['', Validators.required.bind(Validators)],
+    password: [
+      '',
+      [
+        Validators.required.bind(Validators),
+        Validators.minLength(8).bind(Validators),
+        Validators.pattern(PASSWORD_REGEX).bind(Validators),
+      ],
+    ],
   });
 
   loginLoading = false;

@@ -8,6 +8,9 @@ import { ToasterService } from '../toaster.service';
 import { UserService } from './user.service';
 import { type CreateUser } from './user.model';
 
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
+
 @Component({
   imports: [CommonModule, ReactiveFormsModule],
   selector: 'app-user-form',
@@ -25,7 +28,11 @@ import { type CreateUser } from './user.model';
       </label>
       <label>
         Password:
-        <input type="password" formControlName="password" />
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="Password (8+ chars, upper & lower case, number, special)"
+        />
       </label>
       <label>
         First Name:
@@ -87,7 +94,14 @@ export class UserFormComponent {
     email: ['', [Validators.required, Validators.email]],
     firstName: [''],
     lastName: [''],
-    password: ['', Validators.required],
+    password: [
+      '',
+      [
+        Validators.required.bind(Validators),
+        Validators.minLength(8).bind(Validators),
+        Validators.pattern(PASSWORD_REGEX).bind(Validators),
+      ],
+    ],
     phone: [''],
     role: ['customer'],
     username: ['', Validators.required],

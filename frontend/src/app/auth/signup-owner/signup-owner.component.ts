@@ -7,6 +7,9 @@ import { finalize } from 'rxjs';
 import { ErrorService } from '../../error.service';
 import { AuthService } from '../auth.service';
 
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
+
 @Component({
   imports: [CommonModule, ReactiveFormsModule],
   selector: 'app-signup-owner',
@@ -18,7 +21,11 @@ import { AuthService } from '../auth.service';
     <form [formGroup]="form" (ngSubmit)="submit()">
       <input type="text" formControlName="name" placeholder="Name" />
       <input type="email" formControlName="email" placeholder="Email" />
-      <input type="password" formControlName="password" placeholder="Password" />
+      <input
+        type="password"
+        formControlName="password"
+        placeholder="Password (8+ chars, upper & lower case, number, special)"
+      />
       <input type="text" formControlName="companyName" placeholder="Company Name" />
       <button type="submit" [disabled]="loading">Sign Up</button>
     </form>
@@ -34,7 +41,14 @@ export class SignupOwnerComponent {
     companyName: ['', Validators.required.bind(Validators)],
     email: ['', [Validators.required.bind(Validators), Validators.email.bind(Validators)]],
     name: ['', Validators.required.bind(Validators)],
-    password: ['', Validators.required.bind(Validators)],
+    password: [
+      '',
+      [
+        Validators.required.bind(Validators),
+        Validators.minLength(8).bind(Validators),
+        Validators.pattern(PASSWORD_REGEX).bind(Validators),
+      ],
+    ],
   });
 
   loading = false;
