@@ -1,10 +1,11 @@
-import 'reflect-metadata';
 import { Test, type TestingModule } from '@nestjs/testing';
 
 import { type EquipmentResponseDto } from './dto/equipment-response.dto';
 import { EquipmentStatus, EquipmentType } from './entities/equipment.entity';
 import { EquipmentController } from './equipment.controller';
 import { EquipmentService } from './equipment.service';
+
+import 'reflect-metadata';
 
 describe('EquipmentController', () => {
   let controller: EquipmentController;

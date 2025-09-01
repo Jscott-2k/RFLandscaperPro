@@ -5,8 +5,8 @@ import { Router } from '@angular/router';
 
 import { ErrorService } from '../error.service';
 import { ToasterService } from '../toaster.service';
-import { UserService } from './user.service';
 import { type CreateUser } from './user.model';
+import { UserService } from './user.service';
 
 const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
@@ -117,11 +117,11 @@ export class UserFormComponent {
       password,
       username,
     };
-    if (firstName) payload.firstName = firstName;
-    if (lastName) payload.lastName = lastName;
-    if (phone) payload.phone = phone;
-    if (role) payload.role = role;
-    if (this.isOwner) payload.company = company;
+    if (firstName) {payload.firstName = firstName;}
+    if (lastName) {payload.lastName = lastName;}
+    if (phone) {payload.phone = phone;}
+    if (role) {payload.role = role;}
+    if (this.isOwner) {payload.company = company;}
     this.userService.createUser(payload).subscribe({
       error: () => this.errorService.show('Failed to create user'),
       next: () => {
