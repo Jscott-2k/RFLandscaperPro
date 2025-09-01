@@ -1,3 +1,4 @@
+#requires -version 7.0
 #!/usr/bin/env pwsh
 param(
   [switch]$Rebuild,      # up --build
@@ -9,100 +10,166 @@ param(
   [switch]$Local         # run backend and frontend without Docker
 )
 
-$ErrorActionPreference = "Stop"
-Set-Location -Path (Resolve-Path "$PSScriptRoot")
+$ErrorActionPreference = 'Stop'
+Set-Location -Path (Resolve-Path $PSScriptRoot)
 
+# --------------------------------------------------------------------
+# Local-only shortcut
+# --------------------------------------------------------------------
 if ($Local) {
-  $backend  = Start-Process npm -ArgumentList '--prefix','backend','run','start:dev' -PassThru
-  $frontend = Start-Process npm -ArgumentList '--prefix','frontend','start' -PassThru
-  Write-Host "→ Started local backend (PID $($backend.Id)) and frontend (PID $($frontend.Id))." -ForegroundColor Cyan
+  $backend  = Start-Process -FilePath npm -ArgumentList '--prefix','backend','run','start:dev' -PassThru
+  $frontend = Start-Process -FilePath npm -ArgumentList '--prefix','frontend','start' -PassThru
+  Write-Host 'Started local backend and frontend.' -ForegroundColor Cyan
   Wait-Process -Id $backend.Id, $frontend.Id
   return
 }
 
+# --------------------------------------------------------------------
+# Docker readiness helpers
+# --------------------------------------------------------------------
+function Test-DockerReady {
+  & docker info --format '{{json .ServerVersion}}' > $null 2> $null
+  return ($LASTEXITCODE -eq 0)
+}
+
+function Wait-Docker {
+  param([int]$TimeoutSec = 180)
+  Write-Host 'Waiting for Docker engine...' -ForegroundColor Yellow
+  $deadline = (Get-Date).AddSeconds($TimeoutSec)
+  while ((Get-Date) -lt $deadline) {
+    if (Test-DockerReady) {
+      $v = (& docker version --format '{{.Server.Version}}' 2>$null)
+      Write-Host ("Docker is ready. Server version: {0}" -f ($v -join '')) -ForegroundColor Green
+      return $true
+    }
+    Start-Sleep -Seconds 2
+  }
+  throw "Docker did not become ready within ${TimeoutSec}s."
+}
+
 function Preflight {
-  Write-Host "→ Running Docker preflight checks" -ForegroundColor Cyan
+  Write-Host 'Running Docker preflight checks' -ForegroundColor Cyan
 
   if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-    throw "Docker CLI not found. Install Docker Desktop."
+    throw 'Docker CLI not found. Install Docker Desktop.'
   }
 
-  $desktopExe = Join-Path $Env:ProgramFiles 'Docker/Docker/Docker Desktop.exe'
-  if (-not (Test-Path $desktopExe)) { throw "Docker Desktop is not installed." }
+  if (-not (Test-DockerReady)) {
+    $desktopExe = Join-Path $Env:ProgramFiles 'Docker\Docker\Docker Desktop.exe'
+    if (-not (Test-Path $desktopExe)) { throw 'Docker Desktop is not installed.' }
 
-  $svc = Get-Service -Name 'com.docker.service' -ErrorAction SilentlyContinue
-  if ($null -eq $svc) { throw "Docker Desktop service 'com.docker.service' not found." }
-  if ($svc.Status -ne 'Running') {
-    $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-    if (-not $isAdmin) {
-      throw "Docker Desktop service is not running and current user lacks permission to start it. Start Docker Desktop manually or run PowerShell as Administrator."
-    }
-    try {
+    $svc = Get-Service -Name 'com.docker.service' -ErrorAction SilentlyContinue
+    $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
+      [Security.Principal.WindowsBuiltInRole]::Administrator)
+
+    if ($svc -and $svc.Status -ne 'Running' -and $isAdmin) {
+      if ($svc.StartType -eq 'Disabled') { Set-Service -Name 'com.docker.service' -StartupType Automatic }
+      Write-Host 'Starting com.docker.service...' -ForegroundColor Yellow
       Start-Service -Name 'com.docker.service' -ErrorAction Stop
-    } catch {
-      throw "Failed to start Docker Desktop service: $_"
+    } elseif (-not $svc -or $svc.Status -ne 'Running') {
+      Write-Host 'Launching Docker Desktop (user mode)...' -ForegroundColor Yellow
+      Start-Process -FilePath $desktopExe | Out-Null
     }
-    do {
-      Start-Sleep -Seconds 1
-      $svc = Get-Service -Name 'com.docker.service' -ErrorAction SilentlyContinue
-    } until ($svc.Status -eq 'Running')
+
+    Wait-Docker
   }
+}
+# --------------------------------------------------------------------
+# Compose detection (v2 vs v1)
+# --------------------------------------------------------------------
+$script:UseComposeV2 = $false
+$null = & docker compose version 2>$null
+if ($LASTEXITCODE -eq 0) { $script:UseComposeV2 = $true }
 
-  if (Get-Command wsl -ErrorAction SilentlyContinue) {
-    try {
-      $wsl = wsl.exe -l -v 2>$null
-      if ($LASTEXITCODE -eq 0 -and -not ($wsl | Select-String 'docker-desktop')) {
-        throw "WSL backend is not running. Ensure Docker Desktop is configured for WSL2."
-      }
-    } catch {
-      throw "Unable to query WSL backend: $_"
-    }
+function Join-ComposeArgs {
+  param([string[]]$Args)
+  if ($null -eq $Args) { return @() }
+  return @($Args | Where-Object { $_ -ne $null -and $_.ToString().Trim().Length -gt 0 })
+}
+
+function Invoke-ComposeCmd {
+  param([string]$Cmd, [string[]]$Args)
+  $argv = @($Cmd) + (Join-ComposeArgs -Args $Args)
+  if ($script:UseComposeV2) {
+    return & docker compose @argv 2>&1
+  } else {
+    return & docker-compose @argv 2>&1
   }
-
-  $pipe = '\\.\pipe\docker_engine'
-  if (-not (Test-Path $pipe)) { throw "Docker engine socket '$pipe' not found." }
-
-  try { docker version | Out-Null } catch { throw "Cannot communicate with Docker engine." }
 }
 
 function Compose {
-  param([Parameter(ValueFromRemainingArguments = $true)]
-        [string[]]$Args)
+  param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Args)
 
-  Write-Host "→ docker compose $($Args -join ' ')" -ForegroundColor Cyan
-  $output = & docker compose @Args 2>&1
+  if ($Args.Count -eq 0) { throw 'Compose: missing subcommand (e.g., up, down, build, ps)' }
+
+  $cmd  = $Args[0]
+  $rest = @()
+  if ($Args.Count -gt 1) { $rest = $Args[1..($Args.Count-1)] }
+
+  # Only add --progress=plain to `build` on v2 (not to `up`)
+  if ($script:UseComposeV2 -and $cmd -eq 'build' -and -not ($rest -contains '--progress=plain')) {
+    $rest = @('--progress=plain') + $rest
+  }
+
+  $shown = if ($script:UseComposeV2) { 'docker compose' } else { 'docker-compose' }
+  Write-Host ("{0} {1} {2}" -f $shown, $cmd, ($rest -join ' ')) -ForegroundColor Cyan
+
+  $lines = @()
+  & { Invoke-ComposeCmd -Cmd $cmd -Args $rest } 2>&1 | Tee-Object -Variable lines
   $code = $LASTEXITCODE
 
-  # Be lenient for `down` (it often returns non-zero when nothing exists); strict otherwise.
-  $isDown = ($Args.Count -gt 0 -and $Args[0] -eq 'down')
+  $isDown = ($cmd -eq 'down')
   if ($code -ne 0) {
-    if ($output -match 'error during connect' -or $output -match 'pipe') {
-      throw "Failed to communicate with Docker engine. Is Docker Desktop running?"
+    Write-Host ''
+    Write-Host ("--- compose output (exit {0}) ---" -f $code) -ForegroundColor Red
+    $lines | ForEach-Object { Write-Host $_ }
+    Write-Host '--- end output ---' -ForegroundColor Red
+
+    if (($lines -join "`n") -match 'error during connect|pipe') {
+      throw 'Failed to communicate with Docker engine. Is Docker Desktop running?'
     }
     if ($isDown) {
-      Write-Warning "docker compose down exited with $code (likely nothing to remove). Continuing…"
+      Write-Warning ("{0} down exited with {1} (likely nothing to remove). Continuing..." -f $shown, $code)
       return
-    } else {
-      throw "docker compose $($Args -join ' ') failed with exit code $code"
     }
+    throw ("{0} {1} {2} failed with exit code {3}" -f $shown, $cmd, ($rest -join ' '), $code)
   }
 }
 
 function Get-ComposeStatus {
   param([string[]]$Svcs)
-  $out = & docker compose ps --format json @Svcs 2>$null
-  if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($out)) { return @() }
-  $json = $out | ConvertFrom-Json
-  if ($null -eq $json) { return @() }
-  if ($json -is [System.Array]) { return $json } else { return @($json) }
+
+  if ($script:UseComposeV2) {
+    $out = Invoke-ComposeCmd -Args (@('ps','--format','json') + (Join-ComposeArgs -Args $Svcs))
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($out)) { return @() }
+    if ($out -match 'Usage:\s+docker compose') { return @() }  # guard against help text
+    try {
+      $json = $out | ConvertFrom-Json
+    } catch {
+      return @()
+    }
+    if ($null -eq $json) { return @() }
+    if ($json -is [System.Array]) { return $json } else { return @($json) }
+  } else {
+    # v1: parse plain table
+    $out = Invoke-ComposeCmd -Args (@('ps') + (Join-ComposeArgs -Args $Svcs))
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($out)) { return @() }
+    if ($out -match 'Usage:\s+docker-compose') { return @() }
+    $lines = $out -split "`r?`n" | Where-Object { $_.Trim().Length -gt 0 }
+    $rows = $lines | Where-Object { $_ -match '\b(Up|Exit|Restarting)\b' }
+    $result = @()
+    foreach ($r in $rows) {
+      $name  = ($r -replace '\s{2,}', '|').Split('|')[0].Trim()
+      $state = ($r -match '\b(Up|Exit|Restarting)\b') ? $Matches[1] : ''
+      $service = $name -replace '_\d+$',''
+      $result += [PSCustomObject]@{ Service = $service; Name = $name; State = $state; Health = $null }
+    }
+    return $result
+  }
 }
 
 function Wait-ComposeHealthy {
-  param(
-    [string[]]$Svcs,
-    [int]$TimeoutSeconds = 120,
-    [int]$PollSeconds    = 3
-  )
+  param([string[]]$Svcs, [int]$TimeoutSeconds = 120, [int]$PollSeconds = 3)
   $sw = [System.Diagnostics.Stopwatch]::StartNew()
   do {
     $items = Get-ComposeStatus -Svcs $Svcs
@@ -110,74 +177,74 @@ function Wait-ComposeHealthy {
       Start-Sleep -Seconds $PollSeconds
       continue
     }
-
     $allOk = $true
     foreach ($c in $items) {
       $state = $c.State
       $health = $null
-      if ($c.PSObject.Properties.Name -contains 'Health') {
-        $health = $c.Health
-      }
-      if ($state -ne 'running') { $allOk = $false }
+      if ($c.PSObject.Properties.Name -contains 'Health') { $health = $c.Health }
+      if (($state -ne 'running') -and ($state -ne 'Up')) { $allOk = $false }
       if ($null -ne $health -and $health -ne 'healthy') { $allOk = $false }
     }
-
     if ($allOk) { return $true }
     Start-Sleep -Seconds $PollSeconds
   } while ($sw.Elapsed.TotalSeconds -lt $TimeoutSeconds)
-
   return $false
 }
 
-# Preflight checks before any docker compose commands
+# --------------------------------------------------------------------
+# Main flow
+# --------------------------------------------------------------------
 Preflight
 
-# Optional bits
-if ($Clean) { Compose down --volumes --remove-orphans @Services }  # use long flag; avoids -Verbose capture
-if ($Pull)  { Compose pull @Services }
+$svc = Join-ComposeArgs -Args $Services
 
-# Build/run
+if ($Clean) {
+  if ($svc.Count -gt 0) { Compose down --volumes --remove-orphans @svc } else { Compose down --volumes --remove-orphans }
+}
+if ($Pull)  {
+  if ($svc.Count -gt 0) { Compose pull @svc } else { Compose pull }
+}
+
 if ($NoCache) {
-  Compose build --no-cache @Services
-  Compose up -d @Services
+  if ($svc.Count -gt 0) { Compose build --no-cache @svc } else { Compose build --no-cache }
+  if ($svc.Count -gt 0) { Compose up -d @svc } else { Compose up -d }
 }
 elseif ($Rebuild) {
-  Compose up --build -d @Services
+  if ($svc.Count -gt 0) { Compose up --build -d @svc } else { Compose up --build -d }
 }
 else {
-  Compose up -d @Services
+  if ($svc.Count -gt 0) { Compose up -d @svc } else { Compose up -d }
 }
 
-# Show current state
-Compose ps
+if ($svc.Count -gt 0) { Compose ps @svc } else { Compose ps }
 
-# Wait for services to be 'running' (and 'healthy' if healthchecks exist)
-$ok = Wait-ComposeHealthy -Svcs $Services
+$ok = Wait-ComposeHealthy -Svcs $svc
 
-# Always print a status table so you can see what happened
-$items = Get-ComposeStatus -Svcs $Services
+$items = Get-ComposeStatus -Svcs $svc
 if ($items.Count -gt 0) {
   $items | Select-Object Service, Name, State, Health | Format-Table -AutoSize
 }
 
 if ($ok) {
-  Write-Host ""
-  Write-Host "Services are available at:" -ForegroundColor Green
-  Write-Host "Frontend:   http://localhost:4200"
-  Write-Host "Backend:    http://localhost:3000"
-  Write-Host "Swagger UI: http://localhost:3000/docs"
-  Write-Host "Log Server: http://localhost:9880"
-  Write-Host "Mailhog:    http://localhost:8025  (SMTP: smtp://localhost:1025)"
-  Write-Host "Postgres:   postgres://localhost:5432"
-  Write-Host "Prometheus: http://localhost:9090"
-  Write-Host "Grafana:    http://localhost:3001"
+  Write-Host ''
+  Write-Host 'Services are available at:' -ForegroundColor Green
+  Write-Host 'Frontend:   http://localhost:4200'
+  Write-Host 'Backend:    http://localhost:3000'
+  Write-Host 'Swagger UI: http://localhost:3000/docs'
+  Write-Host 'Log Server: http://localhost:9880'
+  Write-Host 'Mailhog:    http://localhost:8025  (SMTP: smtp://localhost:1025)'
+  Write-Host 'Postgres:   postgres://localhost:5432'
+  Write-Host 'Prometheus: http://localhost:9090'
+  Write-Host 'Grafana:    http://localhost:3001'
 } else {
-  Write-Host ""
-  Write-Host "At least one service failed to reach a healthy running state within the timeout." -ForegroundColor Yellow
-  Write-Host "Tip: run with -Logs to follow logs, or inspect a specific service:" -ForegroundColor DarkGray
-  Write-Host "  docker compose logs --tail=200 <service>"
-  Write-Host "  docker compose ps"
+  Write-Host ''
+  Write-Host 'At least one service failed to reach a healthy running state within the timeout.' -ForegroundColor Yellow
+  Write-Host 'Tip: run with -Logs to follow logs, or inspect a specific service:' -ForegroundColor DarkGray
+  Write-Host '  docker compose logs --tail=200 <service>'
+  Write-Host '  docker compose ps'
   if (-not $Logs) { exit 1 }
 }
 
-if ($Logs) { Compose logs -f @Services }
+if ($Logs) {
+  if ($svc.Count -gt 0) { Compose logs -f @svc } else { Compose logs -f }
+}
