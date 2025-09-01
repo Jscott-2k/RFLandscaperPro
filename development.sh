@@ -6,6 +6,15 @@ if [[ "${1:-}" == "--local" ]]; then
   (cd frontend && npm start) &
   wait
 else
+  if ! command -v docker >/dev/null 2>&1; then
+    echo "Docker CLI not found. Install Docker." >&2
+    exit 1
+  fi
+  if ! docker info >/dev/null 2>&1; then
+    echo "Docker daemon not running or not reachable." >&2
+    exit 1
+  fi
+
   docker compose up -d
 
   printf '%s\n' \
