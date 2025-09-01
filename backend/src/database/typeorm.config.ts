@@ -10,7 +10,7 @@ import { join, resolve } from 'node:path';
 
 function coalesce<T>(...vals: (T | undefined | null | '')[]): T | undefined {
   for (const v of vals)
-    {if (v !== undefined && v !== null && v !== ('' as any)) {return v as T;}}
+    {if (v !== undefined && v !== null && v !== '') {return v as T;}}
   return undefined;
 }
 function toBool(v: unknown, fallback = false): boolean {

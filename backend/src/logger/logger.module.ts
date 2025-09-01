@@ -62,23 +62,23 @@ class PrometheusLogger implements LoggerService {
     };
   }
 
-  log(message: any, ...optionalParams: any[]) {
+  log(message: unknown, ...optionalParams: unknown[]): void {
     this.counters.info.inc();
     this.logger.info?.(message, ...optionalParams);
   }
-  error(message: any, ...optionalParams: any[]) {
+  error(message: unknown, ...optionalParams: unknown[]): void {
     this.counters.error.inc();
     this.logger.error?.(message, ...optionalParams);
   }
-  warn(message: any, ...optionalParams: any[]) {
+  warn(message: unknown, ...optionalParams: unknown[]): void {
     this.counters.warn.inc();
     this.logger.warn?.(message, ...optionalParams);
   }
-  debug(message: any, ...optionalParams: any[]) {
+  debug(message: unknown, ...optionalParams: unknown[]): void {
     this.counters.debug.inc();
     this.logger.debug?.(message, ...optionalParams);
   }
-  verbose(message: any, ...optionalParams: any[]) {
+  verbose(message: unknown, ...optionalParams: unknown[]): void {
     this.counters.verbose.inc();
     this.logger.verbose?.(message, ...optionalParams);
   }

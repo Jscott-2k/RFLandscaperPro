@@ -41,7 +41,7 @@ describe('UserCreationService', () => {
         }
         return user;
       }),
-    } as unknown as Repository<User> & { manager: any };
+    } as unknown as Repository<User> & { manager: EntityManager };
 
     manager = {
       getRepository: jest.fn(() => usersRepository),

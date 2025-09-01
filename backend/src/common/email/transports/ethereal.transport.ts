@@ -17,7 +17,7 @@ export class EtherealTransport implements EmailTransport {
     try {
       const testAccount = await Promise.race([
         nodemailer.createTestAccount(),
-        new Promise<never>((_, reject) =>
+        new Promise<never>((_resolve, reject) =>
           setTimeout(
             () => reject(new Error('Ethereal test account timeout')),
             5000,

@@ -3,7 +3,7 @@ import { type Repository, type SelectQueryBuilder } from 'typeorm';
 import { paginate } from './pagination';
 
 describe('paginate', () => {
-  let repo: jest.Mocked<Repository<any>>;
+  let repo: jest.Mocked<Repository<unknown>>;
   let qb: Record<string, jest.Mock>;
 
   beforeEach(() => {
@@ -17,8 +17,8 @@ describe('paginate', () => {
     repo = {
       createQueryBuilder: jest
         .fn()
-        .mockReturnValue(qb as unknown as SelectQueryBuilder<any>),
-    } as unknown as jest.Mocked<Repository<any>>;
+        .mockReturnValue(qb as unknown as SelectQueryBuilder<unknown>),
+    } as unknown as jest.Mocked<Repository<unknown>>;
   });
 
   it('caps limit at 100', async () => {
@@ -27,7 +27,9 @@ describe('paginate', () => {
   });
 
   it('applies provided filters', async () => {
-    const filter = (qb: SelectQueryBuilder<any>) =>
+    const filter = (
+      qb: SelectQueryBuilder<unknown>,
+    ): SelectQueryBuilder<unknown> =>
       qb.andWhere('entity.active = :active', { active: true });
 
     await paginate(repo, { limit: 10 }, 'entity', filter);
