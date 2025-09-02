@@ -10,10 +10,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   const isLogin = req.url.includes('/auth/login');
   const isSwitchCompany = req.url.includes('/auth/switch-company');
+  const isRefresh = req.url.includes('/auth/refresh');
 
   const headers: Record<string, string> = {};
 
-  if (token && !isLogin) {
+  if (token && !isLogin && !isRefresh) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
