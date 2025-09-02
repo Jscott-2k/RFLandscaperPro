@@ -49,6 +49,7 @@ function commonOptions({
   password,
   port,
   ssl,
+  synchronize,
   username,
 }: {
   host: string;
@@ -58,6 +59,7 @@ function commonOptions({
   database: string;
   ssl: boolean;
   logging: DataSourceOptions['logging'];
+  synchronize: boolean;
 }): DataSourceOptions {
   const entities = [join(__dirname, '..', '**', '*.entity.{ts,js}')];
   const migrations = [
@@ -88,8 +90,8 @@ function commonOptions({
 
     // proper top-level SSL flag/object for TypeORM
     ssl: ssl ? { rejectUnauthorized: false } : false,
-    // Never block boot:
-    synchronize: false,
+    // Allow explicit schema sync when requested
+    synchronize,
 
     type: 'postgres',
 
@@ -110,6 +112,7 @@ export function buildTypeOrmOptions(cfg: ConfigService): DataSourceOptions {
   const password = cfg.get<string>('DB_PASSWORD')!;
   const database = cfg.get<string>('DB_NAME')!;
   const ssl = toBool(cfg.get('DB_SSL'), nodeEnv === 'production');
+  const synchronize = toBool(cfg.get('DB_SYNC'));
 
   const logging = parseLogging(cfg.get<string>('TYPEORM_LOGGING'));
   if (!host || !username || !password || !database) {
@@ -125,6 +128,7 @@ export function buildTypeOrmOptions(cfg: ConfigService): DataSourceOptions {
     password,
     port,
     ssl,
+    synchronize,
     username,
   });
 }
@@ -154,6 +158,7 @@ export function buildTypeOrmOptionsFromEnv(): DataSourceOptions {
   const password = process.env.DB_PASSWORD;
   const database = process.env.DB_NAME;
   const ssl = toBool(process.env.DB_SSL, nodeEnv === 'production');
+  const synchronize = toBool(process.env.DB_SYNC);
 
   if (!host || !username || !password || !database) {
     throw new Error(
@@ -170,6 +175,7 @@ export function buildTypeOrmOptionsFromEnv(): DataSourceOptions {
     password,
     port,
     ssl,
+    synchronize,
     username,
   });
 }
