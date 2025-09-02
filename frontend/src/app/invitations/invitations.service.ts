@@ -30,9 +30,9 @@ export class InvitationsService {
       phone?: string;
     },
   ): Observable<{ access_token: string; companies?: CompanyMembership[] }> {
-    return this.http.post<{ access_token: string; companies?: CompanyMembership[] }>(
-      `${environment.apiUrl}/invitations/${token}/accept`,
-      data ?? {},
-    );
+    return this.http.post<{
+      access_token: string;
+      companies?: CompanyMembership[];
+    }>(`${environment.apiUrl}/invitations/${token}/accept`, data ?? {});
   }
 }

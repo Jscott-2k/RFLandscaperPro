@@ -19,18 +19,25 @@ export class AuthService {
     return this.roles().includes(role);
   }
 
-  login(data: { email: string; password: string }): Observable<{ access_token: string }> {
-    return this.http.post<{ access_token: string }>(`${environment.apiUrl}/auth/login`, data).pipe(
-      tap((res) => {
-        if (this.hasLocalStorage()) {
-          localStorage.setItem('token', res.access_token);
-          this.roles.set(this.getRolesFromToken(res.access_token));
-          const company = this.getCompanyFromToken(res.access_token);
-          this.setCompany(company ?? null);
-          this.setCompanies([]);
-        }
-      }),
-    );
+  login(
+    data: { email: string; password: string },
+  ): Observable<{ access_token: string }> {
+    return this.http
+      .post<{ access_token: string }>(
+        `${environment.apiUrl}/auth/login`,
+        data,
+      )
+      .pipe(
+        tap((res) => {
+          if (this.hasLocalStorage()) {
+            localStorage.setItem('token', res.access_token);
+            this.roles.set(this.getRolesFromToken(res.access_token));
+            const company = this.getCompanyFromToken(res.access_token);
+            this.setCompany(company ?? null);
+            this.setCompanies([]);
+          }
+        }),
+      );
   }
 
   loadCompanies(): Observable<CompanyMembership[]> {
@@ -63,7 +70,10 @@ export class AuthService {
     phone?: string;
   }): Observable<{ access_token: string }> {
     return this.http
-      .post<{ access_token: string }>(`${environment.apiUrl}/auth/signup-owner`, data)
+      .post<{ access_token: string }>(
+        `${environment.apiUrl}/auth/signup-owner`,
+        data,
+      )
       .pipe(tap((res) => this.handleAuth(res)));
   }
 
@@ -89,9 +99,7 @@ export class AuthService {
 
   refreshToken(): Observable<{ access_token: string }> {
     return this.http
-      .post<{
-        access_token: string;
-      }>(`${environment.apiUrl}/auth/refresh`, { token: this.getToken() })
+      .post<{ access_token: string }>(`${environment.apiUrl}/auth/refresh`, {})
       .pipe(tap((res) => this.handleAuth(res)));
   }
 
@@ -112,18 +120,20 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    return this.http.post<void>(`${environment.apiUrl}/auth/logout`, {}).pipe(
-      tap(() => {
-        if (this.hasLocalStorage()) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('companyId');
-          localStorage.removeItem('companies');
-        }
-        this.roles.set([]);
-        this.company.set(null);
-        this.companies.set([]);
-      }),
-    );
+    return this.http
+      .post<void>(`${environment.apiUrl}/auth/logout`, {})
+      .pipe(
+        tap(() => {
+          if (this.hasLocalStorage()) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('companyId');
+            localStorage.removeItem('companies');
+          }
+          this.roles.set([]);
+          this.company.set(null);
+          this.companies.set([]);
+        }),
+      );
   }
 
   getToken(): string | null {

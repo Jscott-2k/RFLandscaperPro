@@ -3,17 +3,20 @@ import {
   Post,
   Body,
   Req,
+  Res,
   UsePipes,
   ValidationPipe,
   HttpCode,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { parse } from 'cookie';
+import { type Response, type Request } from 'express';
 
 import { Public } from '../common/decorators/public.decorator';
 import { type User } from '../users/user.entity';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { type RefreshTokenDto } from './dto/refresh-token.dto';
 import { type RegisterDto } from './dto/register.dto';
 import { type RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { type ResetPasswordDto } from './dto/reset-password.dto';
@@ -31,8 +34,15 @@ export class AuthController {
   @Post('signup-owner')
   @ApiOperation({ summary: 'Self-register a new company owner' })
   @ApiResponse({ description: 'Created owner and company', status: 201 })
-  async signupOwner(@Body() dto: SignupOwnerDto) {
-    return this.authService.signupOwner(dto);
+  async signupOwner(@Body() dto: SignupOwnerDto, @Res({ passthrough: true }) res: Response) {
+    const result = await this.authService.signupOwner(dto);
+    res.cookie('refreshToken', result.refresh_token, {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: true,
+      path: '/',
+    });
+    return { access_token: result.access_token };
   }
 
   @Public()
@@ -49,12 +59,19 @@ export class AuthController {
   )
   @ApiOperation({ summary: 'Authenticate user and return JWT' })
   @ApiResponse({ description: 'JWT token payload', status: 200 })
-  async login(@Body() loginDto: LoginDto) {
+  async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const user: User = await this.authService.validateUser(
       loginDto.email,
       loginDto.password,
     );
-    return this.authService.login(user);
+    const result = await this.authService.login(user);
+    res.cookie('refreshToken', result.refresh_token, {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: true,
+      path: '/',
+    });
+    return { access_token: result.access_token };
   }
 
   @Post('switch-company')
@@ -110,16 +127,44 @@ export class AuthController {
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiResponse({ description: 'New access token', status: 200 })
-  async refresh(@Body() dto: RefreshTokenDto) {
-    return this.authService.refresh(dto.refreshToken);
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const token = this.getRefreshToken(req);
+    if (!token) {
+      throw new UnauthorizedException('No refresh token');
+    }
+    const result = await this.authService.refresh(token);
+    res.cookie('refreshToken', result.refresh_token, {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: true,
+      path: '/',
+    });
+    return { access_token: result.access_token };
   }
 
   @Public()
   @Post('logout')
   @ApiOperation({ summary: 'Logout current user' })
   @ApiResponse({ description: 'Logged out', status: 200 })
-  async logout(@Body() dto: RefreshTokenDto): Promise<{ message: string }> {
-    await this.authService.logout(dto.refreshToken);
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{ message: string }> {
+    const token = this.getRefreshToken(req);
+    if (token) {
+      await this.authService.logout(token);
+    }
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: true,
+      path: '/',
+    });
     return { message: 'Logged out' };
+  }
+
+  private getRefreshToken(req: Request): string | undefined {
+    const cookies = req.headers?.cookie ? parse(req.headers.cookie) : {};
+    return cookies['refreshToken'];
   }
 }
