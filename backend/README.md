@@ -106,6 +106,12 @@ npm run seed:dev
 # Reset the database schema (uses DB_* env vars)
 npm run db:reset
 
+# Reset and seed the database
+npm run db:reset:seed
+
+# Auto-create tables when migrations are missing
+DB_SYNC=true npm run db:reset:seed
+
 # Check for pending schema changes without modifying the database
 npm run db:check-schema
 
@@ -338,6 +344,12 @@ npm run seed:dev
 
 # Reset the database schema (uses DB_* env vars)
 npm run db:reset
+
+# Reset and seed the database
+npm run db:reset:seed
+
+# Auto-create tables when migrations are missing
+DB_SYNC=true npm run db:reset:seed
 
 # Check for pending schema changes without modifying the database
 npm run db:check-schema
