@@ -106,6 +106,9 @@ npm run seed:dev
 # Reset the database schema (uses DB_* env vars)
 npm run db:reset
 
+# Check for pending schema changes without modifying the database
+npm run db:check-schema
+
 # Drop and re-seed the database from scratch
 npm run seed:drop:dev
 ```
@@ -335,6 +338,9 @@ npm run seed:dev
 
 # Reset the database schema (uses DB_* env vars)
 npm run db:reset
+
+# Check for pending schema changes without modifying the database
+npm run db:check-schema
 
 # Drop and re-seed the database from scratch
 npm run seed:drop:dev

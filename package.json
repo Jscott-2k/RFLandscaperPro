@@ -38,6 +38,7 @@
     "seed": "npm run seed -w rflandscaperpro-backend",
     "seed:drop": "npm run seed:drop -w rflandscaperpro-backend",
     "db:reset": "npm run db:reset -w rflandscaperpro-backend",
+    "db:check-schema": "npm run db:check-schema -w rflandscaperpro-backend",
     "lint": "eslint . --cache --cache-location .eslintcache --fix",
     "lint:types": "eslint . --ext .ts --config eslint.types.config.mjs",
     "format": "prettier --write .",
