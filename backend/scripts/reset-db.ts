@@ -1,10 +1,15 @@
 import dataSource from '../src/data-source';
 
-async function reset(seed: boolean): Promise<void> {
+async function reset(seed: boolean, sync: boolean): Promise<void> {
   const ds = await dataSource.initialize();
   try {
     await ds.dropDatabase();
-    await ds.runMigrations();
+    const hasMigrations = await ds.showMigrations();
+    if (sync || !hasMigrations) {
+      await ds.synchronize();
+    } else {
+      await ds.runMigrations();
+    }
   } finally {
     await ds.destroy();
   }
@@ -16,8 +21,11 @@ async function reset(seed: boolean): Promise<void> {
 }
 
 const shouldSeed = process.argv.includes('--seed');
+const shouldSync =
+  process.argv.includes('--sync') || process.env.DB_SYNC === 'true';
 
-reset(shouldSeed).catch((err) => {
+reset(shouldSeed, shouldSync).catch((err) => {
   console.error('Failed to reset database:', err);
   process.exit(1);
 });
+
