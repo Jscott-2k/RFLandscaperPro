@@ -12,7 +12,11 @@ const ext = process.platform === 'win32' ? '.ps1' : '.sh';
 const command = process.platform === 'win32' ? 'powershell' : 'bash';
 const scriptPath = path.join(__dirname, `${scriptName}${ext}`);
 
-const result = spawnSync(command, [scriptPath, ...process.argv.slice(3)], {
+const args = process.platform === 'win32'
+  ? ['-ExecutionPolicy', 'Bypass', '-File', scriptPath, ...process.argv.slice(3)]
+  : [scriptPath, ...process.argv.slice(3)];
+
+const result = spawnSync(command, args, {
   stdio: 'inherit',
 });
 if (result.error) {
