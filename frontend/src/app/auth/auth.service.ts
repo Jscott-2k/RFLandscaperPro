@@ -26,6 +26,7 @@ export class AuthService {
       .post<{ access_token: string }>(
         `${environment.apiUrl}/auth/login`,
         data,
+        { withCredentials: true },
       )
       .pipe(
         tap((res) => {
@@ -99,7 +100,11 @@ export class AuthService {
 
   refreshToken(): Observable<{ access_token: string }> {
     return this.http
-      .post<{ access_token: string }>(`${environment.apiUrl}/auth/refresh`, {})
+      .post<{ access_token: string }>(
+        `${environment.apiUrl}/auth/refresh`,
+        {},
+        { withCredentials: true },
+      )
       .pipe(tap((res) => this.handleAuth(res)));
   }
 
@@ -121,7 +126,11 @@ export class AuthService {
 
   logout(): Observable<void> {
     return this.http
-      .post<void>(`${environment.apiUrl}/auth/logout`, {})
+      .post<void>(
+        `${environment.apiUrl}/auth/logout`,
+        {},
+        { withCredentials: true },
+      )
       .pipe(
         tap(() => {
           if (this.hasLocalStorage()) {
