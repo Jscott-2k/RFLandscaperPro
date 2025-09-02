@@ -1,20 +1,23 @@
-import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
-
 import dataSource from '../src/data-source';
 
-async function reset(): Promise<void> {
-  const sqlPath = resolve(__dirname, 'reset-schema.sql');
-  const sql = await readFile(sqlPath, 'utf-8');
+async function reset(seed: boolean): Promise<void> {
+  const ds = await dataSource.initialize();
+  try {
+    await ds.dropDatabase();
+    await ds.runMigrations();
+  } finally {
+    await ds.destroy();
+  }
+  console.log('Database reset.');
 
-  await dataSource.initialize();
-  await dataSource.query(sql);
-  await dataSource.destroy();
-
-  console.log('Database schema reset.');
+  if (seed) {
+    await import('../src/seed');
+  }
 }
 
-reset().catch((err) => {
+const shouldSeed = process.argv.includes('--seed');
+
+reset(shouldSeed).catch((err) => {
   console.error('Failed to reset database:', err);
   process.exit(1);
 });
