@@ -37,8 +37,8 @@
     "db:reset:seed": "ts-node -r tsconfig-paths/register scripts/reset-db.ts --seed",
     "db:check-schema": "ts-node -r tsconfig-paths/register scripts/check-schema.ts",
     "seed:sample": "ts-node -r tsconfig-paths/register scripts/seed-sample-data.ts",
-    "db:dump": "node ./scripts/run-db-script.js dump",
-    "db:restore": "node ./scripts/run-db-script.js restore",
+    "db:dump": "node ./scripts/run-db-script.mjs dump",
+    "db:restore": "node ./scripts/run-db-script.mjs restore",
     "db:truncate": "ts-node -r tsconfig-paths/register scripts/truncate-db.ts"
   },
   "dependencies": {
