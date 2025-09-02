@@ -11,7 +11,7 @@ param(
 )
 $Env:BUILDKIT_PROGRESS = 'plain'
 $ErrorActionPreference = 'Stop'
-Set-Location -Path (Resolve-Path $PSScriptRoot)
+Set-Location -Path (Resolve-Path (Join-Path $PSScriptRoot '..'))
 
 # --------------------------------------------------------------------
 # Local-only shortcut

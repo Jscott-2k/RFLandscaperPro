@@ -103,6 +103,18 @@ npm run migration:run
 # `NODE_ENV=production`.
 npm run seed:dev
 
+# Reset the database schema (uses DB_* env vars)
+npm run db:reset
+
+# Reset and seed the database
+npm run db:reset:seed
+
+# Auto-create tables when migrations are missing
+DB_SYNC=true npm run db:reset:seed
+
+# Check for pending schema changes without modifying the database
+npm run db:check-schema
+
 # Drop and re-seed the database from scratch
 npm run seed:drop:dev
 ```
@@ -329,6 +341,18 @@ npm run migration:revert:dev
 
 # Seed database with sample data
 npm run seed:dev
+
+# Reset the database schema (uses DB_* env vars)
+npm run db:reset
+
+# Reset and seed the database
+npm run db:reset:seed
+
+# Auto-create tables when migrations are missing
+DB_SYNC=true npm run db:reset:seed
+
+# Check for pending schema changes without modifying the database
+npm run db:check-schema
 
 # Drop and re-seed the database from scratch
 npm run seed:drop:dev
