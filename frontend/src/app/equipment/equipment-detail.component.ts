@@ -27,6 +27,20 @@ import { EquipmentService, type CreateEquipment } from './equipment.service';
           {{ form.controls.name.errors | json }}
         </div>
         <label>
+          Type:
+          <select formControlName="type">
+            <option *ngFor="let t of equipmentTypes" [value]="t">{{ t }}</option>
+          </select>
+        </label>
+        <div
+          *ngIf="
+            form.controls.type.errors &&
+            (form.controls.type.dirty || form.controls.type.touched)
+          "
+        >
+          {{ form.controls.type.errors | json }}
+        </div>
+        <label>
           Status:
           <input formControlName="status" />
         </label>
@@ -53,9 +67,11 @@ export class EquipmentDetailComponent {
   private fb = inject(FormBuilder);
 
   equipmentId?: number;
+  equipmentTypes = ['mower', 'trimmer', 'blower', 'tractor', 'truck', 'trailer', 'other'];
 
   form = this.fb.nonNullable.group({
     name: ['', Validators.required.bind(Validators)],
+    type: ['', Validators.required.bind(Validators)],
     status: ['', Validators.required.bind(Validators)],
   });
 

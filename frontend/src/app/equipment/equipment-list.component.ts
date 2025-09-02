@@ -14,7 +14,7 @@ import { type Equipment, EquipmentService } from './equipment.service';
     <input type="text" [(ngModel)]="filter" placeholder="Search equipment" />
     <ul>
       <li *ngFor="let item of filteredEquipment()" [routerLink]="[item.id]">
-        {{ item.name }} - {{ item.status }}
+        {{ item.name }} - {{ item.type }} - {{ item.status }}
       </li>
     </ul>
     <a [routerLink]="['new']">Add Equipment</a>
@@ -31,6 +31,8 @@ export class EquipmentListComponent {
 
   filteredEquipment(): Equipment[] {
     const term = this.filter.toLowerCase();
-    return this.equipments.filter((e) => e.name.toLowerCase().includes(term));
+    return this.equipments.filter(
+      (e) => e.name.toLowerCase().includes(term) || e.type.toLowerCase().includes(term),
+    );
   }
 }
