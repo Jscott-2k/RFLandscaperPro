@@ -1,4 +1,5 @@
 import { Test, type TestingModule } from '@nestjs/testing';
+import { type Request, type Response } from 'express';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -48,18 +49,26 @@ describe('AuthController', () => {
   it('logs in without company', async () => {
     const dto: LoginDto = { email: 'user@example.com', password: 'pass' };
     const user: { id: number } = { id: 1 };
-    const resultPayload: { access_token: string } = { access_token: 'token' };
     authService.validateUser.mockResolvedValue(user);
-    authService.login.mockResolvedValue(resultPayload);
+    authService.login.mockResolvedValue({
+      access_token: 'token',
+      refresh_token: 'rt',
+    });
+    const res = { cookie: jest.fn() } as unknown as Response;
 
-    const result = await controller.login(dto);
+    const result = await controller.login(dto, res);
 
     expect(authService.validateUser).toHaveBeenCalledWith(
       'user@example.com',
       'pass',
     );
     expect(authService.login).toHaveBeenCalledWith(user);
-    expect(result).toEqual(resultPayload);
+    expect(res.cookie).toHaveBeenCalledWith(
+      'refreshToken',
+      'rt',
+      expect.any(Object),
+    );
+    expect(result).toEqual({ access_token: 'token' });
   });
 
   it('signs up a new owner', async () => {
@@ -72,13 +81,21 @@ describe('AuthController', () => {
       password: 'Password1!',
       phone: '5551234567',
     };
-    const response: { access_token: string } = { access_token: 'jwt' };
-    authService.signupOwner.mockResolvedValue(response);
+    authService.signupOwner.mockResolvedValue({
+      access_token: 'jwt',
+      refresh_token: 'ref',
+    });
+    const res = { cookie: jest.fn() } as unknown as Response;
 
-    const result = await controller.signupOwner(dto);
+    const result = await controller.signupOwner(dto, res);
 
     expect(authService.signupOwner).toHaveBeenCalledWith(dto);
-    expect(result).toEqual(response);
+    expect(res.cookie).toHaveBeenCalledWith(
+      'refreshToken',
+      'ref',
+      expect.any(Object),
+    );
+    expect(result).toEqual({ access_token: 'jwt' });
   });
 
   it('registers a new user and sends verification email', async () => {
@@ -120,16 +137,30 @@ describe('AuthController', () => {
       access_token: 'newAccess',
       refresh_token: 'newRefresh',
     });
-    const result = await controller.refresh({ refreshToken: 'token' });
+    const req = {
+      headers: { cookie: 'refreshToken=token' },
+    } as unknown as Request;
+    const res = { cookie: jest.fn() } as unknown as Response;
+    const result = await controller.refresh(req, res);
     expect(authService.refresh).toHaveBeenCalledWith('token');
-    expect(result).toEqual({
-      access_token: 'newAccess',
-      refresh_token: 'newRefresh',
-    });
+    expect(res.cookie).toHaveBeenCalledWith(
+      'refreshToken',
+      'newRefresh',
+      expect.any(Object),
+    );
+    expect(result).toEqual({ access_token: 'newAccess' });
   });
 
   it('logs out', async () => {
-    await controller.logout({ refreshToken: 'token' });
+    const req = {
+      headers: { cookie: 'refreshToken=token' },
+    } as unknown as Request;
+    const res = { clearCookie: jest.fn() } as unknown as Response;
+    await controller.logout(req, res);
     expect(authService.logout).toHaveBeenCalledWith('token');
+    expect(res.clearCookie).toHaveBeenCalledWith(
+      'refreshToken',
+      expect.any(Object),
+    );
   });
 });

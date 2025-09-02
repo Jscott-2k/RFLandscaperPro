@@ -29,10 +29,9 @@ export class InvitationsService {
       lastName?: string;
       phone?: string;
     },
-  ): Observable<{ access_token: string; refresh_token?: string; companies?: CompanyMembership[] }> {
+  ): Observable<{ access_token: string; companies?: CompanyMembership[] }> {
     return this.http.post<{
       access_token: string;
-      refresh_token?: string;
       companies?: CompanyMembership[];
     }>(`${environment.apiUrl}/invitations/${token}/accept`, data ?? {});
   }

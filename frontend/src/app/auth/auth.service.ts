@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { type CompanyMembership, CompanyUserRole } from '@rflp/shared';
-import { throwError, type Observable, tap } from 'rxjs';
+import { type Observable, tap } from 'rxjs';
 
 import { environment } from '../../environments/environment';
 
@@ -21,9 +21,9 @@ export class AuthService {
 
   login(
     data: { email: string; password: string },
-  ): Observable<{ access_token: string; refresh_token?: string }> {
+  ): Observable<{ access_token: string }> {
     return this.http
-      .post<{ access_token: string; refresh_token?: string }>(
+      .post<{ access_token: string }>(
         `${environment.apiUrl}/auth/login`,
         data,
       )
@@ -31,11 +31,6 @@ export class AuthService {
         tap((res) => {
           if (this.hasLocalStorage()) {
             localStorage.setItem('token', res.access_token);
-            if (res.refresh_token) {
-              localStorage.setItem('refreshToken', res.refresh_token);
-            } else {
-              localStorage.removeItem('refreshToken');
-            }
             this.roles.set(this.getRolesFromToken(res.access_token));
             const company = this.getCompanyFromToken(res.access_token);
             this.setCompany(company ?? null);
@@ -73,9 +68,9 @@ export class AuthService {
     firstName: string;
     lastName: string;
     phone?: string;
-  }): Observable<{ access_token: string; refresh_token?: string }> {
+  }): Observable<{ access_token: string }> {
     return this.http
-      .post<{ access_token: string; refresh_token?: string }>(
+      .post<{ access_token: string }>(
         `${environment.apiUrl}/auth/signup-owner`,
         data,
       )
@@ -102,36 +97,18 @@ export class AuthService {
     });
   }
 
-  refreshToken(): Observable<{ access_token: string; refresh_token?: string }> {
-    const refreshToken = this.getRefreshToken();
-    if (!refreshToken) {
-      return throwError(() => new Error('No refresh token'));
-    }
+  refreshToken(): Observable<{ access_token: string }> {
     return this.http
-      .post<{
-        access_token: string;
-        refresh_token?: string;
-      }>(`${environment.apiUrl}/auth/refresh`, {
-        refreshToken,
-      })
+      .post<{ access_token: string }>(`${environment.apiUrl}/auth/refresh`, {})
       .pipe(tap((res) => this.handleAuth(res)));
   }
 
   handleAuth(
-    res: {
-      access_token: string;
-      refresh_token?: string;
-      companies?: CompanyMembership[];
-    },
+    res: { access_token: string; companies?: CompanyMembership[] },
     companyHint?: number,
   ): void {
     if (this.hasLocalStorage()) {
       localStorage.setItem('token', res.access_token);
-      if (res.refresh_token) {
-        localStorage.setItem('refreshToken', res.refresh_token);
-      } else {
-        localStorage.removeItem('refreshToken');
-      }
       this.roles.set(this.getRolesFromToken(res.access_token));
       const company = this.getCompanyFromToken(res.access_token) ?? companyHint ?? null;
       const companies =
@@ -143,17 +120,12 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    const refreshToken = this.getRefreshToken();
     return this.http
-      .post<void>(
-        `${environment.apiUrl}/auth/logout`,
-        refreshToken ? { refreshToken } : {},
-      )
+      .post<void>(`${environment.apiUrl}/auth/logout`, {})
       .pipe(
         tap(() => {
           if (this.hasLocalStorage()) {
             localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
             localStorage.removeItem('companyId');
             localStorage.removeItem('companies');
           }
@@ -169,13 +141,6 @@ export class AuthService {
       return null;
     }
     return localStorage.getItem('token');
-  }
-
-  getRefreshToken(): string | null {
-    if (!this.hasLocalStorage()) {
-      return null;
-    }
-    return localStorage.getItem('refreshToken');
   }
 
   isAuthenticated(): boolean {
