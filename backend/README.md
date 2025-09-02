@@ -103,6 +103,9 @@ npm run migration:run
 # `NODE_ENV=production`.
 npm run seed:dev
 
+# Reset the database schema (uses DB_* env vars)
+npm run db:reset
+
 # Drop and re-seed the database from scratch
 npm run seed:drop:dev
 ```
@@ -329,6 +332,9 @@ npm run migration:revert:dev
 
 # Seed database with sample data
 npm run seed:dev
+
+# Reset the database schema (uses DB_* env vars)
+npm run db:reset
 
 # Drop and re-seed the database from scratch
 npm run seed:drop:dev
