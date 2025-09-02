@@ -19,18 +19,26 @@ export class AuthService {
     return this.roles().includes(role);
   }
 
-  login(data: { email: string; password: string }): Observable<{ access_token: string }> {
-    return this.http.post<{ access_token: string }>(`${environment.apiUrl}/auth/login`, data).pipe(
-      tap((res) => {
-        if (this.hasLocalStorage()) {
-          localStorage.setItem('token', res.access_token);
-          this.roles.set(this.getRolesFromToken(res.access_token));
-          const company = this.getCompanyFromToken(res.access_token);
-          this.setCompany(company ?? null);
-          this.setCompanies([]);
-        }
-      }),
-    );
+  login(
+    data: { email: string; password: string },
+  ): Observable<{ access_token: string; refresh_token: string }> {
+    return this.http
+      .post<{ access_token: string; refresh_token: string }>(
+        `${environment.apiUrl}/auth/login`,
+        data,
+      )
+      .pipe(
+        tap((res) => {
+          if (this.hasLocalStorage()) {
+            localStorage.setItem('token', res.access_token);
+            localStorage.setItem('refreshToken', res.refresh_token);
+            this.roles.set(this.getRolesFromToken(res.access_token));
+            const company = this.getCompanyFromToken(res.access_token);
+            this.setCompany(company ?? null);
+            this.setCompanies([]);
+          }
+        }),
+      );
   }
 
   loadCompanies(): Observable<CompanyMembership[]> {
@@ -61,9 +69,12 @@ export class AuthService {
     firstName: string;
     lastName: string;
     phone?: string;
-  }): Observable<{ access_token: string }> {
+  }): Observable<{ access_token: string; refresh_token: string }> {
     return this.http
-      .post<{ access_token: string }>(`${environment.apiUrl}/auth/signup-owner`, data)
+      .post<{ access_token: string; refresh_token: string }>(
+        `${environment.apiUrl}/auth/signup-owner`,
+        data,
+      )
       .pipe(tap((res) => this.handleAuth(res)));
   }
 
@@ -87,20 +98,24 @@ export class AuthService {
     });
   }
 
-  refreshToken(): Observable<{ access_token: string }> {
+  refreshToken(): Observable<{ access_token: string; refresh_token: string }> {
     return this.http
       .post<{
         access_token: string;
-      }>(`${environment.apiUrl}/auth/refresh`, { token: this.getToken() })
+        refresh_token: string;
+      }>(`${environment.apiUrl}/auth/refresh`, {
+        refreshToken: this.getRefreshToken(),
+      })
       .pipe(tap((res) => this.handleAuth(res)));
   }
 
   handleAuth(
-    res: { access_token: string; companies?: CompanyMembership[] },
+    res: { access_token: string; refresh_token: string; companies?: CompanyMembership[] },
     companyHint?: number,
   ): void {
     if (this.hasLocalStorage()) {
       localStorage.setItem('token', res.access_token);
+      localStorage.setItem('refreshToken', res.refresh_token);
       this.roles.set(this.getRolesFromToken(res.access_token));
       const company = this.getCompanyFromToken(res.access_token) ?? companyHint ?? null;
       const companies =
@@ -112,18 +127,23 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    return this.http.post<void>(`${environment.apiUrl}/auth/logout`, {}).pipe(
-      tap(() => {
-        if (this.hasLocalStorage()) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('companyId');
-          localStorage.removeItem('companies');
-        }
-        this.roles.set([]);
-        this.company.set(null);
-        this.companies.set([]);
-      }),
-    );
+    return this.http
+      .post<void>(`${environment.apiUrl}/auth/logout`, {
+        refreshToken: this.getRefreshToken(),
+      })
+      .pipe(
+        tap(() => {
+          if (this.hasLocalStorage()) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('companyId');
+            localStorage.removeItem('companies');
+          }
+          this.roles.set([]);
+          this.company.set(null);
+          this.companies.set([]);
+        }),
+      );
   }
 
   getToken(): string | null {
@@ -131,6 +151,13 @@ export class AuthService {
       return null;
     }
     return localStorage.getItem('token');
+  }
+
+  getRefreshToken(): string | null {
+    if (!this.hasLocalStorage()) {
+      return null;
+    }
+    return localStorage.getItem('refreshToken');
   }
 
   isAuthenticated(): boolean {
