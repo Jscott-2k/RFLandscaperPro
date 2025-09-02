@@ -22,17 +22,17 @@ describe('ApiService auth interceptor', () => {
     });
     service = TestBed.inject(ApiService);
     httpMock = TestBed.inject(HttpTestingController);
-    localStorage.clear();
+    sessionStorage.clear();
   });
 
   afterEach(() => {
     httpMock.verify();
-    localStorage.clear();
+    sessionStorage.clear();
   });
 
   it('should attach auth token and company header', () => {
-    localStorage.setItem('token', 'abc');
-    localStorage.setItem('companyId', '1');
+    sessionStorage.setItem('token', 'abc');
+    sessionStorage.setItem('companyId', '1');
     service.getHealth().subscribe();
     const req = httpMock.expectOne(`${environment.apiUrl}/health`);
     expect(req.request.headers.get('Authorization')).toBe('Bearer abc');
@@ -41,8 +41,8 @@ describe('ApiService auth interceptor', () => {
   });
 
   it('should not attach auth token or company header on login', () => {
-    localStorage.setItem('token', 'abc');
-    localStorage.setItem('companyId', '1');
+    sessionStorage.setItem('token', 'abc');
+    sessionStorage.setItem('companyId', '1');
     const http = TestBed.inject(HttpClient);
     http.post(`${environment.apiUrl}/auth/login`, { email: 'a', password: 'b' }).subscribe();
     const req = httpMock.expectOne(`${environment.apiUrl}/auth/login`);

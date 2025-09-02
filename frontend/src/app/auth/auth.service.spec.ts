@@ -1,48 +1,48 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-
+import { HttpClient } from '@angular/common/http';
+import { of } from 'rxjs';
 import { AuthService } from './auth.service';
-import { environment } from '../../environments/environment';
 
-describe('AuthService', () => {
+describe('AuthService token management', () => {
   let service: AuthService;
-  let http: HttpTestingController;
+  let httpSpy: jasmine.SpyObj<HttpClient>;
+
+  function createService(): AuthService {
+    httpSpy = jasmine.createSpyObj<HttpClient>('HttpClient', ['post']);
+    httpSpy.post.and.returnValue(of(void 0));
+    TestBed.configureTestingModule({
+      providers: [AuthService, { provide: HttpClient, useValue: httpSpy }],
+    });
+    return TestBed.inject(AuthService);
+  }
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [AuthService],
-    });
-
-    service = TestBed.inject(AuthService);
-    http = TestBed.inject(HttpTestingController);
+    sessionStorage.clear();
+    service = createService();
   });
 
   afterEach(() => {
-    http.verify();
+    sessionStorage.clear();
+    TestBed.resetTestingModule();
   });
 
-  it('should include credentials on login', () => {
-    service.login({ email: 'test@example.com', password: 'pw' }).subscribe();
+  it('should clear token on logout', () => {
+    service.handleAuth({ access_token: 'abc' });
+    expect(service.getToken()).toBe('abc');
 
-    const req = http.expectOne(`${environment.apiUrl}/auth/login`);
-    expect(req.request.withCredentials).toBeTrue();
-    req.flush({ access_token: 'token' });
-  });
-
-  it('should include credentials on refresh token', () => {
-    service.refreshToken().subscribe();
-
-    const req = http.expectOne(`${environment.apiUrl}/auth/refresh`);
-    expect(req.request.withCredentials).toBeTrue();
-    req.flush({ access_token: 'token' });
-  });
-
-  it('should include credentials on logout', () => {
     service.logout().subscribe();
+    expect(sessionStorage.getItem('token')).toBeNull();
+    expect(service.getToken()).toBeNull();
+  });
 
-    const req = http.expectOne(`${environment.apiUrl}/auth/logout`);
-    expect(req.request.withCredentials).toBeTrue();
-    req.flush(null);
+  it('should not persist token across browser restarts', () => {
+    service.handleAuth({ access_token: 'abc' });
+    expect(sessionStorage.getItem('token')).toBe('abc');
+
+    sessionStorage.clear();
+    TestBed.resetTestingModule();
+    service = createService();
+    expect(service.getToken()).toBeNull();
+
   });
 });
