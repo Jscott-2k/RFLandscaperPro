@@ -32,7 +32,7 @@
     "build:shared": "npm run build -w @rflp/shared",
     "build:backend": "npm run build -w rflandscaperpro-backend",
     "build:frontend": "npm run build:browser -w frontend",
-    "migration:generate": "npm run migration:generate -w rflandscaperpro-backend",
+    "migration:generate": "npm run migration:generate -w rflandscaperpro-backend --",
     "migration:run": "npm run migration:run -w rflandscaperpro-backend",
     "migration:revert": "npm run migration:revert -w rflandscaperpro-backend",
     "seed": "npm run seed -w rflandscaperpro-backend",
