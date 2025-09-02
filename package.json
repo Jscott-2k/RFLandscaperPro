@@ -35,11 +35,12 @@
     "migration:generate": "npm run migration:generate -w rflandscaperpro-backend --",
     "migration:run": "npm run migration:run -w rflandscaperpro-backend",
     "migration:revert": "npm run migration:revert -w rflandscaperpro-backend",
-    "seed": "npm run seed -w rflandscaperpro-backend",
-    "seed:drop": "npm run seed:drop -w rflandscaperpro-backend",
-    "db:reset": "npm run db:reset -w rflandscaperpro-backend",
-    "lint": "eslint . --cache --cache-location .eslintcache --fix",
-    "lint:types": "eslint . --ext .ts --config eslint.types.config.mjs",
+      "seed": "npm run seed -w rflandscaperpro-backend",
+      "seed:drop": "npm run seed:drop -w rflandscaperpro-backend",
+      "seed:sample": "npm run seed:sample -w rflandscaperpro-backend",
+      "db:reset": "npm run db:reset -w rflandscaperpro-backend",
+      "lint": "eslint . --cache --cache-location .eslintcache --fix",
+      "lint:types": "eslint . --ext .ts --config eslint.types.config.mjs",
     "format": "prettier --write .",
     "lockfiles": "npm install --package-lock-only --workspaces"
   }

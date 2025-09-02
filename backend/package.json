@@ -33,6 +33,7 @@
     "seed:dev": "cross-env NODE_ENV=development npm run seed",
     "seed:drop": "ts-node -r tsconfig-paths/register src/seed.ts --drop",
     "seed:drop:dev": "cross-env NODE_ENV=development npm run seed:drop",
+    "seed:sample": "ts-node -r tsconfig-paths/register scripts/seed-sample-data.ts",
     "db:reset": "ts-node -r tsconfig-paths/register scripts/reset-db.ts"
   },
   "dependencies": {
@@ -78,6 +79,7 @@
     "@types/nodemailer": "^7.0.1",
     "@types/passport-jwt": "^3.0.9",
     "@types/supertest": "^6.0.2",
+    "@faker-js/faker": "^10.0.0",
     "cross-env": "^10.0.0",
     "jest": "^29.7.0",
     "supertest": "^7.0.0",
