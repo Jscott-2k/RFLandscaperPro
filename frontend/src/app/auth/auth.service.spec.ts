@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
-
 import { AuthService } from './auth.service';
 
 describe('AuthService token management', () => {
@@ -44,5 +43,6 @@ describe('AuthService token management', () => {
     TestBed.resetTestingModule();
     service = createService();
     expect(service.getToken()).toBeNull();
+
   });
 });
