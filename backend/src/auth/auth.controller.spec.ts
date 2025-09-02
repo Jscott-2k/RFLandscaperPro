@@ -1,4 +1,5 @@
 import { Test, type TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { type Request, type Response } from 'express';
 
 import { AuthController } from './auth.controller';
@@ -24,6 +25,7 @@ describe('AuthController', () => {
     logout: jest.Mock;
     signupOwner: jest.Mock;
   };
+  let configService: { get: jest.Mock };
 
   beforeEach(async () => {
     authService = {
@@ -37,16 +39,22 @@ describe('AuthController', () => {
       validateUser: jest.fn(),
       verifyEmail: jest.fn(),
     };
+    configService = { get: jest.fn().mockReturnValue('7d') };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [{ provide: AuthService, useValue: authService }],
+      providers: [
+        { provide: AuthService, useValue: authService },
+        { provide: ConfigService, useValue: configService },
+      ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
   });
 
-  it('logs in without company', async () => {
+  it('logs in and sets cookie with correct attributes in non-production', async () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
     const dto: LoginDto = { email: 'user@example.com', password: 'pass' };
     const user: { id: number } = { id: 1 };
     authService.validateUser.mockResolvedValue(user);
@@ -66,9 +74,38 @@ describe('AuthController', () => {
     expect(res.cookie).toHaveBeenCalledWith(
       'refreshToken',
       'rt',
-      expect.any(Object),
+      expect.objectContaining({
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: false,
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      }),
     );
     expect(result).toEqual({ access_token: 'token' });
+    process.env.NODE_ENV = originalEnv;
+  });
+
+  it('uses secure cookies in production', async () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    const dto: LoginDto = { email: 'user@example.com', password: 'pass' };
+    const user: { id: number } = { id: 1 };
+    authService.validateUser.mockResolvedValue(user);
+    authService.login.mockResolvedValue({
+      access_token: 'token',
+      refresh_token: 'rt',
+    });
+    const res = { cookie: jest.fn() } as unknown as Response;
+
+    await controller.login(dto, res);
+
+    expect(res.cookie).toHaveBeenCalledWith(
+      'refreshToken',
+      'rt',
+      expect.objectContaining({ secure: true }),
+    );
+    process.env.NODE_ENV = originalEnv;
   });
 
   it('signs up a new owner', async () => {

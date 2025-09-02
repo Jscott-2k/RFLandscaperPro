@@ -10,8 +10,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 import { parse } from 'cookie';
-import { type Response, type Request } from 'express';
+import { type Response, type Request, type CookieOptions } from 'express';
 
 import { Public } from '../common/decorators/public.decorator';
 import { type User } from '../users/user.entity';
@@ -28,7 +29,10 @@ import { type JwtUserPayload } from './interfaces/jwt-user-payload.interface';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Public()
   @Post('signup-owner')
@@ -36,12 +40,7 @@ export class AuthController {
   @ApiResponse({ description: 'Created owner and company', status: 201 })
   async signupOwner(@Body() dto: SignupOwnerDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.signupOwner(dto);
-    res.cookie('refreshToken', result.refresh_token, {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: true,
-      path: '/',
-    });
+    res.cookie('refreshToken', result.refresh_token, this.getCookieOptions());
     return { access_token: result.access_token };
   }
 
@@ -65,12 +64,7 @@ export class AuthController {
       loginDto.password,
     );
     const result = await this.authService.login(user);
-    res.cookie('refreshToken', result.refresh_token, {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: true,
-      path: '/',
-    });
+    res.cookie('refreshToken', result.refresh_token, this.getCookieOptions());
     return { access_token: result.access_token };
   }
 
@@ -133,12 +127,7 @@ export class AuthController {
       throw new UnauthorizedException('No refresh token');
     }
     const result = await this.authService.refresh(token);
-    res.cookie('refreshToken', result.refresh_token, {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: true,
-      path: '/',
-    });
+    res.cookie('refreshToken', result.refresh_token, this.getCookieOptions());
     return { access_token: result.access_token };
   }
 
@@ -154,17 +143,44 @@ export class AuthController {
     if (token) {
       await this.authService.logout(token);
     }
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: true,
-      path: '/',
-    });
+    res.clearCookie('refreshToken', this.getCookieOptions(false));
     return { message: 'Logged out' };
   }
 
   private getRefreshToken(req: Request): string | undefined {
     const cookies = req.headers?.cookie ? parse(req.headers.cookie) : {};
     return cookies['refreshToken'];
+  }
+
+  private getCookieOptions(includeMaxAge = true): CookieOptions {
+    const isProd = process.env.NODE_ENV === 'production';
+    const expiresIn = this.configService.get<string>(
+      'JWT_REFRESH_EXPIRES_IN',
+      '7d',
+    );
+    const maxAge = this.parseDuration(expiresIn);
+    const options: CookieOptions = {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: isProd,
+      path: '/',
+    };
+    return includeMaxAge && maxAge !== undefined
+      ? { ...options, maxAge }
+      : options;
+  }
+
+  private parseDuration(value: string): number | undefined {
+    const match = /^([0-9]+)([smhd])$/i.exec(value);
+    if (!match) return undefined;
+    const amount = Number(match[1]);
+    const unit = match[2].toLowerCase();
+    const unitMs: Record<string, number> = {
+      s: 1000,
+      m: 60 * 1000,
+      h: 60 * 60 * 1000,
+      d: 24 * 60 * 60 * 1000,
+    };
+    return amount * unitMs[unit];
   }
 }
