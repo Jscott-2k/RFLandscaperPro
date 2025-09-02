@@ -33,7 +33,9 @@
     "seed:dev": "cross-env NODE_ENV=development npm run seed",
     "seed:drop": "ts-node -r tsconfig-paths/register src/seed.ts --drop",
     "seed:drop:dev": "cross-env NODE_ENV=development npm run seed:drop",
-    "db:reset": "ts-node -r tsconfig-paths/register scripts/reset-db.ts"
+    "db:reset": "ts-node -r tsconfig-paths/register scripts/reset-db.ts",
+    "db:dump": "./scripts/dump-db.sh",
+    "db:restore": "./scripts/restore-db.sh"
   },
   "dependencies": {
     "@rflp/shared": "file:../shared",
