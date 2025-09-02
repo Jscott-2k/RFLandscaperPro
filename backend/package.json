@@ -36,6 +36,7 @@
     "db:reset": "ts-node -r tsconfig-paths/register scripts/reset-db.ts",
     "db:dump": "node ./scripts/run-db-script.js dump",
     "db:restore": "node ./scripts/run-db-script.js restore"
+    "db:truncate": "ts-node -r tsconfig-paths/register scripts/truncate-db.ts"
   },
   "dependencies": {
     "@rflp/shared": "file:../shared",
